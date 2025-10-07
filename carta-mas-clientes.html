@@ -1,0 +1,2779 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis Préstamos Registrados</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #15a086;
+      --primary-hover: #0e8c74;
+      --secondary-color: #2c3e50;
+      --accent-color: #e74c3c;
+      --light-color: #2c3e50;
+      --dark-color: #2c3e50;
+      --success-color: #2ecc71;
+      --warning-color: #f39c12;
+      --danger-color: #e74c3c;
+      --info-color: #15a086;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--secondary-color);
+      color: var(--light-color);
+      margin: 0;
+      padding: 0;
+
+    }
+
+    .navbar {
+      background-color: var(--secondary-color);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .navbar-brand {
+      font-weight: 700;
+      color: white;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid white;
+    }
+
+    .main-content {
+      padding: 20px;
+      background-color: var(--secondary-color);
+      min-height: 100vh;
+    }
+
+    .card {
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      transition: transform 0.3s;
+      background-color: #2c3e50;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card-header {
+      background-color: var(--secondary-color);
+      border-bottom: 1px solid #2c3e50;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+    }
+
+    .accordion-button:not(.collapsed) {
+      background-color: #2c3e50;
+      color: var(--light-color);
+    }
+
+    .accordion-button {
+      background-color: #2c3e50;
+      color: white;
+    }
+
+    .accordion-button:focus {
+      box-shadow: none;
+      border-color: rgba(0,0,0,.125);
+
+    }
+
+    .client-item {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      border-bottom: 1px solid #2c3e50;
+      transition: background-color 0.3s;
+      background-color: #18222b;
+    }
+
+    .client-item:hover {
+      background-color: #50657a;
+    }
+
+    .client-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 15px;
+    }
+
+    .client-info {
+      flex-grow: 1;
+    }
+
+    .client-name {
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: white;
+    }
+
+    .client-id {
+      font-size: 0.85rem;
+      color: #fff;
+    }
+
+    .client-status {
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 12px;
+      background-color: #fff;
+      color: var(--primary-color);
+    }
+
+    .client-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .action-btn {
+      background: none;
+      border: none;
+      color: #bdc3c7;
+      cursor: pointer;
+      transition: color 0.3s;
+      font-size: 16px;
+    }
+
+    .action-btn:hover {
+      color: var(--primary-color);
+    }
+
+    .view-btn {
+      color: var(--info-color);
+    }
+
+    .print-btn {
+      color: var(--primary-color);
+    }
+
+    .complete-btn {
+      color: var(--success-color);
+    }
+
+    /* Botones personalizados */
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+
+    .btn-primary:hover, .btn-primary:focus {
+      background-color: var(--primary-hover);
+      border-color: var(--primary-hover);
+    }
+
+    .btn-success {
+      background-color: var(--success-color);
+      border-color: var(--success-color);
+    }
+
+    .btn-info {
+      background-color: var(--info-color);
+      border-color: var(--info-color);
+    }
+
+    .btn-secondary {
+      background-color: #6c757d;
+      border-color: #6c757d;
+    }
+
+    /* Modal styles */
+    .modal-content {
+      border-radius: 10px;
+      border: none;
+      background-color: #34495e;
+      color: white;
+      min-height: 400px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-header {
+      border-bottom: 1px solid #3d5166;
+      padding-bottom: 15px;
+      flex-shrink: 0;
+    }
+
+    .modal-title {
+      color: white;
+    }
+
+    .modal-body {
+      overflow-y: auto;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-footer {
+      border-top: 1px solid #3d5166;
+      flex-shrink: 0;
+    }
+
+    .btn-close {
+      filter: invert(1);
+    }
+
+    .image-preview {
+      max-width: 100%;
+      max-height: 70vh;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .document-preview {
+      width: 100%;
+      height: 70vh;
+      border: none;
+      background-color: white;
+    }
+
+    /* Client details styles */
+    .client-details {
+      padding: 20px;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+
+    .detail-row {
+      display: flex;
+      margin-bottom: 10px;
+      color: #fff;
+    }
+
+    .detail-label {
+      font-weight: 600;
+      min-width: 150px;
+      color: #fff;
+    }
+
+    .detail-value {
+      flex-grow: 1;
+      color: white;
+    }
+
+    .documents-container {
+      margin-top: 20px;
+    }
+
+    .document-thumbnail {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border: 1px solid #3d5166;
+      border-radius: 5px;
+      margin-right: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .document-thumbnail:hover {
+      transform: scale(1.05);
+    }
+
+    /* Alert styles */
+    .custom-alert {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1100;
+      min-width: 300px;
+      border-radius: 8px;
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.3s ease;
+    }
+
+    .custom-alert.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .custom-alert.success {
+      background-color: #155724;
+      color: #d4edda;
+      border-left: 4px solid #28a745;
+    }
+
+    .custom-alert.error {
+      background-color: #721c24;
+      color: #f8d7da;
+      border-left: 4px solid #dc3545;
+    }
+
+    .custom-alert.info {
+      background-color: #0c5460;
+      color: #d1ecf1;
+      border-left: 4px solid #17a2b8;
+    }
+
+    .custom-alert i {
+      margin-right: 10px;
+      font-size: 1.2rem;
+    }
+
+    /* Print styles */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      
+      .modal,
+      .modal * {
+        visibility: visible;
+      }
+      
+      .modal {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: auto;
+        max-width: 100%;
+        border: none;
+        box-shadow: none;
+      }
+      
+      .modal-dialog {
+        max-width: 100%;
+        margin: 0;
+      }
+      
+      .modal-content {
+        border: none;
+        box-shadow: none;
+        background-color: white !important;
+        color: white !important;
+      }
+      
+      .no-print, .navbar, .sidebar, .client-actions, .modal-footer,
+      .input-group, .search-container, .action-btn {
+        display: none !important;
+      }
+      
+      .detail-label {
+        color: white !important;
+      }
+
+      .detail-value {
+        color: white !important;
+      }
+      
+      /* Reset colors for printing */
+      body, .main-content, .card {
+        background-color: white !important;
+        color: black !important;
+      }
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 15px;
+      }
+
+      .detail-row {
+        flex-direction: column;
+      }
+
+      .detail-label {
+        margin-bottom: 5px;
+      }
+
+      .client-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .client-actions {
+        margin-top: 10px;
+        width: 100%;
+        justify-content: flex-end;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .navbar-brand {
+        font-size: 1rem;
+      }
+
+      .user-profile span {
+        display: none;
+      }
+
+      .input-group {
+        max-width: 100% !important;
+      }
+    }
+
+    /* Modal size adjustments */
+    .modal-dialog.modal-lg {
+      max-width: 900px;
+      width: 90%;
+    }
+
+    .modal-dialog.modal-xl {
+      max-width: 1140px;
+      width: 95%;
+    }
+    
+    /* Fix for modal content overflow */
+    .modal-dialog {
+      display: flex;
+      align-items: center;
+      min-height: calc(100% - 1rem);
+    }
+    
+    .modal-content {
+      overflow: hidden;
+    }
+    
+    /* Letter styles */
+    .letter-container {
+      background-color: white;
+      color: black;
+      padding: 2cm;
+      margin: 0 auto;
+      max-width: 21cm;
+      min-height: 29.7cm;
+    }
+    
+    .letter-header {
+      text-align: center;
+      margin-bottom: 1.5cm;
+    }
+    
+    .letter-body {
+      line-height: 1.6;
+    }
+    
+    .letter-footer {
+      margin-top: 2cm;
+      text-align: right;
+    }
+    
+    .letter-signature {
+      margin-top: 2cm;
+      border-top: 1px solid #000;
+      width: 50%;
+      padding-top: 0.5cm;
+    }
+
+    /* Payment history styles */
+    .payment-history {
+      margin-top: 20px;
+    }
+
+    .payment-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      border-bottom: 1px solid #3d5166;
+      align-items: center;
+    }
+
+    .payment-date {
+      font-weight: 600;
+      color: #bdc3c7;
+    }
+
+    .payment-amount {
+      color: var(--success-color);
+      font-weight: 600;
+    }
+
+    .payment-type {
+      font-size: 0.85rem;
+      background-color: rgba(52, 152, 219, 0.2);
+      padding: 2px 8px;
+      border-radius: 12px;
+      color: var(--info-color);
+    }
+
+    .payment-late-fee {
+      color: var(--danger-color);
+      font-size: 0.85rem;
+    }
+
+    /* Elegant confirmation modal */
+    .confirmation-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 2000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .confirmation-modal.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .confirmation-content {
+      background-color: #34495e;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 500px;
+      padding: 25px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      transform: translateY(-20px);
+      transition: all 0.3s ease;
+    }
+
+    .confirmation-modal.show .confirmation-content {
+      transform: translateY(0);
+    }
+
+    .confirmation-title {
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+      color: white;
+      text-align: center;
+    }
+
+    .confirmation-message {
+      margin-bottom: 25px;
+      color: #bdc3c7;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .confirmation-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .confirmation-btn {
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+    }
+
+    .confirmation-btn.confirm {
+      background-color: var(--success-color);
+      color: white;
+    }
+
+    .confirmation-btn.confirm:hover {
+      background-color: #25a25a;
+    }
+
+    .confirmation-btn.cancel {
+      background-color: var(--danger-color);
+      color: white;
+    }
+
+    .confirmation-btn.cancel:hover {
+      background-color: #d62c1a;
+    }
+
+    /* Receipt styles */
+    .receipt-container {
+      background-color: white;
+      color: black;
+      padding: 20px;
+      max-width: 500px;
+      margin: 0 auto;
+      border-radius: 8px;
+    }
+
+    .receipt-header {
+      text-align: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 10px;
+    }
+
+    .receipt-title {
+      font-weight: bold;
+      font-size: 1.5rem;
+      margin-bottom: 5px;
+    }
+
+    .receipt-company {
+      font-size: 1rem;
+      margin-bottom: 5px;
+    }
+
+    .receipt-details {
+      margin-bottom: 20px;
+    }
+
+    .receipt-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .receipt-label {
+      font-weight: 600;
+    }
+
+    .receipt-value {
+      text-align: right;
+    }
+
+    .receipt-footer {
+      margin-top: 20px;
+      border-top: 1px dashed #000;
+      padding-top: 10px;
+      text-align: center;
+    }
+
+    .receipt-signature {
+      margin-top: 30px;
+      border-top: 1px solid #000;
+      width: 60%;
+      display: inline-block;
+      padding-top: 5px;
+    }
+
+    /* Ticket styles */
+    .ticket {
+      width: 80mm;
+      background-color: white;
+      color: black;
+      padding: 10px;
+      font-family: 'Courier New', monospace;
+    }
+
+    .ticket-header {
+      text-align: center;
+      margin-bottom: 10px;
+      border-bottom: 1px dashed #000;
+      padding-bottom: 10px;
+    }
+
+    .ticket-title {
+      font-weight: bold;
+      font-size: 1.2rem;
+      margin-bottom: 5px;
+    }
+
+    .ticket-info {
+      font-size: 0.8rem;
+      margin-bottom: 5px;
+    }
+
+    .ticket-body {
+      margin-bottom: 10px;
+    }
+
+    .ticket-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 3px;
+    }
+
+    .ticket-footer {
+      text-align: center;
+      border-top: 1px dashed #000;
+      padding-top: 10px;
+      font-size: 0.8rem;
+    }
+
+    /* Payment history modal */
+    .payment-history-modal .modal-dialog {
+      max-width: 800px;
+    }
+
+    .payment-history-container {
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+
+    /* Nuevos estilos para mejoras */
+    .horizontal-details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .detail-group {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .stats-container {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .stat-card {
+      background-color: #3d5166;
+      border-radius: 8px;
+      padding: 15px;
+      flex: 1;
+      min-width: 200px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: var(--primary-color);
+      margin: 10px 0;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: #bdc3c7;
+    }
+
+    .filter-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      background-color: #3d5166;
+      border: none;
+      color: #fff;
+      padding: 5px 15px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .filter-btn.active, .filter-btn:hover {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .sort-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .sort-select {
+      background-color: #3d5166;
+      border: 1px solid #4a6178;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+    }
+
+    .payment-form {
+      background-color: #3d5166;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 5px;
+      color: #bdc3c7;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 8px 12px;
+      background-color: #2c3e50;
+      border: 1px solid #4a6178;
+      border-radius: 4px;
+      color: white;
+    }
+
+    .loan-progress {
+      height: 10px;
+      background-color: #2c3e50;
+      border-radius: 5px;
+      margin: 10px 0;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background-color: var(--primary-color);
+      border-radius: 5px;
+      transition: width 0.3s;
+    }
+
+    .notification-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background-color: var(--danger-color);
+      color: white;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 0.7rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .action-btn-wrapper {
+      position: relative;
+    }
+
+    .export-btn {
+      background-color: var(--info-color);
+      border: none;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: background-color 0.3s;
+    }
+
+    .export-btn:hover {
+      background-color: #2980b9;
+    }
+/* TEXTOS BLANCOS - ALTO CONTRASTE */
+.client-id,
+.client-id *,
+.text-muted,
+.text-muted *,
+#loanProgressText,
+#clientDetailId,
+.detail-value,
+.detail-label,
+.client-name,
+.client-status,
+.client-info small,
+.client-info .text-muted {
+  color: #15a086 !important;
+}
+
+/* ESTADO COMPLETADO - VERDE */
+.loan-completed .detail-value#loanDetailBalance,
+.detail-value[data-status="completed"] {
+  color: #2ecc71 !important;
+  font-weight: bold;
+}
+
+/* ESTADO COMPLETADO ALTERNATIVO - TACHADO */
+.loan-completed .detail-value#loanDetailBalance.alternative {
+  color: #bdc3c7 !important;
+  text-decoration: line-through;
+  font-weight: normal;
+}
+
+/* BARRA DE PROGRESO - MEJORA VISUAL */
+.loan-progress {
+  background-color: #3d5166 !important;
+  border-radius: 10px;
+  height: 12px;
+}
+
+.progress-bar {
+  background: linear-gradient(90deg, #15a086, #2ecc71) !important;
+  border-radius: 10px;
+  transition: width 1s ease-in-out;
+}
+
+/* TARJETAS Y CONTENEDORES */
+.card,
+.modal-content,
+.accordion-button {
+  background-color: #34495e !important;
+  color: #ffffff !important;
+}
+
+.accordion-blutton:not(.collapsed) {
+  background-color: rgba(21, 160, 134, 0.2) !important;
+  color: #ffffff !important;
+}
+
+/* BOTONES CON ESTILOS MEJORADOS */
+.btn-primary {
+  background-color: #15a086 !important;
+  border-color: #15a086 !important;
+  color: white !important;
+}
+
+.btn-primary:hover {
+  background-color: #0e8c74 !important;
+  border-color: #0e8c74 !important;
+}
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">
+        <i class="fas fa-hand-holding-usd me-2"></i>Mis Préstamos Registrados
+      </a>
+      <div class="user-profile">
+        <span class="text-white" id="usernameDisplay">Usuario</span>
+        <img src="logo.png" alt="User" class="user-avatar" id="userAvatar">
+        <div class="action-btn-wrapper">
+          <button class="action-btn" id="notificationsBtn">
+            <i class="fas fa-bell"></i>
+          </button>
+          <span class="notification-badge d-none" id="notificationCount">3</span>
+        </div>
+        <button class="action-btn" id="logoutBtn" title="Cerrar sesión">
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4><i class="fas fa-users me-2"></i>Mis Clientes con Préstamos</h4>
+      <div class="d-flex gap-2">
+        <button class="export-btn" id="exportBtn">
+          <i class="fas fa-file-export me-1"></i>Exportar
+        </button>
+        <div class="input-group search-container" style="max-width: 300px;">
+          <input type="text" class="form-control" placeholder="Buscar cliente..." id="searchInput">
+          <button class="btn btn-outline-secondary" type="button" id="searchBtn">
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Estadísticas -->
+    <div class="stats-container">
+      <div class="stat-card">
+        <div class="stat-label">Total Préstamos Activos</div>
+        <div class="stat-value" id="totalLoans">0</div>
+        <div class="stat-label" id="totalAmount">$0.00</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Préstamos Atrasados</div>
+        <div class="stat-value" id="overdueLoans">0</div>
+        <div class="stat-label" id="overdueAmount">$0.00</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Próximos Pagos (7 días)</div>
+        <div class="stat-value" id="upcomingPayments">0</div>
+        <div class="stat-label">Clientes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Pagos del Mes</div>
+        <div class="stat-value" id="monthPayments">0</div>
+        <div class="stat-label" id="monthAmount">$0.00</div>
+      </div>
+    </div>
+    
+    <!-- Filtros y ordenamiento -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div class="filter-container">
+        <button class="filter-btn active" data-filter="all">Todos</button>
+        <button class="filter-btn" data-filter="active">Activos</button>
+        <button class="filter-btn" data-filter="overdue">Atrasados</button>
+        <button class="filter-btn" data-filter="completed">Completados</button>
+      </div>
+      
+      <div class="sort-container">
+        <span>Ordenar por:</span>
+        <select class="sort-select" id="sortSelect">
+          <option value="name">Nombre</option>
+          <option value="amount">Monto</option>
+          <option value="date">Fecha</option>
+          <option value="status">Estado</option>
+        </select>
+      </div>
+    </div>
+    
+    <!-- Lista de Clientes -->
+    <div class="card">
+      <div class="card-header">
+        <span>Clientes Registrados</span>
+        <span class="badge bg-primary" id="clientCount">0</span>
+      </div>
+      <div class="card-body p-0">
+        <div class="accordion accordion-flush" id="clientsAccordion">
+          <!-- Los clientes se cargarán dinámicamente aquí -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Client Details Modal -->
+  <div class="modal fade" id="clientModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="clientModalTitle">Detalles del Cliente</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="d-flex align-items-center mb-4">
+            <img src="" alt="Client" class="client-avatar me-3" id="clientDetailAvatar">
+            <div>
+              <h4 id="clientDetailName"></h4>
+              <span class="text-muted" id="clientDetailId"></span>
+              <div class="loan-progress mt-2">
+                <div class="progress-bar" id="loanProgressBar"></div>
+              </div>
+              <small id="loanProgressText" class="text-muted">0% completado</small>
+            </div>
+          </div>
+          
+          <div class="client-details">
+            <div class="horizontal-details">
+              <div class="detail-group">
+                <h5 class="mb-3">Información Personal</h5>
+                <div class="detail-row">
+                  <span class="detail-label">Teléfono:</span>
+                  <span class="detail-value" id="clientDetailPhone"></span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Dirección:</span>
+                  <span class="detail-value" id="clientDetailAddress"></span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Email:</span>
+                  <span class="detail-value" id="clientDetailEmail"></span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Nacionalidad:</span>
+                  <span class="detail-value" id="clientDetailNationality"></span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Empresa:</span>
+                  <span class="detail-value" id="clientDetailCompany"></span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Tiempo en empresa:</span>
+                  <span class="detail-value" id="clientDetailCompanyTime"></span>
+                </div>
+              </div>
+              
+              <div class="detail-group">
+                <h5 class="mb-3">Detalles del Préstamo</h5>
+                <div class="detail-row">
+                  <span class="detail-label">Monto del préstamo:</span>
+                  <span class="detail-value" id="loanDetailAmount"></span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Tasa de interés:</span>
+                  <span class="detail-value" id="loanDetailRate"></span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Plazo:</span>
+                  <span class="detail-value" id="loanDetailTerm"></span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Cuota mensual:</span>
+                  <span class="detail-value" id="loanDetailMonthly"></span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Frecuencia de pago:</span>
+                  <span class="detail-value" id="loanDetailFrequency"></span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Fecha de inicio:</span>
+                  <span class="detail-value" id="loanDetailStartDate"></span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Próximo pago:</span>
+                  <span class="detail-value" id="loanDetailNextPayment"></span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Saldo pendiente:</span>
+                  <span class="detail-value" id="loanDetailBalance"></span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Estado:</span>
+                  <span class="detail-value" id="loanDetailStatus"></span>
+                </div>
+              </div>
+            </div>
+            
+            <h5 class="mb-3 mt-4">Documentos Adjuntos</h5>
+            <div class="documents-container d-flex flex-wrap" id="clientDocuments">
+              <!-- Los documentos se cargarán aquí -->
+            </div>
+
+            <h5 class="mb-3 mt-4">Historial de Pagos</h5>
+            <div class="payment-history" id="paymentHistoryContainer">
+              <!-- El historial de pagos se cargará aquí -->
+            </div>
+            
+            <!-- Formulario para registrar nuevo pago -->
+            <div class="payment-form" id="paymentForm">
+              <h5 class="mb-3">Registrar Nuevo Pago</h5>
+              <div class="horizontal-details">
+                <div class="form-group">
+                  <label class="form-label">Monto del pago</label>
+                  <input type="number" class="form-input" id="paymentAmount" placeholder="0.00">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Fecha de pago</label>
+                  <input type="date" class="form-input" id="paymentDate">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Tipo de pago</label>
+                  <select class="form-input" id="paymentType">
+                    <option value="full">Pago completo</option>
+                    <option value="partial">Pago parcial</option>
+                    <option value="interest">Solo intereses</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Notas (opcional)</label>
+                <textarea class="form-input" id="paymentNotes" rows="2" placeholder="Observaciones sobre este pago"></textarea>
+              </div>
+              <button class="btn btn-primary" id="registerPaymentBtn">
+                <i class="fas fa-money-bill-wave me-2"></i>Registrar Pago
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer no-print">
+          <button type="button" class="btn btn-success" id="completeLoanBtn">
+            <i class="fas fa-check-circle me-2"></i>Marcar como Pagado
+          </button>
+          <button type="button" class="btn btn-info" id="viewPaymentHistoryBtn">
+            <i class="fas fa-history me-2"></i>Ver Historial Completo
+          </button>
+          <button type="button" class="btn btn-warning" id="sendReminderBtn">
+            <i class="fas fa-bell me-2"></i>Enviar Recordatorio
+          </button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <button type="button" class="btn btn-primary" id="printClientBtn">
+            <i class="fas fa-print me-2"></i>Imprimir
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Document/Image Preview Modal -->
+  <div class="modal fade" id="documentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="documentModalTitle">Vista Previa</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center">
+          <img src="" alt="Preview" class="image-preview d-none" id="imagePreview">
+          <iframe src="" frameborder="0" class="document-preview d-none" id="pdfPreview"></iframe>
+        </div>
+        <div class="modal-footer no-print">
+          <a href="#" class="btn btn-primary" id="downloadDocumentBtn" download>
+            <i class="fas fa-download me-2"></i>Descargar
+          </a>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Letter Modal -->
+  <div class="modal fade" id="letterModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Carta de Saldo Cancelado</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="letter-container" id="letterContent">
+            <!-- La carta se generará aquí -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <button type="button" class="btn btn-primary" id="printLetterBtn">
+            <i class="fas fa-print me-2"></i>Imprimir Carta
+          </button>
+          <button type="button" class="btn btn-success" id="downloadLetterBtn">
+            <i class="fas fa-download me-2"></i>Descargar PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment History Modal -->
+  <div class="modal fade payment-history-modal" id="paymentHistoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Historial Completo de Pagos</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="payment-history-container" id="fullPaymentHistory">
+            <!-- El historial completo de pagos se cargará aquí -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <button type="button" class="btn btn-primary" id="exportPaymentsBtn">
+            <i class="fas fa-file-export me-2"></i>Exportar a Excel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Receipt Modal -->
+  <div class="modal fade" id="receiptModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Recibo de Pago</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="receipt-container" id="receiptContent">
+            <!-- El recibo se generará aquí -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <button type="button" class="btn btn-primary" id="printReceiptBtn">
+            <i class="fas fa-print me-2"></i>Imprimir Recibo
+          </button>
+          <button type="button" class="btn btn-success" id="sendReceiptBtn">
+            <i class="fas fa-paper-plane me-2"></i>Enviar por Email
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ticket Modal -->
+  <div class="modal fade" id="ticketModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Ticket de Pago</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="ticket" id="ticketContent">
+            <!-- El ticket se generará aquí -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <button type="button" class="btn btn-primary" id="printTicketBtn">
+            <i class="fas fa-print me-2"></i>Imprimir Ticket
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Elegant Confirmation Modal -->
+  <div class="confirmation-modal" id="confirmationModal">
+    <div class="confirmation-content">
+      <h3 class="confirmation-title" id="confirmationTitle">Confirmar Acción</h3>
+      <p class="confirmation-message" id="confirmationMessage">¿Estás seguro que deseas realizar esta acción?</p>
+      <div class="confirmation-buttons">
+        <button class="confirmation-btn confirm" id="confirmActionBtn">Confirmar</button>
+        <button class="confirmation-btn cancel" id="cancelActionBtn">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Alert Container -->
+  <div id="alertContainer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script type="module">
+    // Importaciones de Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      getDocs, 
+      doc, 
+      getDoc,
+      query, 
+      where,
+      updateDoc,
+      deleteDoc,
+      arrayUnion,
+      arrayRemove,
+      Timestamp,
+      addDoc,
+      setDoc,
+      orderBy,
+      startAt,
+      endAt
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+    import { getStorage, ref, getDownloadURL, uploadBytes, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-storage.js";
+
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+      authDomain: "inventario-35d6b.firebaseapp.com",
+      databaseURL: "https://inventario-35d6b-default-rtdb.firebaseio.com",
+      projectId: "inventario-35d6b",
+      storageBucket: "inventario-35d6b.appspot.com",
+      messagingSenderId: "266100399659",
+      appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+    };
+
+    // Inicialización de Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const storage = getStorage(app);
+
+    // Variables globales
+    let currentUser = null;
+    let currentClientId = null;
+    let clientsData = [];
+    let currentClientDocuments = [];
+    let currentClientPayments = [];
+    let currentFilter = 'all';
+    let currentSort = 'name';
+
+    // Función para mostrar alertas personalizadas
+    function showAlert(message, type = 'success') {
+      const alertContainer = document.getElementById('alertContainer');
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `custom-alert ${type}`;
+      
+      let icon = '';
+      if (type === 'success') {
+        icon = '<i class="fas fa-check-circle"></i>';
+      } else if (type === 'error') {
+        icon = '<i class="fas fa-exclamation-circle"></i>';
+      } else {
+        icon = '<i class="fas fa-info-circle"></i>';
+      }
+      
+      alertDiv.innerHTML = `${icon} ${message}`;
+      alertContainer.appendChild(alertDiv);
+      
+      // Mostrar alerta
+      setTimeout(() => {
+        alertDiv.classList.add('show');
+      }, 10);
+      
+      // Ocultar y eliminar alerta después de 5 segundos
+      setTimeout(() => {
+        alertDiv.classList.remove('show');
+        setTimeout(() => {
+          alertDiv.remove();
+        }, 300);
+      }, 5000);
+    }
+
+    // Función para formatear números con separadores de miles
+    function formatNumber(number) {
+      return new Intl.NumberFormat('es-ES', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(number);
+    }
+
+    // Función para formatear fechas
+    function formatDate(dateString) {
+      if (!dateString) return "No especificado";
+      const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+      return new Date(dateString).toLocaleDateString('es-ES', options);
+    }
+
+    // Función para formatear fechas y horas completas
+    function formatDateTime(dateString) {
+      if (!dateString) return "No especificado";
+      const options = { 
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      };
+      return new Date(dateString).toLocaleDateString('es-ES', options);
+    }
+
+    // Función para calcular el tiempo en la empresa
+    function calculateCompanyTime(startDate) {
+      if (!startDate) return "No especificado";
+      
+      const today = new Date();
+      const start = new Date(startDate);
+      const diffTime = Math.abs(today - start);
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      
+      const years = Math.floor(diffDays / 365);
+      const months = Math.floor((diffDays % 365) / 30);
+      const days = Math.floor((diffDays % 365) % 30);
+      
+      let result = "";
+      if (years > 0) result += `${years} año${years > 1 ? 's' : ''} `;
+      if (months > 0) result += `${months} mes${months > 1 ? 'es' : ''} `;
+      if (days > 0 || result === "") result += `${days} día${days > 1 ? 's' : ''}`;
+      
+      return result.trim();
+    }
+
+    // Función para mostrar el modal de confirmación elegante
+    function showConfirmationModal(title, message) {
+      return new Promise((resolve) => {
+        const modal = document.getElementById('confirmationModal');
+        document.getElementById('confirmationTitle').textContent = title;
+        document.getElementById('confirmationMessage').textContent = message;
+        
+        modal.classList.add('show');
+        
+        const confirmBtn = document.getElementById('confirmActionBtn');
+        const cancelBtn = document.getElementById('cancelActionBtn');
+        
+        const cleanUp = () => {
+          confirmBtn.removeEventListener('click', confirmHandler);
+          cancelBtn.removeEventListener('click', cancelHandler);
+        };
+        
+        const confirmHandler = () => {
+          modal.classList.remove('show');
+          cleanUp();
+          resolve(true);
+        };
+        
+        const cancelHandler = () => {
+          modal.classList.remove('show');
+          cleanUp();
+          resolve(false);
+        };
+        
+        confirmBtn.addEventListener('click', confirmHandler);
+        cancelBtn.addEventListener('click', cancelHandler);
+      });
+    }
+
+    // Función para calcular el progreso del préstamo
+    function calculateLoanProgress(loan) {
+      if (!loan.amount || !loan.balance) return 0;
+      const paid = parseFloat(loan.amount) - parseFloat(loan.balance);
+      return (paid / parseFloat(loan.amount)) * 100;
+    }
+
+    // Función para calcular la cuota mensual
+    function calculateMonthlyPayment(amount, interestRate, term) {
+      if (!amount || !interestRate || !term) return 0;
+      
+      const monthlyRate = interestRate / 100 / 12;
+      const payment = amount * monthlyRate * Math.pow(1 + monthlyRate, term) / (Math.pow(1 + monthlyRate, term) - 1);
+      
+      return isFinite(payment) ? payment : 0;
+    }
+
+    // Función para calcular la próxima fecha de pago
+    function calculateNextPayment(startDate, frequency, lastPaymentDate) {
+      if (!startDate) return "No especificado";
+      
+      const start = new Date(startDate);
+      const today = new Date();
+      
+      // Si hay un último pago, calcular desde allí
+      const baseDate = lastPaymentDate ? new Date(lastPaymentDate) : start;
+      
+      let nextPayment;
+      if (frequency === 'biweekly') {
+        // Pago quincenal: cada 15 días
+        nextPayment = new Date(baseDate);
+        nextPayment.setDate(nextPayment.getDate() + 15);
+      } else {
+        // Pago mensual: mismo día del mes siguiente
+        nextPayment = new Date(baseDate);
+        nextPayment.setMonth(nextPayment.getMonth() + 1);
+      }
+      
+      // Si la próxima fecha de pago es en el pasado, buscar la siguiente
+      while (nextPayment < today) {
+        if (frequency === 'biweekly') {
+          nextPayment.setDate(nextPayment.getDate() + 15);
+        } else {
+          nextPayment.setMonth(nextPayment.getMonth() + 1);
+        }
+      }
+      
+      return formatDate(nextPayment);
+    }
+
+    // Función para cargar los clientes del usuario actual
+    async function loadUserClients() {
+      try {
+        if (!currentUser) return;
+        
+        const q = query(
+          collection(db, "Loans"), 
+          where("userId", "==", currentUser.uid)
+        );
+        
+        const querySnapshot = await getDocs(q);
+        clientsData = [];
+        
+        querySnapshot.forEach(doc => {
+          const loanData = doc.data();
+          clientsData.push({
+            id: doc.id,
+            ...loanData
+          });
+        });
+        
+        updateStatistics();
+        renderClients();
+      } catch (error) {
+        console.error("Error loading user clients:", error);
+        showAlert("Error al cargar los clientes. Por favor, recarga la página.", "error");
+      }
+    }
+
+    // Función para actualizar las estadísticas
+    function updateStatistics() {
+      const totalLoans = clientsData.filter(client => client.status === 'active' || client.status === 'overdue').length;
+      const totalAmount = clientsData
+        .filter(client => client.status === 'active' || client.status === 'overdue')
+        .reduce((sum, client) => sum + parseFloat(client.amount || 0), 0);
+      
+      const overdueLoans = clientsData.filter(client => client.status === 'overdue').length;
+      const overdueAmount = clientsData
+        .filter(client => client.status === 'overdue')
+        .reduce((sum, client) => sum + parseFloat(client.balance || 0), 0);
+      
+      // Calcular próximos pagos (en los próximos 7 días)
+      const today = new Date();
+      const nextWeek = new Date();
+      nextWeek.setDate(today.getDate() + 7);
+      
+      const upcomingPayments = clientsData.filter(client => {
+        if (!client.nextPaymentDate) return false;
+        const paymentDate = new Date(client.nextPaymentDate);
+        return paymentDate >= today && paymentDate <= nextWeek;
+      }).length;
+      
+      // Calcular pagos del mes actual
+      const currentMonth = today.getMonth();
+      const currentYear = today.getFullYear();
+      
+      const monthPayments = clientsData.reduce((count, client) => {
+        if (client.payments) {
+          const paymentsThisMonth = client.payments.filter(payment => {
+            const paymentDate = payment.date.toDate();
+            return paymentDate.getMonth() === currentMonth && 
+                   paymentDate.getFullYear() === currentYear;
+          });
+          return count + paymentsThisMonth.length;
+        }
+        return count;
+      }, 0);
+      
+      const monthAmount = clientsData.reduce((sum, client) => {
+        if (client.payments) {
+          const paymentsThisMonth = client.payments.filter(payment => {
+            const paymentDate = payment.date.toDate();
+            return paymentDate.getMonth() === currentMonth && 
+                   paymentDate.getFullYear() === currentYear;
+          });
+          const amountThisMonth = paymentsThisMonth.reduce((total, payment) => total + parseFloat(payment.amount || 0), 0);
+          return sum + amountThisMonth;
+        }
+        return sum;
+      }, 0);
+      
+      // Actualizar la UI
+      document.getElementById('totalLoans').textContent = totalLoans;
+      document.getElementById('totalAmount').textContent = `$${formatNumber(totalAmount)}`;
+      document.getElementById('overdueLoans').textContent = overdueLoans;
+      document.getElementById('overdueAmount').textContent = `$${formatNumber(overdueAmount)}`;
+      document.getElementById('upcomingPayments').textContent = upcomingPayments;
+      document.getElementById('monthPayments').textContent = monthPayments;
+      document.getElementById('monthAmount').textContent = `$${formatNumber(monthAmount)}`;
+      
+      // Actualizar notificaciones
+      updateNotificationBadge(overdueLoans);
+    }
+
+    // Función para actualizar el badge de notificaciones
+    function updateNotificationBadge(count) {
+      const badge = document.getElementById('notificationCount');
+      if (count > 0) {
+        badge.textContent = count;
+        badge.classList.remove('d-none');
+      } else {
+        badge.classList.add('d-none');
+      }
+    }
+
+    // Función para renderizar la lista de clientes
+    function renderClients() {
+      const clientsAccordion = document.getElementById('clientsAccordion');
+      clientsAccordion.innerHTML = '';
+      
+      // Aplicar filtro
+      let filteredClients = clientsData;
+      if (currentFilter !== 'all') {
+        filteredClients = clientsData.filter(client => client.status === currentFilter);
+      }
+      
+      // Aplicar ordenamiento
+      filteredClients.sort((a, b) => {
+        switch (currentSort) {
+          case 'name':
+            return a.client.name.localeCompare(b.client.name);
+          case 'amount':
+            return parseFloat(b.amount) - parseFloat(a.amount);
+          case 'date':
+            return new Date(b.startDate) - new Date(a.startDate);
+          case 'status':
+            return a.status.localeCompare(b.status);
+          default:
+            return 0;
+        }
+      });
+      
+      document.getElementById('clientCount').textContent = filteredClients.length;
+      
+      if (filteredClients.length === 0) {
+        clientsAccordion.innerHTML = `
+          <div class="text-center py-4">
+            <i class="fas fa-users-slash fa-3x mb-3 text-muted"></i>
+            <p class="text-muted">No se encontraron clientes</p>
+          </div>
+        `;
+        return;
+      }
+      
+      filteredClients.forEach((client, index) => {
+        const clientId = `client-${index}`;
+        const progress = calculateLoanProgress(client);
+        const progressColor = progress >= 75 ? 'var(--success-color)' : 
+                             progress >= 50 ? 'var(--info-color)' : 
+                             progress >= 25 ? 'var(--warning-color)' : 'var(--primary-color)';
+        
+        const clientElement = document.createElement('div');
+        clientElement.className = 'accordion-item';
+        clientElement.innerHTML = `
+          <h2 class="accordion-header" id="heading-${clientId}">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+              data-bs-target="#collapse-${clientId}" aria-expanded="false" aria-controls="collapse-${clientId}">
+              <div class="d-flex align-items-center w-100">
+                <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(client.client.name)}&background=random" 
+                  alt="${client.client.name}" class="client-avatar me-3">
+                <div class="flex-grow-1">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span class="client-name">${client.client.name}</span>
+                    <span class="client-status">${client.status === 'active' ? 'Activo' : 
+                      client.status === 'overdue' ? 'Atrasado' : 
+                      client.status === 'completed' ? 'Completado' : 'Inactivo'}</span>
+                  </div>
+                  <small class="client-id">ID: ${client.client.id}</small>
+                  <div class="loan-progress mt-1">
+                    <div class="progress-bar" style="width: ${progress}%; background-color: ${progressColor}"></div>
+                  </div>
+                  <small class="text-muted">${progress.toFixed(0)}% completado</small>
+                </div>
+              </div>
+            </button>
+          </h2>
+          <div id="collapse-${clientId}" class="accordion-collapse collapse" aria-labelledby="heading-${clientId}" 
+            data-bs-parent="#clientsAccordion">
+            <div class="accordion-body p-0">
+              <div class="client-item">
+                <div class="client-info">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="client-name">${client.client.name}</span>
+                    <span class="client-status">${client.status === 'active' ? 'Activo' : 
+                      client.status === 'overdue' ? 'Atrasado' : 
+                      client.status === 'completed' ? 'Completado' : 'Inactivo'}</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <small class="client-id">ID: ${client.client.id}</small>
+                    <small class="text-muted">Préstamo: $${formatNumber(client.amount)}</small>
+                  </div>
+                  <div class="loan-progress mt-2">
+                    <div class="progress-bar" style="width: ${progress}%; background-color: ${progressColor}"></div>
+                  </div>
+                  <small class="text-muted">${progress.toFixed(0)}% completado • Saldo: $${formatNumber(client.balance)}</small>
+                </div>
+                <div class="client-actions">
+                  <button class="action-btn view-btn" data-client-id="${client.id}" title="Ver detalles">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  ${client.status !== 'completed' ? `
+                    <button class="action-btn complete-btn" data-client-id="${client.id}" title="Marcar como completado">
+                      <i class="fas fa-check-circle"></i>
+                    </button>
+                  ` : ''}
+                  <button class="action-btn print-btn" data-client-id="${client.id}" title="Imprimir">
+                    <i class="fas fa-print"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        clientsAccordion.appendChild(clientElement);
+      });
+      
+      // Agregar event listeners a los botones
+      document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const clientId = e.currentTarget.getAttribute('data-client-id');
+          showClientDetails(clientId);
+        });
+      });
+      
+      document.querySelectorAll('.complete-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const clientId = e.currentTarget.getAttribute('data-client-id');
+          const client = clientsData.find(c => c.id === clientId);
+          
+          const confirmed = await showConfirmationModal(
+            'Confirmar Completar Préstamo',
+            `¿Estás seguro que deseas marcar el préstamo de ${client.client.name} como COMPLETADO?\n\nSe generará una carta de saldo cancelado.`
+          );
+          
+          if (confirmed) {
+            currentClientId = clientId;
+            await completeLoan();
+          }
+        });
+      });
+      
+      document.querySelectorAll('.print-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const clientId = e.currentTarget.getAttribute('data-client-id');
+          printClient(clientId);
+        });
+      });
+    }
+
+    // Función para mostrar los detalles de un cliente
+    async function showClientDetails(clientId) {
+      try {
+        const client = clientsData.find(c => c.id === clientId);
+        if (!client) return;
+        
+        currentClientId = clientId;
+        
+        // Configurar el modal con los datos del cliente
+        document.getElementById('clientModalTitle').textContent = `Detalles de ${client.client.name}`;
+        document.getElementById('clientDetailAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(client.client.name)}&background=random`;
+        document.getElementById('clientDetailName').textContent = client.client.name;
+        document.getElementById('clientDetailId').textContent = `ID: ${client.client.id}`;
+        
+        // Calcular progreso del préstamo
+        const progress = calculateLoanProgress(client);
+        document.getElementById('loanProgressBar').style.width = `${progress}%`;
+        document.getElementById('loanProgressText').textContent = `${progress.toFixed(0)}% completado`;
+        
+        // Información personal
+        document.getElementById('clientDetailPhone').textContent = client.client.phone || 'No especificado';
+        document.getElementById('clientDetailAddress').textContent = client.client.address || 'No especificado';
+        document.getElementById('clientDetailEmail').textContent = client.client.email || 'No especificado';
+        document.getElementById('clientDetailNationality').textContent = client.client.nationality || 'No especificado';
+        document.getElementById('clientDetailCompany').textContent = client.client.company || 'No especificado';
+        document.getElementById('clientDetailCompanyTime').textContent = calculateCompanyTime(client.client.companyStartDate) || 'No especificado';
+        
+        // Detalles del préstamo
+        document.getElementById('loanDetailAmount').textContent = `$${formatNumber(client.amount)}`;
+        document.getElementById('loanDetailRate').textContent = `${client.interestRate}%`;
+        document.getElementById('loanDetailTerm').textContent = `${client.term} meses`;
+        
+        // Calcular cuota mensual
+        const monthlyPayment = calculateMonthlyPayment(client.amount, client.interestRate, client.term);
+        document.getElementById('loanDetailMonthly').textContent = `$${formatNumber(monthlyPayment)}`;
+        
+        document.getElementById('loanDetailFrequency').textContent = client.frequency === 'biweekly' ? 'Quincenal' : 'Mensual';
+        document.getElementById('loanDetailStartDate').textContent = formatDate(client.startDate);
+        
+        // Calcular próxima fecha de pago
+        const lastPayment = client.payments && client.payments.length > 0 ? 
+          client.payments.reduce((latest, payment) => {
+            return payment.date > latest.date ? payment : latest;
+          }) : null;
+        
+        const nextPayment = calculateNextPayment(client.startDate, client.frequency, lastPayment ? lastPayment.date.toDate() : null);
+        document.getElementById('loanDetailNextPayment').textContent = nextPayment;
+        
+        document.getElementById('loanDetailBalance').textContent = `$${formatNumber(client.balance)}`;
+        document.getElementById('loanDetailStatus').textContent = client.status === 'active' ? 'Activo' : 
+          client.status === 'overdue' ? 'Atrasado' : 
+          client.status === 'completed' ? 'Completado' : 'Inactivo';
+        
+        // Documentos adjuntos
+        const documentsContainer = document.getElementById('clientDocuments');
+        documentsContainer.innerHTML = '';
+        
+        if (client.documents && client.documents.length > 0) {
+          client.documents.forEach(doc => {
+            const docElement = document.createElement('img');
+            docElement.src = doc.url;
+            docElement.alt = doc.name;
+            docElement.className = 'document-thumbnail';
+            docElement.setAttribute('data-type', doc.type.includes('image') ? 'image' : 'pdf');
+            docElement.setAttribute('data-src', doc.url);
+            docElement.setAttribute('data-title', doc.name);
+            documentsContainer.appendChild(docElement);
+          });
+        } else {
+          documentsContainer.innerHTML = '<p class="text-muted">No hay documentos adjuntos</p>';
+        }
+        
+        // Cargar historial de pagos
+        await loadPaymentHistory(clientId);
+        
+        // Mostrar u ocultar botón de completar según el estado
+        const completeBtn = document.getElementById('completeLoanBtn');
+        const paymentForm = document.getElementById('paymentForm');
+        if (client.status === 'completed') {
+          completeBtn.classList.add('d-none');
+          paymentForm.classList.add('d-none');
+        } else {
+          completeBtn.classList.remove('d-none');
+          paymentForm.classList.remove('d-none');
+        }
+        
+        // Configurar fecha de pago por defecto
+        document.getElementById('paymentDate').valueAsDate = new Date();
+        
+        // Mostrar el modal
+        const clientModal = new bootstrap.Modal(document.getElementById('clientModal'));
+        clientModal.show();
+        
+        // Agregar event listeners a las miniaturas de documentos
+        document.querySelectorAll('.document-thumbnail').forEach(thumb => {
+          thumb.addEventListener('click', (e) => {
+            const type = e.currentTarget.getAttribute('data-type');
+            const src = e.currentTarget.getAttribute('data-src');
+            const title = e.currentTarget.getAttribute('data-title');
+            
+            const docModal = new bootstrap.Modal(document.getElementById('documentModal'));
+            document.getElementById('documentModalTitle').textContent = title;
+            
+            if (type === 'image') {
+              document.getElementById('imagePreview').classList.remove('d-none');
+              document.getElementById('pdfPreview').classList.add('d-none');
+              document.getElementById('imagePreview').src = src;
+            } else {
+              document.getElementById('pdfPreview').classList.remove('d-none');
+              document.getElementById('imagePreview').classList.add('d-none');
+              document.getElementById('pdfPreview').src = src;
+            }
+            
+            // Configurar enlace de descarga
+            document.getElementById('downloadDocumentBtn').href = src;
+            document.getElementById('downloadDocumentBtn').download = title;
+            
+            clientModal.hide();
+            docModal.show();
+          });
+        });
+      } catch (error) {
+        console.error("Error showing client details:", error);
+        showAlert("Error al cargar los detalles del cliente.", "error");
+      }
+    }
+
+    // Función para cargar el historial de pagos de un cliente
+    async function loadPaymentHistory(clientId) {
+      try {
+        const client = clientsData.find(c => c.id === clientId);
+        if (!client) return;
+        
+        const payments = client.payments || [];
+        currentClientPayments = payments;
+        
+        // Ordenar pagos por fecha (más reciente primero)
+        payments.sort((a, b) => b.date.toDate() - a.date.toDate());
+        
+        const paymentHistoryContainer = document.getElementById('paymentHistoryContainer');
+        paymentHistoryContainer.innerHTML = '';
+        
+        if (payments.length === 0) {
+          paymentHistoryContainer.innerHTML = '<p class="text-muted">No hay pagos registrados</p>';
+          return;
+        }
+        
+        // Mostrar solo los últimos 5 pagos en el resumen
+        const recentPayments = payments.slice(0, 5);
+        
+        recentPayments.forEach(payment => {
+          const paymentDate = payment.date.toDate();
+          const paymentItem = document.createElement('div');
+          paymentItem.className = 'payment-item';
+          
+          paymentItem.innerHTML = `
+            <div class="payment-item">
+              <div class="payment-date">${formatDateTime(paymentDate)}</div>
+              <div class="payment-amount">$${formatNumber(payment.amount)}</div>
+              <div class="payment-type">${getPaymentTypeText(payment.type)}</div>
+              ${payment.lateFee ? `<div class="payment-late-fee">Mora: $${formatNumber(payment.lateFee)}</div>` : ''}
+            </div>
+          `;
+          
+          paymentHistoryContainer.appendChild(paymentItem);
+        });
+        
+        // Si hay más de 5 pagos, mostrar un enlace para ver el historial completo
+        if (payments.length > 5) {
+          const viewAllLink = document.createElement('div');
+          viewAllLink.className = 'text-center mt-2';
+          viewAllLink.innerHTML = `
+            <a href="#" id="viewAllPaymentsLink">Ver los ${payments.length - 5} pagos anteriores</a>
+          `;
+          paymentHistoryContainer.appendChild(viewAllLink);
+          
+          document.getElementById('viewAllPaymentsLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            showFullPaymentHistory(client);
+          });
+        }
+      } catch (error) {
+        console.error("Error loading payment history:", error);
+        showAlert("Error al cargar el historial de pagos.", "error");
+      }
+    }
+
+    // Función para mostrar el historial completo de pagos
+    function showFullPaymentHistory(client) {
+      const fullPaymentHistory = document.getElementById('fullPaymentHistory');
+      fullPaymentHistory.innerHTML = '';
+      
+      // Crear tabla de pagos
+      const table = document.createElement('table');
+      table.className = 'table table-dark table-striped';
+      table.innerHTML = `
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Monto</th>
+            <th>Tipo</th>
+            <th>Mora</th>
+            <th>Notas</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      `;
+      
+      const tbody = table.querySelector('tbody');
+      
+      currentClientPayments.forEach(payment => {
+        const paymentDate = payment.date.toDate();
+        const row = document.createElement('tr');
+        
+        row.innerHTML = `
+          <td>${formatDateTime(paymentDate)}</td>
+          <td>$${formatNumber(payment.amount)}</td>
+          <td>${getPaymentTypeText(payment.type)}</td>
+          <td>${payment.lateFee ? `$${formatNumber(payment.lateFee)}` : '-'}</td>
+          <td>${payment.notes || '-'}</td>
+        `;
+        
+        tbody.appendChild(row);
+      });
+      
+      fullPaymentHistory.appendChild(table);
+      
+      // Mostrar botones para generar recibos
+      const generateReceiptsSection = document.createElement('div');
+      generateReceiptsSection.className = 'mt-4';
+      generateReceiptsSection.innerHTML = `
+        <h5>Generar Recibos</h5>
+        <div class="d-flex gap-2">
+          <button class="btn btn-primary" id="generateAllReceiptsBtn">
+            <i class="fas fa-receipt me-2"></i>Generar Todos los Recibos
+          </button>
+          <button class="btn btn-success" id="generateLastReceiptBtn">
+            <i class="fas fa-file-invoice me-2"></i>Generar Último Recibo
+          </button>
+        </div>
+      `;
+      fullPaymentHistory.appendChild(generateReceiptsSection);
+      
+      // Configurar eventos para los botones de recibos
+      document.getElementById('generateAllReceiptsBtn').addEventListener('click', () => {
+        generateAllReceipts(client);
+      });
+      
+      document.getElementById('generateLastReceiptBtn').addEventListener('click', () => {
+        if (currentClientPayments.length > 0) {
+          generateReceipt(client, currentClientPayments[0]);
+        }
+      });
+      
+      // Mostrar el modal
+      const paymentHistoryModal = new bootstrap.Modal(document.getElementById('paymentHistoryModal'));
+      paymentHistoryModal.show();
+    }
+
+    // Función para obtener el texto del tipo de pago
+    function getPaymentTypeText(type) {
+      switch (type) {
+        case 'full': return 'Pago Completo';
+        case 'interest': return 'Solo Interés';
+        case 'capital': return 'Solo Capital';
+        case 'custom': return 'Personalizado';
+        default: return type;
+      }
+    }
+
+    // Función para registrar un nuevo pago
+    async function registerPayment() {
+      try {
+        if (!currentClientId) {
+          showAlert("No se ha seleccionado ningún cliente", "error");
+          return;
+        }
+        
+        const amount = parseFloat(document.getElementById('paymentAmount').value);
+        const date = document.getElementById('paymentDate').value;
+        const type = document.getElementById('paymentType').value;
+        const notes = document.getElementById('paymentNotes').value;
+        
+        if (!amount || amount <= 0) {
+          showAlert("Por favor ingrese un monto válido", "error");
+          return;
+        }
+        
+        if (!date) {
+          showAlert("Por favor seleccione una fecha", "error");
+          return;
+        }
+        
+        const client = clientsData.find(c => c.id === currentClientId);
+        if (!client) {
+          showAlert("Cliente no encontrado", "error");
+          return;
+        }
+        
+        // Calcular mora si el pago es tardío
+        let lateFee = 0;
+        const paymentDate = new Date(date);
+        const today = new Date();
+        
+        if (paymentDate < today && client.nextPaymentDate && paymentDate > new Date(client.nextPaymentDate)) {
+          // Calcular días de retraso
+          const nextPaymentDate = new Date(client.nextPaymentDate);
+          const daysLate = Math.floor((today - nextPaymentDate) / (1000 * 60 * 60 * 24));
+          
+          // Calcular mora (5% del pago mensual por cada semana de retraso)
+          const monthlyPayment = calculateMonthlyPayment(client.amount, client.interestRate, client.term);
+          const weeksLate = Math.ceil(daysLate / 7);
+          lateFee = monthlyPayment * 0.05 * weeksLate;
+        }
+        
+        // Crear objeto de pago
+        const payment = {
+          amount: amount,
+          date: Timestamp.fromDate(new Date(date)),
+          type: type,
+          lateFee: lateFee,
+          notes: notes
+        };
+        
+        // Actualizar en Firebase
+        const loanRef = doc(db, "Loans", currentClientId);
+        await updateDoc(loanRef, {
+          payments: arrayUnion(payment),
+          balance: (parseFloat(client.balance) - amount).toFixed(2),
+          updatedAt: Timestamp.now()
+        });
+        
+        // Actualizar datos locales
+        const clientIndex = clientsData.findIndex(c => c.id === currentClientId);
+        if (clientIndex !== -1) {
+          if (!clientsData[clientIndex].payments) {
+            clientsData[clientIndex].payments = [];
+          }
+          clientsData[clientIndex].payments.push(payment);
+          clientsData[clientIndex].balance = (parseFloat(client.balance) - amount).toFixed(2);
+        }
+        
+        // Limpiar formulario
+        document.getElementById('paymentAmount').value = '';
+        document.getElementById('paymentNotes').value = '';
+        document.getElementById('paymentDate').valueAsDate = new Date();
+        
+        // Recargar detalles del cliente
+        await loadPaymentHistory(currentClientId);
+        
+        // Actualizar estadísticas
+        updateStatistics();
+        
+        showAlert("Pago registrado correctamente", "success");
+        
+        // Generar recibo automáticamente
+        generateReceipt(client, payment);
+      } catch (error) {
+        console.error("Error registering payment:", error);
+        showAlert("Error al registrar el pago", "error");
+      }
+    }
+
+    // Función para marcar un préstamo como completado
+    async function completeLoan() {
+      try {
+        if (!currentClientId) return;
+        
+        const clientIndex = clientsData.findIndex(c => c.id === currentClientId);
+        if (clientIndex === -1) return;
+        
+        const client = clientsData[clientIndex];
+        
+        // Actualizar el estado en Firebase
+        const loanRef = doc(db, "Loans", currentClientId);
+        await updateDoc(loanRef, {
+          status: 'completed',
+          balance: 0,
+          remainingCapital: 0,
+          completionDate: new Date().toISOString(),
+          updatedAt: Timestamp.now()
+        });
+        
+        // Actualizar los datos locales
+        clientsData[clientIndex] = {
+          ...clientsData[clientIndex],
+          status: 'completed',
+          balance: 0,
+          remainingCapital: 0,
+          completionDate: new Date().toISOString()
+        };
+        
+        // Recargar la lista de clientes
+        renderClients();
+        
+        // Actualizar estadísticas
+        updateStatistics();
+        
+        // Cerrar el modal de detalles
+        bootstrap.Modal.getInstance(document.getElementById('clientModal'))?.hide();
+        
+        // Generar y mostrar la carta de saldo
+        generateLetter(client);
+        
+        showAlert('Préstamo marcado como completado correctamente', 'success');
+      } catch (error) {
+        console.error("Error completing loan:", error);
+        showAlert("Error al marcar el préstamo como completado.", "error");
+      }
+    }
+
+    // Función para generar la carta de saldo cancelado
+    function generateLetter(client) {
+      const today = new Date();
+      const formattedDate = today.toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+      
+      const letterContent = document.getElementById('letterContent');
+      letterContent.innerHTML = `
+        <div class="letter-header">
+          <h2>CARTA DE SALDO CANCELADO</h2>
+          <p>${formattedDate}</p>
+        </div>
+        
+        <div class="letter-body">
+          <p>Yo, ${currentUser.displayName || 'Administrador'}, representante legal de esta entidad,</p>
+          
+          <p>HAGO CONSTAR que el/la señor(a) <strong>${client.client.name}</strong>, 
+          identificado(a) con ${client.client.id}, ha cancelado en su totalidad el préstamo 
+          otorgado el día ${formatDate(client.startDate)} por un monto de 
+          <strong>$${formatNumber(client.amount)}</strong>.</p>
+          
+          <p>El préstamo fue cancelado en su totalidad el día de hoy, quedando saldada 
+          cualquier obligación económica relacionada con este préstamo.</p>
+          
+          <p>Se expide la presente carta a solicitud del interesado(a) para los fines que 
+          estime convenientes.</p>
+        </div>
+        
+        <div class="letter-footer">
+          <p>Atentamente,</p>
+          <div class="letter-signature">
+            <p>${currentUser.displayName || 'Administrador'}</p>
+            <p>Representante Legal</p>
+          </div>
+        </div>
+      `;
+      
+      // Mostrar el modal de la carta
+      const letterModal = new bootstrap.Modal(document.getElementById('letterModal'));
+      letterModal.show();
+    }
+
+    // Función para generar un recibo de pago
+    function generateReceipt(client, payment) {
+      const receiptContent = document.getElementById('receiptContent');
+      const paymentDate = payment.date.toDate();
+      
+      receiptContent.innerHTML = `
+        <div class="receipt-header">
+          <div class="receipt-title">RECIBO DE PAGO</div>
+          <div class="receipt-company">${currentUser.displayName || 'Empresa'}</div>
+          <div>RNC: 000-00000-0</div>
+          <div>Fecha: ${formatDateTime(paymentDate)}</div>
+        </div>
+        
+        <div class="receipt-details">
+          <div class="receipt-row">
+            <span class="receipt-label">Cliente:</span>
+            <span class="receipt-value">${client.client.name}</span>
+          </div>
+          <div class="receipt-row">
+            <span class="receipt-label">Cédula:</span>
+            <span class="receipt-value">${client.client.id}</span>
+          </div>
+          <div class="receipt-row">
+            <span class="receipt-label">Préstamo ID:</span>
+            <span class="receipt-value">${client.id}</span>
+          </div>
+          <div class="receipt-row">
+            <span class="receipt-label">Monto del pago:</span>
+            <span class="receipt-value">$${formatNumber(payment.amount)}</span>
+          </div>
+          <div class="receipt-row">
+            <span class="receipt-label">Tipo de pago:</span>
+            <span class="receipt-value">${getPaymentTypeText(payment.type)}</span>
+          </div>
+          ${payment.lateFee ? `
+            <div class="receipt-row">
+              <span class="receipt-label">Mora:</span>
+              <span class="receipt-value">$${formatNumber(payment.lateFee)}</span>
+            </div>
+          ` : ''}
+          <div class="receipt-row">
+            <span class="receipt-label">Total recibido:</span>
+            <span class="receipt-value">$${formatNumber(payment.amount + (payment.lateFee || 0))}</span>
+          </div>
+          <div class="receipt-row">
+            <span class="receipt-label">Registrado por:</span>
+            <span class="receipt-value">${currentUser.displayName || 'Administrador'}</span>
+          </div>
+          ${payment.notes ? `
+            <div class="receipt-row">
+              <span class="receipt-label">Notas:</span>
+              <span class="receipt-value">${payment.notes}</span>
+            </div>
+          ` : ''}
+        </div>
+        
+        <div class="receipt-footer">
+          <p>¡Gracias por su pago!</p>
+          <div class="receipt-signature">Firma del Cliente</div>
+        </div>
+      `;
+      
+      // Mostrar el modal del recibo
+      const receiptModal = new bootstrap.Modal(document.getElementById('receiptModal'));
+      receiptModal.show();
+    }
+
+    // Función para generar un ticket de pago
+    function generateTicket(client, payment) {
+      const ticketContent = document.getElementById('ticketContent');
+      const paymentDate = payment.date.toDate();
+      
+      ticketContent.innerHTML = `
+        <div class="ticket-header">
+          <div class="ticket-title">${currentUser.displayName || 'Empresa'}</div>
+          <div class="ticket-info">Fecha: ${formatDateTime(paymentDate)}</div>
+          <div class="ticket-title">RECIBO DE PAGO</div>
+        </div>
+        
+        <div class="ticket-body">
+          <div class="ticket-row">
+            <span>Cliente:</span>
+            <span>${client.client.name}</span>
+          </div>
+          <div class="ticket-row">
+            <span>Cédula:</span>
+            <span>${client.client.id}</span>
+          </div>
+          <div class="ticket-row">
+            <span>Préstamo ID:</span>
+            <span>${client.id}</span>
+          </div>
+          <div class="ticket-row">
+            <span>Monto:</span>
+            <span>$${formatNumber(payment.amount)}</span>
+          </div>
+          <div class="ticket-row">
+            <span>Tipo:</span>
+            <span>${getPaymentTypeText(payment.type)}</span>
+          </div>
+          ${payment.lateFee ? `
+            <div class="ticket-row">
+              <span>Mora:</span>
+              <span>$${formatNumber(payment.lateFee)}</span>
+            </div>
+          ` : ''}
+          <div class="ticket-row">
+            <span>Total:</span>
+            <span>$${formatNumber(payment.amount + (payment.lateFee || 0))}</span>
+          </div>
+          <div class="ticket-row">
+            <span>Registrado por:</span>
+            <span>${currentUser.displayName || 'Administrador'}</span>
+          </div>
+        </div>
+        
+        <div class="ticket-footer">
+          <p>¡Gracias por su pago!</p>
+          <p>---------------------</p>
+          <p>Firma del Cliente:</p>
+        </div>
+      `;
+      
+      // Mostrar el modal del ticket
+      const ticketModal = new bootstrap.Modal(document.getElementById('ticketModal'));
+      ticketModal.show();
+    }
+
+    // Función para generar todos los recibos de pagos
+    function generateAllReceipts(client) {
+      if (currentClientPayments.length === 0) {
+        showAlert("No hay pagos para generar recibos", "info");
+        return;
+      }
+      
+      // Generar el último recibo primero
+      generateReceipt(client, currentClientPayments[0]);
+      
+      // Si hay más de un pago, mostrar mensaje
+      if (currentClientPayments.length > 1) {
+        setTimeout(() => {
+          showAlert(`Se generó el recibo del último pago. Hay ${currentClientPayments.length - 1} pagos adicionales.`, "info");
+        }, 1000);
+      }
+    }
+
+    // Función para imprimir la información del cliente
+    async function printClient(clientId) {
+      try {
+        const client = clientsData.find(c => c.id === clientId);
+        if (!client) return;
+        
+        // Mostrar primero los detalles del cliente
+        await showClientDetails(clientId);
+        
+        // Esperar un momento para que el modal se muestre completamente
+        setTimeout(() => {
+          // Activar el botón de imprimir
+          document.getElementById('printClientBtn').click();
+        }, 500);
+      } catch (error) {
+        console.error("Error printing client:", error);
+        showAlert("Error al preparar la impresión.", "error");
+      }
+    }
+
+    // Función para exportar datos a Excel
+    function exportToExcel() {
+      try {
+        // Preparar datos para exportar
+        const data = clientsData.map(client => ({
+          'Nombre': client.client.name,
+          'ID': client.client.id,
+          'Teléfono': client.client.phone || '',
+          'Monto del préstamo': parseFloat(client.amount),
+          'Tasa de interés': parseFloat(client.interestRate),
+          'Plazo': client.term,
+          'Saldo pendiente': parseFloat(client.balance),
+          'Estado': client.status === 'active' ? 'Activo' : 
+                   client.status === 'overdue' ? 'Atrasado' : 
+                   client.status === 'completed' ? 'Completado' : 'Inactivo',
+          'Fecha de inicio': formatDate(client.startDate),
+          'Próximo pago': calculateNextPayment(client.startDate, client.frequency, 
+            client.payments && client.payments.length > 0 ? 
+            client.payments.reduce((latest, payment) => {
+              return payment.date > latest.date ? payment : latest;
+            }).date.toDate() : null)
+        }));
+        
+        // Crear libro de trabajo
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Préstamos');
+        
+        // Generar archivo y descargar
+        const today = new Date();
+        const fileName = `prestamos_${today.getFullYear()}${(today.getMonth()+1).toString().padStart(2,'0')}${today.getDate().toString().padStart(2,'0')}.xlsx`;
+        
+        XLSX.writeFile(workbook, fileName);
+        showAlert('Datos exportados correctamente', 'success');
+      } catch (error) {
+        console.error("Error exporting to Excel:", error);
+        showAlert("Error al exportar los datos", "error");
+      }
+    }
+
+    // Función para exportar historial de pagos a Excel
+    function exportPaymentsToExcel() {
+      try {
+        if (currentClientPayments.length === 0) {
+          showAlert("No hay pagos para exportar", "info");
+          return;
+        }
+        
+        const client = clientsData.find(c => c.id === currentClientId);
+        if (!client) return;
+        
+        // Preparar datos para exportar
+        const data = currentClientPayments.map(payment => ({
+          'Fecha': formatDateTime(payment.date.toDate()),
+          'Monto': parseFloat(payment.amount),
+          'Tipo': getPaymentTypeText(payment.type),
+          'Mora': payment.lateFee ? parseFloat(payment.lateFee) : 0,
+          'Total': parseFloat(payment.amount) + (payment.lateFee ? parseFloat(payment.lateFee) : 0),
+          'Notas': payment.notes || ''
+        }));
+        
+        // Crear libro de trabajo
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Pagos');
+        
+        // Generar archivo y descargar
+        const today = new Date();
+        const fileName = `pagos_${client.client.name}_${today.getFullYear()}${(today.getMonth()+1).toString().padStart(2,'0')}${today.getDate().toString().padStart(2,'0')}.xlsx`;
+        
+        XLSX.writeFile(workbook, fileName);
+        showAlert('Historial de pagos exportado correctamente', 'success');
+      } catch (error) {
+        console.error("Error exporting payments to Excel:", error);
+        showAlert("Error al exportar el historial de pagos", "error");
+      }
+    }
+
+    // Función para descargar carta como PDF
+    function downloadLetterAsPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      
+      const letterContent = document.getElementById('letterContent').innerText;
+      doc.text(letterContent, 10, 10);
+      
+      const client = clientsData.find(c => c.id === currentClientId);
+      const fileName = `carta_saldo_${client.client.name}.pdf`;
+      
+      doc.save(fileName);
+      showAlert('Carta descargada como PDF', 'success');
+    }
+
+    // Función para configurar el botón de imprimir carta
+    function setupPrintLetterButton() {
+      document.getElementById('printLetterBtn').addEventListener('click', () => {
+        // Ocultar botones antes de imprimir
+        document.getElementById('printLetterBtn').classList.add('d-none');
+        document.getElementById('downloadLetterBtn').classList.add('d-none');
+        document.querySelector('#letterModal .btn-secondary').classList.add('d-none');
+        
+        // Imprimir
+        window.print();
+        
+        // Mostrar botones nuevamente después de imprimir
+        setTimeout(() => {
+          document.getElementById('printLetterBtn').classList.remove('d-none');
+          document.getElementById('downloadLetterBtn').classList.remove('d-none');
+          document.querySelector('#letterModal .btn-secondary').classList.remove('d-none');
+        }, 500);
+      });
+    }
+
+    // Función para configurar el botón de descargar carta
+    function setupDownloadLetterButton() {
+      document.getElementById('downloadLetterBtn').addEventListener('click', () => {
+        downloadLetterAsPDF();
+      });
+    }
+
+    // Función para configurar el botón de imprimir recibo
+    function setupPrintReceiptButton() {
+      document.getElementById('printReceiptBtn').addEventListener('click', () => {
+        // Ocultar botones antes de imprimir
+        document.getElementById('printReceiptBtn').classList.add('d-none');
+        document.getElementById('sendReceiptBtn').classList.add('d-none');
+        document.querySelector('#receiptModal .btn-secondary').classList.add('d-none');
+        
+        // Imprimir
+        window.print();
+        
+        // Mostrar botones nuevamente después de imprimir
+        setTimeout(() => {
+          document.getElementById('printReceiptBtn').classList.remove('d-none');
+          document.getElementById('sendReceiptBtn').classList.remove('d-none');
+          document.querySelector('#receiptModal .btn-secondary').classList.remove('d-none');
+        }, 500);
+      });
+    }
+
+    // Función para configurar el botón de enviar recibo
+    function setupSendReceiptButton() {
+      document.getElementById('sendReceiptBtn').addEventListener('click', () => {
+        const client = clientsData.find(c => c.id === currentClientId);
+        if (client && client.client.email) {
+          showAlert(`Recibo enviado a ${client.client.email}`, 'success');
+        } else {
+          showAlert("El cliente no tiene un email registrado", "error");
+        }
+      });
+    }
+
+    // Función para configurar el botón de imprimir ticket
+    function setupPrintTicketButton() {
+      document.getElementById('printTicketBtn').addEventListener('click', () => {
+        // Ocultar botones antes de imprimir
+        document.getElementById('printTicketBtn').classList.add('d-none');
+        document.querySelector('#ticketModal .btn-secondary').classList.add('d-none');
+        
+        // Imprimir
+        window.print();
+        
+        // Mostrar botones nuevamente después de imprimir
+        setTimeout(() => {
+          document.getElementById('printTicketBtn').classList.remove('d-none');
+          document.querySelector('#ticketModal .btn-secondary').classList.remove('d-none');
+        }, 500);
+      });
+    }
+
+    // Función para configurar el botón de exportar pagos
+    function setupExportPaymentsButton() {
+      document.getElementById('exportPaymentsBtn').addEventListener('click', () => {
+        exportPaymentsToExcel();
+      });
+    }
+
+    // Función para buscar clientes
+    function setupSearch() {
+      const searchInput = document.getElementById('searchInput');
+      const searchBtn = document.getElementById('searchBtn');
+      
+      searchInput.addEventListener('input', (e) => {
+        renderClients(e.target.value);
+      });
+      
+      searchBtn.addEventListener('click', () => {
+        renderClients(searchInput.value);
+      });
+    }
+
+    // Función para configurar filtros
+    function setupFilters() {
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          // Remover clase active de todos los botones
+          document.querySelectorAll('.filter-btn').forEach(b => {
+            b.classList.remove('active');
+          });
+          
+          // Agregar clase active al botón clickeado
+          e.currentTarget.classList.add('active');
+          
+          // Actualizar filtro actual
+          currentFilter = e.currentTarget.getAttribute('data-filter');
+          
+          // Renderizar clientes con el nuevo filtro
+          renderClients();
+        });
+      });
+    }
+
+    // Función para configurar ordenamiento
+    function setupSorting() {
+      const sortSelect = document.getElementById('sortSelect');
+      sortSelect.addEventListener('change', (e) => {
+        currentSort = e.target.value;
+        renderClients();
+      });
+    }
+
+    // Función para configurar el botón de exportar
+    function setupExportButton() {
+      document.getElementById('exportBtn').addEventListener('click', () => {
+        exportToExcel();
+      });
+    }
+
+    // Función para configurar el evento de impresión
+    function setupPrintButton() {
+      document.getElementById('printClientBtn').addEventListener('click', () => {
+        window.print();
+      });
+    }
+
+    // Función para configurar el botón de completar préstamo
+    function setupCompleteButton() {
+      document.getElementById('completeLoanBtn').addEventListener('click', async () => {
+        const client = clientsData.find(c => c.id === currentClientId);
+        if (!client) return;
+        
+        const confirmed = await showConfirmationModal(
+          'Confirmar Completar Préstamo',
+          `¿Estás seguro que deseas marcar el préstamo de ${client.client.name} como COMPLETADO?\n\nSe generará una carta de saldo cancelado.`
+        );
+        
+        if (confirmed) {
+          await completeLoan();
+        }
+      });
+    }
+
+    // Función para configurar el botón de ver historial completo
+    function setupViewHistoryButton() {
+      document.getElementById('viewPaymentHistoryBtn').addEventListener('click', () => {
+        const client = clientsData.find(c => c.id === currentClientId);
+        if (client) {
+          showFullPaymentHistory(client);
+        }
+      });
+    }
+
+    // Función para configurar el botón de enviar recordatorio
+    function setupSendReminderButton() {
+      document.getElementById('sendReminderBtn').addEventListener('click', () => {
+        const client = clientsData.find(c => c.id === currentClientId);
+        if (client) {
+          if (client.client.phone) {
+            showAlert(`Recordatorio enviado al ${client.client.phone}`, 'success');
+          } else {
+            showAlert("El cliente no tiene un número de teléfono registrado", "error");
+          }
+        }
+      });
+    }
+
+    // Función para configurar el botón de registrar pago
+    function setupRegisterPaymentButton() {
+      document.getElementById('registerPaymentBtn').addEventListener('click', () => {
+        registerPayment();
+      });
+    }
+
+    // Función para configurar el botón de notificaciones
+    function setupNotificationsButton() {
+      document.getElementById('notificationsBtn').addEventListener('click', () => {
+        const overdueLoans = clientsData.filter(client => client.status === 'overdue').length;
+        if (overdueLoans > 0) {
+          showAlert(`Tienes ${overdueLoans} préstamo(s) atrasados`, 'info');
+        } else {
+          showAlert('No tienes notificaciones pendientes', 'info');
+        }
+      });
+    }
+
+    // Función para configurar el botón de cerrar sesión
+    function setupLogoutButton() {
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
+        const confirmed = await showConfirmationModal(
+          'Cerrar Sesión',
+          '¿Estás seguro que deseas cerrar la sesión?'
+        );
+        
+        if (confirmed) {
+          try {
+            await signOut(auth);
+            window.location.href = 'index.html';
+          } catch (error) {
+            console.error("Error signing out:", error);
+            showAlert("Error al cerrar sesión", "error");
+          }
+        }
+      });
+    }
+
+    // Inicialización cuando el DOM está listo
+    document.addEventListener('DOMContentLoaded', () => {
+      // Configurar Firebase Auth state observer
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          currentUser = user;
+          
+          // Mostrar información del usuario
+          document.getElementById('usernameDisplay').textContent = user.displayName || 'Usuario';
+          
+          // Cargar los clientes del usuario
+          loadUserClients();
+          
+          // Configurar eventos
+          setupSearch();
+          setupFilters();
+          setupSorting();
+          setupExportButton();
+          setupPrintButton();
+          setupCompleteButton();
+          setupViewHistoryButton();
+          setupSendReminderButton();
+          setupRegisterPaymentButton();
+          setupPrintLetterButton();
+          setupDownloadLetterButton();
+          setupPrintReceiptButton();
+          setupSendReceiptButton();
+          setupPrintTicketButton();
+          setupExportPaymentsButton();
+          setupNotificationsButton();
+          setupLogoutButton();
+        } else {
+          // Redirigir a la página de inicio de sesión
+          window.location.href = 'index.html';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

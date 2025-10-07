@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exportar Datos - PlusMoney Retom</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #1abc9c;
+      --primary-dark: #16a085;
+      --secondary-color: #2a2a3f;
+      --background-color: #2c3e50;
+      --text-color: #ffffff;
+      --text-light: #a8a8a8;
+      --border-color: #444;
+      --card-bg: #34495e;
+      --danger-color: #e74c3c;
+      --success-color: #2ecc71;
+      --warning-color: #f39c12;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background-color: var(--secondary-color);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      color: var(--primary-color);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    /* Estilos para alertas */
+    .alert-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 3000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .alert-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .alert-box {
+      background-color: var(--secondary-color);
+      border-radius: 12px;
+      padding: 2rem;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      transform: translateY(20px);
+      transition: transform 0.3s ease;
+    }
+
+    .alert-overlay.active .alert-box {
+      transform: translateY(0);
+    }
+
+    .alert-title {
+      color: var(--primary-color);
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .alert-title i {
+      margin-right: 10px;
+    }
+
+    .alert-message {
+      margin-bottom: 2rem;
+      line-height: 1.5;
+    }
+
+    .alert-btn {
+      background-color: var(--primary-color);
+      color: var(--text-color);
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .alert-btn i {
+      margin-right: 8px;
+    }
+
+    .alert-btn:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .alert-success .alert-title {
+      color: var(--success-color);
+    }
+
+    .alert-error .alert-title {
+      color: var(--danger-color);
+    }
+
+    .alert-warning .alert-title {
+      color: var(--warning-color);
+    }
+
+    /* Resto de estilos... */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    select, input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      font-size: 1rem;
+    }
+
+    .btn {
+      background-color: var(--primary-color);
+      color: var(--text-color);
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 1rem;
+    }
+
+    .btn i {
+      margin-right: 8px;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .btn-danger {
+      background-color: var(--danger-color);
+    }
+
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .loading-overlay.active {
+      display: flex;
+    }
+
+    .loader {
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid var(--primary-color);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+
+    .file-list {
+      margin-top: 2rem;
+    }
+
+    .file-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+
+    .file-info {
+      flex: 1;
+    }
+
+    .file-actions {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .progress-container {
+      width: 100%;
+      background-color: var(--background-color);
+      border-radius: 8px;
+      margin-top: 1rem;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 20px;
+      background-color: var(--primary-color);
+      width: 0%;
+      transition: width 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>Exportar Datos a Archivo .rtmp</h1>
+      
+      <div class="form-group">
+        <label for="exportName">Nombre del Archivo (sin extensión)</label>
+        <input type="text" id="exportName" class="form-control" placeholder="mis_datos_exportados">
+      </div>
+      
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="includeAttachments"> Incluir documentos/imágenes adjuntos
+        </label>
+      </div>
+      
+      <button id="exportSingleBtn" class="btn">
+        <i class="fas fa-file-export"></i> Exportar Préstamo Actual
+      </button>
+      
+      <button id="exportAllBtn" class="btn" style="margin-top: 1rem;">
+        <i class="fas fa-file-archive"></i> Exportar Todos los Préstamos
+      </button>
+      
+      <div id="progressContainer" class="progress-container" style="display: none;">
+        <div id="progressBar" class="progress-bar">0%</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Overlay de carga -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loader"></div>
+  </div>
+  
+  <!-- Alertas personalizadas -->
+  <div class="alert-overlay" id="alertOverlay">
+    <div class="alert-box" id="alertBox">
+      <h3 class="alert-title" id="alertTitle"><i class="fas fa-check-circle"></i> Título</h3>
+      <p class="alert-message" id="alertMessage">Mensaje de la alerta</p>
+      <button class="alert-btn" id="alertBtn"><i class="fas fa-check"></i> Aceptar</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      getDocs,
+      query,
+      where
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+    import { 
+      getStorage, 
+      ref, 
+      getDownloadURL,
+      uploadBytes
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-storage.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+      authDomain: "inventario-35d6b.firebaseapp.com",
+      databaseURL: "https://inventario-35d6b-default-rtdb.firebaseio.com",
+      projectId: "inventario-35d6b",
+      storageBucket: "inventario-35d6b.appspot.com",
+      messagingSenderId: "266100399659",
+      appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const storage = getStorage(app);
+    
+    let currentUser = null;
+    let currentLoanData = null;
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          currentUser = user;
+          // Obtener el préstamo actual de la URL o de sessionStorage
+          const urlParams = new URLSearchParams(window.location.search);
+          const loanId = urlParams.get('loanId') || sessionStorage.getItem('currentLoanId');
+          if (loanId) {
+            getLoanData(loanId);
+          }
+        } else {
+          window.location.href = 'index.html';
+        }
+      });
+      
+      // Configurar eventos
+      document.getElementById('exportSingleBtn').addEventListener('click', exportCurrentLoan);
+      document.getElementById('exportAllBtn').addEventListener('click', exportAllLoans);
+      document.getElementById('alertBtn').addEventListener('click', () => {
+        document.getElementById('alertOverlay').classList.remove('active');
+      });
+    });
+    
+    async function getLoanData(loanId) {
+      try {
+        showLoading();
+        const loanRef = doc(db, "Loans", loanId);
+        const loanSnap = await getDoc(loanRef);
+        
+        if (loanSnap.exists()) {
+          currentLoanData = { id: loanSnap.id, ...loanSnap.data() };
+        } else {
+          showAlert('Error', 'No se encontró el préstamo especificado', 'error');
+        }
+      } catch (error) {
+        console.error("Error getting loan data: ", error);
+        showAlert('Error', 'Error al obtener datos del préstamo', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+    
+    async function exportCurrentLoan() {
+      if (!currentLoanData) {
+        showAlert('Error', 'No hay datos de préstamo para exportar', 'error');
+        return;
+      }
+      
+      const exportName = document.getElementById('exportName').value.trim() || `prestamo_${currentLoanData.id}`;
+      const includeAttachments = document.getElementById('includeAttachments').checked;
+      
+      try {
+        showLoading();
+        document.getElementById('progressContainer').style.display = 'block';
+        updateProgress(0, 'Preparando exportación...');
+        
+        // Procesar datos del préstamo
+        updateProgress(20, 'Procesando datos del préstamo...');
+        const loanToExport = prepareLoanData(currentLoanData, includeAttachments);
+        
+        // Procesar documentos adjuntos si es necesario
+        if (includeAttachments) {
+          updateProgress(40, 'Procesando archivos adjuntos...');
+          await processAttachments([loanToExport]);
+        }
+        
+        // Crear estructura RTMP
+        updateProgress(70, 'Creando archivo .rtmp...');
+        const rtmpData = {
+          metadata: {
+            version: "1.0",
+            type: "single_loan",
+            exportedAt: new Date().toISOString(),
+            exportedBy: currentUser.uid
+          },
+          loanData: loanToExport
+        };
+        
+        // Convertir a Blob
+        const blob = new Blob([JSON.stringify(rtmpData, null, 2)], { type: 'application/rtmp' });
+        
+        // Guardar en Firebase Storage
+        updateProgress(90, 'Guardando archivo...');
+        const storageRef = ref(storage, `exports/${currentUser.uid}/${exportName}.rtmp`);
+        await uploadBytes(storageRef, blob);
+        
+        // Descargar localmente
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${exportName}.rtmp`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        updateProgress(100, 'Exportación completada!');
+        showAlert('Éxito', `Préstamo exportado correctamente a ${exportName}.rtmp`, 'success');
+      } catch (error) {
+        console.error("Error exporting loan: ", error);
+        showAlert('Error', 'Ocurrió un error al exportar el préstamo: ' + error.message, 'error');
+      } finally {
+        hideLoading();
+        setTimeout(() => {
+          document.getElementById('progressContainer').style.display = 'none';
+        }, 2000);
+      }
+    }
+    
+    async function exportAllLoans() {
+      const exportName = document.getElementById('exportName').value.trim() || `todos_prestamos_${new Date().toISOString().split('T')[0]}`;
+      const includeAttachments = document.getElementById('includeAttachments').checked;
+      
+      try {
+        showLoading();
+        document.getElementById('progressContainer').style.display = 'block';
+        updateProgress(0, 'Preparando exportación...');
+        
+        // Obtener todos los préstamos del usuario actual
+        updateProgress(10, 'Obteniendo préstamos...');
+        const q = query(collection(db, "Loans"), where("userId", "==", currentUser.uid));
+        const querySnapshot = await getDocs(q);
+        
+        const loans = [];
+        querySnapshot.forEach((doc) => {
+          loans.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // Procesar cada préstamo
+        updateProgress(30, 'Procesando préstamos...');
+        const loansToExport = loans.map(loan => prepareLoanData(loan, includeAttachments));
+        
+        // Procesar documentos adjuntos si es necesario
+        if (includeAttachments) {
+          updateProgress(50, 'Procesando archivos adjuntos...');
+          await processAttachments(loansToExport);
+        }
+        
+        // Crear estructura RTMP
+        updateProgress(80, 'Creando archivo .rtmp...');
+        const rtmpData = {
+          metadata: {
+            version: "1.0",
+            type: "all_loans",
+            exportedAt: new Date().toISOString(),
+            exportedBy: currentUser.uid,
+            loanCount: loans.length
+          },
+          loans: loansToExport
+        };
+        
+        // Convertir a Blob
+        const blob = new Blob([JSON.stringify(rtmpData, null, 2)], { type: 'application/rtmp' });
+        
+        // Guardar en Firebase Storage
+        updateProgress(90, 'Guardando archivo...');
+        const storageRef = ref(storage, `exports/${currentUser.uid}/${exportName}.rtmp`);
+        await uploadBytes(storageRef, blob);
+        
+        // Descargar localmente
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${exportName}.rtmp`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        updateProgress(100, 'Exportación completada!');
+        showAlert('Éxito', `Todos los préstamos exportados correctamente a ${exportName}.rtmp`, 'success');
+      } catch (error) {
+        console.error("Error exporting loans: ", error);
+        showAlert('Error', 'Ocurrió un error al exportar los préstamos: ' + error.message, 'error');
+      } finally {
+        hideLoading();
+        setTimeout(() => {
+          document.getElementById('progressContainer').style.display = 'none';
+        }, 2000);
+      }
+    }
+    
+    function prepareLoanData(loanData, includeAttachments) {
+      // Extraer solo los datos necesarios del formulario de nuevo préstamo
+      const preparedData = {
+        clientInfo: {
+          name: loanData.client?.name || '',
+          id: loanData.client?.id || '',
+          address: loanData.client?.address || '',
+          phone: loanData.client?.phone || '',
+          nationality: loanData.client?.nationality || '',
+          company: loanData.client?.company || '',
+          companyTime: loanData.client?.companyTime || '',
+          reference: {
+            name: loanData.client?.reference?.name || '',
+            phone: loanData.client?.reference?.phone || '',
+            relation: loanData.client?.reference?.relation || ''
+          }
+        },
+        loanDetails: {
+          amount: loanData.amount || 0,
+          interestRate: loanData.interestRate || 0,
+          term: loanData.term || 0,
+          frequency: loanData.frequency || 'monthly',
+          startDate: loanData.startDate || '',
+          loanType: loanData.loanType || 'normal',
+          guarantee: loanData.guarantee || '',
+          paymentSchedule: loanData.paymentSchedule || [],
+          payments: loanData.payments || []
+        }
+      };
+      
+      // Incluir documentos adjuntos si está marcado
+      if (includeAttachments && loanData.documents) {
+        preparedData.attachments = loanData.documents.map(doc => ({
+          name: doc.name,
+          type: doc.type,
+          url: doc.url
+        }));
+      }
+      
+      return preparedData;
+    }
+    
+    async function processAttachments(loans) {
+      for (const loan of loans) {
+        if (loan.attachments) {
+          for (const attachment of loan.attachments) {
+            try {
+              const fileRef = ref(storage, attachment.url);
+              const downloadURL = await getDownloadURL(fileRef);
+              attachment.downloadURL = downloadURL;
+            } catch (error) {
+              console.warn(`No se pudo obtener el documento adjunto: ${attachment.name}`, error);
+              attachment.downloadError = true;
+            }
+          }
+        }
+      }
+    }
+    
+    function updateProgress(percent, message) {
+      const progressBar = document.getElementById('progressBar');
+      progressBar.style.width = `${percent}%`;
+      progressBar.textContent = message;
+    }
+    
+    function showLoading() {
+      document.getElementById('loadingOverlay').classList.add('active');
+    }
+    
+    function hideLoading() {
+      document.getElementById('loadingOverlay').classList.remove('active');
+    }
+    
+    function showAlert(title, message, type = 'info') {
+      const alertBox = document.getElementById('alertBox');
+      const alertTitle = document.getElementById('alertTitle');
+      const alertMessage = document.getElementById('alertMessage');
+      
+      // Configurar según el tipo
+      alertBox.className = 'alert-box';
+      alertTitle.innerHTML = '';
+      
+      let icon = 'fa-info-circle';
+      if (type === 'error') {
+        alertBox.classList.add('alert-error');
+        icon = 'fa-exclamation-circle';
+      } else if (type === 'success') {
+        alertBox.classList.add('alert-success');
+        icon = 'fa-check-circle';
+      } else if (type === 'warning') {
+        alertBox.classList.add('alert-warning');
+        icon = 'fa-exclamation-triangle';
+      }
+      
+      alertTitle.innerHTML = `<i class="fas ${icon}"></i> ${title}`;
+      alertMessage.textContent = message;
+      
+      document.getElementById('alertOverlay').classList.add('active');
+    }
+  </script>
+</body>
+</html>

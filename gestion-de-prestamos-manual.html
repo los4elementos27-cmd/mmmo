@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Préstamos Registrados - PlusMoney Retom</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #15a086;
+      --primary-dark: #0e7a68;
+      --primary-light: #1abc9c;
+      --secondary-color: #2c3e50;
+      --secondary-dark: #1a252f;
+      --secondary-light: #34495e;
+      --accent-color: #e74c3c;
+      --light-color: #ffffff;
+      --dark-color: #2c3e50;
+      --success-color: #2ecc71;
+      --warning-color: #f39c12;
+      --danger-color: #e74c3c;
+      --info-color: #3498db;
+      --text-primary: #ecf0f1;
+      --text-secondary: #bdc3c7;
+      --glass-effect: rgba(44, 62, 80, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --neon-glow: 0 0 10px rgba(21, 160, 134, 0.7);
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--secondary-dark);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(21, 160, 134, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(231, 76, 60, 0.1) 0%, transparent 20%);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+
+    /* Efecto de vidrio futurista */
+    .glass-card {
+      background: var(--glass-effect);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .glass-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--neon-glow), 0 12px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Navbar futurista */
+    .navbar {
+      background: rgba(44, 62, 80, 0.8);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 15px 0;
+    }
+
+    .navbar-brand {
+      font-weight: 700;
+      color: var(--light-color);
+      font-size: 1.5rem;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+    }
+
+    .navbar-brand img {
+      height: 40px;
+      margin-right: 10px;
+      filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+    }
+
+    .company-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .company-logo img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--primary-color);
+      box-shadow: 0 0 10px rgba(21, 160, 134, 0.5);
+    }
+
+    .main-content {
+      padding: 30px;
+      min-height: calc(100vh - 80px);
+    }
+
+    /* Estilos para tarjetas */
+    .card {
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+      margin-bottom: 25px;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      background: var(--secondary-light);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+    }
+
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--neon-glow), 0 15px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-header {
+      background-color: var(--secondary-color);
+      border-bottom: 1px solid var(--glass-border);
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+      padding: 15px 20px;
+    }
+
+    /* Estilos para acordeón */
+    .accordion {
+      --bs-accordion-bg: transparent;
+      --bs-accordion-border-color: var(--glass-border);
+      --bs-accordion-btn-color: var(--text-primary);
+      --bs-accordion-active-color: var(--text-primary);
+      --bs-accordion-active-bg: rgba(21, 160, 134, 0.2);
+    }
+
+    .accordion-button:not(.collapsed) {
+      background-color: rgba(21, 160, 134, 0.1);
+      color: var(--light-color);
+      box-shadow: inset 0 -1px 0 var(--glass-border);
+    }
+
+    .accordion-button {
+      background-color: var(--secondary-color);
+      color: white;
+      padding: 15px 20px;
+    }
+
+    .accordion-button:focus {
+      box-shadow: none;
+      border-color: var(--glass-border);
+    }
+
+    .accordion-body {
+      padding: 0;
+    }
+
+    /* Estilos para items de cliente */
+    .client-item {
+      background-color: rgba(44, 62, 80, 0.7);
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      border-bottom: 1px solid var(--glass-border);
+      transition: all 0.3s ease;
+      color: #fff;
+    }
+
+    .client-item:hover {
+      background-color: rgba(21, 160, 134, 0.3);
+    }
+
+    .client-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 15px;
+      border: 2px solid var(--primary-color);
+      box-shadow: 0 0 10px rgba(21, 160, 134, 0.3);
+    }
+
+    .client-info {
+      flex-grow: 1;
+    }
+
+    .client-name {
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: white;
+      font-size: 1.1rem;
+    }
+
+    .client-id {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .client-status {
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 15px;
+      background-color: rgba(21, 160, 134, 0.2);
+      color: var(--primary-light);
+      border: 1px solid var(--primary-color);
+      box-shadow: 0 0 5px rgba(21, 160, 134, 0.3);
+    }
+
+    .client-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .action-btn {
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 16px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .action-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    }
+
+    .action-btn i {
+      transition: all 0.3s ease;
+    }
+
+    .action-btn:hover i {
+      transform: scale(1.2);
+    }
+
+    .view-btn {
+      color: var(--info-color);
+    }
+
+    .edit-btn {
+      color: var(--warning-color);
+    }
+
+    .delete-btn {
+      color: var(--danger-color);
+    }
+
+    .print-btn {
+      color: var(--primary-light);
+    }
+
+    /* Estilos para préstamo en acordeón */
+    .loan-title {
+      color: white !important;
+      font-size: 0.9rem;
+      margin-top: 5px;
+    }
+
+    .loan-title i {
+      color: white;
+      margin-right: 5px;
+    }
+
+    /* Estilos para modales */
+    .modal-content {
+      border-radius: 15px;
+      border: 1px solid var(--glass-border);
+      background-color: var(--secondary-light);
+      color: white;
+      min-height: 400px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-header {
+      border-bottom: 1px solid var(--glass-border);
+      padding: 15px 20px;
+      flex-shrink: 0;
+    }
+
+    .modal-title {
+      color: white;
+      font-weight: 600;
+    }
+
+    .modal-body {
+      overflow-y: auto;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    .modal-footer {
+      border-top: 1px solid var(--glass-border);
+      flex-shrink: 0;
+      padding: 15px 20px;
+    }
+
+    .btn-close {
+      filter: invert(1);
+      opacity: 0.8;
+    }
+
+    .btn-close:hover {
+      opacity: 1;
+    }
+
+    /* Vista previa de documentos */
+    .image-preview {
+      max-width: 100%;
+      max-height: 70vh;
+      display: block;
+      margin: 0 auto;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .document-preview {
+      width: 100%;
+      height: 70vh;
+      border: none;
+      background-color: white;
+      border-radius: 8px;
+    }
+
+    /* Detalles del cliente */
+    .client-details {
+      padding: 20px;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+
+    .detail-row {
+      display: flex;
+      margin-bottom: 12px;
+    }
+
+    .detail-label {
+      font-weight: 600;
+      min-width: 180px;
+      color: var(--text-primary);
+    }
+
+    .detail-value {
+      flex-grow: 1;
+      color: var(--text-secondary);
+    }
+
+    .documents-container {
+      margin-top: 25px;
+    }
+
+    .document-thumbnail {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      margin-right: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .document-thumbnail:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(21, 160, 134, 0.3);
+    }
+
+    /* Subida de documentos */
+    .document-upload-container {
+      margin-top: 20px;
+    }
+
+    .document-preview-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .document-preview-item {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--glass-border);
+      transition: all 0.3s ease;
+    }
+
+    .document-preview-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .document-preview-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .remove-document {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background-color: var(--danger-color);
+      color: white;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 12px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .document-preview-item:hover .remove-document {
+      opacity: 1;
+    }
+
+    .upload-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100px;
+      height: 100px;
+      border: 2px dashed var(--glass-border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: var(--text-secondary);
+    }
+
+    .upload-btn:hover {
+      border-color: var(--primary-color);
+      color: var(--primary-light);
+      background: rgba(21, 160, 134, 0.1);
+    }
+
+    .upload-btn i {
+      font-size: 24px;
+      margin-bottom: 5px;
+      transition: all 0.3s ease;
+    }
+
+    .upload-btn:hover i {
+      transform: scale(1.1);
+      color: var(--primary-light);
+    }
+
+    /* Formularios */
+    .form-label {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .form-control, .form-select {
+      background-color: rgba(61, 81, 102, 0.7);
+      border: 1px solid var(--glass-border);
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+      background-color: rgba(61, 81, 102, 0.9);
+      color: white;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 0.25rem rgba(21, 160, 134, 0.25);
+    }
+
+    /* Diseño horizontal para detalles */
+    .horizontal-details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+    }
+
+    .detail-group {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .detail-group h5 {
+      color: var(--primary-light);
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--glass-border);
+      font-weight: 600;
+    }
+
+    /* Alertas personalizadas */
+    .custom-alert {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1100;
+      min-width: 300px;
+      border-radius: 8px;
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      background: rgba(44, 62, 80, 0.9);
+      border-left: 4px solid var(--primary-color);
+    }
+
+    .custom-alert.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .custom-alert.success {
+      border-left-color: var(--success-color);
+    }
+
+    .custom-alert.error {
+      border-left-color: var(--danger-color);
+    }
+
+    .custom-alert.info {
+      border-left-color: var(--info-color);
+    }
+
+    .custom-alert i {
+      margin-right: 12px;
+      font-size: 1.5rem;
+    }
+
+    .custom-alert.success i {
+      color: var(--success-color);
+    }
+
+    .custom-alert.error i {
+      color: var(--danger-color);
+    }
+
+    .custom-alert.info i {
+      color: var(--info-color);
+    }
+
+    /* Estilos para botones */
+    .btn {
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn i {
+      margin-right: 8px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(21, 160, 134, 0.4);
+    }
+
+    .btn-secondary {
+      background-color: var(--secondary-color);
+      color: white;
+      border: 1px solid var(--glass-border);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--secondary-light);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-danger {
+      background-color: var(--danger-color);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background-color: #c0392b;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+    }
+
+    /* Barra de búsqueda */
+    .search-container {
+      position: relative;
+      max-width: 350px;
+    }
+
+    .search-container .form-control {
+      padding-left: 40px;
+      border-radius: 30px;
+      background: rgba(61, 81, 102, 0.7);
+    }
+
+    .search-container .btn {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      z-index: 5;
+    }
+
+    .search-container .btn:hover {
+      color: var(--primary-light);
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* Animaciones */
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(21, 160, 134, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(21, 160, 134, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(21, 160, 134, 0); }
+    }
+
+    /* Estilos para impresión */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      
+      .modal,
+      .modal * {
+        visibility: visible;
+      }
+      
+      .modal {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: auto;
+        max-width: 100%;
+        border: none;
+        box-shadow: none;
+      }
+      
+      .modal-dialog {
+        max-width: 100%;
+        margin: 0;
+      }
+      
+      .modal-content {
+        border: none;
+        box-shadow: none;
+        background-color: white !important;
+        color: black !important;
+      }
+      
+      .no-print, .navbar, .sidebar, .client-actions, .modal-footer,
+      .input-group, .search-container, .action-btn {
+        display: none !important;
+      }
+      
+      .detail-label {
+        color: black !important;
+      }
+
+      .detail-value {
+        color: black !important;
+      }
+
+      .horizontal-details {
+        display: flex !important;
+        flex-wrap: wrap !important;
+      }
+
+      .horizontal-details .detail-group {
+        flex: 1 !important;
+        min-width: 45% !important;
+        page-break-inside: avoid;
+      }
+      
+      /* Ensure all content is visible in print */
+      .modal-body {
+        overflow: visible !important;
+        height: auto !important;
+      }
+      
+      /* Reset colors for printing */
+      body, .main-content, .card {
+        background-color: white !important;
+        color: black !important;
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 20px;
+      }
+
+      .detail-row {
+        flex-direction: column;
+      }
+
+      .detail-label {
+        margin-bottom: 5px;
+        min-width: 100%;
+      }
+
+      .client-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .client-actions {
+        margin-top: 15px;
+        width: 100%;
+        justify-content: flex-end;
+      }
+
+      .horizontal-details {
+        flex-direction: column;
+        gap: 20px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .navbar-brand {
+        font-size: 1.2rem;
+      }
+
+      .search-container {
+        max-width: 100%;
+        margin-top: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">
+        <div class="company-logo">
+          <img id="companyLogo" src="logo.png" alt="PlusMoney Retom">
+          <span id="companyName">PlusMoney Retom</span>
+        </div>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4>Clientes con Préstamos</h4>
+      <div class="input-group search-container">
+        <button class="btn" type="button">
+          <i class="fas fa-search"></i>
+        </button>
+        <input type="text" class="form-control" placeholder="Buscar cliente..." id="searchInput">
+      </div>
+    </div>
+    
+    <!-- Lista de Clientes -->
+    <div class="card glass-card">
+      <div class="card-header">
+        <span>Clientes Registrados</span>
+        <span class="badge bg-primary rounded-pill" id="clientCount">0</span>
+      </div>
+      <div class="card-body p-0">
+        <div class="accordion accordion-flush" id="clientsAccordion">
+          <!-- Los clientes se cargarán dinámicamente aquí -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Client Details Modal -->
+  <div class="modal fade" id="clientModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="clientModalTitle">Detalles del Cliente</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="d-flex align-items-center mb-4">
+            <img src="" alt="Client" class="client-avatar me-3" id="clientDetailAvatar">
+            <div>
+              <h4 id="clientDetailName"></h4>
+              <span class="text-muted" id="clientDetailId"></span>
+            </div>
+          </div>
+          
+          <div class="client-details">
+            <div class="horizontal-details">
+              <div class="detail-group">
+                <h5 class="mb-3">Información Personal</h5>
+                <div class="detail-row">
+                  <span class="detail-label">Teléfono:</span>
+                  <span class="detail-value" id="clientDetailPhone"></span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Dirección:</span>
+                  <span class="detail-value" id="clientDetailAddress"></span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Nacionalidad:</span>
+                  <span class="detail-value" id="clientDetailNationality"></span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Empresa:</span>
+                  <span class="detail-value" id="clientDetailCompany"></span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Tiempo en empresa:</span>
+                  <span class="detail-value" id="clientDetailCompanyTime"></span>
+                </div>
+              </div>
+              
+              <div class="detail-group">
+                <h5 class="mb-3">Detalles del Préstamo</h5>
+                <div class="detail-row">
+                  <span class="detail-label">Monto del préstamo:</span>
+                  <span class="detail-value" id="loanDetailAmount"></span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Tasa de interés:</span>
+                  <span class="detail-value" id="loanDetailRate"></span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Plazo:</span>
+                  <span class="detail-value" id="loanDetailTerm"></span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Frecuencia de pago:</span>
+                  <span class="detail-value" id="loanDetailFrequency"></span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Fecha de inicio:</span>
+                  <span class="detail-value" id="loanDetailStartDate"></span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Saldo pendiente:</span>
+                  <span class="detail-value" id="loanDetailBalance"></span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Estado:</span>
+                  <span class="detail-value" id="loanDetailStatus"></span>
+                </div>
+              </div>
+            </div>
+            
+            <h5 class="mb-3 mt-4">Documentos Adjuntos</h5>
+            <div class="documents-container d-flex flex-wrap" id="clientDocuments">
+              <!-- Los documentos se cargarán aquí -->
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer no-print">
+          <button type="button" class="btn btn-danger" id="deleteClientBtn">
+            <i class="fas fa-trash me-2"></i>Eliminar Cliente
+          </button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <button type="button" class="btn btn-primary" id="printClientBtn">
+            <i class="fas fa-print me-2"></i>Imprimir
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Document/Image Preview Modal -->
+  <div class="modal fade" id="documentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="documentModalTitle">Vista Previa</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center">
+          <img src="" alt="Preview" class="image-preview d-none" id="imagePreview">
+          <iframe src="" frameborder="0" class="document-preview d-none" id="pdfPreview"></iframe>
+        </div>
+        <div class="modal-footer no-print">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Client Modal -->
+  <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Editar Información del Cliente</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editClientForm">
+            <div class="row">
+              <div class="col-md-6">
+                <h5>Datos Personales</h5>
+                <div class="mb-3">
+                  <label for="editName" class="form-label">Nombre Completo</label>
+                  <input type="text" class="form-control" id="editName" required>
+                </div>
+                <div class="mb-3">
+                  <label for="editId" class="form-label">Cédula/Número de Identificación</label>
+                  <input type="text" class="form-control" id="editId" required>
+                </div>
+                <div class="mb-3">
+                  <label for="editPhone" class="form-label">Teléfono</label>
+                  <input type="tel" class="form-control" id="editPhone" required>
+                </div>
+                <div class="mb-3">
+                  <label for="editAddress" class="form-label">Dirección</label>
+                  <input type="text" class="form-control" id="editAddress" required>
+                </div>
+                <div class="mb-3">
+                  <label for="editNationality" class="form-label">Nacionalidad</label>
+                  <input type="text" class="form-control" id="editNationality" required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <h5>Información Laboral</h5>
+                <div class="mb-3">
+                  <label for="editCompany" class="form-label">Empresa donde labora</label>
+                  <input type="text" class="form-control" id="editCompany">
+                </div>
+                <div class="mb-3">
+                  <label for="editCompanyDate" class="form-label">Fecha de ingreso a la empresa</label>
+                  <input type="date" class="form-control" id="editCompanyDate">
+                </div>
+                
+                <h5 class="mt-4">Referencia Personal</h5>
+                <div class="mb-3">
+                  <label for="editRefName" class="form-label">Nombre</label>
+                  <input type="text" class="form-control" id="editRefName" required>
+                </div>
+                <div class="mb-3">
+                  <label for="editRefPhone" class="form-label">Teléfono</label>
+                  <input type="tel" class="form-control" id="editRefPhone" required>
+                </div>
+                <div class="mb-3">
+                  <label for="editRefRelation" class="form-label">Parentesco/Relación</label>
+                  <input type="text" class="form-control" id="editRefRelation" required>
+                </div>
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label for="editLoanAmount" class="form-label">Monto del Préstamo</label>
+                  <input type="number" class="form-control" id="editLoanAmount" required>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label for="editInterestRate" class="form-label">Tasa de Interés (%)</label>
+                  <input type="number" class="form-control" id="editInterestRate" required>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label for="editLoanTerm" class="form-label">Plazo (Meses)</label>
+                  <input type="number" class="form-control" id="editLoanTerm" required>
+                </div>
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="editFrequency" class="form-label">Frecuencia de Pago</label>
+                  <select class="form-select" id="editFrequency" required>
+                    <option value="monthly">Mensual</option>
+                    <option value="biweekly">Quincenal</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="editStartDate" class="form-label">Fecha de Inicio</label>
+                  <input type="date" class="form-control" id="editStartDate" required>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="editGuarantee" class="form-label">Garantía (Opcional)</label>
+              <textarea class="form-control" id="editGuarantee" rows="3"></textarea>
+            </div>
+            
+            <div class="document-upload-container">
+              <label class="form-label">Documentos Adjuntos</label>
+              <div class="document-preview-container" id="documentPreviewContainer">
+                <!-- Existing documents will be added here -->
+              </div>
+              <label for="editDocuments" class="upload-btn">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <span>Agregar documentos</span>
+                <input type="file" class="d-none" id="editDocuments" multiple>
+              </label>
+              <small class="text-muted">Puedes subir imágenes, PDFs u otros documentos</small>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="saveChangesBtn">
+            <i class="fas fa-save me-2"></i>Guardar Cambios
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Confirmar Eliminación</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>¿Estás seguro que deseas eliminar permanentemente este cliente y todos sus datos?</p>
+          <p class="text-danger"><strong>Esta acción no se puede deshacer.</strong></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+            <i class="fas fa-trash me-2"></i>Eliminar Definitivamente
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Alert Container -->
+  <div id="alertContainer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script type="module">
+    // Importaciones de Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      getDocs, 
+      doc, 
+      getDoc,
+      query, 
+      where,
+      updateDoc,
+      deleteDoc,
+      arrayUnion,
+      arrayRemove,
+      Timestamp,
+      addDoc,
+      setDoc,
+      orderBy,
+      startAt,
+      endAt
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+    import { getStorage, ref, getDownloadURL, uploadBytes, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-storage.js";
+
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+      authDomain: "inventario-35d6b.firebaseapp.com",
+      databaseURL: "https://inventario-35d6b-default-rtdb.firebaseio.com",
+      projectId: "inventario-35d6b",
+      storageBucket: "inventario-35d6b.appspot.com",
+      messagingSenderId: "266100399659",
+      appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+    };
+
+    // Inicialización de Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const storage = getStorage(app);
+
+    // Variables globales
+    let currentUser = null;
+    let currentClientId = null;
+    let clientsData = [];
+    let currentClientDocuments = [];
+    let companyData = null;
+
+    // Función para cargar los datos de la empresa desde Firebase
+    async function loadCompanyData() {
+      try {
+        if (!currentUser) return;
+        
+        const companyRef = doc(db, "informacionCompany", currentUser.uid);
+        const docSnap = await getDoc(companyRef);
+        
+        if (docSnap.exists()) {
+          companyData = docSnap.data();
+          console.log("Datos de empresa cargados:", companyData);
+          
+          // Actualizar el logo y nombre de la empresa en el navbar
+          if (companyData.fotoURL) {
+            document.getElementById('companyLogo').src = companyData.fotoURL;
+          }
+          
+          if (companyData.nombreEmpresa) {
+            document.getElementById('companyName').textContent = companyData.nombreEmpresa;
+          }
+        } else {
+          console.log("No se encontraron datos de empresa para este usuario");
+        }
+      } catch (error) {
+        console.error("Error al cargar datos de la empresa:", error);
+      }
+    }
+
+    // Función para mostrar alertas personalizadas
+    function showAlert(message, type = 'success') {
+      const alertContainer = document.getElementById('alertContainer');
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `custom-alert ${type}`;
+      
+      let icon = '';
+      if (type === 'success') {
+        icon = '<i class="fas fa-check-circle"></i>';
+      } else if (type === 'error') {
+        icon = '<i class="fas fa-exclamation-circle"></i>';
+      } else {
+        icon = '<i class="fas fa-info-circle"></i>';
+      }
+      
+      alertDiv.innerHTML = `${icon} ${message}`;
+      alertContainer.appendChild(alertDiv);
+      
+      // Mostrar alerta
+      setTimeout(() => {
+        alertDiv.classList.add('show');
+      }, 10);
+      
+      // Ocultar y eliminar alerta después de 5 segundos
+      setTimeout(() => {
+        alertDiv.classList.remove('show');
+        setTimeout(() => {
+          alertDiv.remove();
+        }, 300);
+      }, 5000);
+    }
+
+    // Función para formatear números con separadores de miles
+    function formatNumber(number) {
+      return new Intl.NumberFormat('es-ES', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(number);
+    }
+
+    // Función para formatear fechas
+    function formatDate(dateString) {
+      const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+      return new Date(dateString).toLocaleDateString('es-ES', options);
+    }
+
+    // Función para calcular el tiempo en la empresa
+    function calculateCompanyTime(startDate) {
+      if (!startDate) return "";
+      
+      const today = new Date();
+      const start = new Date(startDate);
+      const diffTime = Math.abs(today - start);
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      
+      const years = Math.floor(diffDays / 365);
+      const months = Math.floor((diffDays % 365) / 30);
+      const days = Math.floor((diffDays % 365) % 30);
+      
+      let result = "";
+      if (years > 0) result += `${years} año${years > 1 ? 's' : ''} `;
+      if (months > 0) result += `${months} mes${months > 1 ? 'es' : ''} `;
+      if (days > 0 || result === "") result += `${days} día${days > 1 ? 's' : ''}`;
+      
+      return result.trim();
+    }
+
+    // Función para cargar los clientes del usuario actual
+    async function loadUserClients() {
+      try {
+        if (!currentUser) return;
+        
+        const q = query(
+          collection(db, "Loans"), 
+          where("userId", "==", currentUser.uid)
+        );
+        
+        const querySnapshot = await getDocs(q);
+        clientsData = [];
+        
+        querySnapshot.forEach(doc => {
+          const loanData = doc.data();
+          clientsData.push({
+            id: doc.id,
+            ...loanData
+          });
+        });
+        
+        renderClients();
+      } catch (error) {
+        console.error("Error loading user clients:", error);
+        showAlert("Error al cargar los clientes. Por favor, recarga la página.", "error");
+      }
+    }
+
+    // Función para renderizar la lista de clientes
+    function renderClients(filter = '') {
+      const clientsAccordion = document.getElementById('clientsAccordion');
+      clientsAccordion.innerHTML = '';
+      
+      const filteredClients = filter ? 
+        clientsData.filter(client => 
+          client.client.name.toLowerCase().includes(filter.toLowerCase()) ||
+          client.client.id.toLowerCase().includes(filter.toLowerCase())
+        ) : 
+        clientsData;
+      
+      document.getElementById('clientCount').textContent = filteredClients.length;
+      
+      if (filteredClients.length === 0) {
+        clientsAccordion.innerHTML = `
+          <div class="text-center py-4">
+            <i class="fas fa-users-slash fa-3x mb-3 text-muted"></i>
+            <p class="text-muted">No se encontraron clientes</p>
+          </div>
+        `;
+        return;
+      }
+      
+      filteredClients.forEach((client, index) => {
+        const clientId = `client-${index}`;
+        const clientElement = document.createElement('div');
+        clientElement.className = 'accordion-item';
+        clientElement.innerHTML = `
+          <h2 class="accordion-header" id="heading-${clientId}">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+              data-bs-target="#collapse-${clientId}" aria-expanded="false" aria-controls="collapse-${clientId}">
+              <div class="d-flex align-items-center w-100">
+                <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(client.client.name)}&background=random" 
+                  alt="${client.client.name}" class="client-avatar me-3">
+                <div class="flex-grow-1">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span class="client-name">${client.client.name}</span>
+                    <span class="client-status">${client.status === 'active' ? 'Activo' : 
+                      client.status === 'overdue' ? 'Atrasado' : 
+                      client.status === 'completed' ? 'Completado' : 'Inactivo'}</span>
+                  </div>
+                  <small class="client-id">ID: ${client.client.id}</small>
+                  <div class="loan-title">
+                    <i class="fas fa-hand-holding-usd"></i> Préstamo: $${formatNumber(client.amount)}
+                  </div>
+                </div>
+              </div>
+            </button>
+          </h2>
+          <div id="collapse-${clientId}" class="accordion-collapse collapse" aria-labelledby="heading-${clientId}" 
+            data-bs-parent="#clientsAccordion">
+            <div class="accordion-body p-0">
+              <div class="client-item">
+                <div class="client-info">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="client-name">${client.client.name}</span>
+                    <span class="client-status">${client.status === 'active' ? 'Activo' : 
+                      client.status === 'overdue' ? 'Atrasado' : 
+                      client.status === 'completed' ? 'Completado' : 'Inactivo'}</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <small class="client-id">ID: ${client.client.id}</small>
+                    <small class="loan-title">
+                      <i class="fas fa-hand-holding-usd"></i> $${formatNumber(client.amount)}
+                    </small>
+                  </div>
+                </div>
+                <div class="client-actions">
+                  <button class="action-btn view-btn" data-client-id="${client.id}">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button class="action-btn edit-btn" data-client-id="${client.id}">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="action-btn delete-btn" data-client-id="${client.id}">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                  <button class="action-btn print-btn" data-client-id="${client.id}">
+                    <i class="fas fa-print"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        clientsAccordion.appendChild(clientElement);
+      });
+      
+      // Agregar event listeners a los botones
+      document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const clientId = e.currentTarget.getAttribute('data-client-id');
+          showClientDetails(clientId);
+        });
+      });
+      
+      document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const clientId = e.currentTarget.getAttribute('data-client-id');
+          editClient(clientId);
+        });
+      });
+      
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const clientId = e.currentTarget.getAttribute('data-client-id');
+          confirmDeleteClient(clientId);
+        });
+      });
+      
+      document.querySelectorAll('.print-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const clientId = e.currentTarget.getAttribute('data-client-id');
+          printClient(clientId);
+        });
+      });
+    }
+
+    // Función para mostrar los detalles de un cliente
+    async function showClientDetails(clientId) {
+      try {
+        const client = clientsData.find(c => c.id === clientId);
+        if (!client) return;
+        
+        currentClientId = clientId;
+        
+        // Configurar el modal con los datos del cliente
+        document.getElementById('clientModalTitle').textContent = `Detalles de ${client.client.name}`;
+        document.getElementById('clientDetailAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(client.client.name)}&background=random`;
+        document.getElementById('clientDetailName').textContent = client.client.name;
+        document.getElementById('clientDetailId').textContent = `ID: ${client.client.id}`;
+        
+        // Información personal
+        document.getElementById('clientDetailPhone').textContent = client.client.phone || 'No especificado';
+        document.getElementById('clientDetailAddress').textContent = client.client.address || 'No especificado';
+        document.getElementById('clientDetailNationality').textContent = client.client.nationality || 'No especificado';
+        document.getElementById('clientDetailCompany').textContent = client.client.company || 'No especificado';
+        document.getElementById('clientDetailCompanyTime').textContent = client.client.companyTime || 'No especificado';
+        
+        // Detalles del préstamo
+        document.getElementById('loanDetailAmount').textContent = `$${formatNumber(client.amount)}`;
+        document.getElementById('loanDetailRate').textContent = `${client.interestRate}%`;
+        document.getElementById('loanDetailTerm').textContent = `${client.term} meses`;
+        document.getElementById('loanDetailFrequency').textContent = client.frequency === 'biweekly' ? 'Quincenal' : 'Mensual';
+        document.getElementById('loanDetailStartDate').textContent = formatDate(client.startDate);
+        document.getElementById('loanDetailBalance').textContent = `$${formatNumber(client.balance)}`;
+        document.getElementById('loanDetailStatus').textContent = client.status === 'active' ? 'Activo' : 
+          client.status === 'overdue' ? 'Atrasado' : 
+          client.status === 'completed' ? 'Completado' : 'Inactivo';
+        
+        // Documentos adjuntos
+        const documentsContainer = document.getElementById('clientDocuments');
+        documentsContainer.innerHTML = '';
+        
+        if (client.documents && client.documents.length > 0) {
+          client.documents.forEach(doc => {
+            const docElement = document.createElement('img');
+            docElement.src = doc.url;
+            docElement.alt = doc.name;
+            docElement.className = 'document-thumbnail';
+            docElement.setAttribute('data-type', doc.type.includes('image') ? 'image' : 'pdf');
+            docElement.setAttribute('data-src', doc.url);
+            docElement.setAttribute('data-title', doc.name);
+            documentsContainer.appendChild(docElement);
+          });
+        } else {
+          documentsContainer.innerHTML = '<p class="text-muted">No hay documentos adjuntos</p>';
+        }
+        
+        // Mostrar el modal
+        const clientModal = new bootstrap.Modal(document.getElementById('clientModal'));
+        clientModal.show();
+        
+        // Agregar event listeners a las miniaturas de documentos
+        document.querySelectorAll('.document-thumbnail').forEach(thumb => {
+          thumb.addEventListener('click', (e) => {
+            const type = e.currentTarget.getAttribute('data-type');
+            const src = e.currentTarget.getAttribute('data-src');
+            const title = e.currentTarget.getAttribute('data-title');
+            
+            const docModal = new bootstrap.Modal(document.getElementById('documentModal'));
+            document.getElementById('documentModalTitle').textContent = title;
+            
+            if (type === 'image') {
+              document.getElementById('imagePreview').classList.remove('d-none');
+              document.getElementById('pdfPreview').classList.add('d-none');
+              document.getElementById('imagePreview').src = src;
+            } else {
+              document.getElementById('pdfPreview').classList.remove('d-none');
+              document.getElementById('imagePreview').classList.add('d-none');
+              document.getElementById('pdfPreview').src = src;
+            }
+            
+            clientModal.hide();
+            docModal.show();
+          });
+        });
+      } catch (error) {
+        console.error("Error showing client details:", error);
+        showAlert("Error al cargar los detalles del cliente.", "error");
+      }
+    }
+
+    // Función para confirmar la eliminación de un cliente
+    function confirmDeleteClient(clientId) {
+      currentClientId = clientId;
+      const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+      deleteModal.show();
+    }
+
+    // Función para eliminar un cliente
+    async function deleteClient() {
+      try {
+        if (!currentClientId) return;
+        
+        const client = clientsData.find(c => c.id === currentClientId);
+        if (!client) return;
+        
+        // Eliminar documentos del storage si existen
+        if (client.documents && client.documents.length > 0) {
+          for (const doc of client.documents) {
+            try {
+              const storageRef = ref(storage, doc.url);
+              await deleteObject(storageRef);
+            } catch (error) {
+              console.error("Error deleting document from storage:", error);
+            }
+          }
+        }
+        
+        // Eliminar el documento de Firestore
+        await deleteDoc(doc(db, "Loans", currentClientId));
+        
+        // Eliminar de los datos locales
+        clientsData = clientsData.filter(c => c.id !== currentClientId);
+        
+        // Recargar la lista de clientes
+        renderClients();
+        
+        // Cerrar modales
+        bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+        bootstrap.Modal.getInstance(document.getElementById('clientModal'))?.hide();
+        
+        showAlert('Cliente eliminado correctamente', 'success');
+      } catch (error) {
+        console.error("Error deleting client:", error);
+        showAlert("Error al eliminar el cliente.", "error");
+      }
+    }
+
+    // Función para editar un cliente
+    async function editClient(clientId) {
+      try {
+        const client = clientsData.find(c => c.id === clientId);
+        if (!client) return;
+        
+        currentClientId = clientId;
+        currentClientDocuments = client.documents || [];
+        
+        // Configurar el formulario con los datos del cliente
+        document.getElementById('editName').value = client.client.name;
+        document.getElementById('editId').value = client.client.id;
+        document.getElementById('editPhone').value = client.client.phone;
+        document.getElementById('editAddress').value = client.client.address;
+        document.getElementById('editNationality').value = client.client.nationality;
+        document.getElementById('editCompany').value = client.client.company || '';
+        
+        // Configurar la fecha de ingreso a la empresa si existe
+        if (client.client.companyStartDate) {
+          document.getElementById('editCompanyDate').value = client.client.companyStartDate;
+        }
+        
+        // Referencia personal
+        document.getElementById('editRefName').value = client.client.reference?.name || '';
+        document.getElementById('editRefPhone').value = client.client.reference?.phone || '';
+        document.getElementById('editRefRelation').value = client.client.reference?.relation || '';
+        
+        // Detalles del préstamo
+        document.getElementById('editLoanAmount').value = client.amount;
+        document.getElementById('editInterestRate').value = client.interestRate;
+        document.getElementById('editLoanTerm').value = client.term;
+        document.getElementById('editFrequency').value = client.frequency;
+        document.getElementById('editStartDate').value = client.startDate;
+        document.getElementById('editGuarantee').value = client.guarantee || '';
+        
+        // Mostrar documentos existentes
+        renderDocumentPreviews();
+        
+        // Mostrar el modal de edición
+        const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+        editModal.show();
+      } catch (error) {
+        console.error("Error preparing edit form:", error);
+        showAlert("Error al preparar el formulario de edición.", "error");
+      }
+    }
+
+    // Función para renderizar las previsualizaciones de documentos
+    function renderDocumentPreviews() {
+      const container = document.getElementById('documentPreviewContainer');
+      container.innerHTML = '';
+      
+      currentClientDocuments.forEach((doc, index) => {
+        const docElement = document.createElement('div');
+        docElement.className = 'document-preview-item';
+        
+        if (doc.type.includes('image')) {
+          docElement.innerHTML = `
+            <img src="${doc.url}" alt="${doc.name}">
+            <div class="remove-document" data-index="${index}">
+              <i class="fas fa-times"></i>
+            </div>
+          `;
+        } else {
+          docElement.innerHTML = `
+            <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#3d5166;">
+              <i class="fas fa-file-pdf" style="font-size:24px;color:white;"></i>
+            </div>
+            <div class="remove-document" data-index="${index}">
+              <i class="fas fa-times"></i>
+            </div>
+          `;
+        }
+        
+        container.appendChild(docElement);
+      });
+      
+      // Agregar event listeners para eliminar documentos
+      document.querySelectorAll('.remove-document').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const index = e.currentTarget.getAttribute('data-index');
+          currentClientDocuments.splice(index, 1);
+          renderDocumentPreviews();
+        });
+      });
+    }
+
+    // Función para manejar la subida de nuevos documentos
+    function setupDocumentUpload() {
+      const fileInput = document.getElementById('editDocuments');
+      
+      fileInput.addEventListener('change', (e) => {
+        const files = Array.from(e.target.files);
+        
+        files.forEach(file => {
+          const reader = new FileReader();
+          
+          reader.onload = (event) => {
+            currentClientDocuments.push({
+              name: file.name,
+              type: file.type,
+              url: event.target.result,
+              file: file // Guardamos el archivo para subirlo luego
+            });
+            
+            renderDocumentPreviews();
+          };
+          
+          reader.readAsDataURL(file);
+        });
+        
+        // Limpiar el input para permitir nuevas selecciones
+        fileInput.value = '';
+      });
+    }
+
+    // Función para guardar los cambios del cliente
+    async function saveClientChanges() {
+      try {
+        if (!currentClientId) return;
+        
+        const clientIndex = clientsData.findIndex(c => c.id === currentClientId);
+        if (clientIndex === -1) return;
+        
+        // Obtener los datos del formulario
+        const clientData = {
+          name: document.getElementById('editName').value.trim(),
+          id: document.getElementById('editId').value.trim(),
+          phone: document.getElementById('editPhone').value.trim(),
+          address: document.getElementById('editAddress').value.trim(),
+          nationality: document.getElementById('editNationality').value.trim(),
+          company: document.getElementById('editCompany').value.trim(),
+          companyStartDate: document.getElementById('editCompanyDate').value,
+          companyTime: calculateCompanyTime(document.getElementById('editCompanyDate').value),
+          reference: {
+            name: document.getElementById('editRefName').value.trim(),
+            phone: document.getElementById('editRefPhone').value.trim(),
+            relation: document.getElementById('editRefRelation').value.trim()
+          }
+        };
+        
+        const loanData = {
+          amount: parseFloat(document.getElementById('editLoanAmount').value),
+          interestRate: parseFloat(document.getElementById('editInterestRate').value),
+          term: parseInt(document.getElementById('editLoanTerm').value),
+          frequency: document.getElementById('editFrequency').value,
+          startDate: document.getElementById('editStartDate').value,
+          guarantee: document.getElementById('editGuarantee').value.trim()
+        };
+        
+        // Validar datos
+        if (!clientData.name || !clientData.id || !clientData.phone) {
+          showAlert('Los campos obligatorios del cliente deben estar completos', 'error');
+          return;
+        }
+        
+        if (loanData.amount <= 0 || loanData.term <= 0) {
+          showAlert('Los valores del préstamo deben ser mayores a cero', 'error');
+          return;
+        }
+        
+        // Subir nuevos documentos a Firebase Storage
+        const documentsToUpload = currentClientDocuments.filter(doc => doc.file);
+        const uploadedDocuments = currentClientDocuments.filter(doc => !doc.file);
+        
+        for (const doc of documentsToUpload) {
+          const storagePath = `loan_documents/${currentUser.uid}/${currentClientId}/${Date.now()}_${doc.name}`;
+          const storageRef = ref(storage, storagePath);
+          await uploadBytes(storageRef, doc.file);
+          const downloadUrl = await getDownloadURL(storageRef);
+          
+          uploadedDocuments.push({
+            name: doc.name,
+            type: doc.type,
+            url: downloadUrl
+          });
+        }
+        
+        // Actualizar los datos en Firebase
+        const loanRef = doc(db, "Loans", currentClientId);
+        await updateDoc(loanRef, {
+          client: clientData,
+          amount: loanData.amount,
+          interestRate: loanData.interestRate,
+          term: loanData.term,
+          frequency: loanData.frequency,
+          startDate: loanData.startDate,
+          guarantee: loanData.guarantee,
+          documents: uploadedDocuments
+        });
+        
+        // Actualizar los datos locales
+        clientsData[clientIndex] = {
+          ...clientsData[clientIndex],
+          client: clientData,
+          amount: loanData.amount,
+          interestRate: loanData.interestRate,
+          term: loanData.term,
+          frequency: loanData.frequency,
+          startDate: loanData.startDate,
+          guarantee: loanData.guarantee,
+          documents: uploadedDocuments
+        };
+        
+        // Recargar la lista de clientes
+        renderClients();
+        
+        // Cerrar el modal
+        const editModal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
+        editModal.hide();
+        
+        showAlert('Cambios guardados correctamente', 'success');
+      } catch (error) {
+        console.error("Error saving client changes:", error);
+        showAlert("Error al guardar los cambios del cliente.", "error");
+      }
+    }
+
+    // Función para imprimir la información del cliente
+    async function printClient(clientId) {
+      try {
+        const client = clientsData.find(c => c.id === clientId);
+        if (!client) return;
+        
+        // Mostrar primero los detalles del cliente
+        await showClientDetails(clientId);
+        
+        // Esperar un momento para que el modal se muestre completamente
+        setTimeout(() => {
+          // Activar el botón de imprimir
+          document.getElementById('printClientBtn').click();
+        }, 500);
+      } catch (error) {
+        console.error("Error printing client:", error);
+        showAlert("Error al preparar la impresión.", "error");
+      }
+    }
+
+    // Función para buscar clientes
+    function setupSearch() {
+      const searchInput = document.getElementById('searchInput');
+      searchInput.addEventListener('input', (e) => {
+        renderClients(e.target.value);
+      });
+    }
+
+    // Función para configurar el evento de impresión
+    function setupPrintButton() {
+      document.getElementById('printClientBtn').addEventListener('click', () => {
+        window.print();
+      });
+    }
+
+    // Función para configurar el botón de guardar cambios
+    function setupSaveButton() {
+      document.getElementById('saveChangesBtn').addEventListener('click', saveClientChanges);
+    }
+
+    // Función para configurar el botón de eliminar cliente
+    function setupDeleteButtons() {
+      document.getElementById('deleteClientBtn').addEventListener('click', () => {
+        confirmDeleteClient(currentClientId);
+      });
+      
+      document.getElementById('confirmDeleteBtn').addEventListener('click', deleteClient);
+    }
+
+    // Inicialización cuando el DOM está listo
+    document.addEventListener('DOMContentLoaded', () => {
+      // Configurar Firebase Auth state observer
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          currentUser = user;
+          
+          // Cargar los datos de la empresa
+          loadCompanyData();
+          
+          // Cargar los clientes del usuario
+          loadUserClients();
+          
+          // Configurar eventos
+          setupSearch();
+          setupPrintButton();
+          setupSaveButton();
+          setupDeleteButtons();
+          setupDocumentUpload();
+        } else {
+          // Redirigir a la página de inicio de sesión
+          window.location.href = 'index.html';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

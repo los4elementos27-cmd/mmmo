@@ -1,0 +1,2949 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Préstamos - Cliente</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* Variables CSS para el diseño general */
+        :root {
+            --primary-color: #1abc9c;
+            --primary-dark: #16a085;
+            --secondary-color: #2a2a3f;
+            --background-color: #2c3e50;
+            --text-color: #ffffff;
+            --text-light: #a8a8a8;
+            --border-color: #444;
+            --card-bg: #34495e;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --success-color: #15b086;
+            --info-color: #15a086;
+            
+            /* Variables para el menú de onda */
+            --bar-bg-color: #2a2a3f;
+            --bar-border-radius: 30px;
+            --dark-bg-color: #21212c;
+            --icon-inactive-color: #9e9e9e;
+            --icon-active-color: #15a086;
+            --shadow-light: 0 5px 20px rgba(0, 0, 0, 0.15);
+            --shadow-active: 0 5px 15px rgba(0, 0, 0, 0.3);
+            --nav-height: 70px;
+            --icon-base-size: 22px;
+            --active-icon-size: 26px;
+            --wave-size: 70px;
+            --wave-top-offset: 20px;
+            --transition-speed: 0.35s;
+            --menu-text-size: 0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Estilos mejorados para el login (estilo app móvil) */
+        #login-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            background-color: var(--dark-bg-color);
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            background-color: var(--secondary-color);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(26, 188, 156, 0.1) 0%, transparent 70%);
+            z-index: 0;
+        }
+
+        .login-logo {
+            width: 100px;
+            height: auto;
+            margin: 0 auto 1.5rem;
+            display: block;
+            filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.3));
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-title {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            font-size: 1.8rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-light);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background-color: rgba(0, 0, 0, 0.2);
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(26, 188, 156, 0.3);
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            border: none;
+            border-radius: 10px;
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            z-index: -1;
+        }
+
+        .btn:hover::after {
+            transform: translateX(0);
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(26, 188, 156, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn i {
+            margin-right: 8px;
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+        }
+
+        .btn-info {
+            background-color: var(--info-color);
+        }
+
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            display: none;
+            align-items: center;
+            margin-bottom: 1rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .alert i {
+            margin-right: 0.5rem;
+        }
+
+        .alert-danger {
+            background-color: rgba(231, 76, 60, 0.2);
+            border: 1px solid var(--danger-color);
+            color: var(--danger-color);
+        }
+
+        .alert-warning {
+            background-color: rgba(243, 156, 18, 0.2);
+            border: 1px solid var(--warning-color);
+            color: var(--warning-color);
+        }
+
+        .alert-success {
+            background-color: rgba(46, 204, 113, 0.2);
+            border: 1px solid var(--success-color);
+            color: var(--success-color);
+        }
+
+        .spinner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            border-radius: 12px;
+            z-index: 100;
+        }
+
+        .spinner.active {
+            display: flex;
+        }
+
+        .spinner-icon {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Estilos para la sección del cliente */
+        #client-section {
+            display: none;
+            min-height: 100vh;
+            padding-bottom: calc(var(--wave-top-offset) + var(--wave-size) + 20px);
+        }
+
+        /* Header mejorado */
+        .header-client {
+            background-color: var(--secondary-color);
+            padding: 1.2rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .client-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .client-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--background-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            flex-shrink: 0;
+        }
+
+        .client-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .client-name {
+            font-size: 1.2rem;
+            margin: 0;
+            font-weight: 500;
+            color: var(--text-color);
+            line-height: 1.3;
+        }
+
+        .client-id {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            opacity: 0.8;
+        }
+
+        .main-container-client {
+            padding: 1.5rem;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* Tarjetas mejoradas */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-title {
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-title i {
+            font-size: 1.1em;
+        }
+
+        .loan-balance {
+            font-size: 2.2rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 1.5rem 0;
+            color: var(--primary-color);
+        }
+
+        .progress-bar {
+            height: 10px;
+            background-color: var(--background-color);
+            border-radius: 6px;
+            margin: 1.5rem 0;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 6px;
+        }
+
+        .loan-details-btn {
+            margin-top: 1.5rem;
+            width: 100%;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-size: 0.95rem;
+            max-width: calc(100% - 130px);
+        }
+
+        .search-bar select {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-size: 0.95rem;
+            min-width: 120px;
+        }
+
+        .payment-history {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .payment-history::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .payment-history::-webkit-scrollbar-thumb {
+            background-color: var(--primary-color);
+            border-radius: 3px;
+        }
+
+        .payment-history::-webkit-scrollbar-track {
+            background-color: var(--background-color);
+            border-radius: 3px;
+        }
+
+        .payment-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s ease;
+        }
+
+        .payment-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .payment-amount {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .payment-date {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .payment-type {
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .payment-type.full {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: var(--success-color);
+        }
+
+        .payment-type.capital {
+            background-color: rgba(52, 152, 219, 0.2);
+            color: var(--info-color);
+        }
+
+        .payment-type.interest {
+            background-color: rgba(155, 89, 182, 0.2);
+            color: #9b59b6;
+        }
+
+        .payment-type.late {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--danger-color);
+        }
+
+        .profile-info {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .info-label {
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+
+        .info-value {
+            text-align: right;
+            color: var(--text-light);
+        }
+
+        .document-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+
+        .document-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background-color: var(--background-color);
+            border-radius: 10px;
+            transition: transform 0.2s ease;
+        }
+
+        .document-item:hover {
+            transform: translateX(5px);
+        }
+
+        .document-icon {
+            color: var(--primary-color);
+            margin-right: 0.75rem;
+            font-size: 1.2rem;
+        }
+
+        .document-name {
+            flex: 1;
+            font-size: 0.95rem;
+        }
+
+        .document-action {
+            color: var(--primary-color);
+            cursor: pointer;
+            margin-left: 0.75rem;
+            font-size: 1.2rem;
+            transition: color 0.2s ease;
+        }
+
+        .document-action:hover {
+            color: var(--primary-dark);
+        }
+
+        .settings-option {
+            margin-bottom: 1.5rem;
+        }
+
+        .settings-option label {
+            display: block;
+            margin-bottom: 0.75rem;
+            color: var(--text-light);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .theme-selector {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .theme-option {
+            padding: 0.75rem;
+            border-radius: 10px;
+            background-color: var(--background-color);
+            cursor: pointer;
+            text-align: center;
+            flex: 1;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .theme-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .theme-option.selected {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-dark);
+        }
+
+        .color-picker {
+            width: 100%;
+            height: 50px;
+            cursor: pointer;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .settings-toggle {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .settings-toggle input {
+            margin-right: 0.75rem;
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary-color);
+        }
+
+        /* Menú de navegación inferior mejorado */
+        .bottom-nav-container {
+            position: fixed;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 95%;
+            max-width: 500px;
+            height: var(--nav-height);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        .bottom-nav {
+            background-color: var(--bar-bg-color);
+            border-radius: var(--bar-border-radius);
+            box-shadow: var(--shadow-light);
+            width: 100%;
+            height: var(--nav-height);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+            padding-bottom: 5px;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: var(--icon-inactive-color);
+            flex: 1;
+            padding: 10px 5px;
+            transition: all var(--transition-speed) ease;
+            cursor: pointer;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            position: relative;
+            z-index: 3;
+            height: 100%;
+        }
+
+        .nav-item i {
+            font-size: var(--icon-base-size);
+            margin-bottom: 3px;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .nav-item span {
+            font-size: var(--menu-text-size);
+            opacity: 0;
+            transition: all var(--transition-speed) ease;
+            max-height: 0;
+            overflow: hidden;
+        }
+
+        .nav-item.active {
+            color: var(--icon-active-color);
+        }
+
+        .nav-item.active i {
+            transform: translateY(-10px);
+            font-size: var(--active-icon-size);
+        }
+
+        .nav-item.active span {
+            opacity: 1;
+            max-height: 20px;
+            font-size: 10px;
+        }
+
+        /* Modales mejorados */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--secondary-color);
+            padding: 2rem;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-title {
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .modal-title i {
+            font-size: 1.2em;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Estilos mejorados para el selector de avatar */
+        .avatar-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            justify-content: center;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .avatar-option {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 60px;
+            height: 60px;
+            background-color: var(--background-color);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .avatar-option:hover {
+            transform: scale(1.1);
+        }
+
+        .avatar-option.selected {
+            background-color: var(--primary-color);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .file-upload-btn {
+            display: inline-block;
+            padding: 1.5rem;
+            background-color: var(--background-color);
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 1.8rem;
+            margin-top: 0.75rem;
+            transition: all 0.3s ease;
+            border: 2px dashed var(--border-color);
+            width: 100%;
+        }
+
+        .file-upload-btn:hover {
+            background-color: rgba(26, 188, 156, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .file-upload-btn input {
+            display: none;
+        }
+
+        .receipt-preview {
+            background-color: white;
+            color: black;
+            padding: 1.5rem;
+            border-radius: 10px;
+            font-family: Arial, sans-serif;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Estilos para la vista previa de imagen */
+        .image-preview-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .image-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            object-fit: cover;
+            margin-bottom: 0.5rem;
+            border: 2px solid var(--primary-color);
+        }
+
+        .image-name {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            text-align: center;
+            word-break: break-all;
+        }
+
+        /* Estilos responsivos */
+        @media (min-width: 768px) {
+            .profile-info {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .document-list {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .avatar-selector {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            :root {
+                --bar-border-radius: 25px;
+                --nav-height: 65px;
+                --icon-base-size: 20px;
+                --active-icon-size: 24px;
+                --wave-size: 65px;
+                --wave-top-offset: 15px;
+            }
+
+            .login-container {
+                padding: 1.5rem;
+            }
+
+            .login-title {
+                font-size: 1.5rem;
+            }
+
+            .card {
+                padding: 1.2rem;
+            }
+
+            .loan-balance {
+                font-size: 2rem;
+            }
+
+            .header-client {
+                padding: 1rem;
+            }
+
+            .client-avatar {
+                width: 45px;
+                height: 45px;
+                font-size: 1.3rem;
+            }
+
+            .client-name {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            :root {
+                --bar-border-radius: 20px;
+                --nav-height: 60px;
+                --icon-base-size: 18px;
+                --active-icon-size: 22px;
+                --wave-size: 60px;
+                --wave-top-offset: 10px;
+            }
+
+            .login-container {
+                padding: 1.2rem;
+            }
+
+            .login-title {
+                font-size: 1.3rem;
+            }
+
+            .form-control {
+                padding: 0.8rem;
+            }
+
+            .btn {
+                padding: 0.8rem;
+            }
+
+            .card {
+                padding: 1rem;
+            }
+
+            .loan-balance {
+                font-size: 1.8rem;
+            }
+
+            .client-avatar {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+
+            .client-name {
+                font-size: 1rem;
+            }
+
+            .search-bar {
+                flex-direction: column;
+            }
+
+            .search-bar input,
+            .search-bar select {
+                max-width: 100%;
+                width: 100%;
+            }
+        }
+
+        /* Tema claro */
+        .light-theme {
+            --background-color: #f5f5f5;
+            --text-color: #333333;
+            --text-light: #666666;
+            --border-color: #dddddd;
+            --card-bg: #ffffff;
+            --secondary-color: #f0f0f0;
+            --bar-bg-color: #f0f0f0;
+            --dark-bg-color: #e0e0e0;
+        }
+
+        /* Tamaños de fuente */
+        .font-small {
+            font-size: 14px;
+        }
+
+        .font-medium {
+            font-size: 16px;
+        }
+
+        .font-large {
+            font-size: 18px;
+        }
+
+        /* Menu superior */
+        .menu-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .micro-menu {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 250px;
+            height: 100%;
+            background-color: var(--secondary-color);
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+            transition: right 0.3s ease;
+            z-index: 1001;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .micro-menu.active {
+            right: 0;
+        }
+
+        .micro-menu-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .micro-menu-logo {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 0.5rem;
+        }
+
+        .micro-menu-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        .micro-menu-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .micro-menu-item:hover {
+            color: var(--primary-color);
+        }
+
+        .micro-menu-item i {
+            margin-right: 0.75rem;
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        /* Estilos específicos para los detalles del préstamo */
+        .loan-detail-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .loan-detail-label {
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+
+        .loan-detail-value {
+            text-align: right;
+            color: var(--text-light);
+        }
+
+        /* Estilos para el modal de información de empresa */
+        .company-info-container {
+            max-height: 70vh;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .company-info-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .company-info-container::-webkit-scrollbar-thumb {
+            background-color: var(--primary-color);
+            border-radius: 3px;
+        }
+
+        .company-info-container::-webkit-scrollbar-track {
+            background-color: var(--background-color);
+            border-radius: 3px;
+        }
+
+        .company-logo-container {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .company-logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 10px;
+            object-fit: contain;
+            border: 2px solid var(--border-color);
+            margin: 0 auto;
+        }
+
+        .default-company-logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 10px;
+            background-color: var(--background-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            font-size: 3rem;
+            color: var(--primary-color);
+            border: 2px solid var(--border-color);
+        }
+
+        .bank-account-card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 1.2rem;
+            margin-bottom: 1.2rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .bank-logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .bank-logo-preview {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background-color: var(--background-color);
+        }
+
+        .bank-logo-preview i {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .bank-logo-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        /* Icono de empresa en el header */
+        .company-icon-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: transform 0.2s ease;
+        }
+
+        .company-icon-btn:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sección de Login -->
+    <section id="login-section">
+        <div class="login-container">
+            <div class="spinner" id="loginSpinner">
+                <div class="spinner-icon"></div>
+            </div>
+            <img src="logo.png" alt="Sistema de Préstamos Logo" class="login-logo">
+            <h1 class="login-title">PlusMoney Retom</h1>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginUsername">Nombre de Usuario</label>
+                    <input type="text" id="loginUsername" class="form-control" required aria-label="Nombre de usuario" placeholder="Ingrese su usuario">
+                </div>
+                <div class="form-group">
+                    <label for="loginPin">PIN (4 dígitos)</label>
+                    <input type="password" id="loginPin" class="form-control" minlength="4" maxlength="4" pattern="\d{4}" required aria-label="PIN de 4 dígitos" placeholder="••••">
+                </div>
+                <div class="form-group">
+                    <div class="settings-toggle">
+                        <input type="checkbox" id="rememberSession">
+                        <label for="rememberSession">Mantener sesión iniciada</label>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-block">
+                    <i class="fas fa-sign-in-alt"></i> <span data-lang="login">Iniciar Sesión</span>
+                </button>
+            </form>
+            <div id="loginAlert" class="alert alert-danger" style="display: none;">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="loginAlertMessage"></span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección del Cliente -->
+    <section id="client-section">
+        <div class="header-client">
+            <div class="client-profile">
+                <div id="clientAvatar" class="client-avatar"><i class="fas fa-user"></i></div>
+                <div class="client-info">
+                    <h2 class="client-name" id="clientName">Nombre del Cliente</h2>
+                    <span class="client-id" id="clientId">ID: 000-0000000-0</span>
+                </div>
+            </div>
+            <button class="company-icon-btn" id="companyInfoBtn" title="Información de la empresa">
+                <i class="fas fa-building"></i>
+            </button>
+            <button class="menu-btn" id="menuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+
+        <div class="main-container-client">
+            <!-- Sección de Resumen -->
+            <div id="summary-section" class="section active">
+                <div class="card">
+                    <div id="latePaymentAlert" class="alert alert-danger" style="display: none;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span id="latePaymentMessage"></span>
+                    </div>
+                    <h3 class="card-title"><i class="fas fa-chart-line"></i> <span data-lang="loan_balance">Saldo Pendiente</span></h3>
+                    <div class="loan-balance" id="loanBalance">$0.00</div>
+                    <div class="late-payment-message" id="latePaymentText" style="display: none;"></div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+                    </div>
+                    <button class="btn btn-info loan-details-btn" id="detailsBtn">
+                        <i class="fas fa-info-circle"></i> <span data-lang="view_details">Ver Detalles</span>
+                    </button>
+                </div>
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-tasks"></i> <span data-lang="loan_progress">Progreso del Préstamo</span></h3>
+                    <div id="loanProgress">
+                        <p id="progressText" data-lang="loading_progress">Cargando progreso...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección de Historial -->
+            <div id="history-section" class="section">
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-history"></i> <span data-lang="payment_history">Historial de Pagos</span></h3>
+                    <div class="search-bar">
+                        <input type="text" id="historySearch" placeholder="Buscar por fecha (dd/mm/aaaa)" aria-label="Buscar pagos">
+                        <select id="historyFilter" aria-label="Filtrar por tipo de pago">
+                            <option value="all" data-lang="all">Todos</option>
+                            <option value="full" data-lang="full">Completo</option>
+                            <option value="capital" data-lang="capital">Capital</option>
+                            <option value="interest" data-lang="interest">Interés</option>
+                            <option value="late" data-lang="late">Con Mora</option>
+                        </select>
+                    </div>
+                    <div class="payment-history" id="paymentHistory">
+                        <p data-lang="loading_history">Cargando historial de pagos...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección de Perfil -->
+            <div id="profile-section" class="section">
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-user-circle"></i> <span data-lang="my_profile">Mi Perfil</span></h3>
+                    <div class="profile-info">
+                        <div class="info-item">
+                            <span class="info-label" data-lang="full_name">Nombre completo:</span>
+                            <span class="info-value" id="profileName">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label" data-lang="id">Identificación:</span>
+                            <span class="info-value" id="profileId">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label" data-lang="phone">Teléfono:</span>
+                            <span class="info-value" id="profilePhone">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label" data-lang="address">Dirección:</span>
+                            <span class="info-value" id="profileAddress">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label" data-lang="nationality">Nacionalidad:</span>
+                            <span class="info-value" id="profileNationality">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Empresa donde labora:</span>
+                            <span class="info-value" id="profileCompany">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Tiempo en la empresa:</span>
+                            <span class="info-value" id="profileCompanyTime">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Fecha de inicio del préstamo:</span>
+                            <span class="info-value" id="profileLoanStartDate">-</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-info" id="changeAvatarBtn">
+                        <i class="fas fa-camera"></i> <span data-lang="change_profile_picture">Cambiar Foto de Perfil</span>
+                    </button>
+                    <br>
+                    <br>
+                    <button class="btn btn-info" id="changePasswordBtn">
+                        <i class="fas fa-key"></i> <span data-lang="change_password">Cambiar Contraseña</span>
+                    </button>
+                    <br>
+                    <br>
+                    <button class="btn btn-danger" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i> <span data-lang="logout">Cerrar Sesión</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sección de Documentos -->
+            <div id="documents-section" class="section">
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-file-alt"></i> <span data-lang="my_documents">Mis Documentos</span></h3>
+                    <div id="documentsAlert" class="alert alert-warning" style="display: none;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span id="documentsAlertMessage" data-lang="no_documents">No hay documentos disponibles</span>
+                    </div>
+                    <div class="document-list" id="documentList"></div>
+                </div>
+            </div>
+
+            <!-- Sección de Configuración -->
+            <div id="settings-section" class="section">
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-cog"></i> <span data-lang="settings">Configuración</span></h3>
+                    <div class="settings-option">
+                        <label data-lang="app_theme">Tema de la Aplicación</label>
+                        <div class="theme-selector">
+                            <div class="theme-option" data-theme="dark" data-lang="dark">Retom</div>
+                            <div class="theme-option" data-theme="light" data-lang="light">Claro</div>
+                            <div class="theme-option" data-theme="custom" data-lang="custom">Personalizado</div>
+                        </div>
+                    </div>
+                    <div class="settings-option" id="customColorContainer" style="display: none;">
+                        <label data-lang="custom_color">Color Personalizado</label>
+                        <input type="color" id="customColorPicker" class="color-picker" value="#15a086">
+                    </div>
+                    <div class="settings-option">
+                        <label data-lang="language">Idioma</label>
+                        <select id="languageSelector" class="form-control">
+                            <option value="es" data-lang="spanish">Español</option>
+                            <option value="en" data-lang="english">English</option>
+                        </select>
+                    </div>
+                    <div class="settings-option">
+                      <label data-lang="notifications">Notificaciones</label>
+                        <div class="settings-toggle">
+                            <input type="checkbox" id="emailNotifications">
+                            <label for="emailNotifications" data-lang="email_notifications">Notificaciones por Email</label>
+                        </div>
+                        <div class="settings-toggle">
+                            <input type="checkbox" id="smsNotifications">
+                            <label for="smsNotifications" data-lang="sms_notifications">Notificaciones por SMS</label>
+                        </div>
+                    </div>
+                    <div class="settings-option">
+                        <label data-lang="font_size">Tamaño de Fuente</label>
+                        <select id="fontSizeSelector" class="form-control">
+                            <option value="small" data-lang="small">Pequeño</option>
+                            <option value="medium" data-lang="medium">Mediano</option>
+                            <option value="large" data-lang="large">Grande</option>
+                        </select>
+                    </div>
+                    <div class="settings-option">
+                        <label data-lang="currency">Formato de Moneda</label>
+                        <select id="currencySelector" class="form-control">
+                            <option value="USD" data-lang="usd">USD</option>
+                            <option value="DOP" data-lang="dop">DOP</option>
+                        </select>
+                    </div>
+                    <div class="settings-option">
+                        <div class="settings-toggle">
+                            <input type="checkbox" id="rememberSessionSettings">
+                            <label for="rememberSessionSettings">Mantener sesión iniciada</label>
+                        </div>
+                    </div>
+                    <button class="btn btn-success" id="saveSettingsBtn">
+                        <i class="fas fa-save"></i> <span data-lang="save_settings">Guardar Configuración</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menú de navegación inferior con efecto de onda -->
+        <div class="bottom-nav-container">
+            <nav class="bottom-nav">
+                <a href="#" class="nav-item" data-section="summary" data-icon-class="fas fa-home">
+                    <i class="fas fa-home"></i>
+                    <span data-lang="home">Inicio</span>
+                </a>
+                <a href="#" class="nav-item" data-section="history" data-icon-class="fas fa-history">
+                    <i class="fas fa-history"></i>
+                    <span data-lang="history">Historial</span>
+                </a>
+                <a href="#" class="nav-item" data-section="profile" data-icon-class="fas fa-user">
+                    <i class="fas fa-user"></i>
+                    <span data-lang="profile">Perfil</span>
+                </a>
+                <a href="#" class="nav-item" data-section="documents" data-icon-class="fas fa-file-alt">
+                    <i class="fas fa-file-alt"></i>
+                    <span data-lang="documents">Documentos</span>
+                </a>
+                <a href="#" class="nav-item" data-section="settings" data-icon-class="fas fa-cog">
+                    <i class="fas fa-cog"></i>
+                    <span data-lang="settings">Ajustes</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Micro menú superior -->
+        <div class="overlay" id="overlay"></div>
+        <div class="micro-menu" id="microMenu">
+            <div class="micro-menu-header">
+                <img src="logo.png" alt="PlusMoney Retom" class="micro-menu-logo">
+                <div class="micro-menu-title">PlusMoney Retom</div>
+            </div>
+            <a href="info-prestamo.html" class="micro-menu-item">
+                <i class="fas fa-info-circle"></i>
+                <span>Información de Préstamos</span>
+            </a>
+            <a href="pagar.html" class="micro-menu-item">
+                <i class="fas fa-money-bill-wave"></i>
+                <span>Realizar Pagos</span>
+            </a>
+            <a href="#" class="micro-menu-item">
+                <i class="fas fa-history"></i>
+                <span>Mi Historial Financiero</span>
+            </a>
+            <a href="#" class="micro-menu-item">
+                <i class="fas fa-question-circle"></i>
+                <span>Ayuda</span>
+            </a>
+            <a href="#" class="micro-menu-item">
+                <i class="fas fa-shield-alt"></i>
+                <span>Política de Privacidad</span>
+            </a>
+            <a href="#" class="micro-menu-item">
+                <i class="fas fa-lock"></i>
+                <span>Política de Seguridad</span>
+            </a>
+            <a href="#" class="micro-menu-item">
+                <i class="fas fa-info-circle"></i>
+                <span>Acerca de</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- Modal de Detalles (Mejorado) -->
+    <div class="modal" id="detailsModal">
+        <div class="modal-content">
+            <h3 class="modal-title"><i class="fas fa-info-circle"></i> <span data-lang="loan_details">Detalles del Préstamo</span></h3>
+            <div id="loanDetailsContent">
+                <!-- Aquí se inyectará el contenido dinámico -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-info" onclick="closeModal()" data-lang="close">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Selección de Avatar -->
+    <div class="modal" id="avatarModal">
+        <div class="modal-content">
+            <h3 class="modal-title"><i class="fas fa-camera"></i> <span data-lang="select_profile_picture">Seleccionar Foto de Perfil</span></h3>
+            <div class="avatar-selector" id="avatarSelector"></div>
+            <div class="form-group">
+                <label data-lang="upload_image">Subir Imagen</label>
+                <label class="file-upload-btn">
+                    <i class="fas fa-camera"></i>
+                    <input type="file" id="profileImageUpload" accept="image/*" aria-label="Subir imagen de perfil">
+                </label>
+                <div class="image-preview-container" id="imagePreviewContainer">
+                    <img id="imagePreview" class="image-preview" src="" alt="Vista previa de la imagen">
+                    <span id="imageName" class="image-name"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" id="saveAvatarBtn" data-lang="save">Guardar</button>
+                <button class="btn btn-danger" onclick="closeModal()" data-lang="cancel">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Cambio de Contraseña -->
+    <div class="modal" id="passwordModal">
+        <div class="modal-content">
+            <h3 class="modal-title"><i class="fas fa-key"></i> <span data-lang="change_password">Cambiar Contraseña</span></h3>
+            <form id="passwordForm">
+                <div class="form-group">
+                    <label for="currentPin" data-lang="current_pin">PIN Actual</label>
+                    <input type="password" id="currentPin" class="form-control" minlength="4" maxlength="4" pattern="\d{4}" required aria-label="PIN actual">
+                </div>
+                <div class="form-group">
+                    <label for="newPin" data-lang="new_pin">Nuevo PIN</label>
+                    <input type="password" id="newPin" class="form-control" minlength="4" maxlength="4" pattern="\d{4}" required aria-label="Nuevo PIN">
+                </div>
+                <div class="form-group">
+                    <label for="confirmPin" data-lang="confirm_pin">Confirmar Nuevo PIN</label>
+                    <input type="password" id="confirmPin" class="form-control" minlength="4" maxlength="4" pattern="\d{4}" required aria-label="Confirmar nuevo PIN">
+                </div>
+                <div id="passwordAlert" class="alert alert-danger" style="display: none;">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="passwordAlertMessage"></span>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success" data-lang="save">Guardar</button>
+                    <button type="button" class="btn btn-danger" onclick="closeModal()" data-lang="cancel">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Vista Previa de Documento (Mejorado) -->
+    <div class="modal" id="documentModal">
+        <div class="modal-content">
+            <h3 class="modal-title"><i class="fas fa-file-invoice"></i> <span id="documentModalTitle">Vista Previa</span></h3>
+            <div id="documentPreview"></div>
+            <div class="modal-footer" id="documentModalFooter">
+                <button class="btn btn-info" onclick="closeModal()" data-lang="close">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Información de Empresa -->
+    <div class="modal" id="companyInfoModal">
+        <div class="modal-content">
+            <h3 class="modal-title"><i class="fas fa-building"></i> Información de la Empresa</h3>
+            <div class="company-info-container" id="companyInfoContent">
+                <!-- Contenido dinámico se cargará aquí -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-info" onclick="closeModal()" data-lang="close">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Información (Mejorado) -->
+    <div class="modal" id="infoModal">
+        <div class="modal-content">
+            <h3 class="modal-title"><i class="fas fa-info-circle"></i> <span id="infoModalTitle" data-lang="info">Información</span></h3>
+            <p id="infoModalMessage"></p>
+            <div class="modal-footer">
+                <button class="btn btn-info" onclick="closeModal()" data-lang="accept">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { 
+        getFirestore, 
+        collection, 
+        getDocs, 
+        query, 
+        where,
+        doc,
+        getDoc,
+        updateDoc,
+        setDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-storage.js";
+
+    // Configuración de Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+        authDomain: "inventario-35d6b.firebaseapp.com",
+        databaseURL: "https://inventario-35d6b-default-rtdb.firebaseio.com",
+        projectId: "inventario-35d6b",
+        storageBucket: "inventario-35d6b.appspot.com",
+        messagingSenderId: "266100399659",
+        appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+    };
+
+    // Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+    const { jsPDF } = window.jspdf;
+
+    // Variables globales
+    let currentUser = null;
+    let currentLoan = null;
+    let paymentReceipts = [];
+    let companyInfo = {
+        nombreEmpresa: "Empresa de Préstamos",
+        rnc: "123-456789-1",
+        telefono: "809-555-5555",
+        direccion: "Calle Principal #123, Santo Domingo",
+        fotoURL: "logo.png",
+        showToClients: false,
+        bankAccounts: []
+    };
+    let userSettings = {
+        theme: 'dark',
+        customColor: '#15a086',
+        language: 'es',
+        emailNotifications: true,
+        smsNotifications: false,
+        fontSize: 'medium',
+        currency: 'USD',
+        rememberSession: false
+    };
+    const isPC = window.innerWidth > 768 && !/Mobi|Android/i.test(navigator.userAgent);
+
+    // Traducciones
+    const translations = {
+        es: {
+            login: 'Iniciar Sesión',
+            view_details: 'Ver Detalles',
+            loan_balance: 'Saldo Pendiente',
+            loan_progress: 'Progreso del Préstamo',
+            loading_progress: 'Cargando progreso...',
+            payment_history: 'Historial de Pagos',
+            loading_history: 'Cargando historial de pagos...',
+            all: 'Todos',
+            full: 'Completo',
+            capital: 'Capital',
+            interest: 'Interés',
+            late: 'Con Mora',
+            my_profile: 'Mi Perfil',
+            full_name: 'Nombre completo',
+            id: 'Identificación',
+            phone: 'Teléfono',
+            address: 'Dirección',
+            nationality: 'Nacionalidad',
+            change_profile_picture: 'Cambiar Foto de Perfil',
+            change_password: 'Cambiar Contraseña',
+            current_pin: 'PIN Actual',
+            new_pin: 'Nuevo PIN',
+            confirm_pin: 'Confirmar Nuevo PIN',
+            logout: 'Cerrar Sesión',
+            my_documents: 'Mis Documentos',
+            no_documents: 'No hay documentos disponibles',
+            settings: 'Configuración',
+            app_theme: 'Tema de la Aplicación',
+            dark: 'Oscuro',
+            light: 'Claro',
+            custom: 'Personalizado',
+            custom_color: 'Color Personalizado',
+            language: 'Idioma',
+            spanish: 'Español',
+            english: 'English',
+            notifications: 'Notificaciones',
+            email_notifications: 'Notificaciones por Email',
+            sms_notifications: 'Notificaciones por SMS',
+            font_size: 'Tamaño de Fuente',
+            small: 'Pequeño',
+            medium: 'Mediano',
+            large: 'Grande',
+            currency: 'Formato de Moneda',
+            usd: 'USD',
+            dop: 'DOP',
+            save_settings: 'Guardar Configuración',
+            home: 'Inicio',
+            history: 'Historial',
+            profile: 'Perfil',
+            documents: 'Documentos',
+            loan_details: 'Detalles del Préstamo',
+            select_profile_picture: 'Seleccionar Foto de Perfil',
+            upload_image: 'Subir Imagen',
+            save: 'Guardar',
+            cancel: 'Cancelar',
+            close: 'Cerrar',
+            accept: 'Aceptar',
+            info: 'Información',
+            download: 'Descargar',
+            no_payments: 'No hay pagos registrados',
+            no_matching_payments: 'No se encontraron pagos que coincidan con los criterios',
+            loan_completed: '¡Préstamo pagado completamente!',
+            payment_due: 'Próximo pago en {days} días',
+            payment_late: 'Pago atrasado por {days} días',
+            late_payment_alert: '¡Atención! Tiene un pago atrasado por {days} días',
+            progress: '{percent}% completado',
+            original_amount: 'Monto original',
+            interest_rate: 'Tasa de interés',
+            frequency: 'Frecuencia',
+            next_payment: 'Próximo pago',
+            next_payment_amount: 'Monto próximo pago',
+            total_to_pay: 'Total a pagar (próxima quincena)',
+            payments_made: 'Pagos realizados',
+            payments_pending: 'Pagos pendientes',
+            biweekly: 'Quincenal',
+            monthly: 'Mensual',
+            completed: 'Completado',
+            status: 'Estado',
+            'Préstamo': 'Préstamo',
+            'Fecha': 'Fecha',
+            'Monto': 'Monto',
+            'Tipo': 'Tipo',
+            'Mora': 'Mora',
+            'Registrado por': 'Registrado por',
+            'Mantener sesión iniciada': 'Mantener sesión iniciada'
+        },
+        en: {
+            login: 'Log In',
+            view_details: 'View Details',
+            loan_balance: 'Outstanding Balance',
+            loan_progress: 'Loan Progress',
+            loading_progress: 'Loading progress...',
+            payment_history: 'Payment History',
+            loading_history: 'Loading payment history...',
+            all: 'All',
+            full: 'Full',
+            capital: 'Capital',
+            interest: 'Interest',
+            late: 'With Late Fee',
+            my_profile: 'My Profile',
+            full_name: 'Full Name',
+            id: 'Identification',
+            phone: 'Phone',
+            address: 'Address',
+            nationality: 'Nationality',
+            change_profile_picture: 'Change Profile Picture',
+            change_password: 'Change Password',
+            current_pin: 'Current PIN',
+            new_pin: 'New PIN',
+            confirm_pin: 'Confirm New PIN',
+            logout: 'Log Out',
+            my_documents: 'My Documents',
+            no_documents: 'No documents available',
+            settings: 'Settings',
+            app_theme: 'App Theme',
+            dark: 'Dark',
+            light: 'Light',
+            custom: 'Custom',
+            custom_color: 'Custom Color',
+            language: 'Language',
+            spanish: 'Spanish',
+            english: 'English',
+            notifications: 'Notifications',
+            email_notifications: 'Email Notifications',
+            sms_notifications: 'SMS Notifications',
+            font_size: 'Font Size',
+            small: 'Small',
+            medium: 'Medium',
+            large: 'Large',
+            currency: 'Currency Format',
+            usd: 'USD',
+            dop: 'DOP',
+            save_settings: 'Save Settings',
+            home: 'Home',
+            history: 'History',
+            profile: 'Profile',
+            documents: 'Documents',
+            loan_details: 'Loan Details',
+            select_profile_picture: 'Select Profile Picture',
+            upload_image: 'Upload Image',
+            save: 'Save',
+            cancel: 'Cancel',
+            close: 'Close',
+            accept: 'Accept',
+            info: 'Information',
+            download: 'Download',
+            no_payments: 'No payments registered',
+            no_matching_payments: 'No payments found matching the criteria',
+            loan_completed: 'Loan fully paid!',
+            payment_due: 'Next payment in {days} days',
+            payment_late: 'Payment overdue by {days} days',
+            late_payment_alert: 'Attention! You have a payment overdue by {days} days',
+            progress: '{percent}% completed',
+            original_amount: 'Original Amount',
+            interest_rate: 'Interest Rate',
+            frequency: 'Frequency',
+            next_payment: 'Next Payment',
+            next_payment_amount: 'Next Payment Amount',
+            total_to_pay: 'Total to pay (next biweekly)',
+            payments_made: 'Payments Made',
+            payments_pending: 'Payments Pending',
+            biweekly: 'Biweekly',
+            monthly: 'Monthly',
+            completed: 'Completed',
+            status: 'Status',
+            'Préstamo': 'Loan',
+            'Fecha': 'Date',
+            'Monto': 'Amount',
+            'Tipo': 'Type',
+            'Mora': 'Late Fee',
+            'Registrado por': 'Recorded by',
+            'Mantener sesión iniciada': 'Keep me logged in'
+        }
+    };
+
+    // Inicialización
+    document.addEventListener('DOMContentLoaded', () => {
+        showLoading();
+        checkRememberedSession();
+        setupEventListeners();
+    });
+
+    // Verificar sesión recordada
+    async function checkRememberedSession() {
+        const rememberedUser = localStorage.getItem('rememberedUser');
+        if (rememberedUser) {
+            try {
+                const userData = JSON.parse(rememberedUser);
+                document.getElementById('loginUsername').value = userData.username;
+                document.getElementById('loginPin').value = userData.pin;
+                document.getElementById('rememberSession').checked = true;
+                document.getElementById('rememberSessionSettings').checked = true;
+                await handleLogin({ preventDefault: () => {} });
+            } catch (error) {
+                console.error("Error al cargar sesión recordada:", error);
+                localStorage.removeItem('rememberedUser');
+                hideLoading();
+            }
+        } else {
+            hideLoading();
+        }
+    }
+
+    // Configurar event listeners
+    function setupEventListeners() {
+        document.getElementById('loginForm').addEventListener('submit', handleLogin);
+        
+        // Configurar el menú de navegación con efecto de onda
+        const navItems = document.querySelectorAll('.nav-item');
+        const bottomNav = document.querySelector('.bottom-nav');
+
+        navItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const currentActiveItem = document.querySelector('.nav-item.active');
+                if (currentActiveItem) {
+                    currentActiveItem.classList.remove('active');
+                }
+
+                this.classList.add('active');
+                navigateToSection(this.dataset.section);
+            });
+        });
+
+        // Activar el primer ítem del menú
+        if (navItems.length > 0) {
+            setTimeout(() => navItems[0].classList.add('active'), 50);
+        }
+
+        // Menu superior
+        document.getElementById('menuBtn').addEventListener('click', toggleMicroMenu);
+        document.getElementById('overlay').addEventListener('click', toggleMicroMenu);
+
+        // Botón de información de empresa
+        document.getElementById('companyInfoBtn').addEventListener('click', showCompanyInfoModal);
+
+        // Resto de event listeners
+        document.getElementById('detailsBtn').addEventListener('click', showLoanDetails);
+        document.getElementById('historySearch').addEventListener('input', filterPaymentHistory);
+        document.getElementById('historyFilter').addEventListener('change', filterPaymentHistory);
+        document.getElementById('changeAvatarBtn').addEventListener('click', showAvatarModal);
+        document.getElementById('saveAvatarBtn').addEventListener('click', saveAvatar);
+        document.getElementById('profileImageUpload').addEventListener('change', handleImageUpload);
+        document.getElementById('changePasswordBtn').addEventListener('click', showPasswordModal);
+        document.getElementById('passwordForm').addEventListener('submit', changePassword);
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+        document.querySelectorAll('.theme-option').forEach(option => {
+            option.addEventListener('click', selectTheme);
+        });
+        document.getElementById('customColorPicker').addEventListener('input', updateCustomColor);
+        document.getElementById('languageSelector').addEventListener('change', updateLanguage);
+        document.getElementById('fontSizeSelector').addEventListener('change', updateFontSize);
+        document.getElementById('currencySelector').addEventListener('change', updateCurrency);
+        document.getElementById('emailNotifications').addEventListener('change', updateNotifications);
+        document.getElementById('smsNotifications').addEventListener('change', updateNotifications);
+        document.getElementById('rememberSession').addEventListener('change', updateRememberSession);
+        document.getElementById('rememberSessionSettings').addEventListener('change', updateRememberSession);
+        document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings);
+    }
+
+    // Toggle micro menu
+    function toggleMicroMenu() {
+        document.getElementById('microMenu').classList.toggle('active');
+        document.getElementById('overlay').classList.toggle('active');
+    }
+
+    // Manejar login
+    async function handleLogin(e) {
+        e.preventDefault();
+        const username = document.getElementById('loginUsername').value.trim();
+        const pin = document.getElementById('loginPin').value.trim();
+        const rememberSession = document.getElementById('rememberSession').checked;
+        
+        if (!username || !pin || pin.length !== 4 || !/^\d{4}$/.test(pin)) {
+            showAlert(translate('Credenciales inválidas o PIN no válido'), 'danger', 'loginAlert');
+            return;
+        }
+
+        showLoading();
+        try {
+            // Primero buscamos en LoanUsers (sistema nuevo)
+            let q = query(collection(db, "LoanUsers"), where("username", "==", username), where("pin", "==", pin));
+            let querySnapshot = await getDocs(q);
+            
+            if (querySnapshot.empty) {
+                // Si no encontramos en LoanUsers, buscamos en Users (sistema anterior)
+                q = query(collection(db, "Users"), where("username", "==", username), where("pin", "==", pin));
+                querySnapshot = await getDocs(q);
+                
+                if (querySnapshot.empty) {
+                    showAlert(translate('Credenciales incorrectas'), 'danger', 'loginAlert');
+                    hideLoading();
+                    return;
+                }
+            }
+
+            const userDoc = querySnapshot.docs[0];
+            currentUser = { id: userDoc.id, ...userDoc.data() };
+
+            // Guardar sesión si está marcado "recordar"
+            if (rememberSession) {
+                localStorage.setItem('rememberedUser', JSON.stringify({
+                    username: username,
+                    pin: pin
+                }));
+            } else {
+                localStorage.removeItem('rememberedUser');
+            }
+
+            // Cargar configuración del usuario
+            await loadUserSettings();
+
+            // Buscar préstamos asociados al cliente (compatible con ambos sistemas)
+            let clientId = currentUser.clientId || currentUser.id; // clientId para sistema nuevo, id para sistema antiguo
+            
+            // Buscar préstamos activos para este cliente
+            q = query(collection(db, "Loans"), 
+                 where("client.id", "==", clientId),
+                 where("status", "in", ["active", "overdue"]));
+            
+            const loansSnapshot = await getDocs(q);
+            
+            if (loansSnapshot.empty) {
+                showAlert(translate('No se encontró préstamo activo asociado a este usuario'), 'danger', 'loginAlert');
+                hideLoading();
+                return;
+            }
+
+            // Tomar el primer préstamo encontrado (podría modificarse para manejar múltiples préstamos)
+            const loanDoc = loansSnapshot.docs[0];
+            currentLoan = { id: loanDoc.id, ...loanDoc.data() };
+
+            // Actualizar el usuario con el ID del préstamo si es necesario (para compatibilidad con sistema nuevo)
+            if (!currentUser.loanIds) {
+                currentUser.loanIds = [currentLoan.id];
+                const userRef = doc(db, querySnapshot.docs[0].ref.parent.path, currentUser.id);
+                await updateDoc(userRef, { loanIds: [currentLoan.id] });
+            }
+
+            // Cargar información de la empresa DESDE LOS DATOS ASOCIADOS AL PRÉSTAMO
+            await loadCompanyInfo();
+
+            showClientSection();
+            loadClientData();
+        } catch (error) {
+            console.error("Error al iniciar sesión: ", error);
+            showAlert(translate('Ocurrió un error al iniciar sesión'), 'danger', 'loginAlert');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    // Cargar información de la empresa DESDE LOS DATOS ASOCIADOS AL PRÉSTAMO
+    async function loadCompanyInfo() {
+        try {
+            // Verificar si el préstamo tiene información de empresa asociada
+            if (currentLoan.companyInfo) {
+                companyInfo = {
+                    nombreEmpresa: currentLoan.companyInfo.nombreEmpresa || "Empresa de Préstamos",
+                    rnc: currentLoan.companyInfo.rnc || "123-456789-1",
+                    telefono: currentLoan.companyInfo.telefono || "809-555-5555",
+                    direccion: currentLoan.companyInfo.direccion || "Calle Principal #123, Santo Domingo",
+                    fotoURL: currentLoan.companyInfo.fotoURL || "logo.png",
+                    showToClients: currentLoan.companyInfo.showToClients || false,
+                    bankAccounts: currentLoan.companyInfo.bankAccounts || []
+                };
+            } else {
+                // Si no hay datos en el préstamo, buscar en la colección informacionCompany como respaldo
+                const companyQuery = query(collection(db, "informacionCompany"));
+                const querySnapshot = await getDocs(companyQuery);
+                
+                if (!querySnapshot.empty) {
+                    const companyData = querySnapshot.docs[0].data();
+                    companyInfo = {
+                        nombreEmpresa: companyData.nombreEmpresa || "Empresa de Préstamos",
+                        rnc: companyData.rnc || "123-456789-1",
+                        telefono: companyData.telefono || "809-555-5555",
+                        direccion: companyData.direccion || "Calle Principal #123, Santo Domingo",
+                        fotoURL: companyData.fotoURL || "logo.png",
+                        showToClients: companyData.showToClients || false,
+                        bankAccounts: companyData.bankAccounts || []
+                    };
+                }
+            }
+        } catch (error) {
+            console.error("Error al cargar información de la empresa:", error);
+            // Mantener los valores por defecto si hay un error
+            companyInfo = {
+                nombreEmpresa: "Empresa de Préstamos",
+                rnc: "123-456789-1",
+                telefono: "809-555-5555",
+                direccion: "Calle Principal #123, Santo Domingo",
+                fotoURL: "logo.png",
+                showToClients: false,
+                bankAccounts: []
+            };
+        }
+    }
+
+    // Mostrar modal de información de la empresa
+    function showCompanyInfoModal() {
+        const container = document.getElementById('companyInfoContent');
+        container.innerHTML = '';
+        
+        // Mostrar logo de la empresa
+        const logoContainer = document.createElement('div');
+        logoContainer.className = 'company-logo-container';
+        
+        if (companyInfo.fotoURL) {
+            logoContainer.innerHTML = `
+                <img src="${companyInfo.fotoURL}" alt="Logo de la empresa" class="company-logo" 
+                     onerror="this.parentElement.innerHTML='<div class=\\'default-company-logo\\'><i class=\\'fas fa-building\\'></i></div>'">
+            `;
+        } else {
+            logoContainer.innerHTML = `
+                <div class="default-company-logo">
+                    <i class="fas fa-building"></i>
+                </div>
+            `;
+        }
+        
+        container.appendChild(logoContainer);
+        
+        // Mostrar información básica de la empresa
+        const infoContainer = document.createElement('div');
+        infoContainer.className = 'profile-info';
+        
+        infoContainer.innerHTML = `
+            <div class="info-item">
+                <span class="info-label">Nombre de la Empresa:</span>
+                <span class="info-value">${companyInfo.nombreEmpresa || 'No disponible'}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">RNC:</span>
+                <span class="info-value">${companyInfo.rnc || 'No disponible'}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Teléfono:</span>
+                <span class="info-value">${companyInfo.telefono || 'No disponible'}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Dirección:</span>
+                <span class="info-value">${companyInfo.direccion || 'No disponible'}</span>
+            </div>
+        `;
+        
+        container.appendChild(infoContainer);
+        
+        // Mostrar cuentas bancarias si existen
+        if (companyInfo.bankAccounts && companyInfo.bankAccounts.length > 0) {
+            const bankAccountsTitle = document.createElement('h3');
+            bankAccountsTitle.className = 'card-title';
+            bankAccountsTitle.innerHTML = '<i class="fas fa-university"></i> Cuentas Bancarias';
+            container.appendChild(bankAccountsTitle);
+            
+            companyInfo.bankAccounts.forEach(account => {
+                const accountCard = document.createElement('div');
+                accountCard.className = 'bank-account-card';
+                
+                accountCard.innerHTML = `
+                    <div class="bank-logo-container">
+                        <div class="bank-logo-preview">
+                            ${account.logoURL ? 
+                                `<img src="${account.logoURL}" alt="Logo del banco" onerror="this.innerHTML='<i class=\\'fas fa-university\\'></i>'">` : 
+                                '<i class="fas fa-university"></i>'}
+                        </div>
+                        <div>
+                            <h4>${account.bankName || 'Banco no especificado'}</h4>
+                            <p>${account.accountNumber || 'Número no especificado'}</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Tipo de Cuenta:</span>
+                        <span class="info-value">${account.accountType === 'ahorro' ? 'Ahorro' : account.accountType === 'corriente' ? 'Corriente' : 'No especificado'}</span>
+                        </div>
+                    <div class="info-item">
+                        <span class="info-label">Titular:</span>
+                        <span class="info-value">${account.accountHolder || 'No especificado'}</span>
+                    </div>
+                `;
+                
+                container.appendChild(accountCard);
+            });
+        } else {
+            const noAccountsMsg = document.createElement('p');
+            noAccountsMsg.textContent = 'No hay cuentas bancarias registradas';
+            noAccountsMsg.style.color = 'var(--text-light)';
+            noAccountsMsg.style.textAlign = 'center';
+            container.appendChild(noAccountsMsg);
+        }
+        
+        document.getElementById('companyInfoModal').classList.add('active');
+    }
+
+    // Formatear números con comas y puntos (ejemplo: 20,550.00)
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(amount);
+    }
+
+    // Mostrar sección del cliente
+    function showClientSection() {
+        document.getElementById('login-section').style.display = 'none';
+        document.getElementById('client-section').style.display = 'block';
+        navigateToSection('summary');
+    }
+
+    // Cargar datos del cliente
+    function loadClientData() {
+        document.getElementById('clientName').textContent = currentLoan.client.name;
+        document.getElementById('clientId').textContent = `ID: ${currentLoan.client.id}`;
+        updateBalanceDisplay();
+
+        const paymentsMade = currentLoan.payments ? currentLoan.payments.length : 0;
+        const totalPayments = currentLoan.paymentSchedule.length;
+        const progress = (paymentsMade / totalPayments) * 100;
+        document.getElementById('progressFill').style.width = `${progress}%`;
+
+        if (currentUser.avatar) {
+            const avatarDiv = document.getElementById('clientAvatar');
+            avatarDiv.innerHTML = currentUser.avatar.includes('<i') ? currentUser.avatar : `<img src="${currentUser.avatar}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+        }
+
+        loadLoanProgress();
+        loadPaymentHistory();
+        loadProfileData();
+        loadDocuments();
+    }
+
+    // Actualizar visualización del saldo con formato de moneda
+    function updateBalanceDisplay() {
+        const balance = currentLoan.balance;
+        const currencySymbol = userSettings.currency === 'USD' ? '$' : 'RD$';
+        document.getElementById('loanBalance').textContent = `${currencySymbol}${formatCurrency(balance)}`;
+    }
+
+    // Mostrar detalles del préstamo en modal con formato de moneda
+    function showLoanDetails() {
+        const nextPayment = currentLoan.paymentSchedule.find(p => p.status === 'pending');
+        const paymentsMade = currentLoan.payments ? currentLoan.payments.length : 0;
+        const totalPayments = currentLoan.paymentSchedule.length;
+        const currencySymbol = userSettings.currency === 'USD' ? '$' : 'RD$';
+        
+        // Calcular los valores según la lógica que proporcionaste
+        const remainingQuincenas = totalPayments - paymentsMade;
+        const capitalToPay = remainingQuincenas > 0 ? currentLoan.remainingCapital / remainingQuincenas : 0;
+        const tasaQuincenal = currentLoan.interestRate / (currentLoan.frequency === 'biweekly' ? 1 : 2);
+        const interestToPay = currentLoan.remainingCapital * (tasaQuincenal / 100);
+        const totalToPay = capitalToPay + interestToPay;
+        
+        // Calcular el monto pendiente (capital + intereses futuros)
+        const montoPendiente = currentLoan.remainingCapital + (interestToPay * remainingQuincenas);
+
+        const content = `
+            <div class="loan-detail-item">
+                <span class="loan-detail-label">Monto original:</span>
+                <span class="loan-detail-value">${currencySymbol}${formatCurrency(currentLoan.amount)}</span>
+            </div>
+            <div class="loan-detail-item">
+                <span class="loan-detail-label">Tasa de interés:</span>
+                <span class="loan-detail-value">${currentLoan.interestRate}% quincenal (${currentLoan.interestRate}%)</span>
+            </div>
+            <div class="loan-detail-item">
+                <span class="loan-detail-label">Frecuencia de pago:</span>
+                <span class="loan-detail-value">Quincenal</span>
+            </div>
+            <div class="loan-detail-item">
+                <span class="loan-detail-label">Próximo pago:</span>
+                <span class="loan-detail-value">${nextPayment ? new Date(nextPayment.dueDate).toLocaleDateString() : 'N/A'}</span>
+            </div>
+            <div class="loan-detail-item">
+                <span class="loan-detail-label">Capital a pagar (próxima quincena):</span>
+                <span class="loan-detail-value">${currencySymbol}${formatCurrency(capitalToPay)}</span>
+            </div>
+            <div class="loan-detail-item">
+                <span class="loan-detail-label">Interés a pagar (próxima quincena):</span>
+                <span class="loan-detail-value">${currencySymbol}${formatCurrency(interestToPay)}</span>
+            </div>
+            <div class="loan-detail-item">
+                <span class="loan-detail-label">Total a pagar (próxima quincena):</span>
+                <span class="loan-detail-value">${currencySymbol}${formatCurrency(totalToPay)}</span>
+            </div>
+           <!-- <div class="loan-detail-item">
+                <span class="loan-detail-label">Monto pendiente:</span>
+                <span class="loan-detail-value">${currencySymbol}${formatCurrency(montoPendiente)}</span>
+            </div>-->
+            <div class="loan-detail-item">
+                <span class="loan-detail-label">Capital pendiente:</span>
+                <span class="loan-detail-value">${currencySymbol}${formatCurrency(currentLoan.remainingCapital)}</span>
+            </div>
+            <div class="loan-detail-item">
+                <span class="loan-detail-label">Pagos realizados:</span>
+                <span class="loan-detail-value">${paymentsMade} de ${totalPayments}</span>
+            </div>
+            <div class="loan-detail-item">
+                <span class="loan-detail-label">Quincenas restantes:</span>
+                <span class="loan-detail-value">${remainingQuincenas}</span>
+            </div>
+            <div class="loan-detail-item">
+                <span class="loan-detail-label">Tipo de pago:</span>
+                <span class="loan-detail-value">Variable (Capital + Interés)</span>
+            </div>
+        `;
+        document.getElementById('loanDetailsContent').innerHTML = content;
+        document.getElementById('detailsModal').classList.add('active');
+        updateLanguage();
+    }
+
+    // Cargar progreso del préstamo
+    function loadLoanProgress() {
+        const container = document.getElementById('loanProgress');
+        const paymentsMade = currentLoan.payments ? currentLoan.payments.length : 0;
+        const totalPayments = currentLoan.paymentSchedule.length;
+        const progress = (paymentsMade / totalPayments) * 100;
+
+        let statusHTML = '';
+        if (currentLoan.balance <= 0) {
+            statusHTML = `
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <span data-lang="loan_completed">${translate('loan_completed')}</span>
+                </div>
+                <div class="loan-summary-item">
+                    <span class="loan-detail-label" data-lang="status">${translate('status')}:</span>
+                    <span data-lang="completed">${translate('completed')}</span>
+                </div>
+            `;
+            document.getElementById('latePaymentAlert').style.display = 'none';
+            document.getElementById('latePaymentText').style.display = 'none';
+        } else {
+            const nextPayment = currentLoan.paymentSchedule.find(p => p.status === 'pending');
+            const today = new Date();
+            let statusClass = '';
+            let message = '';
+
+            if (nextPayment) {
+                const dueDate = new Date(nextPayment.dueDate);
+                const daysUntilDue = Math.floor((dueDate - today) / (1000 * 60 * 60 * 24));
+                if (daysUntilDue < 0) {
+                    statusClass = 'alert-danger';
+                    message = translate('payment_late').replace('{days}', -daysUntilDue);
+                    document.getElementById('latePaymentAlert').style.display = 'flex';
+                    document.getElementById('latePaymentMessage').textContent = translate('late_payment_alert').replace('{days}', -daysUntilDue);
+                    document.getElementById('latePaymentText').style.display = 'block';
+                    document.getElementById('latePaymentText').textContent = translate('payment_late').replace('{days}', -daysUntilDue);
+                } else {
+                    statusClass = daysUntilDue <= 5 ? 'alert-warning' : 'alert-success';
+                    message = translate('payment_due').replace('{days}', daysUntilDue);
+                    document.getElementById('latePaymentAlert').style.display = 'none';
+                    document.getElementById('latePaymentText').style.display = 'none';
+                }
+            } else {
+                statusClass = 'alert-success';
+                message = translate('Todos los pagos están al día');
+                document.getElementById('latePaymentAlert').style.display = 'none';
+                document.getElementById('latePaymentText').style.display = 'none';
+            }
+
+            statusHTML = `
+                <div class="alert ${statusClass}">
+                    <i class="fas fa-info-circle"></i>
+                    <span>${message}</span>
+                </div>
+                <div class="loan-summary-item">
+                    <span class="loan-detail-label" data-lang="progress">${translate('progress').replace('{percent}', '')}:</span>
+                    <span data-lang="progress" data-progress="${progress.toFixed(0)}">${translate('progress').replace('{percent}', progress.toFixed(0))}</span>
+                </div>
+            `;
+        }
+
+        container.innerHTML = statusHTML;
+        updateLanguage();
+    }
+
+    // Cargar historial de pagos con formato de moneda
+    function loadPaymentHistory() {
+        const container = document.getElementById('paymentHistory');
+        paymentReceipts = [];
+
+        if (!currentLoan.payments || currentLoan.payments.length === 0) {
+            container.innerHTML = `
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span data-lang="no_payments">${translate('no_payments')}</span>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = '';
+        const sortedPayments = [...currentLoan.payments].sort((a, b) => b.date.toDate() - a.date.toDate());
+
+        sortedPayments.forEach(payment => {
+            const paymentDate = payment.date.toDate();
+            const typeClass = payment.lateFee && payment.lateFee > 0 ? 'late' : payment.type;
+            const typeText = getPaymentTypeText(payment.type) + (payment.lateFee && payment.lateFee > 0 ? ` ${translate('late')}` : '');
+            const currencySymbol = userSettings.currency === 'USD' ? '$' : 'RD$';
+
+            paymentReceipts.push({
+                id: `${currentLoan.id}_${paymentDate.toISOString()}`,
+                clientName: currentLoan.client.name,
+                clientId: currentLoan.client.id,
+                loanId: currentLoan.id,
+                date: paymentDate,
+                amount: payment.amount,
+                type: payment.type,
+                lateFee: payment.lateFee || 0,
+                recordedBy: payment.recordedBy || translate('Administrador'),
+                companyInfo: companyInfo
+            });
+
+            const paymentItem = document.createElement('div');
+            paymentItem.className = 'payment-item';
+            paymentItem.innerHTML = `
+                <div>
+                    <div class="payment-amount">${currencySymbol}${formatCurrency(payment.amount)}</div>
+                    <div class="payment-date">${paymentDate.toLocaleDateString()} ${paymentDate.toLocaleTimeString()}</div>
+                </div>
+                <div>
+                    <span class="payment-type ${typeClass}">${typeText}</span>
+                </div>
+            `;
+            container.appendChild(paymentItem);
+        });
+        updateLanguage();
+    }
+
+    // Filtrar historial de pagos
+    function filterPaymentHistory() {
+        const searchTerm = document.getElementById('historySearch').value.toLowerCase();
+        const filterType = document.getElementById('historyFilter').value;
+        const container = document.getElementById('paymentHistory');
+
+        if (!currentLoan.payments || currentLoan.payments.length === 0) {
+            container.innerHTML = `
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span data-lang="no_payments">${translate('no_payments')}</span>
+                </div>
+            `;
+            return;
+        }
+
+        const sortedPayments = [...currentLoan.payments].sort((a, b) => b.date.toDate() - a.date.toDate());
+        const filteredPayments = sortedPayments.filter(payment => {
+            const paymentDate = payment.date.toDate().toLocaleDateString().toLowerCase();
+            const isDateMatch = searchTerm ? paymentDate.includes(searchTerm) : true;
+            const isTypeMatch = filterType === 'all' || 
+                               (filterType === 'late' && payment.lateFee && payment.lateFee > 0) || 
+                               (filterType !== 'late' && payment.type === filterType);
+            return isDateMatch && isTypeMatch;
+        });
+
+        container.innerHTML = '';
+        if (filteredPayments.length === 0) {
+            container.innerHTML = `
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span data-lang="no_matching_payments">${translate('no_matching_payments')}</span>
+                </div>
+            `;
+            return;
+        }
+
+        filteredPayments.forEach(payment => {
+            const paymentDate = payment.date.toDate();
+            const typeClass = payment.lateFee && payment.lateFee > 0 ? 'late' : payment.type;
+            const typeText = getPaymentTypeText(payment.type) + (payment.lateFee && payment.lateFee > 0 ? ` ${translate('late')}` : '');
+            const currencySymbol = userSettings.currency === 'USD' ? '$' : 'RD$';
+
+            const paymentItem = document.createElement('div');
+            paymentItem.className = 'payment-item';
+            paymentItem.innerHTML = `
+                <div>
+                    <div class="payment-amount">${currencySymbol}${formatCurrency(payment.amount)}</div>
+                    <div class="payment-date">${paymentDate.toLocaleDateString()} ${paymentDate.toLocaleTimeString()}</div>
+                </div>
+                <div>
+                    <span class="payment-type ${typeClass}">${typeText}</span>
+                </div>
+            `;
+            container.appendChild(paymentItem);
+        });
+        updateLanguage();
+    }
+
+    // Obtener texto del tipo de pago
+    function getPaymentTypeText(type) {
+        const types = {
+            full: translate('full'),
+            interest: translate('interest'),
+            capital: translate('capital')
+        };
+        return types[type] || type;
+    }
+
+    // Cargar datos del perfil
+    function loadProfileData() {
+        document.getElementById('profileName').textContent = currentLoan.client.name;
+        document.getElementById('profileId').textContent = currentLoan.client.id;
+        document.getElementById('profilePhone').textContent = currentLoan.client.phone || '-';
+        document.getElementById('profileAddress').textContent = currentLoan.client.address || '-';
+        document.getElementById('profileNationality').textContent = currentLoan.client.nationality || '-';
+        document.getElementById('profileCompany').textContent = currentLoan.client.company || '-';
+        document.getElementById('profileCompanyTime').textContent = currentLoan.client.companyTime || '-';
+        document.getElementById('profileLoanStartDate').textContent = currentLoan.startDate ? new Date(currentLoan.startDate).toLocaleDateString() : '-';
+        updateLanguage();
+    }
+
+    // Mostrar modal de selección de avatar
+    function showAvatarModal() {
+        const avatarSelector = document.getElementById('avatarSelector');
+        avatarSelector.innerHTML = '';
+
+        const icons = [
+            'fa-user', 'fa-user-tie', 'fa-user-astronaut', 'fa-user-ninja', 'fa-user-secret',
+            'fa-user-doctor', 'fa-user-graduate', 'fa-user-shield', 'fa-user-cog', 'fa-user-clock',
+            'fa-robot', 'fa-cat', 'fa-dog', 'fa-fish', 'fa-dragon',
+            'fa-smile', 'fa-heart', 'fa-star', 'fa-moon', 'fa-sun', 'fa-tree', 'fa-leaf',
+            'fa-rocket', 'fa-camera'
+        ];
+
+        icons.forEach(icon => {
+            const avatarOption = document.createElement('div');
+            avatarOption.className = `avatar-option ${currentUser.avatar === `<i class="fas ${icon}"></i>` ? 'selected' : ''}`;
+            avatarOption.innerHTML = `<i class="fas ${icon}"></i>`;
+            avatarOption.dataset.avatar = `<i class="fas ${icon}"></i>`;
+            avatarOption.addEventListener('click', selectAvatar);
+            avatarSelector.appendChild(avatarOption);
+        });
+
+        document.getElementById('profileImageUpload').value = '';
+        document.getElementById('imagePreviewContainer').style.display = 'none';
+        document.getElementById('avatarModal').classList.add('active');
+        updateLanguage();
+    }
+
+    // Seleccionar avatar
+    function selectAvatar(e) {
+        document.querySelectorAll('.avatar-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+        e.currentTarget.classList.add('selected');
+        currentUser.avatar = e.currentTarget.dataset.avatar;
+        document.getElementById('imagePreviewContainer').style.display = 'none';
+    }
+
+    // Manejar carga de imagen
+    function handleImageUpload(e) {
+        const file = e.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                currentUser.avatar = event.target.result;
+                document.querySelectorAll('.avatar-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+                
+                // Mostrar vista previa de la imagen
+                const previewContainer = document.getElementById('imagePreviewContainer');
+                const preview = document.getElementById('imagePreview');
+                const nameDisplay = document.getElementById('imageName');
+                
+                preview.src = event.target.result;
+                nameDisplay.textContent = file.name;
+                previewContainer.style.display = 'flex';
+            };
+            reader.readAsDataURL(file);
+        } else {
+            showInfoModal(translate('info'), translate('Por favor, seleccione una imagen válida'));
+        }
+    }
+
+    // Guardar avatar
+    async function saveAvatar() {
+        if (!currentUser.avatar) {
+            showInfoModal(translate('info'), translate('Por favor, seleccione un avatar o suba una imagen'));
+            return;
+        }
+
+        showLoading();
+        try {
+            const avatarDiv = document.getElementById('clientAvatar');
+            if (currentUser.avatar.startsWith('data:image')) {
+                avatarDiv.innerHTML = `<img src="${currentUser.avatar}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+            } else {
+                avatarDiv.innerHTML = currentUser.avatar;
+            }
+
+            const userRef = doc(db, "LoanUsers", currentUser.id);
+            await updateDoc(userRef, { avatar: currentUser.avatar });
+            closeModal();
+            showInfoModal(translate('info'), translate('Foto de perfil guardada correctamente'));
+        } catch (error) {
+            console.error("Error al guardar avatar: ", error);
+            showInfoModal(translate('info'), translate('No se pudo guardar la imagen de perfil'));
+        } finally {
+            hideLoading();
+        }
+    }
+
+    // Mostrar modal de cambio de contraseña
+    function showPasswordModal() {
+        document.getElementById('passwordForm').reset();
+        document.getElementById('passwordAlert').style.display = 'none';
+        document.getElementById('passwordModal').classList.add('active');
+        updateLanguage();
+    }
+
+    // Cambiar contraseña
+    async function changePassword(e) {
+        e.preventDefault();
+        const currentPin = document.getElementById('currentPin').value.trim();
+        const newPin = document.getElementById('newPin').value.trim();
+        const confirmPin = document.getElementById('confirmPin').value.trim();
+
+        if (!currentPin || !newPin || !confirmPin || newPin.length !== 4 || !/^\d{4}$/.test(newPin)) {
+            showAlert(translate('Por favor, ingrese un PIN válido de 4 dígitos'), 'danger', 'passwordAlert');
+            return;
+        }
+
+        if (newPin !== confirmPin) {
+            showAlert(translate('Los nuevos PIN no coinciden'), 'danger', 'passwordAlert');
+            return;
+        }
+
+        if (currentPin !== currentUser.pin) {
+            showAlert(translate('El PIN actual es incorrecto'), 'danger', 'passwordAlert');
+            return;
+        }
+
+        showLoading();
+        try {
+            const userRef = doc(db, "LoanUsers", currentUser.id);
+            await updateDoc(userRef, { pin: newPin });
+            currentUser.pin = newPin;
+            
+            // Actualizar sesión recordada si existe
+            const rememberedUser = localStorage.getItem('rememberedUser');
+            if (rememberedUser) {
+                const userData = JSON.parse(rememberedUser);
+                if (userData.username === currentUser.username) {
+                    localStorage.setItem('rememberedUser', JSON.stringify({
+                        username: userData.username,
+                        pin: newPin
+                    }));
+                }
+            }
+            
+            closeModal();
+            showInfoModal(translate('info'), translate('Contraseña actualizada correctamente'));
+        } catch (error) {
+            console.error("Error al cambiar contraseña: ", error);
+            showAlert(translate('No se pudo actualizar la contraseña'), 'danger', 'passwordAlert');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    // Cargar documentos
+    function loadDocuments() {
+        const container = document.getElementById('documentList');
+        const alert = document.getElementById('documentsAlert');
+
+        container.innerHTML = '';
+
+        if (!paymentReceipts || paymentReceipts.length === 0) {
+            alert.style.display = 'flex';
+            return;
+        }
+
+        alert.style.display = 'none';
+
+        paymentReceipts.forEach(receipt => {
+            const documentItem = document.createElement('div');
+            documentItem.className = 'document-item';
+            const currencySymbol = userSettings.currency === 'USD' ? '$' : 'RD$';
+            documentItem.innerHTML = `
+                <i class="fas fa-receipt document-icon"></i>
+                <span class="document-name">Recibo ${receipt.date.toLocaleDateString()} - ${currencySymbol}${formatCurrency(receipt.amount)}</span>
+                <i class="fas fa-eye document-action" onclick="previewDocument('receipt', '${receipt.id}')"></i>
+            `;
+            container.appendChild(documentItem);
+        });
+        updateLanguage();
+    }
+
+    // Vista previa de documento
+    window.previewDocument = async function(type, receiptId = null) {
+        const previewContainer = document.getElementById('documentPreview');
+        const modalTitle = document.getElementById('documentModalTitle');
+        const modalFooter = document.getElementById('documentModalFooter');
+        const currencySymbol = userSettings.currency === 'USD' ? '$' : 'RD$';
+
+        previewContainer.innerHTML = '';
+        modalFooter.innerHTML = `<button class="btn btn-info" onclick="closeModal()" data-lang="close">${translate('close')}</button>`;
+
+        if (type === 'receipt' && receiptId) {
+            const receipt = paymentReceipts.find(r => r.id === receiptId);
+            if (receipt) {
+                modalTitle.textContent = `Recibo ${receipt.date.toLocaleDateString()}`;
+                const content = `
+                    <div class="receipt-preview" id="receiptPreview_${receiptId}">
+                        <div style="text-align: center; margin-bottom: 15px;">
+                            ${receipt.companyInfo.showToClients && receipt.companyInfo.fotoURL ? 
+                                `<img src="${receipt.companyInfo.fotoURL}" alt="Logo" style="max-width: 120px; max-height: 60px;">` : 
+                                `<i class="fas fa-building" style="font-size: 3rem; color: #15a086;"></i>`}
+                            <h3>${receipt.companyInfo.showToClients ? (receipt.companyInfo.nombreEmpresa || 'Empresa de Préstamos') : 'Empresa de Préstamos'}</h3>
+                            ${receipt.companyInfo.showToClients ? `
+                                <p>RNC: ${receipt.companyInfo.rnc || '123-456789-1'}</p>
+                                <p>${receipt.companyInfo.telefono || '809-555-5555'} - ${receipt.companyInfo.direccion || 'Calle Principal #123, Santo Domingo'}</p>
+                            ` : ''}
+                        </div>
+                        <hr>
+                        <h3 style="text-align: center;">RECIBO DE PAGO</h3>
+                        <p><strong>${translate('full_name')}:</strong> ${receipt.clientName}</p>
+                        <p><strong>${translate('id')}:</strong> ${receipt.clientId}</p>
+                        <p><strong>${translate('Préstamo')}:</strong> ${receipt.loanId}</p>
+                        <p><strong>${translate('Fecha')}:</strong> ${receipt.date.toLocaleDateString()} ${receipt.date.toLocaleTimeString()}</p>
+                        <p><strong>${translate('Monto')}:</strong> ${currencySymbol}${formatCurrency(receipt.amount)}</p>
+                        <p><strong>${translate('Tipo')}:</strong> ${getPaymentTypeText(receipt.type)}</p>
+                        ${receipt.lateFee > 0 ? `<p><strong>${translate('Mora')}:</strong> ${currencySymbol}${formatCurrency(receipt.lateFee)}</p>` : ''}
+                        <p><strong>${translate('Registrado por')}:</strong> ${receipt.recordedBy}</p>
+                    </div>
+                `;
+                previewContainer.innerHTML = content;
+
+                if (isPC) {
+                    modalFooter.innerHTML += `
+                        <button class="btn btn-success" onclick="downloadReceipt('${receiptId}')" data-lang="download">${translate('download')}</button>
+                    `;
+                }
+            } else {
+                showInfoModal(translate('info'), translate('No se encontró el recibo solicitado'));
+                return;
+            }
+        }
+
+        document.getElementById('documentModal').classList.add('active');
+        updateLanguage();
+    }
+
+    // Descargar recibo
+    window.downloadReceipt = async function(receiptId) {
+        showLoading();
+        try {
+            const receipt = paymentReceipts.find(r => r.id === receiptId);
+            if (!receipt) {
+                showInfoModal(translate('info'), translate('No se encontró el recibo solicitado'));
+                hideLoading();
+                return;
+            }
+
+            const preview = document.getElementById(`receiptPreview_${receiptId}`);
+            const canvas = await html2canvas(preview, { backgroundColor: '#ffffff', scale: 2 });
+            const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
+
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = `recibo_pago_${receiptId}.jpg`;
+            link.click();
+            showInfoModal(translate('info'), translate('Recibo descargado exitosamente'));
+        } catch (error) {
+            console.error("Error al descargar recibo: ", error);
+            showInfoModal(translate('info'), translate('Error al descargar el recibo'));
+        } finally {
+            hideLoading();
+        }
+    }
+
+    // Seleccionar tema
+    function selectTheme(e) {
+        document.querySelectorAll('.theme-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+        e.target.classList.add('selected');
+        userSettings.theme = e.target.dataset.theme;
+        document.getElementById('customColorContainer').style.display = userSettings.theme === 'custom' ? 'block' : 'none';
+        applyTheme();
+        updateLanguage();
+    }
+
+    // Actualizar color personalizado
+    function updateCustomColor(e) {
+        userSettings.customColor = e.target.value;
+        applyTheme();
+    }
+
+    // Aplicar tema
+    function applyTheme() {
+        document.body.classList.remove('light-theme');
+        document.documentElement.style.setProperty('--primary-color', '#15a086');
+        document.documentElement.style.setProperty('--primary-dark', '#127c68');
+        document.documentElement.style.setProperty('--bar-bg-color', '#2a2a3f');
+
+        if (userSettings.theme === 'light') {
+            document.body.classList.add('light-theme');
+            document.documentElement.style.setProperty('--bar-bg-color', '#f0f0f0');
+        } else if (userSettings.theme === 'custom') {
+            document.documentElement.style.setProperty('--primary-color', userSettings.customColor);
+            document.documentElement.style.setProperty('--primary-dark', darkenColor(userSettings.customColor, 0.8));
+            document.documentElement.style.setProperty('--bar-bg-color', darkenColor(userSettings.customColor, 0.9));
+            document.getElementById('customColorPicker').value = userSettings.customColor;
+        }
+
+        document.querySelectorAll('.theme-option').forEach(option => {
+            option.classList.toggle('selected', option.dataset.theme === userSettings.theme);
+        });
+        document.getElementById('customColorContainer').style.display = userSettings.theme === 'custom' ? 'block' : 'none';
+    }
+
+    // Oscurecer color
+    function darkenColor(hex, factor) {
+        hex = hex.replace('#', '');
+        const r = parseInt(hex.substr(0, 2), 16) * factor;
+        const g = parseInt(hex.substr(2, 2), 16) * factor;
+        const b = parseInt(hex.substr(4, 2), 16) * factor;
+        return `#${Math.round(r).toString(16).padStart(2, '0')}${Math.round(g).toString(16).padStart(2, '0')}${Math.round(b).toString(16).padStart(2, '0')}`;
+    }
+
+    // Actualizar idioma
+    function updateLanguage() {
+        userSettings.language = document.getElementById('languageSelector').value;
+        document.querySelectorAll('[data-lang]').forEach(element => {
+            const key = element.dataset.lang;
+            if (element.dataset.progress) {
+                element.textContent = translate('progress').replace('{percent}', element.dataset.progress);
+            } else {
+                element.textContent = translate(key);
+            }
+        });
+    }
+
+    // Actualizar tamaño de fuente
+    function updateFontSize() {
+        userSettings.fontSize = document.getElementById('fontSizeSelector').value;
+        document.body.classList.remove('font-small', 'font-medium', 'font-large');
+        document.body.classList.add(`font-${userSettings.fontSize}`);
+    }
+
+    // Actualizar moneda
+    function updateCurrency() {
+        userSettings.currency = document.getElementById('currencySelector').value;
+        updateBalanceDisplay();
+        loadPaymentHistory();
+        loadDocuments();
+        if (document.getElementById('detailsModal').classList.contains('active')) {
+            showLoanDetails();
+        }
+    }
+
+    // Actualizar notificaciones
+    function updateNotifications() {
+        userSettings.emailNotifications = document.getElementById('emailNotifications').checked;
+        userSettings.smsNotifications = document.getElementById('smsNotifications').checked;
+    }
+
+    // Actualizar recordar sesión
+    function updateRememberSession() {
+        const rememberSession = document.getElementById('rememberSession').checked || 
+                              document.getElementById('rememberSessionSettings').checked;
+        document.getElementById('rememberSession').checked = rememberSession;
+        document.getElementById('rememberSessionSettings').checked = rememberSession;
+        userSettings.rememberSession = rememberSession;
+    }
+
+    // Guardar configuración
+    async function saveSettings() {
+        showLoading();
+        try {
+            const userRef = doc(db, "LoanUsers", currentUser.id);
+            await updateDoc(userRef, { settings: userSettings });
+            
+            // Actualizar sesión recordada si está marcado
+            if (userSettings.rememberSession) {
+                localStorage.setItem('rememberedUser', JSON.stringify({
+                    username: currentUser.username,
+                    pin: currentUser.pin
+                }));
+            } else {
+                localStorage.removeItem('rememberedUser');
+            }
+            
+            showInfoModal(translate('info'), translate('Configuración guardada correctamente'));
+        } catch (error) {
+            console.error("Error al guardar ajustes: ", error);
+            showInfoModal(translate('info'), translate('No se pudo guardar la configuración'));
+        } finally {
+            hideLoading();
+        }
+    }
+
+    // Cargar configuración del usuario
+    async function loadUserSettings() {
+        try {
+            if (currentUser && currentUser.id) {
+                const userRef = doc(db, "LoanUsers", currentUser.id);
+                const userSnap = await getDoc(userRef);
+                if (userSnap.exists() && userSnap.data().settings) {
+                    userSettings = { ...userSettings, ...userSnap.data().settings };
+                }
+            }
+
+            document.getElementById('languageSelector').value = userSettings.language;
+            document.getElementById('fontSizeSelector').value = userSettings.fontSize;
+            document.getElementById('currencySelector').value = userSettings.currency;
+            document.getElementById('emailNotifications').checked = userSettings.emailNotifications;
+            document.getElementById('smsNotifications').checked = userSettings.smsNotifications;
+            document.getElementById('rememberSession').checked = userSettings.rememberSession;
+            document.getElementById('rememberSessionSettings').checked = userSettings.rememberSession;
+
+            applyTheme();
+            updateLanguage();
+            updateFontSize();
+            updateCurrency();
+        } catch (error) {
+            console.error("Error al cargar ajustes: ", error);
+        } finally {
+            hideLoading();
+        }
+    }
+
+    // Navegar entre secciones
+    function navigateToSection(section) {
+        document.querySelectorAll('.section').forEach(sec => {
+            sec.classList.toggle('active', sec.id === `${section}-section`);
+        });
+        updateLanguage();
+    }
+
+    // Mostrar alerta
+    function showAlert(message, type, alertId = 'loginAlert') {
+        const alert = document.getElementById(alertId);
+        alert.style.display = 'flex';
+        alert.className = `alert alert-${type}`;
+        document.getElementById(`${alertId}Message`).textContent = message;
+    }
+
+    // Mostrar modal de información
+    function showInfoModal(title, message) {
+        document.getElementById('infoModalTitle').textContent = title;
+        document.getElementById('infoModalMessage').textContent = message;
+        document.getElementById('infoModal').classList.add('active');
+        updateLanguage();
+    }
+
+    // Cerrar modal
+    window.closeModal = function() {
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.classList.remove('active');
+        });
+        document.getElementById('microMenu').classList.remove('active');
+        document.getElementById('overlay').classList.remove('active');
+    };
+
+    // Mostrar carga
+    function showLoading() {
+        document.getElementById('loginSpinner').classList.add('active');
+    }
+
+    // Ocultar carga
+    function hideLoading() {
+        document.getElementById('loginSpinner').classList.remove('active');
+    }
+
+    // Cerrar sesión
+    function logout() {
+        currentUser = null;
+        currentLoan = null;
+        paymentReceipts = [];
+        companyInfo = null;
+        document.getElementById('login-section').style.display = 'flex';
+        document.getElementById('client-section').style.display = 'none';
+        document.getElementById('loginForm').reset();
+        document.getElementById('loginAlert').style.display = 'none';
+        localStorage.removeItem('rememberedUser');
+        applyTheme();
+        updateLanguage();
+        // Recargar la página para limpiar completamente el estado
+        window.location.reload();
+    }
+
+    // Función de traducción
+    function translate(key) {
+        return translations[userSettings.language][key] || key;
+    }
+</script>

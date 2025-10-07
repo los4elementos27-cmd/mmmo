@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configuración de Empresa</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #1abc9c;
+      --primary-dark: #16a085;
+      --secondary-color: #2a2a3f;
+      --background-color: #2c3e50;
+      --text-color: #ffffff;
+      --text-light: #a8a8a8;
+      --border-color: #444;
+      --card-bg: #34495e;
+      --danger-color: #e74c3c;
+      --warning-color: #f39c12;
+      --success-color: #2ecc71;
+      --info-color: #3498db;
+      --modal-bg: rgba(0, 0, 0, 0.8);
+      --modal-content-bg: #2a2a3f;
+      --modal-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+      --modal-border-radius: 12px;
+      --modal-padding: 2rem;
+      --modal-title-size: 1.5rem;
+      --modal-message-size: 1rem;
+      --modal-footer-gap: 1rem;
+      --alert-success-bg: rgba(46, 204, 113, 0.2);
+      --alert-success-border: #2ecc71;
+      --alert-error-bg: rgba(231, 76, 60, 0.2);
+      --alert-error-border: #e74c3c;
+      --alert-warning-bg: rgba(243, 156, 18, 0.2);
+      --alert-warning-border: #f39c12;
+      --alert-info-bg: rgba(52, 152, 219, 0.2);
+      --alert-info-border: #3498db;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1000px;
+      background-color: var(--secondary-color);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      padding: 2rem;
+    }
+
+    h1 {
+      color: var(--primary-color);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--border-color);
+      text-align: center;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-control:disabled {
+      background-color: var(--card-bg);
+      color: var(--text-light);
+      cursor: not-allowed;
+    }
+
+    .btn {
+      background-color: var(--primary-color);
+      color: var(--text-color);
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn i {
+      margin-right: 8px;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-block {
+      display: block;
+      width: 100%;
+    }
+
+    .btn-success {
+      background-color: var(--success-color);
+    }
+
+    .btn-success:hover {
+      background-color: #27ae60;
+    }
+
+    .btn-danger {
+      background-color: var(--danger-color);
+    }
+
+    .btn-danger:hover {
+      background-color: #c0392b;
+    }
+
+    .btn-secondary {
+      background-color: var(--secondary-color);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: #3a3a4f;
+    }
+
+    .btn-warning {
+      background-color: var(--warning-color);
+    }
+
+    .btn-warning:hover {
+      background-color: #e67e22;
+    }
+
+    /* Image preview styles */
+    .image-preview-container {
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    .image-preview {
+      max-width: 200px;
+      max-height: 150px;
+      border-radius: 8px;
+      border: 2px solid var(--border-color);
+    }
+
+    /* Default logo styles */
+    .default-logo {
+      width: 100px;
+      height: 100px;
+      border-radius: 8px;
+      background-color: var(--background-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      margin-bottom: 1rem;
+    }
+
+    .default-logo i {
+      font-size: 3rem;
+      color: var(--primary-color);
+    }
+
+    /* Bank accounts styles */
+    .bank-accounts-container {
+      margin-top: 2rem;
+      border-top: 2px solid var(--border-color);
+      padding-top: 1.5rem;
+    }
+
+    .bank-account-title {
+      color: var(--primary-color);
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+
+    .bank-account-card {
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .bank-logo-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .bank-logo-preview {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background-color: var(--background-color);
+    }
+
+    .bank-logo-preview i {
+      font-size: 1.5rem;
+      color: var(--primary-color);
+    }
+
+    .bank-logo-preview img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    /* Client selector styles */
+    .client-selector {
+      margin-top: 1.5rem;
+      border-top: 1px solid var(--border-color);
+      padding-top: 1.5rem;
+    }
+
+    .client-selector-title {
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+    }
+
+    .client-list {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+
+    .client-item {
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .client-item:hover {
+      background-color: rgba(26, 188, 156, 0.1);
+    }
+
+    .client-item.selected {
+      background-color: rgba(26, 188, 156, 0.2);
+      border-left: 4px solid var(--primary-color);
+    }
+
+    .client-item:last-child {
+      border-bottom: none;
+    }
+
+    .client-info {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .client-name {
+      font-weight: 500;
+    }
+
+    .client-id {
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    .client-loans {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      margin-top: 0.25rem;
+    }
+
+    /* Loading overlay */
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .loading-overlay.active {
+      display: flex;
+    }
+
+    .loader {
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid var(--primary-color);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+
+    /* Toast notification styles */
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      z-index: 3000;
+      transform: translateX(120%);
+      transition: transform 0.3s ease;
+      max-width: 350px;
+    }
+
+    .toast.active {
+      transform: translateX(0);
+    }
+
+    .toast i {
+      margin-right: 0.75rem;
+      font-size: 1.25rem;
+    }
+
+    .toast-success {
+      background-color: var(--alert-success-bg);
+      border-left: 4px solid var(--alert-success-border);
+      color: #d1f5e0;
+    }
+
+    .toast-error {
+      background-color: var(--alert-error-bg);
+      border-left: 4px solid var(--alert-error-border);
+      color: #ffd3d3;
+    }
+
+    .toast-warning {
+      background-color: var(--alert-warning-bg);
+      border-left: 4px solid var(--alert-warning-border);
+      color: #ffe8c5;
+    }
+
+    .toast-info {
+      background-color: var(--alert-info-bg);
+      border-left: 4px solid var(--alert-info-border);
+      color: #d1e8ff;
+    }
+
+    .buttons-container {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    /* Modal de confirmación */
+    .custom-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--modal-bg);
+      z-index: 4000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .custom-modal.active {
+      display: flex;
+    }
+
+    .custom-modal-content {
+      background-color: var(--modal-content-bg);
+      border-radius: var(--modal-border-radius);
+      padding: var(--modal-padding);
+      width: 90%;
+      max-width: 500px;
+      box-shadow: var(--modal-shadow);
+      text-align: center;
+    }
+
+    .custom-modal-title {
+      font-size: var(--modal-title-size);
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+    }
+
+    .custom-modal-message {
+      font-size: var(--modal-message-size);
+      margin-bottom: 2rem;
+      line-height: 1.5;
+    }
+
+    .custom-modal-footer {
+      display: flex;
+      justify-content: center;
+      gap: var(--modal-footer-gap);
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+      
+      .buttons-container {
+        flex-direction: column;
+      }
+      
+      .custom-modal-footer {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1><i class="fas fa-building"></i> Configuración de Empresa</h1>
+    
+    <form id="companyConfigForm">
+      <!-- Logo de la empresa -->
+      <div class="form-group">
+        <label>Logo de la Empresa</label>
+        <div class="image-preview-container">
+          <div class="default-logo" id="defaultLogo">
+            <i class="fas fa-building"></i>
+          </div>
+          <img id="companyLogoPreview" src="" alt="Logo de la empresa" class="image-preview" style="display: none;">
+        </div>
+      </div>
+      
+      <!-- Nombre de la empresa -->
+      <div class="form-group">
+        <label for="companyName">Nombre de la Empresa</label>
+        <input type="text" id="companyName" class="form-control" disabled>
+      </div>
+      
+      <!-- RNC -->
+      <div class="form-group">
+        <label for="companyRNC">RNC</label>
+        <input type="text" id="companyRNC" class="form-control" disabled>
+      </div>
+      
+      <!-- Teléfono -->
+      <div class="form-group">
+        <label for="companyPhone">Teléfono</label>
+        <input type="tel" id="companyPhone" class="form-control" disabled>
+      </div>
+      
+      <!-- Dirección -->
+      <div class="form-group">
+        <label for="companyAddress">Dirección</label>
+        <input type="text" id="companyAddress" class="form-control" disabled>
+      </div>
+      
+      <!-- Cuentas Bancarias -->
+      <div class="bank-accounts-container">
+        <h3 class="bank-account-title"><i class="fas fa-university"></i> Cuentas Bancarias</h3>
+        <div id="bankAccountsList">
+          <!-- Las cuentas bancarias se mostrarán aquí dinámicamente -->
+        </div>
+      </div>
+      
+      <!-- Selector de Clientes -->
+      <div class="client-selector">
+        <h3 class="client-selector-title"><i class="fas fa-users"></i> Seleccionar Cliente para Asociar</h3>
+        <div class="form-group">
+          <label for="searchClient">Buscar Cliente:</label>
+          <input type="text" id="searchClient" class="form-control" placeholder="Ingrese nombre o cédula del cliente">
+        </div>
+        <div class="client-list" id="clientList">
+          <!-- Los clientes se cargarán aquí dinámicamente -->
+        </div>
+      </div>
+      
+      <div class="buttons-container">
+        <button type="button" id="associateBtn" class="btn btn-success btn-block">
+          <i class="fas fa-link"></i> Asociar al Cliente Seleccionado
+        </button>
+        <button type="button" id="associateAllBtn" class="btn btn-warning btn-block">
+          <i class="fas fa-users"></i> Asociar a Todos los Clientes
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Loading overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loader"></div>
+  </div>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toastNotification">
+    <i class="fas fa-check-circle"></i>
+    <span id="toastMessage">Operación realizada con éxito</span>
+  </div>
+
+  <!-- Modal de confirmación -->
+  <div class="custom-modal" id="confirmationModal">
+    <div class="custom-modal-content">
+      <h3 class="custom-modal-title"><i class="fas fa-exclamation-circle"></i> Confirmación</h3>
+      <p class="custom-modal-message" id="confirmationMessage">¿Estás seguro de realizar esta acción?</p>
+      <div class="custom-modal-footer">
+        <button id="confirmYes" class="btn btn-success">
+          <i class="fas fa-check"></i> Sí
+        </button>
+        <button id="confirmNo" class="btn btn-danger">
+          <i class="fas fa-times"></i> No
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-storage-compat.js"></script>
+
+  <script>
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+      authDomain: "inventario-35d6b.firebaseapp.com",
+      databaseURL: "https://inventario-35d6b-default-rtdb.firebaseio.com",
+      projectId: "inventario-35d6b",
+      storageBucket: "inventario-35d6b.appspot.com",
+      messagingSenderId: "266100399659",
+      appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+    };
+
+    // Inicializar Firebase
+    try {
+      firebase.initializeApp(firebaseConfig);
+      console.log("Firebase inicializado correctamente");
+    } catch (error) {
+      console.error("Error al inicializar Firebase:", error);
+      showToast('Error', 'Error al conectar con la base de datos', 'error');
+    }
+
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+    const storage = firebase.storage();
+
+    // Variables globales
+    let currentUser = null;
+    let companyData = null;
+    let clientsList = [];
+    let selectedClient = null;
+    let confirmCallback = null;
+
+    // Inicializar la aplicación cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log("DOM cargado, verificando autenticación...");
+      
+      auth.onAuthStateChanged(user => {
+        if (user) {
+          currentUser = user;
+          console.log('Usuario autenticado:', user.uid);
+          setupEventListeners();
+          loadCompanyData();
+          loadClients();
+        } else {
+          console.log('Usuario no autenticado, redirigiendo...');
+          showToast('Error', 'Debes iniciar sesión para ver esta página. Redirigiendo...', 'error');
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 3000);
+        }
+      }, error => {
+        console.error("Error en autenticación:", error);
+        showToast('Error', 'Error al verificar autenticación', 'error');
+      });
+    });
+
+    // Configurar event listeners
+    function setupEventListeners() {
+      // Buscador de clientes
+      document.getElementById('searchClient').addEventListener('input', searchClients);
+      
+      // Botón para asociar configuración al cliente seleccionado
+      document.getElementById('associateBtn').addEventListener('click', associateCompanyToClient);
+      
+      // Botón para asociar configuración a todos los clientes
+      document.getElementById('associateAllBtn').addEventListener('click', () => {
+        showConfirmation(
+          'Confirmar Asociación Masiva',
+          `¿Estás seguro de asociar la configuración a TODOS los clientes (${clientsList.length} clientes)?`,
+          associateCompanyToAllClients
+        );
+      });
+      
+      // Event listeners para el modal de confirmación
+      document.getElementById('confirmYes').addEventListener('click', () => {
+        if (confirmCallback) {
+          confirmCallback();
+        }
+        hideConfirmation();
+      });
+      
+      document.getElementById('confirmNo').addEventListener('click', hideConfirmation);
+    }
+
+    // Mostrar modal de confirmación
+    function showConfirmation(title, message, callback) {
+      document.getElementById('confirmationMessage').textContent = message;
+      document.querySelector('.custom-modal-title').innerHTML = `<i class="fas fa-exclamation-circle"></i> ${title}`;
+      confirmCallback = callback;
+      document.getElementById('confirmationModal').classList.add('active');
+    }
+
+    // Ocultar modal de confirmación
+    function hideConfirmation() {
+      document.getElementById('confirmationModal').classList.remove('active');
+      confirmCallback = null;
+    }
+
+    // Cargar datos de la empresa
+    async function loadCompanyData() {
+      try {
+        showLoading();
+        console.log('Cargando datos de empresa para usuario:', currentUser.uid);
+        
+        const companyRef = db.collection("informacionCompany").doc(currentUser.uid);
+        const doc = await companyRef.get();
+        
+        if (doc.exists) {
+          companyData = doc.data();
+          console.log('Datos de empresa encontrados:', companyData);
+          displayCompanyData(companyData);
+        } else {
+          console.log('No se encontraron datos de empresa para este usuario');
+          showToast('Información', 'No se encontraron datos de empresa configurados.', 'info');
+          displayEmptyData();
+        }
+      } catch (error) {
+        console.error("Error al cargar datos de la empresa:", error);
+        showToast('Error', 'No se pudieron cargar los datos de la empresa: ' + error.message, 'error');
+        displayEmptyData();
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Mostrar datos vacíos cuando no hay información
+    function displayEmptyData() {
+      document.getElementById('companyName').value = 'No configurado';
+      document.getElementById('companyRNC').value = 'No configurado';
+      document.getElementById('companyPhone').value = 'No configurado';
+      document.getElementById('companyAddress').value = 'No configurado';
+      
+      const bankAccountsList = document.getElementById('bankAccountsList');
+      bankAccountsList.innerHTML = '<p style="color: var(--text-light);">No hay cuentas bancarias registradas.</p>';
+    }
+
+    // Mostrar datos de la empresa en el formulario
+    function displayCompanyData(data) {
+      if (!data) {
+        console.log('No hay datos para mostrar');
+        displayEmptyData();
+        return;
+      }
+      
+      console.log('Mostrando datos de empresa:', data);
+      
+      // Mostrar logo si existe
+      const preview = document.getElementById('companyLogoPreview');
+      const defaultLogo = document.getElementById('defaultLogo');
+      
+      if (data.fotoURL) {
+        console.log('Mostrando logo de empresa:', data.fotoURL);
+        preview.src = data.fotoURL;
+        preview.style.display = 'block';
+        defaultLogo.style.display = 'none';
+        
+        // Manejar error en carga de imagen
+        preview.onerror = function() {
+          console.log('Error al cargar la imagen, mostrando icono por defecto');
+          preview.style.display = 'none';
+          defaultLogo.style.display = 'flex';
+        };
+      } else {
+        console.log('No hay logo de empresa configurado');
+        preview.style.display = 'none';
+        defaultLogo.style.display = 'flex';
+      }
+      
+      // Llenar campos del formulario
+      document.getElementById('companyName').value = data.nombreEmpresa || 'No configurado';
+      document.getElementById('companyRNC').value = data.rnc || 'No configurado';
+      document.getElementById('companyPhone').value = data.telefono || 'No configurado';
+      document.getElementById('companyAddress').value = data.direccion || 'No configurado';
+      
+      // Mostrar cuentas bancarias si existen
+      displayBankAccounts(data.bankAccounts);
+    }
+
+    // Mostrar cuentas bancarias
+    function displayBankAccounts(accounts) {
+      const bankAccountsList = document.getElementById('bankAccountsList');
+      bankAccountsList.innerHTML = '';
+      
+      if (!accounts || !Array.isArray(accounts) || accounts.length === 0) {
+        console.log('Mostrando mensaje de no hay cuentas bancarias');
+        bankAccountsList.innerHTML = '<p style="color: var(--text-light);">No hay cuentas bancarias registradas.</p>';
+        return;
+      }
+      
+      console.log('Mostrando', accounts.length, 'cuentas bancarias');
+      
+      accounts.forEach((account) => {
+        const accountElement = document.createElement('div');
+        accountElement.className = 'bank-account-card';
+        accountElement.innerHTML = `
+          <div class="form-group">
+            <label>Banco</label>
+            <input type="text" class="form-control" value="${account.bankName || 'No especificado'}" disabled>
+          </div>
+          
+          <div class="form-group">
+            <label>Número de Cuenta</label>
+            <input type="text" class="form-control" value="${account.accountNumber || 'No especificado'}" disabled>
+          </div>
+          
+          <div class="form-group">
+            <label>Tipo de Cuenta</label>
+            <input type="text" class="form-control" value="${account.accountType === 'ahorro' ? 'Ahorro' : account.accountType === 'corriente' ? 'Corriente' : 'No especificado'}" disabled>
+          </div>
+          
+          <div class="form-group">
+            <label>Titular</label>
+            <input type="text" class="form-control" value="${account.accountHolder || 'No especificado'}" disabled>
+          </div>
+          
+          <div class="bank-logo-container">
+            <div class="bank-logo-preview">
+              ${account.logoURL ? 
+                `<img src="${account.logoURL}" alt="Logo del banco" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-university\\'></i>'">` : 
+                '<i class="fas fa-university"></i>'}
+            </div>
+          </div>
+        `;
+        
+        bankAccountsList.appendChild(accountElement);
+      });
+    }
+
+    // Cargar lista de clientes con préstamos
+    async function loadClients() {
+      try {
+        showLoading();
+        console.log('Cargando lista de clientes...');
+        
+        let q;
+        if (currentUser && currentUser.uid !== 'admin') {
+          q = db.collection("Loans").where("userId", "==", currentUser.uid);
+        } else {
+          q = db.collection("Loans");
+        }
+        
+        const querySnapshot = await q.get();
+        clientsList = [];
+        const uniqueClients = new Map();
+        
+        querySnapshot.forEach(doc => {
+          const loan = doc.data();
+          if (loan.client && loan.client.id) {
+            const clientId = loan.client.id;
+            
+            if (!uniqueClients.has(clientId)) {
+              uniqueClients.set(clientId, {
+                id: clientId,
+                name: loan.client.name || 'Cliente sin nombre',
+                phone: loan.client.phone || 'Sin teléfono',
+                address: loan.client.address || 'Sin dirección',
+                loansCount: 1,
+                loanId: doc.id
+              });
+            } else {
+              const client = uniqueClients.get(clientId);
+              client.loansCount++;
+              uniqueClients.set(clientId, client);
+            }
+          }
+        });
+        
+        clientsList = Array.from(uniqueClients.values());
+        console.log('Clientes cargados:', clientsList.length);
+        displayClients(clientsList);
+      } catch (error) {
+        console.error("Error al cargar clientes:", error);
+        showToast('Error', 'No se pudieron cargar los clientes: ' + error.message, 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Mostrar clientes en la lista
+    function displayClients(clients) {
+      const clientListElement = document.getElementById('clientList');
+      clientListElement.innerHTML = '';
+      
+      if (!clients || clients.length === 0) {
+        console.log('No hay clientes para mostrar');
+        clientListElement.innerHTML = '<p style="color: var(--text-light);">No hay clientes con préstamos activos.</p>';
+        return;
+      }
+      
+      console.log('Mostrando', clients.length, 'clientes');
+      
+      clients.forEach(client => {
+        const clientElement = document.createElement('div');
+        clientElement.className = 'client-item';
+        clientElement.dataset.id = client.id;
+        clientElement.innerHTML = `
+          <div class="client-info">
+            <div>
+              <div class="client-name">${client.name}</div>
+              <div class="client-id">${client.id}</div>
+            </div>
+            <div class="client-loans">${client.loansCount} préstamo${client.loansCount > 1 ? 's' : ''}</div>
+          </div>
+        `;
+        
+        clientElement.addEventListener('click', () => {
+          document.querySelectorAll('.client-item').forEach(item => {
+            item.classList.remove('selected');
+          });
+          clientElement.classList.add('selected');
+          selectedClient = client;
+          console.log('Cliente seleccionado:', client);
+        });
+        
+        clientListElement.appendChild(clientElement);
+      });
+    }
+
+    // Buscar clientes
+    function searchClients() {
+      const searchTerm = document.getElementById('searchClient').value.trim().toLowerCase();
+      console.log('Buscando clientes con término:', searchTerm);
+      
+      if (!searchTerm) {
+        console.log('Mostrando todos los clientes');
+        displayClients(clientsList);
+        return;
+      }
+      
+      const filteredClients = clientsList.filter(client => 
+        client.name.toLowerCase().includes(searchTerm) || 
+        (client.id && client.id.toLowerCase().includes(searchTerm))
+      );
+      
+      console.log('Clientes encontrados:', filteredClients.length);
+      displayClients(filteredClients);
+    }
+
+    // Asociar configuración de empresa al cliente seleccionado
+    async function associateCompanyToClient() {
+      if (!selectedClient) {
+        console.log('No se seleccionó cliente');
+        showToast('Error', 'Debes seleccionar un cliente para asociar la configuración.', 'error');
+        return;
+      }
+      
+      if (!companyData) {
+        console.log('No hay datos de empresa');
+        showToast('Error', 'No hay datos de empresa para asociar.', 'error');
+        return;
+      }
+      
+      try {
+        showLoading();
+        console.log('Asociando configuración al cliente:', selectedClient.id);
+        
+        // Actualizar el préstamo del cliente con los datos de la empresa
+        const loanRef = db.collection("Loans").doc(selectedClient.loanId);
+        await loanRef.update({
+          companyInfo: {
+            nombreEmpresa: companyData.nombreEmpresa || '',
+            rnc: companyData.rnc || '',
+            telefono: companyData.telefono || '',
+            direccion: companyData.direccion || '',
+            fotoURL: companyData.fotoURL || '',
+            bankAccounts: companyData.bankAccounts || []
+          },
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        console.log('Configuración asociada con éxito');
+        showToast('Éxito', `Configuración asociada al cliente ${selectedClient.name} correctamente.`, 'success');
+      } catch (error) {
+        console.error("Error asociando empresa al cliente:", error);
+        showToast('Error', 'Ocurrió un error al asociar la configuración: ' + error.message, 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Asociar configuración de empresa a TODOS los clientes
+    async function associateCompanyToAllClients() {
+      if (!companyData) {
+        console.log('No hay datos de empresa');
+        showToast('Error', 'No hay datos de empresa para asociar.', 'error');
+        return;
+      }
+      
+      if (!clientsList || clientsList.length === 0) {
+        console.log('No hay clientes para asociar');
+        showToast('Error', 'No hay clientes disponibles para asociar.', 'error');
+        return;
+      }
+      
+      try {
+        showLoading();
+        console.log('Asociando configuración a TODOS los clientes');
+        
+        // Contador para llevar registro de las asociaciones exitosas
+        let successCount = 0;
+        let errorCount = 0;
+        
+        // Procesar cada cliente
+        for (const client of clientsList) {
+          try {
+            const loanRef = db.collection("Loans").doc(client.loanId);
+            await loanRef.update({
+              companyInfo: {
+                nombreEmpresa: companyData.nombreEmpresa || '',
+                rnc: companyData.rnc || '',
+                telefono: companyData.telefono || '',
+                direccion: companyData.direccion || '',
+                fotoURL: companyData.fotoURL || '',
+                bankAccounts: companyData.bankAccounts || []
+              },
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            successCount++;
+          } catch (error) {
+            console.error(`Error asociando empresa al cliente ${client.id}:`, error);
+            errorCount++;
+          }
+        }
+        
+        console.log('Proceso de asociación masiva completado');
+        showToast('Éxito', `Configuración asociada a ${successCount} clientes. ${errorCount > 0 ? `(Errores: ${errorCount})` : ''}`, 'success');
+      } catch (error) {
+        console.error("Error en asociación masiva:", error);
+        showToast('Error', 'Ocurrió un error al asociar la configuración a todos los clientes: ' + error.message, 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Mostrar toast notification
+    function showToast(title, message, type = 'success') {
+      console.log(`Mostrando toast [${type}]: ${title} - ${message}`);
+      const toast = document.getElementById('toastNotification');
+      
+      // Configurar el toast según el tipo
+      toast.className = 'toast';
+      toast.classList.add(`toast-${type}`);
+      
+      // Configurar icono según el tipo
+      let icon = 'fa-check-circle';
+      if (type === 'error') icon = 'fa-exclamation-circle';
+      if (type === 'warning') icon = 'fa-exclamation-triangle';
+      if (type === 'info') icon = 'fa-info-circle';
+      
+      toast.innerHTML = `<i class="fas ${icon}"></i><span id="toastMessage">${message}</span>`;
+      
+      // Mostrar el toast
+      toast.classList.add('active');
+      
+      // Ocultar después de 5 segundos
+      setTimeout(() => {
+        toast.classList.remove('active');
+      }, 5000);
+    }
+
+    // Mostrar loading overlay
+    function showLoading() {
+      console.log('Mostrando loading overlay');
+      document.getElementById('loadingOverlay').classList.add('active');
+    }
+
+    // Ocultar loading overlay
+    function hideLoading() {
+      console.log('Ocultando loading overlay');
+      document.getElementById('loadingOverlay').classList.remove('active');
+    }
+  </script>
+</body>
+</html>

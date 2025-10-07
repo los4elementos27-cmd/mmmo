@@ -1,0 +1,2842 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Préstamos</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --primary-color: #1abc9c;
+      --primary-dark: #16a085;
+      --secondary-color: #2a2a3f;
+      --background-color: #2c3e50;
+      --text-color: #ffffff;
+      --text-light: #a8a8a8;
+      --border-color: #444;
+      --card-bg: #34495e;
+      --danger-color: #e74c3c;
+      --warning-color: #f39c12;
+      --success-color: #2ecc71;
+      --info-color: #3498db;
+      --sidebar-width: 250px;
+      --mobile-nav-height: 75px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* Sidebar (Desktop) */
+    .sidebar {
+      width: var(--sidebar-width);
+      background-color: var(--secondary-color);
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      overflow-y: auto;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+      z-index: 100;
+    }
+
+    .sidebar .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      padding: 1.5rem;
+      text-align: center;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .sidebar .nav-menu {
+      list-style: none;
+      padding: 1rem 0;
+    }
+
+    .sidebar .nav-item {
+      margin: 0.5rem 0;
+    }
+
+    .sidebar .nav-link {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1.5rem;
+      color: var(--text-color);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border-left: 4px solid transparent;
+    }
+
+    .sidebar .nav-link i {
+      margin-right: 1rem;
+      font-size: 1.2rem;
+    }
+
+    .sidebar .nav-link:hover,
+    .sidebar .nav-link.active {
+      background-color: var(--primary-color);
+      border-left-color: var(--primary-dark);
+      color: white;
+    }
+
+    /* Mobile Navigation */
+    .mobile-nav {
+      display: none;
+      background: rgba(42, 42, 63, 0.2);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      height: var(--mobile-nav-height);
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.4);
+      z-index: 100;
+    }
+
+    .mobile-nav .nav-menu {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: 100%;
+      list-style: none;
+    }
+
+    .mobile-nav .nav-item {
+      flex: 1;
+      text-align: center;
+    }
+
+    .mobile-nav .nav-link {
+      color: var(--text-light);
+      text-decoration: none;
+      padding: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+    }
+
+    .mobile-nav .nav-link i {
+      font-size: 1.8rem;
+      margin-bottom: 0.4rem;
+      transition: transform 0.3s ease, text-shadow 0.3s ease;
+    }
+
+    .mobile-nav .nav-link:hover,
+    .mobile-nav .nav-link.active {
+      color: var(--primary-color);
+      background: rgba(26, 188, 156, 0.1);
+      border-radius: 8px;
+    }
+
+    .mobile-nav .nav-link:hover i,
+    .mobile-nav .nav-link.active i {
+      transform: scale(1.1);
+      text-shadow: 0 0 10px var(--primary-color), 0 0 20px var(--primary-color);
+    }
+
+    /* Main Content */
+    .main-container {
+      flex: 1;
+      padding: 2rem;
+      margin-left: var(--sidebar-width);
+      max-width: calc(100% - var(--sidebar-width));
+      width: 100%;
+    }
+
+    .section-title {
+      color: var(--primary-color);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .card {
+      background-color: var(--secondary-color);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      font-size: 1rem;
+    }
+
+    .btn {
+      background-color: var(--primary-color);
+      color: var(--text-color);
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn i {
+      margin-right: 8px;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .btn-success {
+      background-color: var(--success-color);
+    }
+
+    .btn-info {
+      background-color: var(--info-color);
+    }
+
+    .btn-danger {
+      background-color: var(--danger-color);
+    }
+
+    .btn-danger:hover {
+      background-color: #c0392b;
+    }
+
+    .btn-warning {
+      background-color: var(--warning-color);
+    }
+
+    .client-status {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      border-radius: 8px;
+      background-color: var(--card-bg);
+    }
+
+    .status-good {
+      border-left: 4px solid var(--success-color);
+    }
+
+    .status-overdue {
+      border-left: 4px solid var(--danger-color);
+    }
+
+    .status-expired {
+      border-left: 4px solid var(--warning-color);
+    }
+
+    .payment-history-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      background-color: rgba(52, 152, 219, 0.1);
+      border-radius: 4px;
+    }
+
+    .payment-history-item.paid {
+      background-color: rgba(46, 204, 113, 0.1);
+    }
+
+    .payment-history-item.overdue {
+      background-color: rgba(231, 76, 60, 0.1);
+    }
+
+    .payment-history-item.expired {
+      background-color: rgba(243, 156, 18, 0.1);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background-color: var(--secondary-color);
+      padding: 2rem;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-title {
+      margin-bottom: 1.5rem;
+      color: var(--primary-color);
+      text-align: center;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .receipt {
+      background-color: white;
+      color: black;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+      display: none;
+    }
+
+    .receipt h3 {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .receipt p {
+      margin: 0.5rem 0;
+    }
+
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .loading-overlay.active {
+      display: flex;
+    }
+
+    .loader {
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid var(--primary-color);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      margin-bottom: 2rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: var(--card-bg);
+    }
+
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      background-color: var(--secondary-color);
+      color: var(--primary-color);
+    }
+
+    tr:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background-color: var(--card-bg);
+      padding: 1rem;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stat-card h3 {
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-card p {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .chart-container {
+      max-width: 100%;
+      margin: 1rem 0;
+    }
+
+    canvas#dashboardChart {
+      max-height: 200px;
+      width: 100%;
+    }
+
+    canvas#monthlyChart {
+      max-height: 300px;
+      width: 100%;
+    }
+
+    canvas#yearlyChart {
+      max-height: 300px;
+      width: 100%;
+    }
+
+    .report-filters {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .report-filters .form-group {
+      margin-bottom: 0;
+      min-width: 200px;
+    }
+
+    .report-period {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .report-period-btn {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .report-period-btn.active {
+      background-color: var(--primary-color);
+      color: white;
+      border-color: var(--primary-dark);
+    }
+
+    .config-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .config-card {
+      background-color: var(--card-bg);
+      border-radius: 10px;
+      padding: 1.5rem;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .config-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .config-card i {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: var(--primary-color);
+    }
+
+    .config-card h3 {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .config-card p {
+      font-size: 0.8rem;
+      color: var(--text-light);
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .sidebar {
+        display: none;
+      }
+
+      .mobile-nav {
+        display: flex;
+      }
+
+      .main-container {
+        margin-left: 0;
+        max-width: 100%;
+        padding: 1rem;
+        padding-bottom: calc(var(--mobile-nav-height) + 10px);
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .report-filters {
+        flex-direction: column;
+      }
+    }
+
+    @media (min-width: 769px) {
+      .mobile-nav {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar (Desktop) -->
+  <nav class="sidebar">
+    <div class="logo">Sistema de Préstamos</div>
+    <ul class="nav-menu">
+      <li class="nav-item">
+        <a href="#dashboard" class="nav-link active">
+          <i class="fas fa-tachometer-alt"></i> Panel
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#new-loan" class="nav-link">
+          <i class="fas fa-hand-holding-usd"></i> Nuevo Préstamo
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#loans-list" class="nav-link">
+          <i class="fas fa-list"></i> Préstamos Activos
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#payment" class="nav-link">
+          <i class="fas fa-money-bill-wave"></i> Pagos
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#users" class="nav-link">
+          <i class="fas fa-users"></i> Usuarios
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#reports" class="nav-link">
+          <i class="fas fa-file-alt"></i> Reportes
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#config" class="nav-link">
+          <i class="fas fa-cog"></i> Configuración
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <main class="main-container">
+    <!-- Dashboard Section -->
+    <section id="dashboard" class="card">
+      <h1 class="section-title">Panel de Control</h1>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h3>Total Prestado</h3>
+          <p id="totalLoaned">$0.00</p>
+        </div>
+        <div class="stat-card">
+          <h3>Monto Pendiente</h3>
+          <p id="totalPending">$0.00</p>
+        </div>
+        <div class="stat-card">
+          <h3>Total Intereses</h3>
+          <p id="totalInterest">$0.00</p>
+        </div>
+        <div class="stat-card">
+          <h3>Clientes con Préstamos</h3>
+          <p id="totalClients">0</p>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="dashboardChart"></canvas>
+      </div>
+    </section>
+
+    <!-- New Loan Section -->
+    <section id="new-loan" class="card" style="display: none;">
+      <h1 class="section-title">Nuevo Préstamo</h1>
+      <div class="card">
+        <form id="loanForm">
+          <div class="loan-form-container">
+            <!-- Datos Personales -->
+            <div>
+              <h3>Datos Personales</h3>
+              <div class="form-group">
+                <label for="clientName">Nombre Completo</label>
+                <input type="text" id="clientName" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="clientId">Cédula/Número de Identificación</label>
+                <input type="text" id="clientId" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="clientAddress">Dirección</label>
+                <input type="text" id="clientAddress" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="clientPhone">Teléfono</label>
+                <input type="tel" id="clientPhone" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="clientNationality">Nacionalidad</label>
+                <input type="text" id="clientNationality" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="referenceName">Referencia Personal (Nombre)</label>
+                <input type="text" id="referenceName" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="referencePhone">Referencia Personal (Teléfono)</label>
+                <input type="tel" id="referencePhone" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="referenceRelation">Parentesco/Relación</label>
+                <input type="text" id="referenceRelation" class="form-control" required>
+              </div>
+            </div>
+
+            <!-- Datos del Préstamo -->
+            <div>
+              <h3>Datos del Préstamo</h3>
+              <div class="form-group">
+                <label for="loanAmount">Monto del Préstamo (Capital)</label>
+                <input type="number" id="loanAmount" class="form-control" min="1" required>
+              </div>
+              <div class="form-group">
+                <label for="interestRate">Tasa de Interés (%)</label>
+                <input type="number" id="interestRate" class="form-control" min="1" max="100" step="0.1" required>
+              </div>
+              <div class="form-group">
+                <label>Frecuencia de Pago</label>
+                <div class="payment-frequency">
+                  <div class="payment-frequency-option">
+                    <input type="radio" id="frequencyMonthly" name="paymentFrequency" value="monthly" checked>
+                    <label for="frequencyMonthly">Mensual</label>
+                  </div>
+                  <div class="payment-frequency-option">
+                    <input type="radio" id="frequencyBiweekly" name="paymentFrequency" value="biweekly">
+                    <label for="frequencyBiweekly">Quincenal</label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="loanTerm">Plazo (Meses)</label>
+                <input type="number" id="loanTerm" class="form-control" min="1" required>
+              </div>
+              <div class="form-group">
+                <label for="loanDate">Fecha de Inicio</label>
+                <input type="date" id="loanDate" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="guarantee">Garantía (Opcional)</label>
+                <textarea id="guarantee" class="form-control" rows="3"></textarea>
+              </div>
+              
+              <!-- Credenciales de Acceso -->
+              <h3 style="margin-top: 2rem;">Credenciales de Acceso</h3>
+              <div class="form-group">
+                <label for="clientUsername">Nombre de Usuario</label>
+                <input type="text" id="clientUsername" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="clientPin">PIN (4 dígitos)</label>
+                <input type="password" id="clientPin" class="form-control" minlength="4" maxlength="4" pattern="\d{4}" required>
+              </div>
+            </div>
+          </div>
+
+          <!-- Resumen del Préstamo -->
+          <div class="loan-summary">
+            <h3>Resumen del Préstamo</h3>
+            <div class="loan-summary-item">
+              <span>Monto del Préstamo:</span>
+              <span id="summaryAmount">$0.00</span>
+            </div>
+            <div class="loan-summary-item">
+              <span>Tasa de Interés:</span>
+              <span id="summaryRate">0%</span>
+            </div>
+            <div class="loan-summary-item">
+              <span>Interés Total:</span>
+              <span id="summaryTotalInterest">$0.00</span>
+            </div>
+            <div class="loan-summary-item">
+              <span>Monto a Pagar:</span>
+              <span id="summaryTotalPayment">$0.00</span>
+            </div>
+            <div class="loan-summary-item">
+              <span>Pago por Período:</span>
+              <span id="summaryPeriodPayment">$0.00</span>
+            </div>
+            <div class="loan-summary-item">
+              <span>Fecha de Finalización:</span>
+              <span id="summaryEndDate">--/--/----</span>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-block btn-success" style="margin-top: 1.5rem;">
+            <i class="fas fa-save"></i> Registrar Préstamo
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Active Loans Section -->
+    <section id="loans-list" class="card" style="display: none;">
+      <h1 class="section-title">Préstamos Activos</h1>
+      <div class="table-container">
+        <table id="loansTable">
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Cédula</th>
+              <th>Monto Prestado</th>
+              <th>Saldo Pendiente</th>
+              <th>Próximo Pago</th>
+              <th>Estado</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="loansTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Payment Section -->
+    <section id="payment" class="card" style="display: none;">
+      <h1 class="section-title">Registro de Pagos</h1>
+      <div class="form-group">
+        <label for="searchClientPayment">Buscar Cliente:</label>
+        <input type="text" id="searchClientPayment" class="form-control" placeholder="Ingrese nombre o cédula del cliente">
+      </div>
+      
+      <div id="paymentFormContainer" style="display: none;">
+        <h3>Registrar Pago</h3>
+        <form id="paymentForm">
+          <input type="hidden" id="paymentLoanId">
+          <div class="form-group">
+            <label for="paymentAmount">Monto del Pago</label>
+            <input type="number" id="paymentAmount" class="form-control" min="0.01" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label for="paymentDate">Fecha del Pago</label>
+            <input type="date" id="paymentDate" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="paymentType">Tipo de Pago</label>
+            <select id="paymentType" class="form-control" required>
+              <option value="full">Pago Completo (Capital + Interés)</option>
+              <option value="interest">Solo Interés</option>
+              <option value="capital">Solo Capital</option>
+              <option value="custom">Personalizado</option>
+            </select>
+          </div>
+          <div class="form-group" id="latePaymentContainer" style="display: none;">
+            <label>
+              <input type="checkbox" id="applyLateFee"> Aplicar Mora
+            </label>
+            <div id="lateFeeDetails" style="display: none; margin-top: 1rem;">
+              <div class="form-group">
+                <label for="lateFeeDays">Días de Atraso</label>
+                <input type="number" id="lateFeeDays" class="form-control" min="0" value="0">
+              </div>
+              <div class="form-group">
+                <label for="lateFeeAmount">Monto de Mora</label>
+                <input type="number" id="lateFeeAmount" class="form-control" readonly value="0.00">
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-success">
+            <i class="fas fa-money-bill-wave"></i> Registrar Pago
+          </button>
+        </form>
+        <button id="generateReceiptBtn" class="btn btn-info" style="display: none; margin-top: 1rem;">
+          <i class="fas fa-receipt"></i> Generar Recibo
+        </button>
+        <button id="shareReceiptBtn" class="btn btn-info" style="display: none; margin-top: 1rem;">
+          <i class="fab fa-whatsapp"></i> Compartir en WhatsApp
+        </button>
+      </div>
+      
+      <div id="clientLoanDetails" style="margin-top: 2rem; display: none;">
+        <h3>Detalles del Préstamo</h3>
+        <div id="loanDetailsContent"></div>
+        <div id="clientStatusContainer" class="client-status status-good" style="display: none;">
+          <h3>Estado del Cliente</h3>
+          <div id="clientStatusContent"></div>
+        </div>
+        <h3 style="margin-top: 1.5rem;">Historial de Pagos</h3>
+        <div id="paymentHistory"></div>
+      </div>
+      
+      <div id="receiptContainer" class="receipt" style="display: none;">
+        <h3>Recibo de Pago</h3>
+        <p><strong>Cliente:</strong> <span id="receiptClientName"></span></p>
+        <p><strong>Cédula:</strong> <span id="receiptClientId"></span></p>
+        <p><strong>Préstamo ID:</strong> <span id="receiptLoanId"></span></p>
+        <p><strong>Fecha y Hora:</strong> <span id="receiptDateTime"></span></p>
+        <p><strong>Monto:</strong> $<span id="receiptAmount"></span></p>
+        <p><strong>Tipo:</strong> <span id="receiptType"></span></p>
+        <p><strong>Mora:</strong> $<span id="receiptLateFee"></span></p>
+        <p><strong>Registrado por:</strong> <span id="receiptRecordedBy"></span></p>
+      </div>
+    </section>
+
+    <!-- Users Section -->
+    <section id="users" class="card" style="display: none;">
+      <h1 class="section-title">Resumen de Usuarios y Préstamos</h1>
+      <div class="table-container">
+        <table id="usersTable">
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Cédula</th>
+              <th>Cant. Préstamos</th>
+              <th>Total Prestado</th>
+              <th>Total c/Intereses</th>
+              <th>Pendiente</th>
+              <th>Préstamos Saldados</th>
+              <th>Atrasos</th>
+              <th>Estado Actual</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Reports Section -->
+    <section id="reports" class="card" style="display: none;">
+      <h1 class="section-title">Reportes Generales</h1>
+      
+      <div class="report-filters">
+        <div class="form-group">
+          <label for="reportYear">Año</label>
+          <select id="reportYear" class="form-control">
+            <!-- Se llenará dinámicamente -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="reportMonth">Mes</label>
+          <select id="reportMonth" class="form-control">
+            <option value="all">Todos los meses</option>
+            <option value="1">Enero</option>
+            <option value="2">Febrero</option>
+            <option value="3">Marzo</option>
+            <option value="4">Abril</option>
+            <option value="5">Mayo</option>
+            <option value="6">Junio</option>
+            <option value="7">Julio</option>
+            <option value="8">Agosto</option>
+            <option value="9">Septiembre</option>
+            <option value="10">Octubre</option>
+            <option value="11">Noviembre</option>
+            <option value="12">Diciembre</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="report-period">
+        <button class="report-period-btn active" data-period="monthly">Mensual</button>
+        <button class="report-period-btn" data-period="yearly">Anual</button>
+      </div>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h3>Total Prestado</h3>
+          <p id="totalLoanedReport">$0.00</p>
+        </div>
+        <div class="stat-card">
+          <h3>Total Ganancias</h3>
+          <p id="totalProfits">$0.00</p>
+        </div>
+        <div class="stat-card">
+          <h3>Total Intereses</h3>
+          <p id="totalInterestReport">$0.00</p>
+        </div>
+        <div class="stat-card">
+          <h3>Total Capital + Intereses</h3>
+          <p id="totalCapitalInterest">$0.00</p>
+        </div>
+        <div class="stat-card">
+          <h3>Pérdidas por Atrasos</h3>
+          <p id="totalOverdueLoss">$0.00</p>
+        </div>
+        <div class="stat-card">
+          <h3>Clientes con Préstamos</h3>
+          <p id="totalClientsReport">0</p>
+        </div>
+        <div class="stat-card">
+          <h3>Monto Pendiente</h3>
+          <p id="totalPendingReport">$0.00</p>
+        </div>
+        <div class="stat-card">
+          <h3>Clientes Atrasados</h3>
+          <p id="totalOverdueClients">0</p>
+        </div>
+      </div>
+      
+      <div class="chart-container">
+        <h3>Reporte Mensual</h3>
+        <canvas id="monthlyChart"></canvas>
+      </div>
+      
+      <div class="chart-container">
+        <h3>Reporte Anual</h3>
+        <canvas id="yearlyChart"></canvas>
+      </div>
+    </section>
+
+    <!-- Config Section -->
+    <section id="config" class="card" style="display: none;">
+      <h1 class="section-title">Configuración del Sistema</h1>
+      
+      <div class="config-grid">
+        <div class="config-card" onclick="navigateTo('user-settings.html')">
+          <i class="fas fa-users-cog"></i>
+          <h3>Opciones de Usuario</h3>
+          <p>Configuración de usuarios y permisos</p>
+        </div>
+        
+        <div class="config-card" onclick="navigateTo('loan-settings.html')">
+          <i class="fas fa-cogs"></i>
+          <h3>Configuración de Préstamos</h3>
+          <p>Parámetros para nuevos préstamos</p>
+        </div>
+        
+        <div class="config-card" onclick="navigateTo('payment-settings.html')">
+          <i class="fas fa-money-bill-wave"></i>
+          <h3>Configuración de Pagos</h3>
+          <p>Opciones para procesamiento de pagos</p>
+        </div>
+        
+        <div class="config-card" onclick="navigateTo('report-settings.html')">
+          <i class="fas fa-chart-line"></i>
+          <h3>Configuración de Reportes</h3>
+          <p>Personalización de reportes</p>
+        </div>
+        
+        <div class="config-card" onclick="navigateTo('system-settings.html')">
+          <i class="fas fa-server"></i>
+          <h3>Configuración del Sistema</h3>
+          <p>Opciones generales del sistema</p>
+        </div>
+        
+        <div class="config-card" onclick="navigateTo('backup-settings.html')">
+          <i class="fas fa-database"></i>
+          <h3>Copias de Seguridad</h3>
+          <p>Configuración de respaldos</p>
+        </div>
+      </div>
+      
+      <div class="card">
+        <h3>Configuración de Moras</h3>
+        <form id="lateFeeConfigForm">
+          <div class="form-group">
+            <label for="lateFeeRate">Tasa de Mora (% por mes)</label>
+            <input type="number" id="lateFeeRateConfig" class="form-control" min="0" max="100" step="0.1" value="5" required>
+          </div>
+          <div class="form-group">
+            <label for="lateFeeGracePeriod">Período de Gracia (días)</label>
+            <input type="number" id="lateFeeGracePeriod" class="form-control" min="0" value="5" required>
+          </div>
+          <div class="form-group">
+            <label for="autoExtendLoan">Extensión Automática de Plazo</label>
+            <select id="autoExtendLoan" class="form-control" required>
+              <option value="yes">Sí</option>
+              <option value="no">No</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-success">
+            <i class="fas fa-save"></i> Guardar Configuración
+          </button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- Mobile Navigation -->
+  <nav class="mobile-nav">
+    <ul class="nav-menu">
+      <li class="nav-item">
+        <a href="#dashboard" class="nav-link active">
+          <i class="fas fa-tachometer-alt"></i> Panel
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#new-loan" class="nav-link">
+          <i class="fas fa-hand-holding-usd"></i> Préstamo
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#loans-list" class="nav-link">
+          <i class="fas fa-list"></i> Activos
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#payment" class="nav-link">
+          <i class="fas fa-money-bill-wave"></i> Pagos
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#users" class="nav-link">
+          <i class="fas fa-users"></i> Usuarios
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#reports" class="nav-link">
+          <i class="fas fa-file-alt"></i> Reportes
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#config" class="nav-link">
+          <i class="fas fa-cog"></i> Config
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loader"></div>
+  </div>
+
+  <!-- Modal para confirmación -->
+  <div class="modal" id="confirmModal">
+    <div class="modal-content">
+      <h3 class="modal-title" id="confirmModalTitle"></h3>
+      <p id="confirmModalMessage"></p>
+      <div class="modal-footer">
+        <button id="confirmModalButton" class="btn btn-success">Confirmar</button>
+        <button onclick="closeModal()" class="btn btn-danger">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para información -->
+  <div class="modal" id="infoModal">
+    <div class="modal-content">
+      <h3 class="modal-title" id="infoModalTitle"></h3>
+      <p id="infoModalMessage"></p>
+      <div class="modal-footer">
+        <button onclick="closeModal()" class="btn">Aceptar</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      getDocs, 
+      doc, 
+      getDoc,
+      query, 
+      where,
+      updateDoc,
+      arrayUnion,
+      Timestamp,
+      addDoc,
+      setDoc,
+      orderBy,
+      startAt,
+      endAt
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+      authDomain: "inventario-35d6b.firebaseapp.com",
+      databaseURL: "https://inventario-35d6b-default-rtdb.firebaseio.com",
+      projectId: "inventario-35d6b",
+      storageBucket: "inventario-35d6b.appspot.com",
+      messagingSenderId: "266100399659",
+      appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    let selectedLoanForPayment = null;
+    let lastPaymentData = null;
+    let currentUser = null;
+    let systemConfig = {
+      lateFeeRate: 5,
+      gracePeriod: 5,
+      autoExtend: true
+    };
+    let monthlyReportData = {};
+    let yearlyReportData = {};
+
+    // Helper function to format numbers
+    function formatNumber(number) {
+      return number.toLocaleString('en-US', { 
+        minimumFractionDigits: 2, 
+        maximumFractionDigits: 2 
+      });
+    }
+
+    // Helper function to format date
+    function formatDate(date) {
+      return date.toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      });
+    }
+
+    // Helper function to format date and time
+    function formatDateTime(date) {
+      return date.toLocaleString('es-ES', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+      });
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      // Set up authentication state observer
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          currentUser = user;
+          loadSystemConfig();
+          initializeAppData();
+        } else {
+          // Redirect to login if not authenticated
+          window.location.href = 'login.html';
+        }
+      });
+
+      // Set up event listeners
+      setupEventListeners();
+      
+      // Set default date to current date
+      document.getElementById('paymentDate').value = new Date().toISOString().split('T')[0];
+      
+      // Initialize dashboard
+      initializeDashboardChart();
+      initializeMonthlyChart();
+      initializeYearlyChart();
+      
+      // Show dashboard by default
+      document.getElementById('dashboard').style.display = 'block';
+    });
+
+    function setupEventListeners() {
+      // Navigation
+      setupNavigation();
+      
+      // Payment section
+      document.getElementById('searchClientPayment').addEventListener('input', debounce(searchClientForPayment, 300));
+      document.getElementById('paymentForm').addEventListener('submit', registerPayment);
+      document.getElementById('paymentType').addEventListener('change', updatePaymentForm);
+      document.getElementById('applyLateFee').addEventListener('change', toggleLateFeeDetails);
+      document.getElementById('lateFeeDays').addEventListener('input', calculateLateFee);
+      document.getElementById('generateReceiptBtn').addEventListener('click', generateReceipt);
+      document.getElementById('shareReceiptBtn').addEventListener('click', shareReceipt);
+      
+      // New loan section
+      document.getElementById('loanAmount').addEventListener('input', calculateLoan);
+      document.getElementById('interestRate').addEventListener('input', calculateLoan);
+      document.getElementById('loanTerm').addEventListener('input', calculateLoan);
+      document.getElementById('loanDate').addEventListener('change', calculateLoan);
+      document.querySelectorAll('input[name="paymentFrequency"]').forEach(radio => {
+        radio.addEventListener('change', calculateLoan);
+      });
+      document.getElementById('loanForm').addEventListener('submit', registerLoan);
+      
+      // Reports section
+      document.getElementById('reportYear').addEventListener('change', loadReportsData);
+      document.getElementById('reportMonth').addEventListener('change', loadReportsData);
+      document.querySelectorAll('.report-period-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.report-period-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          updateReportCharts();
+        });
+      });
+      
+      // Config section
+      document.getElementById('lateFeeConfigForm').addEventListener('submit', saveSystemConfig);
+    }
+
+    function debounce(func, wait) {
+      let timeout;
+      return function(...args) {
+        const context = this;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), wait);
+      };
+    }
+
+    function initializeAppData() {
+      loadUsersData();
+      loadReportsData();
+      loadActiveLoans();
+      populateYearDropdown();
+    }
+
+    async function loadSystemConfig() {
+      try {
+        const configRef = doc(db, "SystemConfig", "loanSettings");
+        const configSnap = await getDoc(configRef);
+        
+        if (configSnap.exists()) {
+          systemConfig = configSnap.data();
+          document.getElementById('lateFeeRateConfig').value = systemConfig.lateFeeRate || 5;
+          document.getElementById('lateFeeGracePeriod').value = systemConfig.gracePeriod || 5;
+          document.getElementById('autoExtendLoan').value = systemConfig.autoExtend ? 'yes' : 'no';
+        } else {
+          // Set default config if not exists
+          await setDoc(configRef, systemConfig);
+        }
+      } catch (error) {
+        console.error("Error loading system config: ", error);
+        showInfoModal('Error', 'Error al cargar la configuración del sistema. Usando valores por defecto.');
+      }
+    }
+
+    async function saveSystemConfig(e) {
+      e.preventDefault();
+      
+      try {
+        showLoading();
+        const configRef = doc(db, "SystemConfig", "loanSettings");
+        const newConfig = {
+          lateFeeRate: parseFloat(document.getElementById('lateFeeRateConfig').value),
+          gracePeriod: parseInt(document.getElementById('lateFeeGracePeriod').value),
+          autoExtend: document.getElementById('autoExtendLoan').value === 'yes',
+          updatedAt: Timestamp.now(),
+          updatedBy: currentUser.uid
+        };
+        
+        await setDoc(configRef, newConfig, { merge: true });
+        systemConfig = newConfig;
+        showInfoModal('Éxito', 'Configuración guardada correctamente');
+      } catch (error) {
+        console.error("Error saving system config: ", error);
+        showInfoModal('Error', 'Error al guardar la configuración');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function setupNavigation() {
+      const navLinks = document.querySelectorAll('.nav-link');
+      const sections = document.querySelectorAll('.main-container section');
+
+      navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const targetId = link.getAttribute('href').substring(1);
+          sections.forEach(section => section.style.display = 'none');
+          navLinks.forEach(l => l.classList.remove('active'));
+          document.getElementById(targetId).style.display = 'block';
+          link.classList.add('active');
+          
+          // Add active class to corresponding mobile nav link
+          document.querySelectorAll(`.mobile-nav .nav-link[href="#${targetId}"]`).forEach(mobileLink => {
+            mobileLink.classList.add('active');
+          });
+          
+          // Add active class to corresponding sidebar link
+          document.querySelectorAll(`.sidebar .nav-link[href="#${targetId}"]`).forEach(sidebarLink => {
+            sidebarLink.classList.add('active');
+          });
+          
+          // Load data if needed
+          if (targetId === 'reports') {
+            loadReportsData();
+          } else if (targetId === 'users') {
+            loadUsersData();
+          } else if (targetId === 'loans-list') {
+            loadActiveLoans();
+          }
+        });
+      });
+    }
+
+    function navigateTo(url) {
+      window.location.href = url;
+    }
+
+    async function loadActiveLoans() {
+      try {
+        showLoading();
+        let q;
+        
+        if (currentUser && currentUser.uid !== 'admin') {
+          // For regular users, only show their own loans
+          q = query(
+            collection(db, "Loans"), 
+            where("userId", "==", currentUser.uid),
+            where("status", "in", ["active", "overdue"])
+          );
+        } else {
+          // For admin, show all active loans
+          q = query(
+            collection(db, "Loans"), 
+            where("status", "in", ["active", "overdue"])
+          );
+        }
+        
+        const querySnapshot = await getDocs(q);
+        const loansTableBody = document.getElementById('loansTableBody');
+        loansTableBody.innerHTML = '';
+
+        querySnapshot.forEach(doc => {
+          const loan = { id: doc.id, ...doc.data() };
+          const nextPayment = loan.paymentSchedule?.find(p => p.status === 'pending');
+          const nextPaymentDate = nextPayment ? new Date(nextPayment.dueDate).toLocaleDateString('es-ES') : 'N/A';
+          
+          let statusBadge = '';
+          if (loan.status === 'overdue') {
+            statusBadge = '<span class="badge badge-danger">Atrasado</span>';
+          } else if (loan.status === 'expired') {
+            statusBadge = '<span class="badge badge-warning">No Saldado</span>';
+          } else {
+            statusBadge = '<span class="badge badge-success">Activo</span>';
+          }
+
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${loan.client.name}</td>
+            <td>${loan.client.id}</td>
+            <td>$${formatNumber(loan.amount)}</td>
+            <td>$${formatNumber(loan.balance)}</td>
+            <td>${nextPaymentDate}</td>
+            <td>${statusBadge}</td>
+            <td>
+              <button class="btn btn-success pay-loan-btn" data-loan-id="${loan.id}" data-client-name="${loan.client.name}">
+                <i class="fas fa-money-bill-wave"></i> Pagar
+              </button>
+            </td>
+          `;
+          loansTableBody.appendChild(row);
+        });
+
+        // Attach event listeners to pay buttons
+        document.querySelectorAll('.pay-loan-btn').forEach(button => {
+          button.addEventListener('click', () => {
+            const loanId = button.getAttribute('data-loan-id');
+            const clientName = button.getAttribute('data-client-name');
+            selectLoanForPayment(loanId, clientName);
+          });
+        });
+      } catch (error) {
+        console.error("Error loading active loans: ", error);
+        showInfoModal('Error', 'Error al cargar los préstamos activos.');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function selectLoanForPayment(loanId, clientName) {
+      try {
+        showLoading();
+        const loanRef = doc(db, "Loans", loanId);
+        const loanSnap = await getDoc(loanRef);
+        
+        if (!loanSnap.exists()) {
+          showInfoModal('Error', 'El préstamo no existe.');
+          return;
+        }
+
+        selectedLoanForPayment = { id: loanId, ...loanSnap.data() };
+
+        // Switch to payment section
+        const sections = document.querySelectorAll('.main-container section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        sections.forEach(section => section.style.display = 'none');
+        navLinks.forEach(link => link.classList.remove('active'));
+        document.getElementById('payment').style.display = 'block';
+        document.querySelectorAll('.nav-link[href="#payment"]').forEach(link => link.classList.add('active'));
+
+        // Pre-fill payment form
+        document.getElementById('searchClientPayment').value = clientName;
+        document.getElementById('paymentLoanId').value = loanId;
+        await searchClientForPayment();
+      } catch (error) {
+        console.error("Error selecting loan for payment: ", error);
+        showInfoModal('Error', 'Error al seleccionar el préstamo para pago.');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function initializeDashboardChart() {
+      const ctx = document.getElementById('dashboardChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Total Prestado', 'Monto Pendiente', 'Total Intereses'],
+          datasets: [{
+            label: 'Resumen Financiero ($)',
+            data: [0, 0, 0],
+            backgroundColor: [
+              'rgba(26, 188, 156, 0.6)',
+              'rgba(231, 76, 60, 0.6)',
+              'rgba(52, 152, 219, 0.6)'
+            ],
+            borderColor: [
+              'rgba(26, 188, 156, 1)',
+              'rgba(231, 76, 60, 1)',
+              'rgba(52, 152, 219, 1)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              beginAtZero: true,
+              ticks: {
+                color: 'white',
+                callback: function(value) {
+                  return '$' + value.toLocaleString('en-US');
+                }
+              },
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              }
+            },
+            y: {
+              ticks: {
+                color: 'white'
+              },
+              grid: {
+                display: false
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return context.dataset.label + ': $' + formatNumber(context.parsed.x);
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function initializeMonthlyChart() {
+      const ctx = document.getElementById('monthlyChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+          datasets: [
+            {
+              label: 'Prestado',
+              data: Array(12).fill(0),
+              backgroundColor: 'rgba(54, 162, 235, 0.6)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1
+            },
+            {
+              label: 'Intereses',
+              data: Array(12).fill(0),
+              backgroundColor: 'rgba(255, 206, 86, 0.6)',
+              borderColor: 'rgba(255, 206, 86, 1)',
+              borderWidth: 1
+            },
+            {
+              label: 'Pendiente',
+              data: Array(12).fill(0),
+              backgroundColor: 'rgba(255, 99, 132, 0.6)',
+              borderColor: 'rgba(255, 99, 132, 1)',
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              stacked: false,
+              ticks: {
+                color: 'white'
+              },
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              }
+            },
+            y: {
+              stacked: false,
+              ticks: {
+                color: 'white',
+                callback: function(value) {
+                  return '$' + value.toLocaleString('en-US');
+                }
+              },
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              labels: {
+                color: 'white'
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return context.dataset.label + ': $' + formatNumber(context.raw);
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function initializeYearlyChart() {
+      const ctx = document.getElementById('yearlyChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [
+            {
+              label: 'Prestado',
+              data: [],
+              borderColor: 'rgba(54, 162, 235, 1)',
+              backgroundColor: 'rgba(54, 162, 235, 0.1)',
+              borderWidth: 2,
+              fill: true
+            },
+            {
+              label: 'Intereses',
+              data: [],
+              borderColor: 'rgba(255, 206, 86, 1)',
+              backgroundColor: 'rgba(255, 206, 86, 0.1)',
+              borderWidth: 2,
+              fill: true
+            },
+            {
+              label: 'Pendiente',
+              data: [],
+              borderColor: 'rgba(255, 99, 132, 1)',
+              backgroundColor: 'rgba(255, 99, 132, 0.1)',
+              borderWidth: 2,
+              fill: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              ticks: {
+                color: 'white'
+              },
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              }
+            },
+            y: {
+              ticks: {
+                color: 'white',
+                callback: function(value) {
+                  return '$' + value.toLocaleString('en-US');
+                }
+              },
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              labels: {
+                color: 'white'
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return context.dataset.label + ': $' + formatNumber(context.raw);
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function updateReportCharts() {
+      const period = document.querySelector('.report-period-btn.active').dataset.period;
+      
+      if (period === 'monthly') {
+        document.getElementById('monthlyChart').style.display = 'block';
+        document.getElementById('yearlyChart').style.display = 'none';
+        updateMonthlyChart();
+      } else {
+        document.getElementById('monthlyChart').style.display = 'none';
+        document.getElementById('yearlyChart').style.display = 'block';
+        updateYearlyChart();
+      }
+    }
+
+    function updateMonthlyChart() {
+      const year = document.getElementById('reportYear').value;
+      const month = document.getElementById('reportMonth').value;
+      const chart = Chart.getChart('monthlyChart');
+      
+      if (chart) {
+        if (month === 'all') {
+          // Show data for all months of the selected year
+          const yearData = yearlyReportData[year] || {};
+          
+          chart.data.datasets[0].data = Array(12).fill(0).map((_, i) => {
+            const monthData = yearData[i+1] || {};
+            return monthData.totalLoaned || 0;
+          });
+          
+          chart.data.datasets[1].data = Array(12).fill(0).map((_, i) => {
+            const monthData = yearData[i+1] || {};
+            return monthData.totalInterest || 0;
+          });
+          
+          chart.data.datasets[2].data = Array(12).fill(0).map((_, i) => {
+            const monthData = yearData[i+1] || {};
+            return monthData.totalPending || 0;
+          });
+        } else {
+          // Show data for specific month
+          const monthData = monthlyReportData[year]?.[month] || {};
+          
+          chart.data.datasets[0].data = Array(12).fill(0);
+          chart.data.datasets[1].data = Array(12).fill(0);
+          chart.data.datasets[2].data = Array(12).fill(0);
+          
+          const monthIndex = parseInt(month) - 1;
+          chart.data.datasets[0].data[monthIndex] = monthData.totalLoaned || 0;
+          chart.data.datasets[1].data[monthIndex] = monthData.totalInterest || 0;
+          chart.data.datasets[2].data[monthIndex] = monthData.totalPending || 0;
+        }
+        
+        chart.update();
+      }
+    }
+
+    function updateYearlyChart() {
+      const chart = Chart.getChart('yearlyChart');
+      
+      if (chart) {
+        const years = Object.keys(yearlyReportData).sort();
+        const yearData = years.map(year => {
+          const data = yearlyReportData[year];
+          return {
+            year,
+            totalLoaned: data.totalLoaned || 0,
+            totalInterest: data.totalInterest || 0,
+            totalPending: data.totalPending || 0
+          };
+        });
+        
+        chart.data.labels = years;
+        chart.data.datasets[0].data = yearData.map(d => d.totalLoaned);
+        chart.data.datasets[1].data = yearData.map(d => d.totalInterest);
+        chart.data.datasets[2].data = yearData.map(d => d.totalPending);
+        
+        chart.update();
+      }
+    }
+
+    function populateYearDropdown() {
+      const currentYear = new Date().getFullYear();
+      const yearSelect = document.getElementById('reportYear');
+      
+      // Clear existing options
+      yearSelect.innerHTML = '';
+      
+      // Add current year and previous 5 years
+      for (let i = currentYear; i >= currentYear - 5; i--) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = i;
+        if (i === currentYear) option.selected = true;
+        yearSelect.appendChild(option);
+      }
+      
+      // Set current month as default
+      const currentMonth = new Date().getMonth() + 1;
+      document.getElementById('reportMonth').value = currentMonth;
+    }
+
+    async function loadUsersData() {
+      try {
+        showLoading();
+        let q;
+        
+        if (currentUser && currentUser.uid !== 'admin') {
+          // For regular users, only show their own data
+          q = query(
+            collection(db, "Loans"), 
+            where("userId", "==", currentUser.uid)
+          );
+        } else {
+          // For admin, show all loans
+          q = collection(db, "Loans");
+        }
+        
+        const loansSnapshot = await getDocs(q);
+        const clientsMap = new Map();
+
+        loansSnapshot.forEach(doc => {
+          const loan = { id: doc.id, ...doc.data() };
+          const clientId = loan.client.id;
+          
+          if (!clientsMap.has(clientId)) {
+            clientsMap.set(clientId, {
+              name: loan.client.name,
+              id: clientId,
+              loans: [],
+              totalLoaned: 0,
+              totalWithInterest: 0,
+              totalPending: 0,
+              completedLoans: 0,
+              overdueCount: 0,
+              isOverdue: false,
+              isExpired: false
+            });
+          }
+
+          const client = clientsMap.get(clientId);
+          client.loans.push(loan);
+          client.totalLoaned += loan.amount;
+          client.totalWithInterest += loan.amount + (loan.totalInterest || 0);
+          client.totalPending += loan.balance || 0;
+          if (loan.status === 'completed') {
+            client.completedLoans++;
+          }
+
+          const today = new Date();
+          const hasOverdue = loan.paymentSchedule?.some(p => 
+            p.status === 'pending' && new Date(p.dueDate) < today
+          );
+          
+          if (hasOverdue) {
+            client.overdueCount++;
+            client.isOverdue = true;
+          }
+          
+          if (loan.status === 'expired') {
+            client.isExpired = true;
+          }
+        });
+
+        const tableBody = document.getElementById('usersTableBody');
+        tableBody.innerHTML = '';
+
+        for (const client of clientsMap.values()) {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${client.name}</td>
+            <td>${client.id}</td>
+            <td>${client.loans.length}</td>
+            <td>$${formatNumber(client.totalLoaned)}</td>
+            <td>$${formatNumber(client.totalWithInterest)}</td>
+            <td>$${formatNumber(client.totalPending)}</td>
+            <td>${client.completedLoans}</td>
+            <td>${client.overdueCount}</td>
+            <td class="${client.isExpired ? 'status-expired' : client.isOverdue ? 'status-overdue' : 'status-good'}">
+              ${client.isExpired ? 'No Saldado' : client.isOverdue ? 'Atrasado' : 'Al Día'}
+            </td>
+          `;
+          tableBody.appendChild(row);
+        }
+      } catch (error) {
+        console.error("Error loading users data: ", error);
+        showInfoModal('Error', 'Error al cargar los datos de usuarios.');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function loadReportsData() {
+      try {
+        showLoading();
+        const year = document.getElementById('reportYear').value;
+        const month = document.getElementById('reportMonth').value;
+        
+        // Always recalculate reports data to ensure freshness
+        await calculateReportsData(year, month);
+        
+        // Update UI with the data
+        updateReportsUI(year, month);
+        updateReportCharts();
+      } catch (error) {
+        console.error("Error loading reports data: ", error);
+        showInfoModal('Error', 'Error al cargar los datos de reportes. Por favor intente nuevamente.');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function calculateReportsData(year, month) {
+      try {
+        const loansSnapshot = await getDocs(collection(db, "Loans"));
+        
+        // Initialize data structures
+        if (!yearlyReportData[year]) {
+          yearlyReportData[year] = {};
+        }
+        
+        if (!monthlyReportData[year]) {
+          monthlyReportData[year] = {};
+        }
+        
+        // Calculate totals for the selected year and month
+        let yearTotalLoaned = 0;
+        let yearTotalInterest = 0;
+        let yearTotalPending = 0;
+        let yearTotalClients = new Set();
+        let yearTotalOverdueClients = 0;
+        let yearTotalProfits = 0;
+        let yearTotalOverdueLoss = 0;
+        
+        let monthTotalLoaned = 0;
+        let monthTotalInterest = 0;
+        let monthTotalPending = 0;
+        let monthTotalClients = new Set();
+        let monthTotalOverdueClients = 0;
+        let monthTotalProfits = 0;
+        let monthTotalOverdueLoss = 0;
+        
+        loansSnapshot.forEach(doc => {
+          const loan = { id: doc.id, ...doc.data() };
+          const loanDate = loan.startDate ? new Date(loan.startDate) : new Date();
+          const loanYear = loanDate.getFullYear();
+          const loanMonth = loanDate.getMonth() + 1;
+          
+          // Yearly calculations
+          if (loanYear.toString() === year) {
+            yearTotalLoaned += loan.amount;
+            yearTotalInterest += loan.totalInterest || 0;
+            yearTotalPending += loan.balance || 0;
+            yearTotalClients.add(loan.client.id);
+            
+            const payments = loan.payments || [];
+            const interestPayments = payments.reduce((sum, p) => 
+              sum + (p.type === 'interest' || p.type === 'full' ? p.amount - (p.lateFee || 0) : 0), 0
+            );
+            yearTotalProfits += interestPayments;
+            
+            const today = new Date();
+            const hasOverdue = loan.paymentSchedule?.some(p => 
+              p.status === 'pending' && new Date(p.dueDate) < today
+            );
+            
+            if (hasOverdue) {
+              yearTotalOverdueClients++;
+              const overduePayments = loan.paymentSchedule.filter(p => 
+                p.status === 'pending' && new Date(p.dueDate) < today
+              );
+              const overdueAmount = overduePayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+              yearTotalOverdueLoss += overdueAmount;
+            }
+            
+            // Monthly calculations
+            if (month !== 'all' && loanMonth.toString() === month) {
+              monthTotalLoaned += loan.amount;
+              monthTotalInterest += loan.totalInterest || 0;
+              monthTotalPending += loan.balance || 0;
+              monthTotalClients.add(loan.client.id);
+              
+              const monthInterestPayments = payments.reduce((sum, p) => {
+                const paymentDate = p.date?.toDate ? p.date.toDate() : new Date();
+                if (paymentDate.getMonth() + 1 === parseInt(month)) {
+                  return sum + (p.type === 'interest' || p.type === 'full' ? p.amount - (p.lateFee || 0) : 0);
+                }
+                return sum;
+              }, 0);
+              monthTotalProfits += monthInterestPayments;
+              
+              if (hasOverdue) {
+                monthTotalOverdueClients++;
+                monthTotalOverdueLoss += overdueAmount;
+              }
+            }
+          }
+        });
+        
+        // Update yearly data
+        yearlyReportData[year] = {
+          totalLoaned: yearTotalLoaned,
+          totalInterest: yearTotalInterest,
+          totalPending: yearTotalPending,
+          totalClients: yearTotalClients.size,
+          totalOverdueClients: yearTotalOverdueClients,
+          totalProfits: yearTotalProfits,
+          totalOverdueLoss: yearTotalOverdueLoss
+        };
+        
+        // Update monthly data if needed
+        if (month !== 'all') {
+          monthlyReportData[year][month] = {
+            totalLoaned: monthTotalLoaned,
+            totalInterest: monthTotalInterest,
+            totalPending: monthTotalPending,
+            totalClients: monthTotalClients.size,
+            totalOverdueClients: monthTotalOverdueClients,
+            totalProfits: monthTotalProfits,
+            totalOverdueLoss: monthTotalOverdueLoss
+          };
+        }
+      } catch (error) {
+        console.error("Error calculating reports data: ", error);
+        throw error;
+      }
+    }
+
+    function updateReportsUI(year, month) {
+      try {
+        let data;
+        
+        if (month === 'all') {
+          data = yearlyReportData[year] || {};
+        } else {
+          data = monthlyReportData[year]?.[month] || {};
+        }
+        
+        document.getElementById('totalLoanedReport').textContent = `$${formatNumber(data.totalLoaned || 0)}`;
+        document.getElementById('totalInterestReport').textContent = `$${formatNumber(data.totalInterest || 0)}`;
+        document.getElementById('totalPendingReport').textContent = `$${formatNumber(data.totalPending || 0)}`;
+        document.getElementById('totalClientsReport').textContent = data.totalClients || 0;
+        document.getElementById('totalOverdueClients').textContent = data.totalOverdueClients || 0;
+        document.getElementById('totalProfits').textContent = `$${formatNumber(data.totalProfits || 0)}`;
+        document.getElementById('totalCapitalInterest').textContent = `$${formatNumber((data.totalLoaned || 0) + (data.totalInterest || 0))}`;
+        document.getElementById('totalOverdueLoss').textContent = `$${formatNumber(data.totalOverdueLoss || 0)}`;
+        
+        // Update dashboard chart with current data
+        const chart = Chart.getChart('dashboardChart');
+        if (chart) {
+          chart.data.datasets[0].data = [
+            data.totalLoaned || 0,
+            data.totalPending || 0,
+            data.totalInterest || 0
+          ];
+          chart.update();
+        }
+      } catch (error) {
+        console.error("Error updating reports UI: ", error);
+        showInfoModal('Error', 'Error al actualizar la interfaz de reportes.');
+      }
+    }
+
+    async function searchClientForPayment() {
+      const searchTerm = document.getElementById('searchClientPayment').value.trim();
+      
+      if (!searchTerm) {
+        document.getElementById('paymentFormContainer').style.display = 'none';
+        document.getElementById('clientLoanDetails').style.display = 'none';
+        document.getElementById('clientStatusContainer').style.display = 'none';
+        document.getElementById('receiptContainer').style.display = 'none';
+        return;
+      }
+      
+      try {
+        showLoading();
+        let q;
+        
+        if (currentUser && currentUser.uid !== 'admin') {
+          // For regular users, only search their own loans
+          q = query(
+            collection(db, "Loans"), 
+            where("userId", "==", currentUser.uid),
+            where("status", "in", ["active", "overdue"])
+          );
+        } else {
+          // For admin, search all active loans
+          q = query(
+            collection(db, "Loans"), 
+            where("status", "in", ["active", "overdue"])
+          );
+        }
+        
+        const querySnapshot = await getDocs(q);
+        const matchingLoans = [];
+        
+        querySnapshot.forEach(doc => {
+          const loan = { id: doc.id, ...doc.data() };
+          if (loan.client.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+              loan.client.id.toLowerCase().includes(searchTerm.toLowerCase())) {
+            matchingLoans.push(loan);
+          }
+        });
+        
+        if (matchingLoans.length === 0) {
+          document.getElementById('paymentFormContainer').style.display = 'none';
+          document.getElementById('clientLoanDetails').style.display = 'block';
+          document.getElementById('loanDetailsContent').innerHTML = '<p>No se encontraron préstamos activos para este cliente.</p>';
+          document.getElementById('paymentHistory').innerHTML = '';
+          document.getElementById('clientStatusContainer').style.display = 'none';
+          document.getElementById('receiptContainer').style.display = 'none';
+          return;
+        }
+        
+        // Select the first matching loan
+        selectedLoanForPayment = matchingLoans[0];
+        document.getElementById('paymentFormContainer').style.display = 'block';
+        document.getElementById('paymentLoanId').value = selectedLoanForPayment.id;
+        
+        displayLoanDetails(selectedLoanForPayment);
+        evaluateClientStatus(selectedLoanForPayment);
+        displayPaymentHistory(selectedLoanForPayment);
+        
+        const nextPayment = selectedLoanForPayment.paymentSchedule?.find(p => p.status === 'pending');
+        if (nextPayment) {
+          document.getElementById('paymentAmount').value = nextPayment.amount.toFixed(2);
+        }
+        
+        updatePaymentForm();
+        document.getElementById('generateReceiptBtn').style.display = lastPaymentData ? 'block' : 'none';
+        document.getElementById('shareReceiptBtn').style.display = lastPaymentData ? 'block' : 'none';
+      } catch (error) {
+        console.error("Error searching client: ", error);
+        // Don't show error message to avoid confusion when searching
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function displayLoanDetails(loan) {
+      const container = document.getElementById('loanDetailsContent');
+      const nextPayment = loan.paymentSchedule?.find(p => p.status === 'pending');
+      const paymentsMade = loan.payments?.length || 0;
+      const totalPayments = loan.paymentSchedule?.length || 0;
+      
+      // Cálculo de amortización lineal y tasa de interés ajustada según la nueva lógica
+      const remainingQuincenas = totalPayments - paymentsMade;
+      const capitalToPay = remainingQuincenas > 0 ? loan.remainingCapital / remainingQuincenas : 0;
+      
+      // Ajuste de la tasa de interés según la especificación
+      const tasaQuincenal = loan.interestRate / (loan.frequency === 'biweekly' ? 1 : 2);
+      const interestToPay = loan.remainingCapital * (tasaQuincenal / 100);
+      
+      const totalToPay = capitalToPay + interestToPay;
+      
+      container.innerHTML = `
+        <div class="loan-detail">
+          <span>Cliente:</span>
+          <span>${loan.client.name} (${loan.client.id})</span>
+        </div>
+        <div class="loan-detail">
+          <span>Monto original:</span>
+          <span>$${formatNumber(loan.amount)}</span>
+        </div>
+        <div class="loan-detail">
+          <span>Tasa de interés:</span>
+          <span>${loan.interestRate}% (${tasaQuincenal.toFixed(2)}% quincenal)</span>
+        </div>
+        <div class="loan-detail">
+          <span>Frecuencia de pago:</span>
+          <span>${loan.frequency === 'biweekly' ? 'Quincenal' : 'Mensual'}</span>
+        </div>
+        <div class="loan-detail">
+          <span>Próximo pago:</span>
+          <span>${nextPayment ? new Date(nextPayment.dueDate).toLocaleDateString() : 'N/A'}</span>
+        </div>
+        <div class="loan-detail">
+          <span>Capital a pagar (próxima quincena):</span>
+          <span>$${formatNumber(capitalToPay)}</span>
+        </div>
+        <div class="loan-detail">
+          <span>Interés a pagar (próxima quincena):</span>
+          <span>$${formatNumber(interestToPay)}</span>
+        </div>
+        <div class="loan-detail">
+          <span>Total a pagar (próxima quincena):</span>
+          <span>$${formatNumber(totalToPay)}</span>
+        </div>
+        <div class="loan-detail">
+          <span>Monto pendiente:</span>
+          <span>$${formatNumber(loan.balance)}</span>
+        </div>
+        <div class="loan-detail">
+          <span>Capital pendiente:</span>
+          <span>$${formatNumber(loan.remainingCapital)}</span>
+        </div>
+        <div class="loan-detail">
+          <span>Pagos realizados:</span>
+          <span>${paymentsMade} de ${totalPayments}</span>
+        </div>
+        <div class="loan-detail">
+          <span>Quincenas restantes:</span>
+          <span>${remainingQuincenas}</span>
+        </div>
+      `;
+      
+      document.getElementById('clientLoanDetails').style.display = 'block';
+    }
+
+    function evaluateClientStatus(loan) {
+      const statusContainer = document.getElementById('clientStatusContainer');
+      const statusContent = document.getElementById('clientStatusContent');
+      
+      statusContainer.style.display = 'block';
+      statusContent.innerHTML = '';
+      
+      const paymentsMade = loan.payments?.length || 0;
+      const totalPayments = loan.paymentSchedule?.length || 0;
+      const completionPercentage = (paymentsMade / totalPayments) * 100;
+      
+      let statusClass = 'status-good';
+      let statusMessage = 'En curso - Buen pagador';
+      let statusHTML = `
+        <p><i class="fas fa-clock"></i> Préstamo en curso (${completionPercentage.toFixed(0)}% completado)</p>
+        <p><i class="fas fa-check-circle"></i> Buen comportamiento de pago</p>
+        <p><i class="fas fa-check"></i> Puede calificar para nuevo préstamo con condiciones</p>
+      `;
+      
+      const today = new Date();
+      const isOverdue = loan.paymentSchedule?.some(p => 
+        p.status === 'pending' && new Date(p.dueDate) < today
+      );
+      
+      if (isOverdue) {
+        statusClass = 'status-overdue';
+        statusMessage = 'Atrasado';
+        statusHTML = `
+          <p><i class="fas fa-exclamation-triangle"></i> Pagos atrasados detectados</p>
+          <p><i class="fas fa-clock"></i> Préstamo en curso (${completionPercentage.toFixed(0)}% completado)</p>
+        `;
+      }
+      
+      // Check if loan is expired (passed final due date without being completed)
+      const finalPayment = loan.paymentSchedule?.[loan.paymentSchedule.length - 1];
+      if (finalPayment && new Date(finalPayment.dueDate) < today && loan.status !== 'completed') {
+        statusClass = 'status-expired';
+        statusMessage = 'No Saldado';
+        statusHTML = `
+          <p><i class="fas fa-exclamation-circle"></i> Préstamo no saldado en el plazo acordado</p>
+          <p><i class="fas fa-ban"></i> No califica para nuevos préstamos</p>
+        `;
+        
+        // Auto-extend loan if configured
+        if (systemConfig.autoExtend) {
+          const newTerm = Math.ceil(loan.term / 2); // Half of original term
+          statusHTML += `<p><i class="fas fa-calendar-plus"></i> Plazo extendido por ${newTerm} meses</p>`;
+        }
+      }
+      
+      statusContainer.className = `client-status ${statusClass}`;
+      statusContent.innerHTML = `
+        <div class="loan-detail">
+          <span>Estado:</span>
+          <span>${statusMessage}</span>
+        </div>
+        ${statusHTML}
+        <div class="loan-detail">
+          <span>Puede obtener nuevo préstamo:</span>
+          <span>${statusClass !== 'status-good' ? 'No' : 'Sí'}</span>
+        </div>
+        <div class="loan-detail">
+          <span>Puede renegociar:</span>
+          <span>${statusClass === 'status-expired' ? 'No' : 'Sí'}</span>
+        </div>
+      `;
+    }
+
+    function displayPaymentHistory(loan) {
+      const container = document.getElementById('paymentHistory');
+      container.innerHTML = '<p>No hay pagos registrados.</p>';
+      
+      if (loan.payments && loan.payments.length > 0) {
+        container.innerHTML = '';
+        const sortedPayments = [...loan.payments].sort((a, b) => b.date.toDate() - a.date.toDate());
+        
+        sortedPayments.forEach(payment => {
+          const paymentDateTime = payment.date.toDate();
+          const isLate = payment.lateFee && payment.lateFee > 0;
+          const paymentItem = document.createElement('div');
+          paymentItem.className = `payment-history-item ${isLate ? 'overdue' : 'paid'}`;
+          paymentItem.innerHTML = `
+            <span>${formatDateTime(paymentDateTime)}</span>
+            <span>$${formatNumber(payment.amount)}</span>
+            <span>${getPaymentTypeText(payment.type)}</span>
+            ${isLate ? `<span>(Mora: $${formatNumber(payment.lateFee)})</span>` : ''}
+          `;
+          container.appendChild(paymentItem);
+        });
+      }
+    }
+
+    function getPaymentTypeText(type) {
+      switch (type) {
+        case 'full': return 'Pago Completo';
+        case 'interest': return 'Solo Interés';
+        case 'capital': return 'Solo Capital';
+        case 'custom': return 'Personalizado';
+        default: return type;
+      }
+    }
+
+    function updatePaymentForm() {
+      const paymentType = document.getElementById('paymentType').value;
+      const latePaymentContainer = document.getElementById('latePaymentContainer');
+      
+      if (paymentType === 'full' || paymentType === 'custom') {
+        latePaymentContainer.style.display = 'block';
+      } else {
+        latePaymentContainer.style.display = 'none';
+        document.getElementById('applyLateFee').checked = false;
+        document.getElementById('lateFeeDetails').style.display = 'none';
+        document.getElementById('lateFeeAmount').value = '0.00';
+      }
+      
+      if (paymentType === 'custom') {
+        document.getElementById('paymentAmount').value = '';
+        document.getElementById('paymentAmount').placeholder = 'Ingrese monto personalizado';
+      } else if (selectedLoanForPayment) {
+        const nextPayment = selectedLoanForPayment.paymentSchedule?.find(p => p.status === 'pending');
+        if (nextPayment) {
+          document.getElementById('paymentAmount').value = nextPayment.amount.toFixed(2);
+          document.getElementById('paymentAmount').placeholder = '';
+        }
+      }
+    }
+
+    function toggleLateFeeDetails() {
+      const applyLateFee = document.getElementById('applyLateFee').checked;
+      document.getElementById('lateFeeDetails').style.display = applyLateFee ? 'block' : 'none';
+      calculateLateFee();
+    }
+
+    function calculateLateFee() {
+      if (!selectedLoanForPayment || !document.getElementById('applyLateFee').checked) {
+        document.getElementById('lateFeeAmount').value = '0.00';
+        return;
+      }
+      
+      const daysLate = parseInt(document.getElementById('lateFeeDays').value) || 0;
+      const lateFee = daysLate > 0 
+        ? (selectedLoanForPayment.remainingCapital * (systemConfig.lateFeeRate / 100 / 30) * daysLate)
+        : 0;
+      
+      document.getElementById('lateFeeAmount').value = formatNumber(lateFee);
+    }
+
+    function calculateLoan() {
+      const amount = parseFloat(document.getElementById('loanAmount').value) || 0;
+      const rate = parseFloat(document.getElementById('interestRate').value) || 0;
+      const term = parseInt(document.getElementById('loanTerm').value) || 1;
+      const startDate = new Date(document.getElementById('loanDate').value);
+      const frequency = document.querySelector('input[name="paymentFrequency"]:checked').value;
+      
+      // Calcular interés total y monto total a pagar
+      const monthlyRate = rate / 100;
+      const totalInterest = amount * monthlyRate * term;
+      const totalPayment = amount + totalInterest;
+      
+      // Calcular pago por período
+      let periods = term;
+      if (frequency === 'biweekly') {
+        periods = term * 2;
+      }
+      const periodPayment = totalPayment / periods;
+      
+      // Calcular fecha de finalización
+      const endDate = new Date(startDate);
+      if (frequency === 'monthly') {
+        endDate.setMonth(endDate.getMonth() + term);
+      } else {
+        // Biweekly - 15 days per period
+        endDate.setDate(endDate.getDate() + (term * 15 * 2));
+      }
+      
+      // Actualizar resumen
+      document.getElementById('summaryAmount').textContent = `$${amount.toFixed(2)}`;
+      document.getElementById('summaryRate').textContent = `${rate}%`;
+      document.getElementById('summaryTotalInterest').textContent = `$${totalInterest.toFixed(2)}`;
+      document.getElementById('summaryTotalPayment').textContent = `$${totalPayment.toFixed(2)}`;
+      document.getElementById('summaryPeriodPayment').textContent = `$${periodPayment.toFixed(2)}`;
+      document.getElementById('summaryEndDate').textContent = endDate.toLocaleDateString();
+    }
+
+    async function registerLoan(e) {
+      e.preventDefault();
+      
+      // Obtener datos del formulario
+      const clientData = {
+        name: document.getElementById('clientName').value.trim(),
+        id: document.getElementById('clientId').value.trim(),
+        address: document.getElementById('clientAddress').value.trim(),
+        phone: document.getElementById('clientPhone').value.trim(),
+        nationality: document.getElementById('clientNationality').value.trim(),
+        reference: {
+          name: document.getElementById('referenceName').value.trim(),
+          phone: document.getElementById('referencePhone').value.trim(),
+          relation: document.getElementById('referenceRelation').value.trim()
+        },
+        username: document.getElementById('clientUsername').value.trim(),
+        pin: document.getElementById('clientPin').value.trim()
+      };
+      
+      const loanData = {
+        amount: parseFloat(document.getElementById('loanAmount').value),
+        interestRate: parseFloat(document.getElementById('interestRate').value),
+        term: parseInt(document.getElementById('loanTerm').value),
+        frequency: document.querySelector('input[name="paymentFrequency"]:checked').value,
+        startDate: document.getElementById('loanDate').value,
+        guarantee: document.getElementById('guarantee').value.trim(),
+        status: 'active',
+        createdBy: currentUser.uid,
+        createdAt: Timestamp.now(),
+        userId: currentUser.uid
+      };
+      
+      // Validar que el cliente no tenga préstamos activos
+      try {
+        const clientLoansQuery = query(
+          collection(db, "Loans"),
+          where("client.id", "==", clientData.id),
+          where("status", "in", ["active", "overdue"])
+        );
+        const clientLoansSnapshot = await getDocs(clientLoansQuery);
+        
+        if (!clientLoansSnapshot.empty) {
+          showInfoModal('Error', 'Este cliente ya tiene un préstamo activo o atrasado.');
+          return;
+        }
+      } catch (error) {
+        console.error("Error verificando préstamos existentes: ", error);
+        showInfoModal('Error', 'Error al verificar préstamos existentes para este cliente.');
+        return;
+      }
+      
+      // Calcular fechas de pago
+      const paymentSchedule = generatePaymentSchedule(loanData);
+      loanData.paymentSchedule = paymentSchedule;
+      loanData.totalInterest = loanData.amount * (loanData.interestRate / 100) * loanData.term;
+      loanData.totalPayment = loanData.amount + loanData.totalInterest;
+      loanData.balance = loanData.totalPayment;
+      loanData.remainingCapital = loanData.amount;
+      
+      // Calcular pago por período
+      if (loanData.frequency === 'monthly') {
+        loanData.periodPayment = loanData.totalPayment / loanData.term;
+      } else {
+        loanData.periodPayment = loanData.totalPayment / (loanData.term * 2);
+      }
+      
+      // Validar datos
+      if (!validateLoanData(clientData, loanData)) {
+        return;
+      }
+      
+      try {
+        showLoading();
+        
+        // Registrar en la colección "Loans"
+        const loanRef = await addDoc(collection(db, "Loans"), {
+          ...loanData,
+          client: clientData
+        });
+        
+        // Mostrar mensaje de éxito
+        showInfoModal('Éxito', 'Préstamo registrado correctamente');
+        
+        // Limpiar formulario
+        document.getElementById('loanForm').reset();
+        
+        // Recalcular
+        calculateLoan();
+        
+        // Recargar datos
+        loadActiveLoans();
+        loadUsersData();
+        loadReportsData();
+      } catch (error) {
+        console.error("Error registrando préstamo: ", error);
+        showInfoModal('Error', 'Ocurrió un error al registrar el préstamo');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function generatePaymentSchedule(loanData) {
+      const schedule = [];
+      const startDate = new Date(loanData.startDate);
+      let paymentDate = new Date(startDate);
+      let paymentNumber = 1;
+      
+      if (loanData.frequency === 'monthly') {
+        // Pagos mensuales
+        for (let i = 0; i < loanData.term; i++) {
+          paymentDate = new Date(startDate);
+          paymentDate.setMonth(startDate.getMonth() + i + 1);
+          
+          schedule.push({
+            number: paymentNumber++,
+            dueDate: paymentDate.toISOString().split('T')[0],
+            amount: loanData.totalPayment / loanData.term,
+            status: 'pending'
+          });
+        }
+      } else {
+        // Pagos quincenales (cada 15 días)
+        for (let i = 0; i < loanData.term * 2; i++) {
+          paymentDate = new Date(startDate);
+          paymentDate.setDate(startDate.getDate() + (i + 1) * 15);
+          
+          schedule.push({
+            number: paymentNumber++,
+            dueDate: paymentDate.toISOString().split('T')[0],
+            amount: loanData.totalPayment / (loanData.term * 2),
+            status: 'pending'
+          });
+        }
+      }
+      
+      return schedule;
+    }
+
+    function validateLoanData(clientData, loanData) {
+      // Validar datos del cliente
+      if (!clientData.name || !clientData.id || !clientData.phone || !clientData.username || !clientData.pin) {
+        showInfoModal('Error', 'Todos los campos obligatorios del cliente deben estar completos');
+        return false;
+      }
+      
+      if (clientData.pin.length !== 4 || !/^\d+$/.test(clientData.pin)) {
+        showInfoModal('Error', 'El PIN debe ser de 4 dígitos numéricos');
+        return false;
+      }
+      
+      // Validar datos del préstamo
+      if (loanData.amount <= 0 || loanData.interestRate <= 0 || loanData.term <= 0) {
+        showInfoModal('Error', 'Los valores del préstamo deben ser mayores a cero');
+        return false;
+      }
+      
+      return true;
+    }
+
+    async function registerPayment(e) {
+      e.preventDefault();
+      
+      if (!selectedLoanForPayment) {
+        showInfoModal('Error', 'No se ha seleccionado un préstamo.');
+        return;
+      }
+      
+      const paymentAmount = parseFloat(document.getElementById('paymentAmount').value);
+      const paymentDate = document.getElementById('paymentDate').value;
+      const paymentType = document.getElementById('paymentType').value;
+      const applyLateFee = document.getElementById('applyLateFee').checked;
+      
+      if (isNaN(paymentAmount) || paymentAmount <= 0) {
+        showInfoModal('Error', 'El monto del pago debe ser mayor a cero.');
+        return;
+      }
+      if (!paymentDate) {
+        showInfoModal('Error', 'Seleccione una fecha de pago válida.');
+        return;
+      }
+      if (!paymentType) {
+        showInfoModal('Error', 'Seleccione un tipo de pago.');
+        return;
+      }
+      
+      const nextPayment = selectedLoanForPayment.paymentSchedule?.find(p => p.status === 'pending');
+      if (!nextPayment && paymentType !== 'custom') {
+        showInfoModal('Error', 'No hay pagos pendientes para este préstamo.');
+        return;
+      }
+      
+      const paymentsMade = selectedLoanForPayment.payments?.length || 0;
+      const totalPayments = selectedLoanForPayment.paymentSchedule?.length || 0;
+      const remainingQuincenas = totalPayments - paymentsMade;
+      
+      // Cálculo según la nueva lógica de amortización lineal y tasa de interés ajustada
+      const capitalToPay = remainingQuincenas > 0 ? selectedLoanForPayment.remainingCapital / remainingQuincenas : 0;
+      
+      // Ajuste de la tasa de interés según la especificación
+      const tasaQuincenal = selectedLoanForPayment.interestRate / (selectedLoanForPayment.frequency === 'biweekly' ? 1 : 2);
+      const interestToPay = selectedLoanForPayment.remainingCapital * (tasaQuincenal / 100);
+      
+      const totalToPay = capitalToPay + interestToPay;
+      
+      let lateFee = 0;
+      if (applyLateFee && (paymentType === 'full' || paymentType === 'custom')) {
+        lateFee = parseFloat(document.getElementById('lateFeeAmount').value.replace(',', '.')) || 0;
+      }
+      
+      const totalPayment = paymentAmount + lateFee;
+      
+      if (paymentType === 'full' && totalPayment < totalToPay) {
+        showInfoModal('Error', `El monto total ($${formatNumber(totalPayment)}) es menor al requerido ($${formatNumber(totalToPay)}) para un pago completo.`);
+        return;
+      }
+      if (paymentType === 'capital' && paymentAmount < capitalToPay) {
+        showInfoModal('Error', `El monto ($${formatNumber(paymentAmount)}) es menor al capital requerido ($${formatNumber(capitalToPay)}) para el próximo pago.`);
+        return;
+      }
+      if (paymentType === 'interest' && paymentAmount < interestToPay) {
+        showInfoModal('Error', `El monto ($${formatNumber(paymentAmount)}) es menor al interés requerido ($${formatNumber(interestToPay)}) para el próximo pago.`);
+        return;
+      }
+      
+      const now = new Date();
+      const selectedDate = new Date(paymentDate);
+      const paymentDateTime = new Date(
+        selectedDate.getFullYear(),
+        selectedDate.getMonth(),
+        selectedDate.getDate(),
+        now.getHours(),
+        now.getMinutes(),
+        now.getSeconds()
+      );
+      
+      const paymentData = {
+        amount: paymentAmount,
+        date: Timestamp.fromDate(paymentDateTime),
+        type: paymentType,
+        timestamp: Timestamp.now(),
+        recordedBy: currentUser.uid
+      };
+      
+      if (lateFee > 0 && (paymentType === 'full' || paymentType === 'custom')) {
+        paymentData.lateFee = lateFee;
+        paymentData.lateFeeDays = parseInt(document.getElementById('lateFeeDays').value) || 0;
+        paymentData.lateFeeRate = systemConfig.lateFeeRate;
+      }
+      
+      try {
+        showLoading();
+        const loanRef = doc(db, "Loans", selectedLoanForPayment.id);
+        
+        const loanSnap = await getDoc(loanRef);
+        if (!loanSnap.exists()) {
+          hideLoading();
+          showInfoModal('Error', 'El préstamo no existe en la base de datos.');
+          return;
+        }
+        
+        let capitalPayment = 0;
+        let interestPayment = 0;
+        let totalLateFees = (selectedLoanForPayment.payments || []).reduce((sum, p) => sum + (p.lateFee || 0), 0) + lateFee;
+        
+        if (paymentType === 'full') {
+          // Cálculo de intereses pendientes según la nueva lógica
+          const interestDue = selectedLoanForPayment.remainingCapital * (tasaQuincenal / 100);
+          interestPayment = Math.min(paymentAmount, interestDue);
+          capitalPayment = paymentAmount - interestPayment;
+          if (lateFee > 0) interestPayment += lateFee;
+        } else if (paymentType === 'interest') {
+          interestPayment = paymentAmount;
+        } else if (paymentType === 'capital') {
+          capitalPayment = paymentAmount;
+        } else if (paymentType === 'custom') {
+          // For custom payments, we apply to capital first, then interest
+          const interestDue = selectedLoanForPayment.remainingCapital * (tasaQuincenal / 100);
+          capitalPayment = Math.min(paymentAmount, selectedLoanForPayment.remainingCapital);
+          interestPayment = Math.min(paymentAmount - capitalPayment, interestDue);
+          if (lateFee > 0) interestPayment += lateFee;
+        }
+        
+        const newBalance = Math.max(0, selectedLoanForPayment.balance - totalPayment);
+        const newRemainingCapital = Math.max(0, selectedLoanForPayment.remainingCapital - capitalPayment);
+        
+        const today = new Date();
+        let hasOverdue = false;
+        if (nextPayment) {
+          const dueDate = new Date(nextPayment.dueDate);
+          if (dueDate < today) {
+            hasOverdue = true;
+          }
+        }
+        
+        const hasInterestDue = selectedLoanForPayment.remainingCapital * (tasaQuincenal / 100) > 0;
+        
+        let updatedPaymentSchedule = [...(selectedLoanForPayment.paymentSchedule || [])];
+        if (paymentType === 'full' && totalPayment >= totalToPay) {
+          const paymentIndex = updatedPaymentSchedule.findIndex(p => p.number === nextPayment.number);
+          if (paymentIndex !== -1) {
+            updatedPaymentSchedule[paymentIndex].status = 'paid';
+            if (paymentIndex < updatedPaymentSchedule.length - 1) {
+              const nextDueDate = new Date(updatedPaymentSchedule[paymentIndex].dueDate);
+              nextDueDate.setDate(nextDueDate.getDate() + (selectedLoanForPayment.frequency === 'biweekly' ? 15 : 30));
+              updatedPaymentSchedule[paymentIndex + 1].dueDate = nextDueDate.toISOString().split('T')[0];
+            }
+          }
+        }
+        
+        // Check if loan is expired (passed final due date without being completed)
+        const finalPayment = updatedPaymentSchedule[updatedPaymentSchedule.length - 1];
+        let newStatus = selectedLoanForPayment.status;
+        
+        if (newRemainingCapital <= 0 && !hasInterestDue && totalLateFees <= 0) {
+          newStatus = 'completed';
+        } else if (finalPayment && new Date(finalPayment.dueDate) < today && newStatus !== 'completed') {
+          newStatus = 'expired';
+          
+          // Auto-extend loan if configured
+          if (systemConfig.autoExtend) {
+            const newTerm = Math.ceil(selectedLoanForPayment.term / 2); // Half of original term
+            const newPayments = generatePaymentSchedule({
+              ...selectedLoanForPayment,
+              term: newTerm,
+              startDate: finalPayment.dueDate
+            });
+            
+            updatedPaymentSchedule = [...updatedPaymentSchedule, ...newPayments];
+            newStatus = 'active';
+          }
+        } else if (hasOverdue) {
+          newStatus = 'overdue';
+        } else {
+          newStatus = 'active';
+        }
+        
+        await updateDoc(loanRef, {
+          payments: selectedLoanForPayment.payments ? arrayUnion(paymentData) : [paymentData],
+          balance: newBalance,
+          remainingCapital: newRemainingCapital,
+          paymentSchedule: updatedPaymentSchedule,
+          status: newStatus
+        });
+        
+        lastPaymentData = {
+          ...paymentData,
+          loanId: selectedLoanForPayment.id,
+          clientName: selectedLoanForPayment.client.name,
+          clientId: selectedLoanForPayment.client.id,
+          recordedBy: currentUser.displayName || 'Administrador'
+        };
+        
+        showInfoModal('Éxito', 'Pago registrado correctamente.');
+        
+        document.getElementById('paymentForm').reset();
+        document.getElementById('paymentDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('lateFeeDetails').style.display = 'none';
+        document.getElementById('applyLateFee').checked = false;
+        document.getElementById('lateFeeAmount').value = '0.00';
+        
+        document.getElementById('generateReceiptBtn').style.display = 'block';
+        document.getElementById('shareReceiptBtn').style.display = 'block';
+        
+        const updatedLoanSnap = await getDoc(loanRef);
+        selectedLoanForPayment = { id: loanRef.id, ...updatedLoanSnap.data() };
+        displayLoanDetails(selectedLoanForPayment);
+        evaluateClientStatus(selectedLoanForPayment);
+        displayPaymentHistory(selectedLoanForPayment);
+        
+        await loadUsersData();
+        await loadReportsData();
+        await loadActiveLoans();
+      } catch (error) {
+        console.error("Error registrando pago: ", error);
+        showInfoModal('Error', `Error al registrar el pago: ${error.message}. Verifica tu conexión y permisos de Firestore.`);
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function generateReceipt() {
+      if (!lastPaymentData) {
+        showInfoModal('Error', 'No hay datos de pago para generar un recibo.');
+        return;
+      }
+      
+      const receiptContainer = document.getElementById('receiptContainer');
+      document.getElementById('receiptClientName').textContent = lastPaymentData.clientName;
+      document.getElementById('receiptClientId').textContent = lastPaymentData.clientId;
+      document.getElementById('receiptLoanId').textContent = lastPaymentData.loanId;
+      document.getElementById('receiptDateTime').textContent = formatDateTime(lastPaymentData.date.toDate());
+      document.getElementById('receiptAmount').textContent = formatNumber(lastPaymentData.amount);
+      document.getElementById('receiptType').textContent = getPaymentTypeText(lastPaymentData.type);
+      document.getElementById('receiptLateFee').textContent = formatNumber(lastPaymentData.lateFee || 0);
+      document.getElementById('receiptRecordedBy').textContent = lastPaymentData.recordedBy;
+      
+      receiptContainer.style.display = 'block';
+      
+      try {
+        const canvas = await html2canvas(receiptContainer, { backgroundColor: '#ffffff' });
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL('image/jpeg');
+        link.download = `recibo_pago_${lastPaymentData.loanId}_${lastPaymentData.date.toDate().toISOString().slice(0, 19).replace(/:/g, '-')}.jpg`;
+        link.click();
+      } catch (error) {
+        console.error("Error generando recibo: ", error);
+        showInfoModal('Error', 'Error al generar el recibo. Por favor, intenta de nuevo.');
+      }
+      
+      receiptContainer.style.display = 'none';
+    }
+
+    async function shareReceipt() {
+      if (!lastPaymentData) {
+        showInfoModal('Error', 'No hay datos de pago para compartir.');
+        return;
+      }
+      
+      const receiptContainer = document.getElementById('receiptContainer');
+      document.getElementById('receiptClientName').textContent = lastPaymentData.clientName;
+      document.getElementById('receiptClientId').textContent = lastPaymentData.clientId;
+      document.getElementById('receiptLoanId').textContent = lastPaymentData.loanId;
+      document.getElementById('receiptDateTime').textContent = formatDateTime(lastPaymentData.date.toDate());
+      document.getElementById('receiptAmount').textContent = formatNumber(lastPaymentData.amount);
+      document.getElementById('receiptType').textContent = getPaymentTypeText(lastPaymentData.type);
+      document.getElementById('receiptLateFee').textContent = formatNumber(lastPaymentData.lateFee || 0);
+      document.getElementById('receiptRecordedBy').textContent = lastPaymentData.recordedBy;
+      
+      receiptContainer.style.display = 'block';
+      
+      try {
+        const canvas = await html2canvas(receiptContainer, { backgroundColor: '#ffffff' });
+        const dataUrl = canvas.toDataURL('image/jpeg');
+        
+        if (navigator.share) {
+          const blob = await (await fetch(dataUrl)).blob();
+          const file = new File([blob], `recibo_pago_${lastPaymentData.loanId}.jpg`, { type: 'image/jpeg' });
+          
+          await navigator.share({
+            files: [file],
+            title: 'Recibo de Pago',
+            text: `Recibo de pago para ${lastPaymentData.clientName}\nPréstamo: ${lastPaymentData.loanId}\nMonto: $${formatNumber(lastPaymentData.amount)}\nFecha y Hora: ${formatDateTime(lastPaymentData.date.toDate())}`
+          });
+        } else {
+          showInfoModal('Advertencia', 'La función de compartir no está disponible. El recibo se descargará.');
+          const link = document.createElement('a');
+          link.href = dataUrl;
+          link.download = `recibo_pago_${lastPaymentData.loanId}.jpg`;
+          link.click();
+        }
+      } catch (error) {
+        console.error("Error compartiendo recibo: ", error);
+        showInfoModal('Error', 'Error al compartir el recibo. Por favor, intenta de nuevo.');
+      }
+      
+      receiptContainer.style.display = 'none';
+    }
+
+    async function showConfirmModal(title, message) {
+      return new Promise((resolve) => {
+        document.getElementById('confirmModalTitle').textContent = title;
+        document.getElementById('confirmModalMessage').textContent = message;
+        document.getElementById('confirmModal').classList.add('active');
+        
+        const confirmButton = document.getElementById('confirmModalButton');
+        const handler = () => {
+          confirmButton.removeEventListener('click', handler);
+          closeModal();
+          resolve(true);
+        };
+        
+        confirmButton.addEventListener('click', handler);
+        
+        document.getElementById('confirmModal').addEventListener('click', (e) => {
+          if (e.target === document.getElementById('confirmModal')) {
+            closeModal();
+            resolve(false);
+          }
+        }, { once: true }); 
+      });
+    }
+
+    function showInfoModal(title, message) {
+      document.getElementById('infoModalTitle').textContent = title;
+      document.getElementById('infoModalMessage').textContent = message;
+      document.getElementById('infoModal').classList.add('active');
+    }
+
+    function showLoading() {
+      document.getElementById('loadingOverlay').classList.add('active');
+    }
+
+    function hideLoading() {
+      document.getElementById('loadingOverlay').classList.remove('active');
+    }
+
+    window.closeModal = function() {
+      document.querySelectorAll('.modal').forEach(modal => modal.classList.remove('active'));
+    };
+  </script>
+</html>

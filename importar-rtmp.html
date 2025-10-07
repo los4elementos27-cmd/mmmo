@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Importar Datos - PlusMoney Retom</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #1abc9c;
+      --primary-dark: #16a085;
+      --secondary-color: #2a2a3f;
+      --background-color: #2c3e50;
+      --text-color: #ffffff;
+      --text-light: #a8a8a8;
+      --border-color: #444;
+      --card-bg: #34495e;
+      --danger-color: #e74c3c;
+      --success-color: #2ecc71;
+      --warning-color: #15a086;
+      --info-color: #15a086;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background-color: var(--secondary-color);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      color: var(--primary-color);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    /* Alertas Elegantes Mejoradas */
+    .alert-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 3000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(5px);
+    }
+
+    .alert-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .alert-box {
+      background-color: var(--secondary-color);
+      border-radius: 15px;
+      padding: 2rem;
+      width: 90%;
+      max-width: 450px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+      transform: translateY(30px) scale(0.95);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      border-top: 4px solid var(--primary-color);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .alert-overlay.active .alert-box {
+      transform: translateY(0) scale(1);
+    }
+
+    .alert-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
+    }
+
+    .alert-title {
+      color: var(--primary-color);
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      font-weight: 600;
+    }
+
+    .alert-title i {
+      margin-right: 12px;
+      font-size: 1.8rem;
+    }
+
+    .alert-message {
+      margin-bottom: 2rem;
+      line-height: 1.6;
+      font-size: 1.05rem;
+      color: var(--text-light);
+    }
+
+    .alert-btn {
+      background-color: var(--primary-color);
+      color: var(--text-color);
+      border: none;
+      border-radius: 8px;
+      padding: 0.8rem 1.8rem;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 120px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .alert-btn i {
+      margin-right: 10px;
+      font-size: 1.1rem;
+    }
+
+    .alert-btn:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .alert-btn:active {
+      transform: translateY(0);
+    }
+
+    /* Estilos específicos para cada tipo de alerta */
+    .alert-success {
+      border-top-color: var(--success-color);
+    }
+    .alert-success .alert-title {
+      color: var(--success-color);
+    }
+    .alert-success .alert-btn {
+      background-color: var(--success-color);
+    }
+    .alert-success .alert-btn:hover {
+      background-color: #27ae60;
+    }
+
+    .alert-error {
+      border-top-color: var(--danger-color);
+    }
+    .alert-error .alert-title {
+      color: var(--danger-color);
+    }
+    .alert-error .alert-btn {
+      background-color: var(--danger-color);
+    }
+    .alert-error .alert-btn:hover {
+      background-color: #c0392b;
+    }
+
+    .alert-warning {
+      border-top-color: var(--warning-color);
+    }
+    .alert-warning .alert-title {
+      color: var(--warning-color);
+    }
+    .alert-warning .alert-btn {
+      background-color: var(--warning-color);
+    }
+    .alert-warning .alert-btn:hover {
+      background-color: #e67e22;
+    }
+
+    .alert-info {
+      border-top-color: var(--info-color);
+    }
+    .alert-info .alert-title {
+      color: var(--info-color);
+    }
+    .alert-info .alert-btn {
+      background-color: var(--info-color);
+    }
+    .alert-info .alert-btn:hover {
+      background-color: #2980b9;
+    }
+
+    /* Resto de estilos... */
+    .file-upload {
+      border: 2px dashed var(--border-color);
+      border-radius: 8px;
+      padding: 2rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .file-upload:hover {
+      border-color: var(--primary-color);
+      background-color: rgba(26, 188, 156, 0.1);
+    }
+
+    .file-upload i {
+      font-size: 3rem;
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+    }
+
+    .file-upload p {
+      margin-bottom: 1rem;
+    }
+
+    .file-input {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .file-info {
+      display: none;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background-color: var(--card-bg);
+      border-radius: 8px;
+    }
+
+    .file-info.active {
+      display: block;
+    }
+
+    .preview-container {
+      margin-top: 2rem;
+      max-height: 500px;
+      overflow-y: auto;
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    .preview-section {
+      margin-bottom: 2rem;
+    }
+
+    .preview-section h3 {
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .preview-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+
+    .preview-table th, .preview-table td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .preview-table th {
+      color: var(--primary-color);
+      font-weight: 500;
+    }
+
+    .attachment-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      background-color: rgba(0, 0, 0, 0.2);
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+    }
+
+    .attachment-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn {
+      background-color: var(--primary-color);
+      color: var(--text-color);
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 1rem;
+    }
+
+    .btn i {
+      margin-right: 8px;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .btn-danger {
+      background-color: var(--danger-color);
+    }
+
+    .btn-secondary {
+      background-color: var(--secondary-color);
+      border: 1px solid var(--border-color);
+    }
+
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      backdrop-filter: blur(3px);
+    }
+
+    .loading-overlay.active {
+      display: flex;
+    }
+
+    .loader {
+      border: 5px solid rgba(255, 255, 255, 0.1);
+      border-top: 5px solid var(--primary-color);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+      box-shadow: 0 0 20px rgba(26, 188, 156, 0.3);
+    }
+
+    .progress-container {
+      width: 100%;
+      background-color: var(--background-color);
+      border-radius: 8px;
+      margin-top: 1rem;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 20px;
+      background-color: var(--primary-color);
+      width: 0%;
+      transition: width 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Animación para alertas */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes scaleIn {
+      from { transform: scale(0.9); }
+      to { transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1><i class="fas fa-file-import"></i> Importar Datos .rtmp</h1>
+      
+      <div class="file-upload" id="fileUpload">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <p>Arrastra y suelta tu archivo .rtmp aquí o haz clic para seleccionar</p>
+        <button class="btn"><i class="fas fa-folder-open"></i> Seleccionar Archivo</button>
+        <input type="file" id="fileInput" class="file-input" accept=".rtmp">
+      </div>
+      
+      <div id="fileInfo" class="file-info">
+        <p><strong>Archivo:</strong> <span id="fileName"></span></p>
+        <p><strong>Tamaño:</strong> <span id="fileSize"></span></p>
+        <p><strong>Tipo:</strong> <span id="fileType"></span></p>
+      </div>
+      
+      <div id="progressContainer" class="progress-container" style="display: none;">
+        <div id="progressBar" class="progress-bar">0%</div>
+      </div>
+      
+      <div id="previewContainer" class="preview-container" style="display: none;">
+        <h2>Vista Previa de los Datos</h2>
+        <div id="metadataPreview" class="preview-section"></div>
+        <div id="loansPreview"></div>
+      </div>
+      
+      <div id="actionButtons" style="display: none; margin-top: 2rem;">
+        <button id="importBtn" class="btn">
+          <i class="fas fa-file-import"></i> Importar Datos
+        </button>
+        <button id="cancelBtn" class="btn btn-secondary">
+          <i class="fas fa-times"></i> Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Overlay de carga -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loader"></div>
+  </div>
+  
+  <!-- Alertas personalizadas mejoradas -->
+  <div class="alert-overlay" id="alertOverlay">
+    <div class="alert-box" id="alertBox">
+      <h3 class="alert-title" id="alertTitle"><i class="fas fa-check-circle"></i> Título</h3>
+      <p class="alert-message" id="alertMessage">Mensaje de la alerta</p>
+      <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+        <button class="alert-btn" id="alertBtn"><i class="fas fa-check"></i> Aceptar</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      addDoc,
+      setDoc,
+      doc,
+      getDoc,
+      updateDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+    import { 
+      getStorage, 
+      ref, 
+      uploadBytes,
+      getDownloadURL
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-storage.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+      authDomain: "inventario-35d6b.firebaseapp.com",
+      databaseURL: "https://inventario-35d6b-default-rtdb.firebaseio.com",
+      projectId: "inventario-35d6b",
+      storageBucket: "inventario-35d6b.appspot.com",
+      messagingSenderId: "266100399659",
+      appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const storage = getStorage(app);
+    
+    let currentUser = null;
+    let importedData = null;
+    let fileObject = null;
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          currentUser = user;
+          setupEventListeners();
+        } else {
+          showAlert('Sesión requerida', 'Debes iniciar sesión para acceder a esta función', 'info', () => {
+            window.location.href = 'index.html';
+          });
+        }
+      });
+    });
+    
+    function setupEventListeners() {
+      // Configurar el input file directamente
+      const fileInput = document.getElementById('fileInput');
+      fileInput.addEventListener('change', handleFileSelect);
+      
+      // Drag and drop
+      const uploadArea = document.getElementById('fileUpload');
+      
+      uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = 'var(--primary-color)';
+        uploadArea.style.backgroundColor = 'rgba(26, 188, 156, 0.2)';
+      });
+      
+      uploadArea.addEventListener('dragleave', () => {
+        uploadArea.style.borderColor = 'var(--border-color)';
+        uploadArea.style.backgroundColor = '';
+      });
+      
+      uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = 'var(--border-color)';
+        uploadArea.style.backgroundColor = '';
+        
+        if (e.dataTransfer.files.length) {
+          fileInput.files = e.dataTransfer.files;
+          handleFileSelect({ target: fileInput });
+        }
+      });
+      
+      // Botones de acción
+      document.getElementById('importBtn').addEventListener('click', importData);
+      document.getElementById('cancelBtn').addEventListener('click', resetForm);
+      document.getElementById('alertBtn').addEventListener('click', () => {
+        document.getElementById('alertOverlay').classList.remove('active');
+      });
+    }
+    
+    async function handleFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      // Validar extensión
+      if (!file.name.endsWith('.rtmp')) {
+        showAlert('Formato incorrecto', 'Por favor selecciona un archivo con extensión .rtmp', 'error');
+        return;
+      }
+      
+      fileObject = file;
+      
+      // Mostrar información del archivo
+      document.getElementById('fileName').textContent = file.name;
+      document.getElementById('fileSize').textContent = formatFileSize(file.size);
+      document.getElementById('fileType').textContent = file.type || 'application/json';
+      document.getElementById('fileInfo').classList.add('active');
+      
+      try {
+        showLoading();
+        document.getElementById('progressContainer').style.display = 'block';
+        updateProgress(10, 'Leyendo archivo...');
+        
+        // Leer el archivo
+        const fileContent = await readFileAsText(file);
+        
+        updateProgress(30, 'Procesando datos...');
+        
+        // Parsear JSON
+        importedData = JSON.parse(fileContent);
+        
+        updateProgress(70, 'Generando vista previa...');
+        
+        // Mostrar vista previa
+        generatePreview(importedData);
+        
+        updateProgress(100, 'Archivo cargado correctamente');
+        
+        // Mostrar botones de acción
+        document.getElementById('actionButtons').style.display = 'block';
+      } catch (error) {
+        console.error("Error processing file: ", error);
+        showAlert('Error de procesamiento', 'Error al procesar el archivo: ' + error.message, 'error');
+      } finally {
+        hideLoading();
+        setTimeout(() => {
+          document.getElementById('progressContainer').style.display = 'none';
+        }, 1000);
+      }
+    }
+    
+    function readFileAsText(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (event) => resolve(event.target.result);
+        reader.onerror = (error) => reject(error);
+        reader.readAsText(file);
+      });
+    }
+    
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i]);
+    }
+    
+    function generatePreview(data) {
+      // Mostrar contenedor de vista previa
+      document.getElementById('previewContainer').style.display = 'block';
+      
+      // Mostrar metadatos
+      const metadataPreview = document.getElementById('metadataPreview');
+      metadataPreview.innerHTML = `
+        <h3>Metadatos del Archivo</h3>
+        <table class="preview-table">
+          <tr>
+            <th>Tipo de Exportación</th>
+            <td>${data.metadata.type === 'single_loan' ? 'Préstamo Individual' : 'Todos los Préstamos'}</td>
+          </tr>
+          <tr>
+            <th>Fecha de Exportación</th>
+            <td>${new Date(data.metadata.exportedAt).toLocaleString()}</td>
+          </tr>
+          <tr>
+            <th>Versión</th>
+            <td>${data.metadata.version}</td>
+          </tr>
+          <tr>
+            <th>Número de Préstamos</th>
+            <td>${data.metadata.loanCount || 1}</td>
+          </tr>
+        </table>
+      `;
+      
+      // Mostrar préstamos
+      const loansPreview = document.getElementById('loansPreview');
+      
+      if (data.metadata.type === 'single_loan') {
+        loansPreview.innerHTML = `
+          <h3>Datos del Préstamo</h3>
+          ${generateLoanPreview(data.loanData)}
+        `;
+      } else {
+        loansPreview.innerHTML = `
+          <h3>Préstamos (${data.loans.length})</h3>
+          ${data.loans.map((loan, index) => `
+            <div class="preview-section">
+              <h4>Préstamo ${index + 1}</h4>
+              ${generateLoanPreview(loan)}
+            </div>
+          `).join('')}
+        `;
+      }
+    }
+    
+    function generateLoanPreview(loan) {
+      return `
+        <table class="preview-table">
+          <tr>
+            <th colspan="2" style="color: var(--primary-color);">Información del Cliente</th>
+          </tr>
+          <tr>
+            <th>Nombre</th>
+            <td>${loan.clientInfo.name}</td>
+          </tr>
+          <tr>
+            <th>Identificación</th>
+            <td>${loan.clientInfo.id}</td>
+          </tr>
+          <tr>
+            <th>Teléfono</th>
+            <td>${loan.clientInfo.phone}</td>
+          </tr>
+          <tr>
+            <th>Dirección</th>
+            <td>${loan.clientInfo.address}</td>
+          </tr>
+          <tr>
+            <th>Referencia</th>
+            <td>${loan.clientInfo.reference.name} (${loan.clientInfo.reference.relation}) - ${loan.clientInfo.reference.phone}</td>
+          </tr>
+          
+          <tr>
+            <th colspan="2" style="color: var(--primary-color);">Detalles del Préstamo</th>
+          </tr>
+          <tr>
+            <th>Monto</th>
+            <td>$${loan.loanDetails.amount.toLocaleString()}</td>
+          </tr>
+          <tr>
+            <th>Tasa de Interés</th>
+            <td>${loan.loanDetails.interestRate}%</td>
+          </tr>
+          <tr>
+            <th>Plazo</th>
+            <td>${loan.loanDetails.term} ${loan.loanDetails.frequency === 'monthly' ? 'meses' : 'semanas'}</td>
+          </tr>
+          <tr>
+            <th>Fecha de Inicio</th>
+            <td>${new Date(loan.loanDetails.startDate).toLocaleDateString()}</td>
+          </tr>
+          <tr>
+            <th>Garantía</th>
+            <td>${loan.loanDetails.guarantee}</td>
+          </tr>
+          
+          ${loan.attachments && loan.attachments.length > 0 ? `
+          <tr>
+            <th colspan="2" style="color: var(--primary-color);">Documentos Adjuntos (${loan.attachments.length})</th>
+          </tr>
+          <tr>
+            <td colspan="2">
+              ${loan.attachments.map(attachment => `
+                <div class="attachment-item">
+                  <span>${attachment.name} (${attachment.type})</span>
+                  ${attachment.downloadURL ? `
+                    <div class="attachment-actions">
+                      <a href="${attachment.downloadURL}" target="_blank" class="btn btn-secondary" style="padding: 0.5rem;">
+                        <i class="fas fa-eye"></i> Ver
+                      </a>
+                    </div>
+                  ` : '<span style="color: var(--warning-color);">No disponible</span>'}
+                </div>
+              `).join('')}
+            </td>
+          </tr>
+          ` : ''}
+        </table>
+      `;
+    }
+    
+    async function importData() {
+      if (!importedData || !currentUser) return;
+      
+      try {
+        showLoading();
+        document.getElementById('progressContainer').style.display = 'block';
+        updateProgress(0, 'Preparando importación...');
+        
+        // Verificar si el usuario que exportó es el mismo que está importando
+        if (importedData.metadata.exportedBy !== currentUser.uid) {
+          showAlert('Confirmación requerida', 'Este archivo fue exportado por otro usuario. ¿Deseas continuar con la importación?', 'warning', async () => {
+            await proceedWithImport();
+          }, true);
+          return;
+        }
+        
+        await proceedWithImport();
+        
+      } catch (error) {
+        console.error("Error importing data: ", error);
+        showAlert('Error de importación', 'Ocurrió un error al importar los datos: ' + error.message, 'error');
+      } finally {
+        hideLoading();
+        setTimeout(() => {
+          document.getElementById('progressContainer').style.display = 'none';
+        }, 2000);
+      }
+    }
+    
+    async function proceedWithImport() {
+      updateProgress(10, 'Validando datos...');
+      
+      // Procesar según el tipo de importación
+      if (importedData.metadata.type === 'single_loan') {
+        await importSingleLoan(importedData.loanData);
+      } else {
+        await importAllLoans(importedData.loans);
+      }
+      
+      updateProgress(100, 'Importación completada!');
+      showAlert('Éxito', 'Los datos se importaron correctamente', 'success', () => {
+        resetForm();
+      });
+    }
+    
+    async function importSingleLoan(loanData) {
+      updateProgress(20, 'Importando préstamo...');
+      
+      // Preparar datos para Firebase
+      const loanToImport = prepareLoanForImport(loanData);
+      
+      // Subir documentos adjuntos si existen
+      if (loanData.attachments) {
+        updateProgress(40, 'Subiendo documentos adjuntos...');
+        await processAttachmentsForImport([loanToImport]);
+      }
+      
+      // Guardar en Firestore
+      updateProgress(80, 'Guardando préstamo...');
+      const docRef = await addDoc(collection(db, "Loans"), loanToImport);
+      
+      // Actualizar URL de documentos si es necesario
+      if (loanToImport.documents && loanToImport.documents.length > 0) {
+        await updateDoc(doc(db, "Loans", docRef.id), {
+          documents: loanToImport.documents
+        });
+      }
+    }
+    
+    async function importAllLoans(loans) {
+      const totalLoans = loans.length;
+      let processedLoans = 0;
+      
+      for (const loan of loans) {
+        updateProgress(
+          20 + (processedLoans / totalLoans * 60),
+          `Importando préstamo ${processedLoans + 1} de ${totalLoans}...`
+        );
+        
+        // Preparar datos para Firebase
+        const loanToImport = prepareLoanForImport(loan);
+        
+        // Subir documentos adjuntos si existen
+        if (loan.attachments) {
+          await processAttachmentsForImport([loanToImport]);
+        }
+        
+        // Guardar en Firestore
+        const docRef = await addDoc(collection(db, "Loans"), loanToImport);
+        
+        // Actualizar URL de documentos si es necesario
+        if (loanToImport.documents && loanToImport.documents.length > 0) {
+          await updateDoc(doc(db, "Loans", docRef.id), {
+            documents: loanToImport.documents
+          });
+        }
+        
+        processedLoans++;
+      }
+    }
+    
+    function prepareLoanForImport(loanData) {
+      return {
+        userId: currentUser.uid,
+        client: loanData.clientInfo,
+        amount: loanData.loanDetails.amount,
+        interestRate: loanData.loanDetails.interestRate,
+        term: loanData.loanDetails.term,
+        frequency: loanData.loanDetails.frequency,
+        startDate: loanData.loanDetails.startDate,
+        loanType: loanData.loanDetails.loanType,
+        guarantee: loanData.loanDetails.guarantee,
+        paymentSchedule: loanData.loanDetails.paymentSchedule || [],
+        payments: loanData.loanDetails.payments || [],
+        status: 'active',
+        createdAt: new Date().toISOString(),
+        documents: []
+      };
+    }
+    
+    async function processAttachmentsForImport(loans) {
+      for (const loan of loans) {
+        if (loan.attachments) {
+          loan.documents = [];
+          
+          for (const attachment of loan.attachments) {
+            try {
+              if (attachment.downloadURL && !attachment.downloadError) {
+                // Descargar el archivo
+                const response = await fetch(attachment.downloadURL);
+                const blob = await response.blob();
+                
+                // Subir a Firebase Storage con nueva ruta
+                const newPath = `loan_documents/${currentUser.uid}/${Date.now()}_${attachment.name}`;
+                const storageRef = ref(storage, newPath);
+                await uploadBytes(storageRef, blob);
+                
+                // Obtener URL de descarga
+                const downloadURL = await getDownloadURL(storageRef);
+                
+                // Guardar referencia
+                loan.documents.push({
+                  name: attachment.name,
+                  type: attachment.type,
+                  url: newPath,
+                  downloadURL: downloadURL
+                });
+              }
+            } catch (error) {
+              console.warn(`Error al subir documento adjunto: ${attachment.name}`, error);
+            }
+          }
+        }
+      }
+    }
+    
+    function resetForm() {
+      document.getElementById('fileInput').value = '';
+      document.getElementById('fileInfo').classList.remove('active');
+      document.getElementById('previewContainer').style.display = 'none';
+      document.getElementById('actionButtons').style.display = 'none';
+      importedData = null;
+      fileObject = null;
+    }
+    
+    function updateProgress(percent, message) {
+      const progressBar = document.getElementById('progressBar');
+      progressBar.style.width = `${percent}%`;
+      progressBar.textContent = message;
+    }
+    
+    function showLoading() {
+      document.getElementById('loadingOverlay').classList.add('active');
+    }
+    
+    function hideLoading() {
+      document.getElementById('loadingOverlay').classList.remove('active');
+    }
+    
+    function showAlert(title, message, type = 'info', callback = null, showCancel = false) {
+      const alertBox = document.getElementById('alertBox');
+      const alertTitle = document.getElementById('alertTitle');
+      const alertMessage = document.getElementById('alertMessage');
+      const alertBtn = document.getElementById('alertBtn');
+      
+      // Configurar según el tipo
+      alertBox.className = 'alert-box';
+      alertTitle.innerHTML = '';
+      
+      let icon = 'fa-info-circle';
+      if (type === 'error') {
+        alertBox.classList.add('alert-error');
+        icon = 'fa-exclamation-circle';
+      } else if (type === 'success') {
+        alertBox.classList.add('alert-success');
+        icon = 'fa-check-circle';
+      } else if (type === 'warning') {
+        alertBox.classList.add('alert-warning');
+        icon = 'fa-exclamation-triangle';
+      } else if (type === 'info') {
+        alertBox.classList.add('alert-info');
+        icon = 'fa-info-circle';
+      }
+      
+      // Configurar título y mensaje
+      alertTitle.innerHTML = `<i class="fas ${icon}"></i> ${title}`;
+      alertMessage.textContent = message;
+      
+      // Configurar botón principal
+      alertBtn.innerHTML = `<i class="fas fa-check"></i> Aceptar`;
+      alertBtn.style.display = 'inline-flex';
+      
+      // Configurar acciones
+      alertBtn.onclick = () => {
+        document.getElementById('alertOverlay').classList.remove('active');
+        if (callback && typeof callback === 'function') {
+          callback();
+        }
+      };
+      
+      // Mostrar alerta
+      document.getElementById('alertOverlay').classList.add('active');
+    }
+  </script>
+</body>
+</html>

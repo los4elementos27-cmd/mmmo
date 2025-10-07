@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía PlusMoney Retom</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1abc9c;
+            --primary-dark: #16a085;
+            --secondary-color: #2a2a3f;
+            --background-color: #2c3e50;
+            --text-color: #ffffff;
+            --text-light: #a8a8a8;
+            --border-color: #444;
+            --card-bg: #34495e;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --success-color: #2ecc71;
+            --info-color: #15a086;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--secondary-color), var(--background-color));
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            line-height: 1.4;
+            padding-bottom: 80px;
+        }
+
+        .guide-container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 15px;
+            width: 100%;
+            flex: 1;
+        }
+
+        .guide-header {
+            text-align: center;
+            padding: 15px 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--primary-color);
+        }
+
+        .guide-header h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .guide-header p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .session-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .session {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .session.active {
+            display: block;
+        }
+
+        .session-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .session-icon {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-right: 15px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(26, 188, 156, 0.1);
+            animation: pulse 2s infinite;
+            flex-shrink: 0;
+        }
+
+        .session-title {
+            font-size: 1.3rem;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .session-content {
+            margin-bottom: 20px;
+        }
+
+        .session-content p {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 12px;
+            color: var(--text-light);
+        }
+
+        .session-content ul {
+            list-style-type: none;
+            padding-left: 15px;
+            margin-bottom: 15px;
+        }
+
+        .session-content li {
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            color: var(--text-light);
+        }
+
+        .session-content li:before {
+            content: "\f058";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            color: var(--primary-color);
+            position: absolute;
+            left: 0;
+            top: 1px;
+            font-size: 0.9rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .feature-icon {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            animation: bounce 2s infinite;
+        }
+
+        .feature-title {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .feature-description {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            line-height: 1.3;
+        }
+
+        /* Botones flotantes fijos en la parte inferior */
+        .floating-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px 15px;
+            background: rgba(42, 42, 63, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            min-width: 120px;
+            justify-content: center;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+            height: 42px;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        .nav-btn:active {
+            transform: translateY(1px);
+        }
+
+        .nav-btn i {
+            margin: 0 5px;
+            font-size: 0.9rem;
+        }
+
+        .nav-btn.prev {
+            background: var(--secondary-color);
+        }
+
+        .nav-btn.prev:hover {
+            background: #3a3a5f;
+        }
+
+        .nav-btn.hidden {
+            display: none;
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            margin: 20px 0;
+            overflow: hidden;
+            height: 8px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--info-color));
+            border-radius: 8px;
+            transition: width 0.4s ease;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .step {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background-color: var(--border-color);
+            position: relative;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .step.active {
+            background-color: var(--primary-color);
+            transform: scale(1.2);
+        }
+
+        .step-label {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            color: var(--text-light);
+            white-space: nowrap;
+            display: none;
+        }
+
+        .step.active .step-label {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .session-number {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            text-align: center;
+            margin-top: 12px;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(26, 188, 156, 0.3); }
+            70% { box-shadow: 0 0 0 10px rgba(26, 188, 156, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(26, 188, 156, 0); }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-8px); }
+            60% { transform: translateY(-4px); }
+        }
+
+        /* Responsive design para tablets */
+        @media (min-width: 768px) {
+            .guide-container {
+                padding: 20px;
+                max-width: 90%;
+            }
+            
+            .guide-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .guide-header p {
+                font-size: 1rem;
+            }
+            
+            .session {
+                padding: 25px;
+                border-radius: 15px;
+            }
+            
+            .session-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 2.2rem;
+            }
+            
+            .session-title {
+                font-size: 1.5rem;
+            }
+            
+            .session-content p, .session-content li {
+                font-size: 1rem;
+            }
+            
+            .features-grid {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                gap: 15px;
+            }
+            
+            .feature-icon {
+                font-size: 2rem;
+            }
+            
+            .feature-title {
+                font-size: 1rem;
+            }
+            
+            .feature-description {
+                font-size: 0.85rem;
+            }
+            
+            .floating-nav {
+                padding: 15px;
+            }
+            
+            .nav-btn {
+                padding: 12px 25px;
+                font-size: 1rem;
+                min-width: 140px;
+                height: 46px;
+            }
+            
+            .step {
+                width: 16px;
+                height: 16px;
+            }
+            
+            .step-label {
+                display: block;
+            }
+        }
+
+        /* Responsive design para escritorio */
+        @media (min-width: 1024px) {
+            .guide-container {
+                max-width: 900px;
+            }
+            
+            .session {
+                padding: 30px;
+            }
+            
+            .features-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* Estilos específicos para móviles muy pequeños */
+        @media (max-width: 340px) {
+            .session-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .session-icon {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-btn {
+                min-width: 100px;
+                padding: 10px 15px;
+                font-size: 0.8rem;
+            }
+            
+            .nav-btn i {
+                margin: 0 3px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="guide-container">
+        <div class="guide-header">
+            <h1>PlusMoney Retom</h1>
+            <p>Sistema de Gestión de Préstamos</p>
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar" style="width: 16.66%"></div>
+        </div>
+        
+        <div class="step-indicator">
+            <div class="step active"><span class="step-label">Bienvenida</span></div>
+            <div class="step"><span class="step-label">Dashboard</span></div>
+            <div class="step"><span class="step-label">Préstamos</span></div>
+            <div class="step"><span class="step-label">Pagos</span></div>
+            <div class="step"><span class="step-label">Reportes</span></div>
+            <div class="step"><span class="step-label">Configuración</span></div>
+        </div>
+        
+        <div class="session-container">
+            <!-- Sesión 1: Bienvenida -->
+            <div class="session active" id="session-1">
+                <div class="session-header">
+                    <div class="session-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h2 class="session-title">Bienvenido a PlusMoney Retom</h2>
+                </div>
+                <div class="session-content">
+                    <p>Sistema integral de gestión de préstamos diseñado para optimizar el control de cartera crediticia.</p>
+                    
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h3 class="feature-title">Dashboard</h3>
+                            <p class="feature-description">Métricas financieras clave en un vistazo</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-hand-holding-usd"></i>
+                            </div>
+                            <h3 class="feature-title">Préstamos</h3>
+                            <p class="feature-description">Administra préstamos con cálculo automático</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-file-invoice-dollar"></i>
+                            </div>
+                            <h3 class="feature-title">Pagos</h3>
+                            <p class="feature-description">Registro de pagos con control de moras</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="session-number">Sesión 1 de 6</div>
+            </div>
+            
+            <!-- Sesión 2: Dashboard -->
+            <div class="session" id="session-2">
+                <div class="session-header">
+                    <div class="session-icon">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <h2 class="session-title">Panel de Control</h2>
+                </div>
+                <div class="session-content">
+                    <p>El dashboard principal te ofrece una visión completa de tu negocio.</p>
+                    
+                    <ul>
+                        <li>Resumen financiero con total prestado, pendiente e intereses</li>
+                        <li>Gráficos interactivos de tu cartera de préstamos</li>
+                        <li>Estadísticas de clientes y morosidad</li>
+                        <li>Acceso rápido a las funciones principales</li>
+                    </ul>
+                </div>
+                <div class="session-number">Sesión 2 de 6</div>
+            </div>
+            
+            <!-- Sesión 3: Préstamos -->
+            <div class="session" id="session-3">
+                <div class="session-header">
+                    <div class="session-icon">
+                        <i class="fas fa-hand-holding-usd"></i>
+                    </div>
+                    <h2 class="session-title">Gestión de Préstamos</h2>
+                </div>
+                <div class="session-content">
+                    <p>Funciones avanzadas para administrar préstamos.</p>
+                    
+                    <ul>
+                        <li>Registro de nuevos préstamos con datos completos</li>
+                        <li>Cálculo automático de intereses y cuotas</li>
+                        <li>Diferentes tipos de préstamos</li>
+                        <li>Control de garantías y documentos</li>
+                        <li>Generación de contratos automáticos</li>
+                    </ul>
+                </div>
+                <div class="session-number">Sesión 3 de 6</div>
+            </div>
+            
+            <!-- Sesión 4: Pagos -->
+            <div class="session" id="session-4">
+                <div class="session-header">
+                    <div class="session-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <h2 class="session-title">Sistema de Pagos</h2>
+                </div>
+                <div class="session-content">
+                    <p>Registro y control de pagos con diferentes modalidades.</p>
+                    
+                    <ul>
+                        <li>Registro de pagos (completo, interés, capital)</li>
+                        <li>Cálculo automático de moras por atrasos</li>
+                        <li>Generación de recibos y tickets</li>
+                        <li>Compartir comprobantes por WhatsApp</li>
+                        <li>Historial completo de transacciones</li>
+                    </ul>
+                </div>
+                <div class="session-number">Sesión 4 de 6</div>
+            </div>
+            
+            <!-- Sesión 5: Reportes -->
+            <div class="session" id="session-5">
+                <div class="session-header">
+                    <div class="session-icon">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h2 class="session-title">Reportes y Análisis</h2>
+                </div>
+                <div class="session-content">
+                    <p>Informes detallados para la toma de decisiones.</p>
+                    
+                    <ul>
+                        <li>Reportes de clientes y préstamos activos</li>
+                        <li>Estado de cartera y morosidad</li>
+                        <li>Proyecciones de ingresos por intereses</li>
+                        <li>Reportes personalizados por fechas</li>
+                        <li>Exportación de datos para análisis</li>
+                    </ul>
+                </div>
+                <div class="session-number">Sesión 5 de 6</div>
+            </div>
+            
+            <!-- Sesión 6: Configuración -->
+            <div class="session" id="session-6">
+                <div class="session-header">
+                    <div class="session-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <h2 class="session-title">Configuración y Seguridad</h2>
+                </div>
+                <div class="session-content">
+                    <p>Personaliza y protege tu información.</p>
+                    
+                    <ul>
+                        <li>Configuración de tasas de interés y moras</li>
+                        <li>Gestión de usuarios y permisos</li>
+                        <li>Datos de empresa y personalización</li>
+                        <li>Protección de datos y seguridad</li>
+                        <li>Copias de seguridad automáticas</li>
+                    </ul>
+                    
+                    <p>Para soporte: infor@retomrt.com o (849) 515-8440</p>
+                </div>
+                <div class="session-number">Sesión 6 de 6</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Botones flotantes fijos en la parte inferior -->
+    <div class="floating-nav">
+        <button class="nav-btn prev hidden" id="prev-btn">
+            <i class="fas fa-arrow-left"></i> Anterior
+        </button>
+        <button class="nav-btn next" id="next-btn">
+            Siguiente <i class="fas fa-arrow-right"></i>
+        </button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar si la guía ya se completó
+            if (localStorage.getItem('guiaPlusMoneyCompletada') === 'true') {
+                window.location.href = "home.html"; // Redirigir automáticamente si ya se completó
+                return;
+            }
+            
+            const sessions = document.querySelectorAll('.session');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const progressBar = document.getElementById('progress-bar');
+            const steps = document.querySelectorAll('.step');
+            
+            let currentSession = 0;
+            
+            // Función para actualizar la visualización de sesiones
+            function updateSessions() {
+                sessions.forEach((session, index) => {
+                    if (index === currentSession) {
+                        session.classList.add('active');
+                    } else {
+                        session.classList.remove('active');
+                    }
+                });
+                
+                // Actualizar progreso
+                const progress = ((currentSession + 1) / sessions.length) * 100;
+                progressBar.style.width = `${progress}%`;
+                
+                // Actualizar indicador de pasos
+                steps.forEach((step, index) => {
+                    if (index <= currentSession) {
+                        step.classList.add('active');
+                    } else {
+                        step.classList.remove('active');
+                    }
+                });
+                
+                // Actualizar estado de botones
+                if (currentSession === 0) {
+                    prevBtn.classList.add('hidden');
+                } else {
+                    prevBtn.classList.remove('hidden');
+                }
+                
+                nextBtn.innerHTML = currentSession === sessions.length - 1 
+                    ? 'Comenzar <i class="fas fa-check"></i>' 
+                    : 'Siguiente <i class="fas fa-arrow-right"></i>';
+            }
+            
+            // Función para redirigir a la aplicación principal
+            function redirigirAAplicacion() {
+                // Guardar en localStorage que ya se completó la guía
+                localStorage.setItem('guiaPlusMoneyCompletada', 'true');
+                // Redirigir a la aplicación principal
+                window.location.href = "home.html";
+            }
+            
+            // Evento para botón siguiente
+            nextBtn.addEventListener('click', function() {
+                if (currentSession < sessions.length - 1) {
+                    currentSession++;
+                    updateSessions();
+                    
+                    // Desplazar hacia arriba para mejor visualización
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                } else {
+                    redirigirAAplicacion();
+                }
+            });
+            
+            // Evento para botón anterior
+            prevBtn.addEventListener('click', function() {
+                if (currentSession > 0) {
+                    currentSession--;
+                    updateSessions();
+                    
+                    // Desplazar hacia arriba para mejor visualización
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+            
+            // Navegación con teclado
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowRight') {
+                    nextBtn.click();
+                } else if (e.key === 'ArrowLeft' && currentSession > 0) {
+                    prevBtn.click();
+                }
+            });
+            
+            // Soporte para gestos táctiles en móviles
+            let touchStartX = 0;
+            let touchEndX = 0;
+            
+            document.addEventListener('touchstart', function(e) {
+                touchStartX = e.changedTouches[0].screenX;
+            });
+            
+            document.addEventListener('touchend', function(e) {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            });
+            
+            function handleSwipe() {
+                const minSwipeDistance = 50; // Distancia mínima para considerar un swipe
+                
+                if (touchEndX < touchStartX - minSwipeDistance) {
+                    // Swipe izquierda - avanzar
+                    nextBtn.click();
+                } else if (touchEndX > touchStartX + minSwipeDistance && currentSession > 0) {
+                    // Swipe derecha - retroceder
+                    prevBtn.click();
+                }
+            }
+            
+            // Inicializar
+            updateSessions();
+        });
+    </script>
+</body>
+</html>

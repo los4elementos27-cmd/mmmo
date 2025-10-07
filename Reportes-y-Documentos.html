@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reportes - Sistema de Préstamos</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    :root {
+      --primary-color: #1abc9c;
+      --primary-dark: #16a085;
+      --secondary-color: #2a2a3f;
+      --background-color: #2c3e50;
+      --text-color: #ffffff;
+      --text-light: #a8a8a8;
+      --border-color: #444;
+      --card-bg: #34495e;
+      --danger-color: #e74c3c;
+      --warning-color: #f39c12;
+      --success-color: #2ecc71;
+      --info-color: #3498db;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background-color: var(--secondary-color);
+      padding: 1rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+
+    .nav-menu {
+      display: flex;
+      list-style: none;
+    }
+
+    .nav-item {
+      margin-left: 1.5rem;
+    }
+
+    .nav-link {
+      color: var(--text-color);
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-link i {
+      margin-right: 8px;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .main-container {
+      flex: 1;
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .section-title {
+      color: var(--primary-color);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .card {
+      background-color: var(--secondary-color);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .btn {
+      background-color: var(--primary-color);
+      color: var(--text-color);
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn i {
+      margin-right: 8px;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .btn-success {
+      background-color: var(--success-color);
+    }
+
+    .btn-info {
+      background-color: var(--info-color);
+    }
+
+    .receipt-container {
+      background-color: white;
+      color: black;
+      padding: 2rem;
+      border-radius: 8px;
+      max-width: 600px;
+      margin: 0 auto;
+      display: none;
+    }
+
+    .receipt-header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .receipt-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    .receipt-details {
+      margin-bottom: 1.5rem;
+    }
+
+    .receipt-detail {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    .receipt-footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-style: italic;
+    }
+
+    .recommendation-letter {
+      background-color: white;
+      color: black;
+      padding: 2rem;
+      border-radius: 8px;
+      max-width: 600px;
+      margin: 0 auto;
+      display: none;
+    }
+
+    .letter-header {
+      text-align: right;
+      margin-bottom: 1.5rem;
+    }
+
+    .letter-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .letter-body {
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+
+    .letter-footer {
+      margin-top: 2rem;
+      text-align: right;
+    }
+
+    .letter-signature {
+      margin-top: 3rem;
+      border-top: 1px solid black;
+      display: inline-block;
+      padding-top: 0.5rem;
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      .header-container {
+        flex-direction: column;
+      }
+      
+      .nav-menu {
+        margin-top: 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      
+      .nav-item {
+        margin-left: 0.5rem;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-container">
+      <div class="logo">Sistema de Préstamos</div>
+      <ul class="nav-menu">
+        <li class="nav-item">
+          <a href="index.html" class="nav-link">
+            <i class="fas fa-tachometer-alt"></i> Panel
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="new-loan.html" class="nav-link">
+            <i class="fas fa-hand-holding-usd"></i> Nuevo Préstamo
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="loans-list.html" class="nav-link">
+            <i class="fas fa-list"></i> Préstamos Activos
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="payments.html" class="nav-link">
+            <i class="fas fa-money-bill-wave"></i> Pagos
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="reports.html" class="nav-link active">
+            <i class="fas fa-file-alt"></i> Reportes
+          </a>
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="main-container">
+    <h1 class="section-title">Reportes y Documentos</h1>
+    
+    <div class="card">
+      <div id="receiptContainer" class="receipt-container">
+        <div class="receipt-header">
+          <div class="receipt-title">RECIBO DE PAGO</div>
+          <div id="receiptNumber">Nº: 000001</div>
+        </div>
+        <div class="receipt-details">
+          <div class="receipt-detail">
+            <span>Fecha:</span>
+            <span id="receiptDate">--/--/----</span>
+          </div>
+          <div class="receipt-detail">
+            <span>Cliente:</span>
+            <span id="receiptClient">Nombre del Cliente</span>
+          </div>
+          <div class="receipt-detail">
+            <span>Préstamo Nº:</span>
+            <span id="receiptLoanId">000001</span>
+          </div>
+          <div class="receipt-detail">
+            <span>Monto del Pago:</span>
+            <span id="receiptAmount">$0.00</span>
+          </div>
+          <div class="receipt-detail">
+            <span>Tipo de Pago:</span>
+            <span id="receiptType">Pago Completo</span>
+          </div>
+          <div class="receipt-detail" id="receiptLateFeeContainer" style="display: none;">
+            <span>Mora:</span>
+            <span id="receiptLateFee">$0.00</span>
+          </div>
+          <div class="receipt-detail">
+            <span>Total Recibido:</span>
+            <span id="receiptTotal">$0.00</span>
+          </div>
+        </div>
+        <div class="receipt-footer">
+          <p>Gracias por su pago. Este recibo es su comprobante.</p>
+        </div>
+      </div>
+      
+      <div id="letterContainer" class="recommendation-letter">
+        <div class="letter-header">
+          <div id="letterDate">Ciudad, Fecha</div>
+        </div>
+        <div class="letter-title">CARTA DE RECOMENDACIÓN</div>
+        <div class="letter-body">
+          <p>Por medio de la presente, certificamos que el/la señor(a) <span id="letterClientName">Nombre del Cliente</span>, 
+          identificado(a) con cédula de identidad Nº <span id="letterClientId">000-0000000-0</span>, ha cumplido satisfactoriamente 
+          con todas sus obligaciones financieras en nuestra institución.</p>
+          
+          <p>Durante el período de su préstamo, el/la señor(a) <span id="letterClientName2">Nombre del Cliente</span> demostró 
+          responsabilidad y puntualidad en todos sus pagos, mostrando un excelente historial crediticio.</p>
+          
+          <p>Por lo tanto, recomendamos ampliamente al/la señor(a) <span id="letterClientName3">Nombre del Cliente</span> como 
+          una persona confiable y cumplidora de sus compromisos financieros.</p>
+        </div>
+        <div class="letter-footer">
+          <p>Atentamente,</p>
+          <div class="letter-signature">
+            <p>_________________________</p>
+            <p>Administrador</p>
+            <p>Sistema de Préstamos</p>
+          </div>
+        </div>
+      </div>
+      
+      <div style="margin-top: 2rem;">
+        <button id="downloadReceiptBtn" class="btn btn-success" style="display: none;">
+          <i class="fas fa-download"></i> Descargar Recibo (PNG)
+        </button>
+        <button id="downloadLetterBtn" class="btn btn-info" style="display: none; margin-left: 1rem;">
+          <i class="fas fa-download"></i> Descargar Carta (PNG)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    // Configuración de jsPDF
+    const { jsPDF } = window.jspdf;
+    
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { 
+      getFirestore, 
+      doc, 
+      getDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+      authDomain: "inventario-35d6b.firebaseapp.com",
+      databaseURL: "https://inventario-35d6b-default-rtdb.firebaseio.com",
+      projectId: "inventario-35d6b",
+      storageBucket: "inventario-35d6b.appspot.com",
+      messagingSenderId: "266100399659",
+      appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Variables globales
+    let currentUser = "Administrador";
+    let lastPaymentData = null;
+    let selectedLoanForLetter = null;
+
+    // Inicialización
+    document.addEventListener('DOMContentLoaded', () => {
+      // Verificar si hay parámetros en la URL
+      const urlParams = new URLSearchParams(window.location.search);
+      
+      // Verificar si se debe mostrar un recibo
+      if (urlParams.has('receipt')) {
+        const loanId = urlParams.get('receipt');
+        loadReceiptData(loanId);
+      }
+      
+      // Verificar si se debe mostrar una carta de recomendación
+      if (urlParams.has('letter')) {
+        const loanId = urlParams.get('letter');
+        loadLetterData(loanId);
+      }
+      
+      // Configurar botones de descarga
+      document.getElementById('downloadReceiptBtn').addEventListener('click', downloadReceipt);
+      document.getElementById('downloadLetterBtn').addEventListener('click', downloadRecommendationLetter);
+    });
+
+    // Cargar datos para el recibo
+    async function loadReceiptData(loanId) {
+      try {
+        // Obtener el préstamo
+        const loanRef = doc(db, "Loans", loanId);
+        const loanSnap = await getDoc(loanRef);
+        
+        if (loanSnap.exists()) {
+          const loan = loanSnap.data();
+          
+          // Obtener el último pago
+          if (loan.payments && loan.payments.length > 0) {
+            const lastPayment = loan.payments[loan.payments.length - 1];
+            
+            // Formatear fecha
+            const paymentDate = lastPayment.date.toDate();
+            const formattedDate = paymentDate.toLocaleDateString();
+            
+            // Llenar datos del recibo
+            document.getElementById('receiptNumber').textContent = `Nº: ${loanId.slice(0, 6).toUpperCase()}`;
+            document.getElementById('receiptDate').textContent = formattedDate;
+            document.getElementById('receiptClient').textContent = loan.client.name;
+            document.getElementById('receiptLoanId').textContent = loanId.slice(0, 6).toUpperCase();
+            document.getElementById('receiptAmount').textContent = `$${lastPayment.amount.toFixed(2)}`;
+            document.getElementById('receiptType').textContent = getPaymentTypeText(lastPayment.type);
+            
+            if (lastPayment.lateFee) {
+              document.getElementById('receiptLateFeeContainer').style.display = 'flex';
+              document.getElementById('receiptLateFee').textContent = `$${lastPayment.lateFee.toFixed(2)}`;
+              document.getElementById('receiptTotal').textContent = `$${(lastPayment.amount + lastPayment.lateFee).toFixed(2)}`;
+            } else {
+              document.getElementById('receiptLateFeeContainer').style.display = 'none';
+              document.getElementById('receiptTotal').textContent = `$${lastPayment.amount.toFixed(2)}`;
+            }
+            
+            // Mostrar recibo
+            document.getElementById('receiptContainer').style.display = 'block';
+            document.getElementById('downloadReceiptBtn').style.display = 'inline-block';
+            
+            // Guardar datos para descarga
+            lastPaymentData = {
+              ...lastPayment,
+              loanId: loanId,
+              clientName: loan.client.name,
+              clientId: loan.client.id
+            };
+          } else {
+            showReceiptError();
+          }
+        } else {
+          showReceiptError();
+        }
+      } catch (error) {
+        console.error("Error cargando recibo: ", error);
+        showReceiptError();
+      }
+    }
+
+    // Mostrar error en recibo
+    function showReceiptError() {
+      document.getElementById('receiptContainer').style.display = 'block';
+      document.getElementById('receiptContainer').innerHTML = '<p>No se pudo cargar la información del recibo</p>';
+      document.getElementById('downloadReceiptBtn').style.display = 'none';
+    }
+
+    // Cargar datos para carta de recomendación
+    async function loadLetterData(loanId) {
+      try {
+        // Obtener el préstamo
+        const loanRef = doc(db, "Loans", loanId);
+        const loanSnap = await getDoc(loanRef);
+        
+        if (loanSnap.exists()) {
+          const loan = loanSnap.data();
+          selectedLoanForLetter = { id: loanSnap.id, ...loan };
+          
+          // Formatear fecha
+          const today = new Date();
+          const formattedDate = today.toLocaleDateString('es-ES', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          });
+          
+          // Llenar datos de la carta
+          document.getElementById('letterDate').textContent = `Santo Domingo, ${formattedDate}`;
+          document.getElementById('letterClientName').textContent = loan.client.name;
+          document.getElementById('letterClientName2').textContent = loan.client.name;
+          document.getElementById('letterClientName3').textContent = loan.client.name;
+          document.getElementById('letterClientId').textContent = loan.client.id;
+          
+          // Mostrar carta
+          document.getElementById('letterContainer').style.display = 'block';
+          document.getElementById('downloadLetterBtn').style.display = 'inline-block';
+        } else {
+          showLetterError();
+        }
+      } catch (error) {
+        console.error("Error cargando carta: ", error);
+        showLetterError();
+      }
+    }
+
+    // Mostrar error en carta
+    function showLetterError() {
+      document.getElementById('letterContainer').style.display = 'block';
+      document.getElementById('letterContainer').innerHTML = '<p>No se pudo cargar la información de la carta</p>';
+      document.getElementById('downloadLetterBtn').style.display = 'none';
+    }
+
+    // Obtener texto para tipo de pago
+    function getPaymentTypeText(type) {
+      switch (type) {
+        case 'full': return 'Pago completo';
+        case 'interest': return 'Solo interés';
+        case 'capital': return 'Solo capital';
+        default: return type;
+      }
+    }
+
+    // Descargar recibo como imagen
+    function downloadReceipt() {
+      const receiptElement = document.getElementById('receiptContainer');
+      
+      html2canvas(receiptElement).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `Recibo_${lastPaymentData.loanId.slice(0, 6)}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      });
+    }
+
+    // Descargar carta de recomendación como imagen
+    function downloadRecommendationLetter() {
+      const letterElement = document.getElementById('letterContainer');
+      
+      html2canvas(letterElement).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `Carta_Recomendacion_${selectedLoanForLetter.client.name.replace(/\s+/g, '_')}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      });
+    }
+  </script>
+</body>
+</html>

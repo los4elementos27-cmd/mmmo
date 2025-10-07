@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Préstamos Activos - Sistema de Préstamos</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #1abc9c;
+      --primary-dark: #16a085;
+      --secondary-color: #2a2a3f;
+      --background-color: #2c3e50;
+      --text-color: #ffffff;
+      --text-light: #a8a8a8;
+      --border-color: #444;
+      --card-bg: #34495e;
+      --danger-color: #e74c3c;
+      --warning-color: #f39c12;
+      --success-color: #2ecc71;
+      --info-color: #3498db;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background-color: var(--secondary-color);
+      padding: 1rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+
+    .nav-menu {
+      display: flex;
+      list-style: none;
+    }
+
+    .nav-item {
+      margin-left: 1.5rem;
+    }
+
+    .nav-link {
+      color: var(--text-color);
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-link i {
+      margin-right: 8px;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .main-container {
+      flex: 1;
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .section-title {
+      color: var(--primary-color);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .card {
+      background-color: var(--secondary-color);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      font-size: 1rem;
+    }
+
+    .btn {
+      background-color: var(--primary-color);
+      color: var(--text-color);
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn i {
+      margin-right: 8px;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .btn-sm {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+    }
+
+    .btn-success {
+      background-color: var(--success-color);
+    }
+
+    .btn-danger {
+      background-color: var(--danger-color);
+    }
+
+    .btn-danger:hover {
+      background-color: #c0392b;
+    }
+
+    .btn-info {
+      background-color: var(--info-color);
+    }
+
+    .loans-list {
+      margin-top: 2rem;
+    }
+
+    .loan-item {
+      background-color: var(--secondary-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      transition: transform 0.3s ease;
+    }
+
+    .loan-item:hover {
+      transform: translateY(-5px);
+    }
+
+    .loan-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .loan-item-title {
+      font-size: 1.25rem;
+      color: var(--primary-color);
+    }
+
+    .loan-item-status {
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+    }
+
+    .status-active {
+      background-color: var(--success-color);
+    }
+
+    .status-overdue {
+      background-color: var(--danger-color);
+    }
+
+    .status-completed {
+      background-color: var(--info-color);
+    }
+
+    .status-warning {
+      background-color: var(--warning-color);
+    }
+
+    .loan-item-body {
+      margin-bottom: 1rem;
+    }
+
+    .loan-item-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .loan-amount {
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    .loan-detail {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    .loan-detail-label {
+      color: var(--text-light);
+    }
+
+    .alert {
+      padding: 1rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .alert-warning {
+      background-color: rgba(243, 156, 18, 0.2);
+      border-left: 4px solid var(--warning-color);
+    }
+
+    .alert-danger {
+      background-color: rgba(231, 76, 60, 0.2);
+      border-left: 4px solid var(--danger-color);
+    }
+
+    .alert i {
+      margin-right: 0.5rem;
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      .header-container {
+        flex-direction: column;
+      }
+      
+      .nav-menu {
+        margin-top: 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      
+      .nav-item {
+        margin-left: 0.5rem;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+      
+      .loan-item-footer {
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-container">
+      <div class="logo">Sistema de Préstamos</div>
+      <ul class="nav-menu">
+        <li class="nav-item">
+          <a href="index.html" class="nav-link">
+            <i class="fas fa-tachometer-alt"></i> Panel
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="new-loan.html" class="nav-link">
+            <i class="fas fa-hand-holding-usd"></i> Nuevo Préstamo
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="loans-list.html" class="nav-link active">
+            <i class="fas fa-list"></i> Préstamos Activos
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="Registro-de-Pagos.html" class="nav-link">
+            <i class="fas fa-money-bill-wave"></i> Pagos
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="reports.html" class="nav-link">
+            <i class="fas fa-file-alt"></i> Reportes
+          </a>
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="main-container">
+    <h1 class="section-title">Préstamos Activos</h1>
+    
+    <div class="card">
+      <div class="filter-container">
+        <div class="form-group">
+          <label for="searchLoans">Buscar por Nombre o Cédula:</label>
+          <input type="text" id="searchLoans" class="form-control" placeholder="Ingrese nombre o cédula del cliente">
+        </div>
+      </div>
+      
+      <div id="activeLoansList">
+        <p>Cargando préstamos activos...</p>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      getDocs, 
+      query, 
+      where
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+      authDomain: "inventario-35d6b.firebaseapp.com",
+      databaseURL: "https://inventario-35d6b-default-rtdb.firebaseio.com",
+      projectId: "inventario-35d6b",
+      storageBucket: "inventario-35d6b.appspot.com",
+      messagingSenderId: "266100399659",
+      appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Variables globales
+    let activeLoans = [];
+
+    // Inicialización
+    document.addEventListener('DOMContentLoaded', () => {
+      // Configurar búsqueda
+      document.getElementById('searchLoans').addEventListener('input', searchLoans);
+      
+      // Cargar préstamos activos
+      loadActiveLoans();
+    });
+
+    // Cargar préstamos activos
+    async function loadActiveLoans() {
+      try {
+        const q = query(collection(db, "Loans"), where("status", "==", "active"));
+        const querySnapshot = await getDocs(q);
+        
+        activeLoans = [];
+        querySnapshot.forEach(doc => {
+          activeLoans.push({ id: doc.id, ...doc.data() });
+        });
+        
+        displayActiveLoans(activeLoans);
+      } catch (error) {
+        console.error("Error cargando préstamos activos: ", error);
+        document.getElementById('activeLoansList').innerHTML = '<p>Error al cargar los préstamos activos</p>';
+      }
+    }
+
+    // Mostrar préstamos activos
+    function displayActiveLoans(loans) {
+      const container = document.getElementById('activeLoansList');
+      container.innerHTML = '';
+      
+      if (loans.length === 0) {
+        container.innerHTML = '<p>No hay préstamos activos</p>';
+        return;
+      }
+      
+      const today = new Date();
+      
+      loans.forEach(loan => {
+        const item = document.createElement('div');
+        item.className = 'loan-item';
+        
+        // Calcular pagos realizados y pendientes
+        const paymentsMade = loan.payments ? loan.payments.length : 0;
+        const totalPayments = loan.paymentSchedule.length;
+        const paymentsPending = totalPayments - paymentsMade;
+        
+        // Calcular próximo pago
+        let nextPayment = null;
+        let isOverdue = false;
+        
+        if (loan.paymentSchedule) {
+          for (const payment of loan.paymentSchedule) {
+            if (payment.status === 'pending') {
+              nextPayment = payment;
+              const dueDate = new Date(payment.dueDate);
+              isOverdue = dueDate < today;
+              break;
+            }
+          }
+        }
+        
+        // Determinar estado
+        let statusClass = 'status-active';
+        let statusText = 'Activo';
+        
+        if (isOverdue) {
+          statusClass = 'status-overdue';
+          statusText = 'Atrasado';
+        } else if (loan.balance <= 0) {
+          statusClass = 'status-completed';
+          statusText = 'Completado';
+        }
+        
+        item.innerHTML = `
+          <div class="loan-item-header">
+            <div class="loan-item-title">${loan.client.name}</div>
+            <div class="loan-item-status ${statusClass}">${statusText}</div>
+          </div>
+          <div class="loan-item-body">
+            <div class="loan-detail">
+              <span class="loan-detail-label">Monto:</span>
+              <span>$${loan.amount.toFixed(2)}</span>
+            </div>
+            <div class="loan-detail">
+              <span class="loan-detail-label">Tasa:</span>
+              <span>${loan.interestRate}%</span>
+            </div>
+            <div class="loan-detail">
+              <span class="loan-detail-label">Próximo pago:</span>
+              <span>${nextPayment ? new Date(nextPayment.dueDate).toLocaleDateString() : 'N/A'}</span>
+            </div>
+            <div class="loan-detail">
+              <span class="loan-detail-label">Pagos:</span>
+              <span>${paymentsMade}/${totalPayments}</span>
+            </div>
+            ${isOverdue ? `
+            <div class="alert alert-danger">
+              <i class="fas fa-exclamation-triangle"></i>
+              <span>Pago atrasado</span>
+            </div>
+            ` : ''}
+          </div>
+          <div class="loan-item-footer">
+            <div class="loan-amount">$${loan.balance.toFixed(2)}</div>
+            <a href="Registro-de-Pagos.html?loanId=${loan.id}" class="btn btn-sm">
+              <i class="fas fa-money-bill-wave"></i> Registrar Pago
+            </a>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    // Buscar préstamos
+    function searchLoans() {
+      const searchTerm = document.getElementById('searchLoans').value.toLowerCase();
+      
+      if (!searchTerm) {
+        displayActiveLoans(activeLoans);
+        return;
+      }
+      
+      const filteredLoans = activeLoans.filter(loan => 
+        loan.client.name.toLowerCase().includes(searchTerm) || 
+        loan.client.id.toLowerCase().includes(searchTerm)
+      );
+      
+      displayActiveLoans(filteredLoans);
+    }
+  </script>
+</body>
+</html>

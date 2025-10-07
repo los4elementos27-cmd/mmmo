@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Consulta de Días Libres</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root {
+      --turn-A: #876a08;
+      --turn-B: #0a6b0b;
+      --turn-C: #0c0e7d;
+      --turn-D: #67096e;
+      --turn-E: #8f12e3;
+      --turn-G: #ff0ae7;
+      --free-day: #f1c40f;
+      --falta: #ab0909;
+      --vacation: #2ecc71;
+      --medical: #16a5b8;
+      --permission: #95a5a6;
+      --primary: #15a086;
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #2c3e50;
+      color: white;
+      margin: 0;
+      padding: 10px;
+      font-size: 14px;
+      -webkit-text-size-adjust: 100%;
+    }
+    
+    .print-header {
+      text-align: center;
+      margin-bottom: 15px;
+      padding: 10px;
+      background-color: #1a2a38;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    
+    .print-header h1 {
+      color: #15a086;
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      line-height: 1.2;
+    }
+    
+    .print-header h2 {
+      margin: 5px 0;
+      font-size: 1.1rem;
+      color: #ecf0f1;
+      font-weight: 400;
+      line-height: 1.2;
+    }
+    
+    .print-header h3 {
+      margin: 0;
+      font-size: 1rem;
+      color: #bdc3c7;
+      font-weight: 300;
+      line-height: 1.2;
+    }
+    
+    .print-controls {
+      background-color: #1a2a38;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    
+    label {
+      font-weight: 500;
+      color: #15a086;
+      margin-bottom: -8px;
+      font-size: 0.9rem;
+    }
+    
+    select, input {
+      padding: 8px 12px;
+      border-radius: 5px;
+      border: 1px solid rgba(21, 160, 134, 0.3);
+      background-color: rgba(26, 42, 56, 0.7);
+      color: white;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      width: 100%;
+      font-size: 0.9rem;
+    }
+    
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 5px;
+    }
+    
+    button {
+      padding: 8px 12px;
+      border-radius: 5px;
+      border: none;
+      background-color: #15a086;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 0.9rem;
+      flex: 1;
+      min-width: 120px;
+    }
+    
+    button:hover {
+      background-color: #12876f;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .btn-change-position {
+      background-color: #e74c3c;
+    }
+    
+    .btn-change-position:hover {
+      background-color: #c0392b;
+    }
+
+    /* Estilos para el botón de orientación */
+    #orientationButton {
+        background-color: #3498db; /* Un color diferente para destacarlo */
+    }
+    #orientationButton:hover {
+        background-color: #2980b9;
+    }
+    
+    .schedule-container {
+      width: 100%;
+      overflow-x: auto;
+      margin-bottom: 15px;
+      background-color: #1a2a38;
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    .schedule-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 600px;
+    }
+    
+    .schedule-table th {
+      background-color: #15a086;
+      color: white;
+      padding: 6px 4px;
+      text-align: center;
+      border: 1px solid rgba(21, 160, 134, 0.5);
+      font-weight: 500;
+      position: sticky;
+      top: 0;
+      font-size: 0.8rem;
+    }
+    
+    .schedule-table td {
+      padding: 6px 4px;
+      border: 1px solid rgba(21, 160, 134, 0.2);
+      text-align: center;
+      font-size: 0.75rem;
+    }
+    
+    .employee-row:hover {
+      background-color: rgba(21, 160, 134, 0.1);
+    }
+    
+    .employee-name {
+      font-weight: bold;
+      background-color: rgba(21, 160, 134, 0.2);
+      position: sticky;
+      left: 0;
+      min-width: 80px;
+      max-width: 80px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 0.75rem;
+    }
+    
+    /* Turn colors */
+    .turn-A { background-color: var(--turn-A); color: white; }
+    .turn-B { background-color: var(--turn-B); color: white; }
+    .turn-C { background-color: var(--turn-C); color: white; }
+    .turn-D { background-color: var(--turn-D); color: white; }
+    .turn-E { background-color: var(--turn-E); color: white; }
+    .turn-G { background-color: var(--turn-G); color: white; }
+    .free-day { background-color: var(--free-day); color: black; }
+    .falta { background-color: var(--falta); color: white; }
+    .vacation { background-color: var(--vacation); color: white; }
+    .medical { background-color: var(--medical); color: white; }
+    .permission { background-color: var(--permission); color: white; }
+    
+    .day-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 30px;
+    }
+    
+    .day-name {
+      font-size: 0.7rem;
+      font-weight: 400;
+      margin-bottom: 1px;
+    }
+    
+    .day-number {
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    
+    .today .day-number {
+      position: relative;
+    }
+    
+    .today .day-number::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 15px;
+      height: 2px;
+      background-color: #e74c3c;
+      border-radius: 2px;
+    }
+    
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 15px 0;
+      justify-content: center;
+      background-color: #1a2a38;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      font-size: 0.7rem;
+      min-width: 80px;
+      flex: 1 0 calc(50% - 8px);
+      max-width: calc(50% - 8px);
+    }
+    
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      margin-right: 6px;
+      border: 1px solid rgba(255,255,255,0.2);
+      flex-shrink: 0;
+    }
+    
+    .position-selector {
+      background-color: #1a2a38;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px auto;
+      max-width: 800px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    
+    .position-selector h2 {
+      color: #15a086;
+      margin-top: 0;
+      font-size: 1.3rem;
+      margin-bottom: 15px;
+    }
+    
+    .position-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 8px;
+      margin: 15px 0;
+    }
+    
+    .position-btn {
+      padding: 10px;
+      background-color: rgba(21, 160, 134, 0.2);
+      color: #15a086;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+    
+    .position-btn:hover {
+      background-color: rgba(21, 160, 134, 0.3);
+    }
+    
+    .position-btn.selected {
+      background-color: #15a086;
+      color: white;
+    }
+    
+    /* Estilos para el modal de contraseña */
+    .password-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.7);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+    }
+    
+    .password-container {
+      background-color: #1a2a38;
+      padding: 20px;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 350px;
+      text-align: center;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+    }
+    
+    .password-container h2 {
+      color: #15a086;
+      margin-top: 0;
+      margin-bottom: 15px;
+      font-size: 1.3rem;
+    }
+    
+    .password-display {
+      font-size: 1.3rem;
+      letter-spacing: 2px;
+      margin: 15px 0;
+      padding: 8px;
+      background-color: rgba(0,0,0,0.2);
+      border-radius: 4px;
+      min-height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .password-error {
+      color: #e74c3c;
+      margin-top: 8px;
+      min-height: 18px;
+      font-size: 0.8rem;
+    }
+    
+    .numpad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 15px;
+    }
+    
+    .numpad button {
+      padding: 12px;
+      font-size: 1.1rem;
+      background-color: #2c3e50;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 45px;
+      min-width: auto;
+    }
+    
+    .numpad button:hover {
+      background-color: #15a086;
+    }
+    
+    .numpad button:active {
+      transform: scale(0.95);
+    }
+    
+    .numpad .clear-btn {
+      background-color: #e74c3c;
+      grid-column: span 1;
+      width: 100%;
+    }
+    
+    .numpad .clear-btn:hover {
+      background-color: #c0392b;
+    }
+    
+    .numpad .submit-btn {
+      background-color: #2ecc71;
+      grid-column: span 1;
+      width: 100%;
+    }
+    
+    .numpad .submit-btn:hover {
+      background-color: #27ae60;
+    }
+    
+    /* Estilos para impresión */
+    @media print {
+      @page {
+        size: landscape;
+        margin: 10mm;
+      }
+      
+      body {
+        background-color: white;
+        color: black;
+        font-size: 10pt;
+        padding: 0;
+      }
+      
+      .no-print {
+        display: none !important;
+      }
+      
+      .print-header {
+        background-color: white;
+        color: black;
+        padding: 8px 0;
+        margin-bottom: 10px;
+        border-bottom: 2px solid #15a086;
+      }
+      
+      .print-header h1 {
+        color: #15a086;
+        font-size: 16pt;
+      }
+      
+      .print-header h2, .print-header h3 {
+        color: #555;
+        font-size: 10pt;
+        margin: 3px 0;
+      }
+      
+      .schedule-container {
+        background-color: white;
+        padding: 0;
+        box-shadow: none;
+        overflow: visible;
+      }
+      
+      .schedule-table {
+        width: 100%;
+        min-width: auto;
+        border: 1px solid #ddd;
+      }
+      
+      .schedule-table th {
+        background-color: #15a086 !important;
+        color: white !important;
+        padding: 4px;
+        font-size: 8pt;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      
+      .schedule-table td {
+        padding: 6px 4px;
+        font-size: 8pt;
+        border: 1px solid #ddd;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      
+      .employee-name {
+        background-color: #f0f0f0 !important;
+        color: black !important;
+        font-weight: bold;
+      }
+      
+      .day-name {
+        font-size: 8pt;
+      }
+      
+      .day-number {
+        font-size: 9pt;
+      }
+      
+      /* Mantener colores en impresión */
+      .turn-A { background-color: var(--turn-A) !important; color: white !important; }
+      .turn-B { background-color: var(--turn-B) !important; color: white !important; }
+      .turn-C { background-color: var(--turn-C) !important; color: white !important; }
+      .turn-D { background-color: var(--turn-D) !important; color: white !important; }
+      .turn-E { background-color: var(--turn-E) !important; color: white !important; }
+      .turn-G { background-color: var(--turn-G) !important; color: white !important; }
+      .free-day { background-color: var(--free-day) !important; color: black !important; }
+      .falta { background-color: var(--falta) !important; color: white !important; }
+      .vacation { background-color: var(--vacation) !important; color: white !important; }
+      .medical { background-color: var(--medical) !important; color: white !important; }
+      .permission { background-color: var(--permission) !important; color: white !important; }
+      
+      .legend {
+        display: none;
+      }
+      
+      .page-break {
+        page-break-after: always;
+      }
+    }
+
+    /* Estilos específicos para móviles pequeños */
+    @media (max-width: 400px) {
+      .print-header h1 {
+        font-size: 1.3rem;
+      }
+      
+      .print-header h2 {
+        font-size: 1rem;
+      }
+      
+      .print-header h3 {
+        font-size: 0.9rem;
+      }
+      
+      button {
+        font-size: 0.8rem;
+        padding: 6px 8px;
+      }
+      
+      .position-btn {
+        font-size: 0.8rem;
+        padding: 8px;
+      }
+      
+      .password-container h2 {
+        font-size: 1.1rem;
+      }
+      
+      .numpad button {
+        height: 40px;
+        font-size: 1rem;
+      }
+      
+      .legend-item {
+        min-width: 70px;
+        font-size: 0.65rem;
+      }
+    }
+
+    /* Nuevos estilos para el modal de selección de colaborador */
+    .employee-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.7);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+    }
+    
+    .employee-container {
+      background-color: #1a2a38;
+      padding: 20px;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 350px;
+      text-align: center;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+    }
+    
+    .employee-container h2 {
+      color: #15a086;
+      margin-top: 0;
+      margin-bottom: 15px;
+      font-size: 1.3rem;
+    }
+    
+    .employee-list {
+      max-height: 300px;
+      overflow-y: auto;
+      margin-bottom: 15px;
+    }
+    
+    .employee-btn {
+      padding: 10px;
+      margin: 5px 0;
+      width: 100%;
+      background-color: rgba(21, 160, 134, 0.2);
+      color: #15a086;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      font-size: 0.9rem;
+      text-align: left;
+    }
+    
+    .employee-btn:hover {
+      background-color: rgba(21, 160, 134, 0.3);
+    }
+    
+    .employee-btn.selected {
+      background-color: #15a086;
+      color: white;
+    }
+
+    /* Estilos para el buscador de colaboradores */
+    .search-container {
+      margin-bottom: 15px;
+      position: relative;
+    }
+    
+    .search-container input {
+      padding-right: 35px;
+    }
+    
+    .search-container i {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #15a086;
+    }
+  </style>
+</head>
+<body>
+  <div class="password-modal" id="passwordModal">
+    <div class="password-container">
+      <h2><i class="fas fa-lock"></i> Ingrese su contraseña</h2>
+      <p id="passwordEmployeeName">Colaborador: [Nombre del Colaborador]</p>
+      
+      <div class="password-display" id="passwordDisplay">
+        <span id="passwordDots"></span>
+      </div>
+      
+      <div class="password-error" id="passwordError"></div>
+      
+      <div class="numpad">
+        <button onclick="appendPassword('1')">1</button>
+        <button onclick="appendPassword('2')">2</button>
+        <button onclick="appendPassword('3')">3</button>
+        <button onclick="appendPassword('4')">4</button>
+        <button onclick="appendPassword('5')">5</button>
+        <button onclick="appendPassword('6')">6</button>
+        <button onclick="appendPassword('7')">7</button>
+        <button onclick="appendPassword('8')">8</button>
+        <button onclick="appendPassword('9')">9</button>
+        <button class="clear-btn" onclick="clearPassword()"><i class="fas fa-backspace"></i></button>
+        <button onclick="appendPassword('0')">0</button>
+        <button class="submit-btn" onclick="checkPassword()"><i class="fas fa-check"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="employee-modal" id="employeeModal">
+    <div class="employee-container">
+      <h2><i class="fas fa-users"></i> Seleccione su nombre</h2>
+      <p>Por favor, seleccione su nombre de la lista:</p>
+      
+      <div class="search-container">
+        <input type="text" id="employeeSearch" placeholder="Buscar por nombre o posición..." onkeyup="filterEmployees()">
+        <i class="fas fa-search"></i>
+      </div>
+      
+      <div class="employee-list" id="employeeList">
+        </div>
+      
+      <button onclick="selectEmployee()"><i class="fas fa-check"></i> Seleccionar</button>
+    </div>
+  </div>
+
+  <div id="mainContent" style="display: none;">
+    <div class="print-header">
+      <h1><i class="fas fa-calendar-alt"></i> MIS DÍAS LIBRES</h1>
+      <h2 id="employeeTitle">Colaborador: [Nombre del Colaborador]</h2>
+      <h3 id="employeePositionCode">Posición: [Posición] | Código: [Código]</h3>
+      <h3 id="periodTitle">Período: [Período Seleccionado]</h3>
+      <h3 id="monthYearTitle"></h3>
+    </div>
+    
+    <div class="print-controls no-print">
+      <div class="control-group">
+        <label for="viewOption"><i class="fas fa-calendar-week"></i> Vista:</label>
+        <select id="viewOption">
+          <option value="week">Semana Actual</option>
+          <option value="next-week">Próxima Semana</option>
+          <option value="month">Mes Completo (30/31 días)</option>
+        </select>
+      </div>
+      
+      <div class="button-group">
+        <button onclick="generateSchedule()"><i class="fas fa-sync-alt"></i> Actualizar</button>
+        <button onclick="window.print()"><i class="fas fa-print"></i> Imprimir</button>
+        <button id="orientationButton"><i class="fas fa-mobile-alt"></i> <span id="orientationText">Rotar</span></button>
+        <button class="btn-change-position" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+      </div>
+    </div>
+    
+    <div class="legend no-print">
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: var(--free-day);"></div>
+        <span>Día Libre</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: var(--turn-A);"></div>
+        <span>Turno A (7am-3pm)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: var(--turn-B);"></div>
+        <span>Turno B (3pm-11pm)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: var(--turn-C);"></div>
+        <span>Turno C (11pm-7am)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: var(--turn-D);"></div>
+        <span>Turno D (7am-7pm)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: var(--turn-E);"></div>
+        <span>Turno E (7pm-7am)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: var(--turn-G);"></div>
+        <span>Turno G (12pm-8pm)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: var(--falta);"></div>
+        <span>Faltas</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: var(--vacation);"></div>
+        <span>Vacaciones</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: var(--medical);"></div>
+        <span>Licencia Médica</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: var(--permission);"></div>
+        <span>Permiso</span>
+      </div>
+    </div>
+    
+    <div class="schedule-container">
+      <div id="scheduleContainer">
+        </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script type="module">
+    // Firebase configuration and initialization
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { getFirestore, collection, getDocs, query, where, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+      authDomain: "inventario-35d6b.firebaseapp.com",
+      databaseURL: "https://inventario-35d6b-default-rtdb.firebaseio.com",
+      projectId: "inventario-35d6b",
+      storageBucket: "inventario-35d6b.appspot.com",
+      messagingSenderId: "266100399659",
+      appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Global variables
+    let allSchedules = [];
+    let allEmployees = [];
+    let selectedEmployee = '';
+    let currentDate = new Date();
+    let currentPassword = '';
+    let employeePasswords = {};
+    let selectedPosition = '';
+    let employeeDetails = {}; // Almacenará posición y código de cada colaborador
+
+    // Variable para controlar el estado de la orientación
+    let isLandscapeLocked = false; 
+
+    // --- Funciones para la API de Orientación de Pantalla ---
+
+    const orientationButton = document.getElementById('orientationButton');
+    const orientationText = document.getElementById('orientationText');
+
+    // Función para actualizar el icono y texto del botón de orientación
+    function updateOrientationButton() {
+        if (isLandscapeLocked) {
+            orientationButton.innerHTML = '<i class="fas fa-mobile-alt fa-rotate-90"></i> <span id="orientationText">Desbloquear</span>';
+        } else {
+            orientationButton.innerHTML = '<i class="fas fa-mobile-alt"></i> <span id="orientationText">Bloquear Horizontal</span>';
+        }
+    }
+
+    // Función para bloquear la pantalla en horizontal
+    async function lockToLandscape() {
+        if (!screen.orientation || !screen.orientation.lock) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'No soportado',
+                text: 'La API de Orientación de Pantalla no es totalmente compatible con este navegador o dispositivo.'
+            });
+            return;
+        }
+
+        try {
+            // 1. Intentar entrar en pantalla completa (crucial para iOS y algunos Android)
+            if (!document.fullscreenElement) {
+                await document.documentElement.requestFullscreen();
+                await Swal.fire({
+                    icon: 'info',
+                    title: 'Pantalla Completa',
+                    text: 'Entrando en pantalla completa para intentar bloquear la orientación.',
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            }
+
+            // 2. Bloquear la orientación
+            await screen.orientation.lock('landscape');
+            isLandscapeLocked = true;
+            updateOrientationButton();
+            Swal.fire({
+                icon: 'success',
+                title: 'Éxito',
+                text: 'Pantalla bloqueada en horizontal (landscape).',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000
+            });
+        } catch (error) {
+            isLandscapeLocked = false; // Asegurar que el estado es correcto si falla
+            updateOrientationButton();
+            let errorMessage = `Error al bloquear: ${error.name} - ${error.message}`;
+            if (error.name === 'NotAllowedError' || error.name === 'SecurityError') {
+                errorMessage = "Permiso denegado. Asegúrese de permitir la pantalla completa y la rotación automática.";
+            } else if (error.name === 'NotSupportedError') {
+                errorMessage = "El bloqueo de orientación no es compatible en este contexto (ej. no en pantalla completa en iOS).";
+            }
+            Swal.fire({
+                icon: 'error',
+                title: 'Error de Orientación',
+                text: errorMessage
+            });
+            console.error("No se pudo bloquear la orientación:", error);
+        }
+    }
+
+    // Función para desbloquear la orientación
+    async function unlockOrientation() {
+        if (!screen.orientation || !screen.orientation.unlock) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'No soportado',
+                text: 'La API de Orientación de Pantalla no es totalmente compatible con este navegador o dispositivo.'
+            });
+            return;
+        }
+
+        try {
+            screen.orientation.unlock();
+            isLandscapeLocked = false;
+            updateOrientationButton();
+            Swal.fire({
+                icon: 'info',
+                title: 'Desbloqueado',
+                text: 'Orientación desbloqueada. El dispositivo puede rotar libremente.',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000
+            });
+
+            // Opcional: Salir de pantalla completa si se entró antes
+            if (document.fullscreenElement) {
+                await document.exitFullscreen();
+            }
+        } catch (error) {
+            let errorMessage = `Error al desbloquear: ${error.name} - ${error.message}`;
+             Swal.fire({
+                icon: 'error',
+                title: 'Error de Desbloqueo',
+                text: errorMessage
+            });
+            console.error("No se pudo desbloquear la orientación:", error);
+        }
+    }
+
+    // Event listener para el botón de orientación
+    orientationButton.addEventListener('click', () => {
+        if (isLandscapeLocked) {
+            unlockOrientation();
+        } else {
+            lockToLandscape();
+        }
+    });
+
+    // Escuchar cambios en la orientación para actualizar el estado y el botón si el usuario rota manualmente
+    if (screen.orientation) {
+        screen.orientation.addEventListener('change', () => {
+            // Solo actualizamos isLandscapeLocked si el tipo de orientación no es lo que esperamos
+            // o si estaba bloqueado y el usuario lo cambió manualmente.
+            if (screen.orientation.type.startsWith('portrait') && isLandscapeLocked) {
+                isLandscapeLocked = false;
+                updateOrientationButton();
+            } else if (screen.orientation.type.startsWith('landscape') && !isLandscapeLocked) {
+                // Si está en landscape pero no lo bloqueamos nosotros, el botón sigue en "Bloquear"
+                // No cambiamos isLandscapeLocked a true si el usuario giró manualmente.
+                // Solo actualizamos el icono si estaba bloqueado y se desbloqueó.
+            }
+            updateOrientationButton(); // Asegura que el icono se actualice si la orientación cambia por cualquier motivo
+        });
+    }
+
+    // --- Fin de las funciones para la API de Orientación de Pantalla ---
+
+
+    // Get month name in Spanish
+    function getMonthName(date) {
+      const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", 
+                     "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+      return months[date.getMonth()];
+    }
+
+    // Format date to DD/MM/YYYY (fixed timezone issue)
+    function formatDate(date) {
+      if (!date) return '';
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}/${month}/${year}`;
+    }
+
+    // Get day name in Spanish (abreviado)
+    function getDayName(date) {
+      const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+      return days[date.getDay()];
+    }
+
+    // Get time range for turn type
+    function getTimeRange(eventType) {
+      switch(eventType) {
+        case 'turn-A': return '7am-3pm';
+        case 'turn-B': return '3pm-11pm';
+        case 'turn-C': return '11pm-7am';
+        case 'turn-D': return '7am-7pm';
+        case 'turn-E': return '7pm-7am';
+        case 'turn-G': return '12pm-8pm';
+        default: return '';
+      }
+    }
+
+    // Fix date to avoid timezone issues
+    function fixTimezone(dateStr) {
+      if (!dateStr) return null;
+      const date = new Date(dateStr);
+      // Adjust for timezone offset
+      return new Date(date.getTime() + (date.getTimezoneOffset() * 60000));
+    }
+
+    // Load employee passwords from Firestore
+    async function loadEmployeePasswords() {
+      try {
+        const docRef = doc(db, "Configuraciones", "PasswordsColaboradores");
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+          employeePasswords = docSnap.data();
+          console.log("Contraseñas de colaboradores cargadas:", employeePasswords);
+        } else {
+          console.log("No se encontraron contraseñas de colaboradores configuradas");
+        }
+      } catch (error) {
+        console.error("Error al cargar contraseñas de colaboradores:", error);
+      }
+    }
+
+    // Show password modal for selected employee
+    function showPasswordModal(employee) {
+      document.getElementById('passwordEmployeeName').textContent = `Colaborador: ${employee}`;
+      document.getElementById('passwordModal').style.display = 'flex';
+      document.getElementById('passwordError').textContent = '';
+      currentPassword = '';
+      updatePasswordDisplay();
+    }
+
+    // Update password display with dots
+    function updatePasswordDisplay() {
+      const dots = '•'.repeat(currentPassword.length);
+      document.getElementById('passwordDots').textContent = dots;
+    }
+
+    // Append digit to password
+    window.appendPassword = function(digit) {
+      if (currentPassword.length < 6) {
+        currentPassword += digit;
+        updatePasswordDisplay();
+      }
+    }
+
+    // Clear password
+    window.clearPassword = function() {
+      currentPassword = '';
+      updatePasswordDisplay();
+    }
+
+    // Check entered password
+    window.checkPassword = async function() {
+      const employee = document.getElementById('passwordEmployeeName').textContent.replace('Colaborador: ', '');
+      const correctPassword = employeePasswords[employee];
+      
+      if (!correctPassword) {
+        document.getElementById('passwordError').textContent = 'Este colaborador no tiene contraseña configurada';
+        return;
+      }
+      
+      if (currentPassword === correctPassword) {
+        // Password correct, proceed
+        document.getElementById('passwordModal').style.display = 'none';
+        selectedEmployee = employee;
+        document.getElementById('mainContent').style.display = 'block';
+        document.getElementById('employeeModal').style.display = 'none';
+        document.getElementById('employeeTitle').textContent = `Colaborador: ${employee}`;
+        
+        // Mostrar posición y código del colaborador
+        if (employeeDetails[employee]) {
+          const details = employeeDetails[employee];
+          document.getElementById('employeePositionCode').textContent = `Posición: ${details.position} | Código: ${details.code}`;
+        } else {
+          document.getElementById('employeePositionCode').textContent = `Posición: No especificada | Código: No especificado`;
+        }
+        
+        loadSchedules(employee);
+      } else {
+        document.getElementById('passwordError').textContent = 'Contraseña incorrecta. Intente nuevamente.';
+        currentPassword = '';
+        updatePasswordDisplay();
+      }
+    }
+
+    // Load schedules from Firestore (with fixed date handling)
+    async function loadSchedules(employee) {
+      try {
+        // Query schedules for the selected employee
+        const q = query(collection(db, "Horarios"), where("employeeName", "==", employee));
+        const querySnapshot = await getDocs(q);
+        
+        allSchedules = [];
+        
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          const schedule = {
+            id: doc.id,
+            ...data,
+            // Store dates with timezone correction
+            startDate: fixTimezone(data.startDate),
+            endDate: fixTimezone(data.endDate),
+            formattedStartDate: formatDate(fixTimezone(data.startDate)),
+            formattedEndDate: formatDate(fixTimezone(data.endDate))
+          };
+          
+          allSchedules.push(schedule);
+        });
+        
+        // Generate initial schedule
+        generateSchedule();
+        
+      } catch (error) {
+        console.error("Error al cargar horarios:", error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudieron cargar los horarios. Por favor intente nuevamente.'
+        });
+      }
+    }
+
+    // Load available employees from Firestore
+    async function loadEmployees() {
+      try {
+        const querySnapshot = await getDocs(collection(db, "Horarios"));
+        const employees = new Set();
+        
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          if (data.employeeName) {
+            employees.add(data.employeeName);
+            // Almacenar posición y código si están disponibles
+            if (data.position || data.code) {
+              employeeDetails[data.employeeName] = {
+                position: data.position || 'No especificada',
+                code: data.code || 'No especificado'
+              };
+            }
+          }
+        });
+        
+        // Store employees in global variable
+        allEmployees = Array.from(employees).sort();
+        
+        // Show employee selection modal
+        showEmployeeModal();
+        
+      } catch (error) {
+        console.error("Error al cargar colaboradores:", error);
+      }
+    }
+
+    // Show employee selection modal
+    function showEmployeeModal() {
+      const employeeList = document.getElementById('employeeList');
+      employeeList.innerHTML = '';
+      
+      allEmployees.forEach(employee => {
+        const employeeBtn = document.createElement('button');
+        employeeBtn.className = 'employee-btn';
+        
+        // Mostrar nombre, posición y código si están disponibles
+        if (employeeDetails[employee]) {
+          const details = employeeDetails[employee];
+          employeeBtn.textContent = `${employee} (${details.position} - ${details.code})`;
+        } else {
+          employeeBtn.textContent = employee;
+        }
+        
+        employeeBtn.onclick = function() {
+          // Remove selected class from all buttons
+          document.querySelectorAll('.employee-btn').forEach(btn => {
+            btn.classList.remove('selected');
+          });
+          
+          // Add selected class to clicked button
+          this.classList.add('selected');
+          selectedEmployee = employee;
+        };
+        
+        // Almacenar datos completos del empleado como atributos personalizados
+        if (employeeDetails[employee]) {
+          employeeBtn.setAttribute('data-position', employeeDetails[employee].position);
+          employeeBtn.setAttribute('data-code', employeeDetails[employee].code);
+        }
+        
+        employeeList.appendChild(employeeBtn);
+      });
+      
+      document.getElementById('employeeModal').style.display = 'flex';
+    }
+
+    // Filtrar colaboradores por nombre o posición
+    window.filterEmployees = function() {
+      const searchTerm = document.getElementById('employeeSearch').value.toLowerCase();
+      const employeeButtons = document.querySelectorAll('.employee-btn');
+      
+      employeeButtons.forEach(button => {
+        const employeeText = button.textContent.toLowerCase();
+        const employeePosition = button.getAttribute('data-position') || '';
+        const employeeCode = button.getAttribute('data-code') || '';
+        
+        if (employeeText.includes(searchTerm) || 
+            employeePosition.toLowerCase().includes(searchTerm) || 
+            employeeCode.toLowerCase().includes(searchTerm)) {
+          button.style.display = 'block';
+        } else {
+          button.style.display = 'none';
+        }
+      });
+    };
+
+    // Select employee and show password modal
+    window.selectEmployee = function() {
+      if (!selectedEmployee) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Por favor seleccione un colaborador'
+        });
+        return;
+      }
+      
+      document.getElementById('employeeModal').style.display = 'none';
+      showPasswordModal(selectedEmployee);
+    };
+
+    // Generate schedule based on selected view
+    window.generateSchedule = function() {
+      if (!selectedEmployee) return;
+      
+      const viewOption = document.getElementById('viewOption').value;
+      const scheduleContainer = document.getElementById('scheduleContainer');
+      scheduleContainer.innerHTML = '';
+      
+      let startDate, endDate;
+      const today = new Date();
+      
+      // Set date range based on view option
+      if (viewOption === 'week') {
+        // Current week (Monday to Sunday)
+        startDate = new Date(today);
+        startDate.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1));
+        endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 6);
+        
+        document.getElementById('periodTitle').textContent = `Semana Actual: ${formatDate(startDate)} al ${formatDate(endDate)}`;
+      } 
+      else if (viewOption === 'next-week') {
+        // Next week (Monday to Sunday)
+        startDate = new Date(today);
+        startDate.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1) + 7);
+        endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 6);
+        
+        document.getElementById('periodTitle').textContent = `Próxima Semana: ${formatDate(startDate)} al ${formatDate(endDate)}`;
+      } 
+      else {
+        // Full month
+        startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+        endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        
+        document.getElementById('periodTitle').textContent = `Mes Completo`;
+      }
+      
+      // Set month and year title
+      document.getElementById('monthYearTitle').textContent = `${getMonthName(today)} ${today.getFullYear()}`;
+      
+      // Filter schedules by date range
+      const filteredSchedules = allSchedules.filter(schedule => {
+        const scheduleStart = schedule.startDate;
+        const scheduleEnd = schedule.endDate;
+        
+        // Check if schedule overlaps with the selected date range
+        return (scheduleStart <= endDate && scheduleEnd >= startDate);
+      });
+      
+      // Create date headers for the table
+      const dateHeaders = [];
+      const currentDateLoop = new Date(startDate); // Renombrado para evitar conflicto con la variable global
+      
+      while (currentDateLoop <= endDate) {
+        dateHeaders.push(new Date(currentDateLoop));
+        currentDateLoop.setDate(currentDateLoop.getDate() + 1);
+      }
+      
+      // Create the schedule table
+      const table = document.createElement('table');
+      table.className = 'schedule-table';
+      
+      // Create table header with dates
+      const thead = document.createElement('thead');
+      const headerRow = document.createElement('tr');
+      
+      // First cell is empty (for employee names)
+      const emptyHeader = document.createElement('th');
+      headerRow.appendChild(emptyHeader);
+      
+      // Add date headers
+      dateHeaders.forEach(date => {
+        const th = document.createElement('th');
+        
+        // Contenedor para día de la semana y número
+        const dayContainer = document.createElement('div');
+        dayContainer.className = 'day-header';
+        
+        // Día de la semana (Lun, Mar, Mié...)
+        const dayName = document.createElement('div');
+        dayName.className = 'day-name';
+        dayName.textContent = getDayName(date);
+        
+        // Número del día
+        const dayNumber = document.createElement('div');
+        dayNumber.className = 'day-number';
+        dayNumber.textContent = date.getDate();
+        
+        dayContainer.appendChild(dayName);
+        dayContainer.appendChild(dayNumber);
+        th.appendChild(dayContainer);
+        
+        // Highlight today
+        if (date.toDateString() === today.toDateString()) {
+          th.classList.add('today');
+        }
+        
+        headerRow.appendChild(th);
+      });
+      
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+      
+      // Create table body with employee schedules
+      const tbody = document.createElement('tbody');
+      const employeeRow = document.createElement('tr');
+      employeeRow.className = 'employee-row';
+      
+      // Employee name cell
+      const nameCell = document.createElement('td');
+      nameCell.className = 'employee-name';
+      nameCell.textContent = selectedEmployee;
+      employeeRow.appendChild(nameCell);
+      
+      // Add schedule cells for each date
+      dateHeaders.forEach(date => {
+        const dayCell = document.createElement('td');
+        
+        // Find schedule for this employee on this date
+        const schedule = filteredSchedules.find(s => 
+          date >= s.startDate && 
+          date <= s.endDate
+        );
+        
+        if (schedule) {
+          // Determine class based on event type
+          let eventClass = '';
+          let eventText = '';
+          let timeRange = '';
+          
+          switch(schedule.eventType) {
+            case 'free': 
+              eventClass = 'free-day';
+              eventText = 'Libre';
+              break;
+            case 'turn-A': 
+              eventClass = 'turn-A';
+              eventText = 'A';
+              timeRange = getTimeRange(schedule.eventType);
+              break;
+            case 'turn-B': 
+              eventClass = 'turn-B';
+              eventText = 'B';
+              timeRange = getTimeRange(schedule.eventType);
+              break;
+            case 'turn-C': 
+              eventClass = 'turn-C';
+              eventText = 'C';
+              timeRange = getTimeRange(schedule.eventType);
+              break;
+            case 'turn-D': 
+              eventClass = 'turn-D';
+              eventText = 'D';
+              timeRange = getTimeRange(schedule.eventType);
+              break;
+            case 'turn-E': 
+              eventClass = 'turn-E';
+              eventText = 'E';
+              timeRange = getTimeRange(schedule.eventType);
+              break;
+            case 'turn-G': 
+              eventClass = 'turn-G';
+              eventText = 'G';
+              timeRange = getTimeRange(schedule.eventType);
+              break;
+            case 'falta': 
+              eventClass = 'falta';
+              eventText = 'Falta';
+              break;
+            case 'vacation': 
+              eventClass = 'vacation';
+              eventText = 'Vac';
+              break;
+            case 'medical': 
+              eventClass = 'medical';
+              eventText = 'LM';
+              break;
+            case 'permission': 
+              eventClass = 'permission';
+              eventText = 'Perm';
+              break;
+            default: 
+              eventText = schedule.eventType;
+          }
+          
+          dayCell.className = eventClass;
+          
+          // Add time range if available
+          if (timeRange) {
+            dayCell.innerHTML = `${eventText}<br><small>${timeRange}</small>`;
+          } else {
+            dayCell.textContent = eventText;
+          }
+          
+          dayCell.title = `${selectedEmployee}: ${eventText} ${timeRange ? '('+timeRange+')' : ''} (${schedule.formattedStartDate} a ${schedule.formattedEndDate})`;
+        }
+        
+        employeeRow.appendChild(dayCell);
+      });
+      
+      tbody.appendChild(employeeRow);
+      table.appendChild(tbody);
+      scheduleContainer.appendChild(table);
+      
+      // Add page breaks for printing if showing full month
+      if (viewOption === 'month') {
+        const tables = scheduleContainer.querySelectorAll('table');
+        tables.forEach((table, index) => {
+          if (index < tables.length - 1) {
+            table.classList.add('page-break');
+          }
+        });
+      }
+    };
+
+    // Logout function
+    window.logout = function() {
+      selectedEmployee = '';
+      currentPassword = '';
+      document.getElementById('mainContent').style.display = 'none';
+      showEmployeeModal();
+      // Asegurarse de desbloquear la orientación al cerrar sesión
+      unlockOrientation();
+    };
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', function() {
+      loadEmployees();
+      loadEmployeePasswords();
+      updateOrientationButton(); // Inicializar el botón de orientación
+
+      // Set up event listener for view option
+      document.getElementById('viewOption').addEventListener('change', generateSchedule);
+    });
+  </script>
+</body>
+</html>

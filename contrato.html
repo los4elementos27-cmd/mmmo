@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contrato de Préstamo</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* Estilos para la pantalla de carga */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #2c3e50 0%, #2c3e50 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      color: white;
+      font-family: 'Arial', sans-serif;
+      transition: opacity 0.5s ease;
+    }
+
+    .loading-content {
+      text-align: center;
+      max-width: 500px;
+      padding: 20px;
+    }
+
+    .money-icon {
+      font-size: 5rem;
+      margin-bottom: 20px;
+      animation: pulse 2s infinite;
+    }
+
+    .loading-progress {
+      width: 100%;
+      height: 10px;
+      background-color: rgba(255, 255, 255, 0.3);
+      border-radius: 5px;
+      margin: 20px 0;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0;
+      background-color: white;
+      border-radius: 5px;
+      transition: width 0.3s ease;
+    }
+
+    .loading-message {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+    }
+
+    .loading-submessage {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+
+    .floating-money {
+      position: absolute;
+      font-size: 1.5rem;
+      opacity: 0.7;
+      animation: float 3s infinite ease-in-out;
+    }
+
+    /* Estilos del contrato (ocultos inicialmente) */
+    .contract-container {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    /* Estilos del contrato cuando es visible */
+    .contract-container.visible {
+      display: block;
+      opacity: 1;
+    }
+
+    /* Estilos del cuerpo del contrato */
+    body {
+      font-family: 'Arial', sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      border-bottom: 2px solid #1abc9c;
+      padding-bottom: 20px;
+    }
+
+    .logo-container {
+      width: 120px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-container img {
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: 8px;
+    }
+
+    .default-logo {
+      width: 100px;
+      height: 100px;
+      border-radius: 8px;
+      background-color: #f5f5f5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .default-logo i {
+      font-size: 3rem;
+      color: #1abc9c;
+    }
+
+    .company-info {
+      text-align: right;
+    }
+
+    h1 {
+      color: #1abc9c;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 24px;
+    }
+
+    h2 {
+      color: #1abc9c;
+      font-size: 20px;
+      margin-top: 25px;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+
+    p {
+      margin-bottom: 15px;
+      text-align: justify;
+    }
+
+    .signature-section {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 50px;
+    }
+
+    .signature-line {
+      width: 300px;
+      border-top: 1px solid #333;
+      margin-top: 50px;
+      text-align: center;
+      padding-top: 5px;
+    }
+
+    .footer {
+      margin-top: 50px;
+      font-size: 12px;
+      color: #777;
+      text-align: center;
+    }
+
+    .print-button {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background-color: #1abc9c;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      z-index: 1000;
+    }
+
+    .print-button:hover {
+      background-color: #16a085;
+    }
+
+    /* Estilos para campos de llenado */
+    .fill-field {
+      display: inline-block;
+      min-width: 300px;
+      border-bottom: 1px solid #333;
+      position: relative;
+      margin: 0 5px;
+      padding: 0 5px;
+    }
+
+    .fill-field .example {
+      color: #999;
+      font-style: italic;
+      font-size: 0.8em;
+      position: absolute;
+      top: -15px;
+      left: 0;
+      display: block;
+    }
+
+    /* Estilos para impresión */
+    @media print {
+      .loading-overlay {
+        display: none !important;
+      }
+
+      body {
+        padding: 0;
+        font-size: 12pt;
+      }
+
+      .print-button {
+        display: none;
+      }
+
+      .header {
+        page-break-after: avoid;
+      }
+
+      .signature-section {
+        page-break-inside: avoid;
+      }
+
+      h1, h2 {
+        page-break-after: avoid;
+      }
+
+      p {
+        page-break-inside: avoid;
+      }
+
+      .fill-field .example {
+        display: none;
+      }
+
+      .fill-field {
+        border-bottom: 1px solid #000;
+        min-width: 400px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Pantalla de carga -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="money-icon">
+      <i class="fas fa-hand-holding-usd"></i>
+    </div>
+    <div class="loading-content">
+      <h2 class="loading-message">Generando su contrato de préstamo</h2>
+      <p class="loading-submessage">Estamos preparando todos los detalles financieros de su acuerdo</p>
+      <div class="loading-progress">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <p class="loading-submessage">Por favor espere, este proceso puede tardar unos segundos...</p>
+    </div>
+    
+    <!-- Elementos flotantes de dinero -->
+    <div class="floating-money" style="top: 20%; left: 15%; animation-delay: 0s;">
+      <i class="fas fa-coins"></i>
+    </div>
+    <div class="floating-money" style="top: 70%; left: 10%; animation-delay: 0.5s;">
+      <i class="fas fa-money-bill-wave"></i>
+    </div>
+    <div class="floating-money" style="top: 30%; right: 15%; animation-delay: 1s;">
+      <i class="fas fa-piggy-bank"></i>
+    </div>
+    <div class="floating-money" style="top: 80%; right: 10%; animation-delay: 1.5s;">
+      <i class="fas fa-chart-line"></i>
+    </div>
+  </div>
+
+  <!-- Contenido del contrato (oculto inicialmente) -->
+  <div class="contract-container" id="contractContainer">
+    <button class="print-button" onclick="window.print()">
+      <i class="fas fa-print"></i> Imprimir Contrato
+    </button>
+
+    <div class="header">
+      <div class="logo-container">
+        <div class="default-logo" id="defaultCompanyLogo">
+          <i class="fas fa-building"></i>
+        </div>
+        <img id="companyLogo" src="" alt="Logo de la empresa" style="display: none;">
+      </div>
+      <div class="company-info">
+        <h2 id="companyNameDisplay">[Nombre de la Empresa]</h2>
+        <p id="companyAddressDisplay">[Dirección de la Empresa]</p>
+        <p id="companyRncDisplay">RNC: [RNC de la Empresa]</p>
+        <p id="companyPhoneDisplay">Teléfono: [Teléfono de la Empresa]</p>
+      </div>
+    </div>
+
+    <h1>CONTRATO DE PRÉSTAMO PERSONAL</h1>
+
+    <div class="contract-data">
+      <div class="contract-data-item">
+        <span class="contract-data-label">Número de Contrato:</span>
+        <span id="contractNumber">PM-2023-001</span>
+      </div>
+      <div class="contract-data-item">
+        <span class="contract-data-label">Fecha:</span>
+        <span id="contractDate">[Fecha actual]</span>
+      </div>
+    </div>
+
+    <h2>PRIMERO: PARTES</h2>
+    <p>En la ciudad de Santo Domingo, Distrito Nacional, República Dominicana, siendo las <span id="currentTime">[hora actual]</span> del día <span id="currentDay">[día actual]</span> del mes de <span id="currentMonth">[mes actual]</span> del año <span id="currentYear">[año actual]</span>, comparecen:</p>
+
+    <p><strong>DE UNA PARTE:</strong> <span id="companyNamePart1">[Nombre de la Empresa]</span>, sociedad comercial debidamente constituida y registrada según las leyes de la República Dominicana, con RNC No. <span id="companyRncPart1">[RNC de la Empresa]</span>, con domicilio en <span id="companyAddressPart1">[Dirección de la Empresa]</span>, a quien en lo sucesivo se le denominará <strong>"EL PRESTAMISTA"</strong>.</p>
+
+    <p><strong>DE LA OTRA PARTE:</strong> <span class="fill-field"><span class="example">Ej: Juan Pérez García</span></span>, mayor de edad, portador de la cédula de identidad y electoral No. <span class="fill-field"><span class="example">Ej: 001-1234567-8</span></span>, de nacionalidad <span class="fill-field"><span class="example">Ej: dominicana</span></span>, con domicilio en <span class="fill-field"><span class="example">Ej: Calle Principal #123, Santo Domingo Este</span></span>, a quien en lo sucesivo se le denominará <strong>"EL PRESTATARIO"</strong>.</p>
+
+    <p>Ambas partes se reconocen capacidad legal para obligarse y contratar, y en tal virtud acuerdan celebrar el presente <strong>CONTRATO DE PRÉSTAMO PERSONAL</strong>, el cual se regirá por las siguientes cláusulas:</p>
+
+    <h2>SEGUNDO: OBJETO</h2>
+    <p>EL PRESTAMISTA se obliga a entregar a EL PRESTATARIO la cantidad de <span class="fill-field"><span class="example">Ej: RD$ 50,000.00</span></span> (<span class="fill-field"><span class="example">Ej: cincuenta mil pesos dominicanos</span></span>), en calidad de préstamo, y EL PRESTATARIO se obliga a devolver dicha cantidad más los intereses pactados, en los plazos y condiciones establecidos en el presente contrato.</p>
+
+    <h2>TERCERO: PLAZO Y FORMA DE PAGO</h2>
+    <p>EL PRESTATARIO se obliga a pagar el préstamo en un plazo de <span class="fill-field"><span class="example">Ej: 12</span></span> meses, contados a partir de la fecha de firma del presente contrato, mediante <span class="fill-field"><span class="example">Ej: mensuales</span></span> pagos consecutivos de <span class="fill-field"><span class="example">Ej: RD$ 4,702.00</span></span> (<span class="fill-field"><span class="example">Ej: cuatro mil setecientos dos pesos dominicanos</span></span>) cada uno, los cuales incluyen capital e intereses.</p>
+
+    <p>Los pagos deberán ser efectuados los días <span class="fill-field"><span class="example">Ej: 15</span></span> de cada mes, en las oficinas de EL PRESTAMISTA ubicadas en <span id="companyAddressPayment">[Dirección de la Empresa]</span>, o mediante transferencia bancaria a las cuentas que EL PRESTAMISTA indique.</p>
+
+    <h2>CUARTO: INTERESES</h2>
+    <p>EL PRÉSTAMO devengará un interés del <span class="fill-field"><span class="example">Ej: 3</span></span>% mensual (<span class="fill-field"><span class="example">Ej: 36</span></span>% anual), el cual será calculado sobre saldos insolutos.</p>
+
+    <h2>QUINTO: MORA</h2>
+    <p>En caso de mora en el pago de cualquiera de las cuotas, EL PRESTATARIO pagará un interés moratorio del <span class="fill-field"><span class="example">Ej: 5</span></span>% mensual sobre el monto de la cuota vencida, sin perjuicio de la facultad de EL PRESTAMISTA de exigir el pago total del saldo insoluto.</p>
+
+    <h2>SEXTO: GARANTÍAS</h2>
+    <p>Como garantía del cumplimiento de las obligaciones contraídas en el presente contrato, EL PRESTATARIO ofrece:</p>
+    <p><span class="fill-field" style="min-width: 600px; display: block;"><span class="example">Ej: Pignoración de su vehículo marca Toyota, modelo Corolla 2018, placa A123BCD</span></span></p>
+
+    <h2>SÉPTIMO: GASTOS</h2>
+    <p>Todos los gastos que origine la preparación, firma, registro y ejecución del presente contrato, incluyendo honorarios legales, serán por cuenta exclusiva de EL PRESTATARIO.</p>
+
+    <h2>OCTAVO: CESIONES</h2>
+    <p>EL PRESTATARIO no podrá ceder sus derechos ni transferir sus obligaciones derivadas de este contrato sin el consentimiento previo y por escrito de EL PRESTAMISTA.</p>
+
+    <h2>NOVENO: JURISDICCIÓN Y LEY APLICABLE</h2>
+    <p>Para todo lo relacionado con la interpretación y cumplimiento del presente contrato, las partes se someten a las leyes de la República Dominicana y a la jurisdicción de los tribunales del Distrito Nacional, renunciando a cualquier otra jurisdicción que pudiera corresponderles.</p>
+
+    <h2>DÉCIMO: ACEPTACIÓN</h2>
+    <p>Las partes manifiestan que han leído y comprendido todas y cada una de las cláusulas del presente contrato, y que están de acuerdo con su contenido, por lo que lo firman en señal de conformidad en dos ejemplares de un mismo tenor y a un mismo efecto.</p>
+
+    <div class="signature-section">
+      <div>
+        <p><strong>EL PRESTAMISTA</strong></p>
+        <p><span id="companyNameSignature">[Nombre de la Empresa]</span></p>
+        <div class="signature-line">Firma y sello</div>
+      </div>
+      <div>
+        <p><strong>EL PRESTATARIO</strong></p>
+        <p><span class="fill-field"><span class="example">Nombre completo del prestatario</span></span></p>
+        <div class="signature-line">Firma</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>Documento generado electrónicamente por <span id="companyNameFooter">[Nombre de la Empresa]</span> - Todos los derechos reservados © <span id="currentYearFooter">[Año actual]</span></p>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-storage-compat.js"></script>
+
+  <script>
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+      authDomain: "inventario-35d6b.firebaseapp.com",
+      databaseURL: "https://inventario-35d6b-default-rtdb.firebaseio.com",
+      projectId: "inventario-35d6b",
+      storageBucket: "inventario-35d6b.appspot.com",
+      messagingSenderId: "266100399659",
+      appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+    };
+
+    // Inicializar Firebase
+    try {
+      firebase.initializeApp(firebaseConfig);
+      console.log("Firebase inicializado correctamente");
+    } catch (error) {
+      console.error("Error al inicializar Firebase:", error);
+    }
+
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+    const storage = firebase.storage();
+
+    // Variables globales
+    let currentUser = null;
+    let companyData = null;
+
+    // Función para simular la carga
+    function simulateLoading() {
+      const progressBar = document.getElementById('progressBar');
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      const contractContainer = document.getElementById('contractContainer');
+      
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += Math.random() * 10;
+        if (progress > 100) progress = 100;
+        progressBar.style.width = `${progress}%`;
+        
+        if (progress >= 100) {
+          clearInterval(interval);
+          // Ocultar pantalla de carga
+          loadingOverlay.style.opacity = '0';
+          setTimeout(() => {
+            loadingOverlay.style.display = 'none';
+            // Mostrar contrato
+            contractContainer.classList.add('visible');
+            // Cargar datos reales
+            loadRealData();
+          }, 500);
+        }
+      }, 200);
+    }
+
+    // Función para cargar datos de la empresa
+    async function loadCompanyData() {
+      try {
+        if (!currentUser) return;
+        
+        const companyRef = db.collection("informacionCompany").doc(currentUser.uid);
+        const doc = await companyRef.get();
+        
+        if (doc.exists) {
+          companyData = doc.data();
+          console.log('Datos de empresa encontrados:', companyData);
+          displayCompanyData();
+        } else {
+          console.log('No se encontraron datos de empresa para este usuario');
+        }
+      } catch (error) {
+        console.error("Error al cargar datos de la empresa:", error);
+      }
+    }
+
+    // Función para mostrar datos de la empresa
+    function displayCompanyData() {
+      if (!companyData) return;
+
+      // Mostrar logo si existe
+      const logoPreview = document.getElementById('companyLogo');
+      const defaultLogo = document.getElementById('defaultCompanyLogo');
+      
+      if (companyData.fotoURL) {
+        logoPreview.src = companyData.fotoURL;
+        logoPreview.style.display = 'block';
+        defaultLogo.style.display = 'none';
+        
+        // Manejar error en carga de imagen
+        logoPreview.onerror = function() {
+          logoPreview.style.display = 'none';
+          defaultLogo.style.display = 'flex';
+        };
+      } else {
+        logoPreview.style.display = 'none';
+        defaultLogo.style.display = 'flex';
+      }
+      
+      // Actualizar todos los lugares donde aparece el nombre de la empresa
+      document.querySelectorAll('[id^="companyName"]').forEach(element => {
+        element.textContent = companyData.nombreEmpresa || '[Nombre de la Empresa]';
+      });
+      
+      // Actualizar otros datos de la empresa
+      if (companyData.direccion) {
+        document.getElementById('companyAddressDisplay').textContent = companyData.direccion;
+        document.getElementById('companyAddressPart1').textContent = companyData.direccion;
+        document.getElementById('companyAddressPayment').textContent = companyData.direccion;
+      }
+      
+      if (companyData.rnc) {
+        document.getElementById('companyRncDisplay').textContent = `RNC: ${companyData.rnc}`;
+        document.getElementById('companyRncPart1').textContent = companyData.rnc;
+      }
+      
+      if (companyData.telefono) {
+        document.getElementById('companyPhoneDisplay').textContent = `Teléfono: ${companyData.telefono}`;
+      }
+    }
+
+    // Función para actualizar la fecha actual
+    function updateCurrentDate() {
+      const now = new Date();
+      const months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+      const days = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+      
+      document.getElementById('contractDate').textContent = now.toLocaleDateString('es-DO');
+      document.getElementById('currentTime').textContent = now.toLocaleTimeString('es-DO', { hour: '2-digit', minute: '2-digit' });
+      document.getElementById('currentDay').textContent = now.getDate();
+      document.getElementById('currentMonth').textContent = months[now.getMonth()];
+      document.getElementById('currentYear').textContent = now.getFullYear();
+      document.getElementById('currentYearFooter').textContent = now.getFullYear();
+    }
+
+    // Función para cargar los datos reales
+    function loadRealData() {
+      updateCurrentDate();
+      if (currentUser) {
+        loadCompanyData();
+      }
+    }
+
+    // Inicialización cuando el DOM está listo
+    document.addEventListener('DOMContentLoaded', () => {
+      // Mostrar pantalla de carga primero
+      simulateLoading();
+      
+      // Verificar autenticación
+      auth.onAuthStateChanged(user => {
+        currentUser = user;
+        if (!user) {
+          console.log('Usuario no autenticado');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
