@@ -1937,7 +1937,7 @@ body {
         </a>
       </li>
       <li class="nav-item">
-        <a href="#reporte-general" class="nav-link">
+        <a href="Reporte-General.html" class="nav-enlace">
           <i class="fas fa-chart-bar"></i> Reporte General
         </a>
       </li>
@@ -2462,53 +2462,6 @@ body {
       </div>
     </section>
 
-    <!-- Reporte General Section -->
-    <section id="reporte-general" class="card" style="display: none;">
-      <h1 class="section-title">Reporte General</h1>
-      
-      <div class="report-grid">
-        <div class="report-card">
-          <h3>Total Intereses Pagados</h3>
-          <div class="value" id="totalInteresesPagados">$0.00</div>
-          <div class="description">Suma de todos los intereses ya pagados</div>
-        </div>
-        
-        <div class="report-card">
-          <h3>Total Capital Pagado</h3>
-          <div class="value" id="totalCapitalPagado">$0.00</div>
-          <div class="description">Suma de todo el capital ya pagado</div>
-        </div>
-        
-        <div class="report-card">
-          <h3>Total Moras Pagadas</h3>
-          <div class="value" id="totalMorasPagadas">$0.00</div>
-          <div class="description">Suma de todas las moras ya pagadas</div>
-        </div>
-        
-        <div class="report-card">
-          <h3>Clientes Completados</h3>
-          <div class="value" id="totalClientesCompletados">0</div>
-          <div class="description">Total de clientes con préstamos completados</div>
-        </div>
-        
-        <div class="report-card">
-          <h3>Intereses Pendientes</h3>
-          <div class="value" id="totalInteresesPendientes">$0.00</div>
-          <div class="description">Intereses que aún no han sido pagados</div>
-        </div>
-        
-        <div class="report-card">
-          <h3>Moras Pendientes</h3>
-          <div class="value" id="totalMorasPendientes">$0.00</div>
-          <div class="description">Moras que aún no han sido pagadas</div>
-        </div>
-      </div>
-      
-      <div class="chart-container">
-        <canvas id="reporteChart"></canvas>
-      </div>
-    </section>
-
     <!-- Config Section -->
     <section id="config" class="card" style="display: none;">
       <h1 class="section-title">Configuración del Sistema</h1>
@@ -2830,6 +2783,11 @@ body {
         <button id="scheduleBackupBtn" class="btn btn-info">
           <i class="fas fa-clock"></i> Programar Copias
         </button>
+        
+        <!-- Botón para pausar copias programadas -->
+        <button id="pauseBackupBtn" class="btn btn-warning" style="display: none;">
+          <i class="fas fa-pause"></i> Pausar Copias
+        </button>
       </div>
       
       <div class="countdown-timer" id="countdownTimer" style="display: none;">
@@ -2867,6 +2825,11 @@ body {
         <button id="saveScheduleBtn" class="btn btn-success">
           <i class="fas fa-save"></i> Guardar Programación
         </button>
+        
+        <!-- Botón para eliminar programación -->
+        <button id="deleteScheduleBtn" class="btn btn-danger" style="margin-top: 1rem;">
+          <i class="fas fa-trash"></i> Eliminar Programación
+        </button>
       </div>
       
       <div class="backup-history">
@@ -2879,6 +2842,86 @@ body {
       <div class="modal-footer">
         <button onclick="closeModal()" class="btn">Cerrar</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Modal para reenganche -->
+  <div class="modal" id="reengagementModal">
+    <div class="modal-content" style="max-width: 800px;">
+      <h3 class="modal-title">Reenganche de Préstamo</h3>
+      
+      <div id="reengagementClientInfo" class="card" style="margin-bottom: 1.5rem;">
+        <h4>Información del Cliente</h4>
+        <div id="reengagementClientDetails"></div>
+      </div>
+      
+      <form id="reengagementForm">
+        <div class="form-horizontal">
+          <div>
+            <h4>Datos del Reenganche</h4>
+            <div class="form-group">
+              <label for="reengagementCapital">Capital del Reenganche</label>
+              <input type="number" id="reengagementCapital" class="form-control" min="1" required>
+            </div>
+            <div class="form-group">
+              <label for="reengagementInterestRate">Tasa de Interés (%)</label>
+              <input type="number" id="reengagementInterestRate" class="form-control" min="1" max="100" step="0.1" required>
+            </div>
+            <div class="form-group">
+              <label for="reengagementTerm">Plazo (Meses)</label>
+              <input type="number" id="reengagementTerm" class="form-control" min="1" required>
+            </div>
+            <div class="form-group">
+              <label>Frecuencia de Pago</label>
+              <div>
+                <input type="radio" id="reengagementFrequencyMonthly" name="reengagementFrequency" value="monthly" checked>
+                <label for="reengagementFrequencyMonthly">Mensual</label>
+                <input type="radio" id="reengagementFrequencyBiweekly" name="reengagementFrequency" value="biweekly" style="margin-left: 1rem;">
+                <label for="reengagementFrequencyBiweekly">Quincenal</label>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="reengagementType">Tipo de Préstamo</label>
+              <select id="reengagementType" class="form-control" required>
+                <option value="normal">Normal (con intereses)</option>
+                <option value="fixed">Plazo Fijo (sin intereses)</option>
+              </select>
+            </div>
+          </div>
+          
+          <div>
+            <h4>Opciones de Reenganche</h4>
+            <div class="form-group">
+              <label>Tipo de Reenganche</label>
+              <div>
+                <input type="radio" id="reengagementOptionSeparate" name="reengagementOption" value="separate" checked>
+                <label for="reengagementOptionSeparate">Préstamo Separado</label>
+              </div>
+              <div>
+                <input type="radio" id="reengagementOptionAttach" name="reengagementOption" value="attach">
+                <label for="reengagementOptionAttach">Adjuntar al Capital Restante</label>
+              </div>
+            </div>
+            
+            <div id="currentLoanInfo" class="card" style="margin-top: 1rem; display: none;">
+              <h5>Información del Préstamo Actual</h5>
+              <div id="currentLoanDetails"></div>
+            </div>
+            
+            <div id="reengagementSummary" class="card" style="margin-top: 1rem;">
+              <h5>Resumen del Reenganche</h5>
+              <div id="reengagementSummaryDetails"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">
+            <i class="fas fa-handshake"></i> Confirmar Reenganche
+          </button>
+          <button type="button" onclick="closeModal()" class="btn btn-danger">Cancelar</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -2999,6 +3042,11 @@ body {
     // Variables para copia de seguridad
     let backupInterval = null;
     let countdownInterval = null;
+    let isBackupPaused = false;
+    
+    // Variables para reenganche
+    let selectedClientForReengagement = null;
+    let clientReengagements = [];
 
     // Función para validar cédula duplicada para el usuario actual
     async function validateDuplicateClientId(clientId) {
@@ -3551,7 +3599,334 @@ body {
       setupImageSelector();
       setupCompanyConfigModal();
       setupBackupSystem();
+      setupReengagementSystem();
     });
+
+    // Función para configurar el sistema de reenganche
+    function setupReengagementSystem() {
+      // Configurar eventos para el formulario de reenganche
+      document.getElementById('reengagementForm').addEventListener('submit', handleReengagement);
+      
+      // Configurar eventos para calcular el resumen del reenganche
+      document.getElementById('reengagementCapital').addEventListener('input', updateReengagementSummary);
+      document.getElementById('reengagementInterestRate').addEventListener('input', updateReengagementSummary);
+      document.getElementById('reengagementTerm').addEventListener('input', updateReengagementSummary);
+      document.querySelectorAll('input[name="reengagementFrequency"]').forEach(radio => {
+        radio.addEventListener('change', updateReengagementSummary);
+      });
+      document.getElementById('reengagementType').addEventListener('change', updateReengagementSummary);
+      document.querySelectorAll('input[name="reengagementOption"]').forEach(radio => {
+        radio.addEventListener('change', updateReengagementSummary);
+      });
+    }
+
+    // Función para manejar el reenganche
+    async function handleReengagement(e) {
+      e.preventDefault();
+      
+      const capital = parseFloat(document.getElementById('reengagementCapital').value);
+      const interestRate = parseFloat(document.getElementById('reengagementInterestRate').value);
+      const term = parseInt(document.getElementById('reengagementTerm').value);
+      const frequency = document.querySelector('input[name="reengagementFrequency"]:checked').value;
+      const loanType = document.getElementById('reengagementType').value;
+      const reengagementOption = document.querySelector('input[name="reengagementOption"]:checked').value;
+      
+      if (!selectedClientForReengagement) {
+        showInfoModal('Error', 'No se ha seleccionado un cliente para reenganche');
+        return;
+      }
+      
+      try {
+        showLoading();
+        
+        if (reengagementOption === 'separate') {
+          // Crear un nuevo préstamo separado
+          const newLoanData = {
+            client: selectedClientForReengagement,
+            amount: capital,
+            interestRate: interestRate,
+            term: term,
+            frequency: frequency,
+            loanType: loanType,
+            startDate: new Date().toISOString().split('T')[0],
+            status: 'active',
+            userId: currentUser.uid,
+            createdAt: Timestamp.now(),
+            createdBy: currentUser.uid,
+            isReengagement: true,
+            originalLoanId: selectedClientForReengagement.currentLoanId || null
+          };
+          
+          // Calcular detalles del préstamo
+          let totalInterest = 0;
+          if (loanType === 'normal') {
+            totalInterest = capital * (interestRate / 100) * term;
+          }
+          const totalPayment = capital + totalInterest;
+          
+          const paymentSchedule = generatePaymentSchedule(newLoanData);
+          newLoanData.paymentSchedule = paymentSchedule;
+          newLoanData.totalInterest = totalInterest;
+          newLoanData.totalPayment = totalPayment;
+          newLoanData.balance = totalPayment;
+          newLoanData.remainingCapital = capital;
+          
+          if (frequency === 'monthly') {
+            newLoanData.periodPayment = totalPayment / term;
+          } else {
+            newLoanData.periodPayment = totalPayment / (term * 2);
+          }
+          
+          await addDoc(collection(db, "Loans"), newLoanData);
+          
+          showInfoModal('Éxito', 'Reenganche creado como préstamo separado correctamente');
+        } else if (reengagementOption === 'attach') {
+          // Adjuntar al capital restante del préstamo actual
+          if (!selectedClientForReengagement.currentLoanId) {
+            showInfoModal('Error', 'No se encontró un préstamo activo para adjuntar el reenganche');
+            return;
+          }
+          
+          const loanRef = doc(db, "Loans", selectedClientForReengagement.currentLoanId);
+          const loanSnap = await getDoc(loanRef);
+          
+          if (!loanSnap.exists()) {
+            showInfoModal('Error', 'El préstamo actual no existe');
+            return;
+          }
+          
+          const loan = loanSnap.data();
+          
+          // Actualizar el préstamo existente
+          const newAmount = loan.amount + capital;
+          const newRemainingCapital = loan.remainingCapital + capital;
+          
+          // Recalcular el préstamo con el nuevo capital
+          let totalInterest = 0;
+          if (loanType === 'normal') {
+            totalInterest = newAmount * (interestRate / 100) * term;
+          }
+          const totalPayment = newAmount + totalInterest;
+          
+          const newPaymentSchedule = generatePaymentSchedule({
+            ...loan,
+            amount: newAmount,
+            interestRate: interestRate,
+            term: term,
+            frequency: frequency,
+            startDate: new Date().toISOString().split('T')[0]
+          });
+          
+          await updateDoc(loanRef, {
+            amount: newAmount,
+            remainingCapital: newRemainingCapital,
+            interestRate: interestRate,
+            term: term,
+            frequency: frequency,
+            loanType: loanType,
+            totalInterest: totalInterest,
+            totalPayment: totalPayment,
+            balance: totalPayment,
+            paymentSchedule: newPaymentSchedule,
+            updatedAt: Timestamp.now()
+          });
+          
+          showInfoModal('Éxito', 'Reenganche adjuntado al préstamo existente correctamente');
+        }
+        
+        closeModal();
+        
+        // Recargar datos
+        loadActiveLoans();
+        loadUsersData();
+        loadDashboardData();
+      } catch (error) {
+        console.error("Error procesando reenganche: ", error);
+        showInfoModal('Error', 'Error al procesar el reenganche');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Función para actualizar el resumen del reenganche
+    function updateReengagementSummary() {
+      const capital = parseFloat(document.getElementById('reengagementCapital').value) || 0;
+      const interestRate = parseFloat(document.getElementById('reengagementInterestRate').value) || 0;
+      const term = parseInt(document.getElementById('reengagementTerm').value) || 1;
+      const frequency = document.querySelector('input[name="reengagementFrequency"]:checked').value;
+      const loanType = document.getElementById('reengagementType').value;
+      const reengagementOption = document.querySelector('input[name="reengagementOption"]:checked').value;
+      
+      let totalInterest = 0;
+      if (loanType === 'normal') {
+        totalInterest = capital * (interestRate / 100) * term;
+      }
+      const totalPayment = capital + totalInterest;
+      
+      let periods = term;
+      if (frequency === 'biweekly') {
+        periods = term * 2;
+      }
+      const periodPayment = totalPayment / periods;
+      
+      const summaryDetails = document.getElementById('reengagementSummaryDetails');
+      summaryDetails.innerHTML = `
+        <div class="loan-detail">
+          <span>Capital:</span>
+          <span>$${formatNumber(capital)}</span>
+        </div>
+        <div class="loan-detail">
+          <span>Interés Total:</span>
+          <span>$${formatNumber(totalInterest)}</span>
+        </div>
+        <div class="loan-detail">
+          <span>Total a Pagar:</span>
+          <span>$${formatNumber(totalPayment)}</span>
+        </div>
+        <div class="loan-detail">
+          <span>Pago por Período:</span>
+          <span>$${formatNumber(periodPayment)}</span>
+        </div>
+        <div class="loan-detail">
+          <span>Tipo de Reenganche:</span>
+          <span>${reengagementOption === 'separate' ? 'Préstamo Separado' : 'Adjuntar al Capital'}</span>
+        </div>
+      `;
+      
+      // Mostrar información del préstamo actual si la opción es adjuntar
+      const currentLoanInfo = document.getElementById('currentLoanInfo');
+      if (reengagementOption === 'attach' && selectedClientForReengagement && selectedClientForReengagement.currentLoan) {
+        currentLoanInfo.style.display = 'block';
+        const currentLoanDetails = document.getElementById('currentLoanDetails');
+        const loan = selectedClientForReengagement.currentLoan;
+        
+        currentLoanDetails.innerHTML = `
+          <div class="loan-detail">
+            <span>Capital Actual:</span>
+            <span>$${formatNumber(loan.amount)}</span>
+          </div>
+          <div class="loan-detail">
+            <span>Capital Pendiente:</span>
+            <span>$${formatNumber(loan.remainingCapital)}</span>
+          </div>
+          <div class="loan-detail">
+            <span>Nuevo Capital:</span>
+            <span>$${formatNumber(loan.remainingCapital + capital)}</span>
+          </div>
+        `;
+      } else {
+        currentLoanInfo.style.display = 'none';
+      }
+    }
+
+    // Función para mostrar modal de reenganche
+    async function showReengagementModal(clientId) {
+      try {
+        showLoading();
+        
+        // Obtener información del cliente y sus préstamos
+        const clientQuery = query(
+          collection(db, "Loans"),
+          where("client.id", "==", clientId),
+          where("userId", "==", currentUser.uid)
+        );
+        
+        const clientSnapshot = await getDocs(clientQuery);
+        let clientData = null;
+        let activeLoan = null;
+        clientReengagements = [];
+        
+        clientSnapshot.forEach(doc => {
+          const loan = { id: doc.id, ...doc.data() };
+          if (!clientData) {
+            clientData = loan.client;
+          }
+          
+          if (loan.status === 'active' || loan.status === 'overdue') {
+            activeLoan = loan;
+          }
+          
+          // Recopilar información de reenganches previos
+          if (loan.isReengagement) {
+            clientReengagements.push(loan);
+          }
+        });
+        
+        if (!clientData) {
+          showInfoModal('Error', 'No se encontraron datos del cliente');
+          return;
+        }
+        
+        selectedClientForReengagement = {
+          ...clientData,
+          currentLoanId: activeLoan ? activeLoan.id : null,
+          currentLoan: activeLoan
+        };
+        
+        // Mostrar información del cliente
+        const clientDetails = document.getElementById('reengagementClientDetails');
+        clientDetails.innerHTML = `
+          <div class="loan-detail">
+            <span>Nombre:</span>
+            <span>${clientData.name}</span>
+          </div>
+          <div class="loan-detail">
+            <span>Cédula:</span>
+            <span>${clientData.id}</span>
+          </div>
+          <div class="loan-detail">
+            <span>Teléfono:</span>
+            <span>${clientData.phone}</span>
+          </div>
+          ${activeLoan ? `
+          <div class="loan-detail">
+            <span>Préstamo Activo:</span>
+            <span>Sí ($${formatNumber(activeLoan.amount)})</span>
+          </div>
+          <div class="loan-detail">
+            <span>Capital Pendiente:</span>
+            <span>$${formatNumber(activeLoan.remainingCapital)}</span>
+          </div>
+          ` : `
+          <div class="loan-detail">
+            <span>Préstamo Activo:</span>
+            <span>No</span>
+          </div>
+          `}
+          <div class="loan-detail">
+            <span>Reenganches Previos:</span>
+            <span>${clientReengagements.length}</span>
+          </div>
+        `;
+        
+        // Configurar valores por defecto
+        document.getElementById('reengagementCapital').value = '';
+        document.getElementById('reengagementInterestRate').value = systemConfig.interestRate || 5;
+        document.getElementById('reengagementTerm').value = 12;
+        document.getElementById('reengagementType').value = 'normal';
+        
+        // Mostrar/ocultar opciones basadas en si hay préstamo activo
+        const attachOption = document.getElementById('reengagementOptionAttach');
+        if (activeLoan) {
+          attachOption.disabled = false;
+          attachOption.parentElement.style.display = 'block';
+        } else {
+          attachOption.disabled = true;
+          attachOption.parentElement.style.display = 'none';
+          document.getElementById('reengagementOptionSeparate').checked = true;
+        }
+        
+        // Actualizar resumen
+        updateReengagementSummary();
+        
+        document.getElementById('reengagementModal').classList.add('active');
+      } catch (error) {
+        console.error("Error mostrando modal de reenganche: ", error);
+        showInfoModal('Error', 'Error al cargar la información del cliente');
+      } finally {
+        hideLoading();
+      }
+    }
 
     // Función para configurar el sistema de copia de seguridad
     function setupBackupSystem() {
@@ -3572,10 +3947,15 @@ body {
       
       document.getElementById('saveScheduleBtn').addEventListener('click', saveBackupSchedule);
       
+      document.getElementById('deleteScheduleBtn').addEventListener('click', deleteBackupSchedule);
+      
       // Configurar eventos para la programación personalizada
       document.getElementById('scheduleCustom').addEventListener('change', (e) => {
         document.getElementById('customSchedule').style.display = e.target.checked ? 'block' : 'none';
       });
+      
+      // Configurar botón para pausar copias
+      document.getElementById('pauseBackupBtn').addEventListener('click', toggleBackupPause);
     }
 
     // Función para crear copia de seguridad
@@ -3599,10 +3979,16 @@ body {
           where("createdBy", "==", currentUser.uid)
         );
         
-        const [loansSnapshot, collaboratorsSnapshot, usersSnapshot] = await Promise.all([
+        const paymentHistoryQuery = query(
+          collection(db, "PaymentHistory"),
+          where("userId", "==", currentUser.uid)
+        );
+        
+        const [loansSnapshot, collaboratorsSnapshot, usersSnapshot, paymentHistorySnapshot] = await Promise.all([
           getDocs(loansQuery),
           getDocs(collaboratorsQuery),
-          getDocs(usersQuery)
+          getDocs(usersQuery),
+          getDocs(paymentHistoryQuery)
         ]);
         
         // Preparar datos para la copia de seguridad
@@ -3612,6 +3998,7 @@ body {
           loans: [],
           collaborators: [],
           users: [],
+          paymentHistory: [],
           systemConfig: systemConfig,
           companyData: companyData
         };
@@ -3626,6 +4013,10 @@ body {
         
         usersSnapshot.forEach(doc => {
           backupData.users.push({ id: doc.id, ...doc.data() });
+        });
+        
+        paymentHistorySnapshot.forEach(doc => {
+          backupData.paymentHistory.push({ id: doc.id, ...doc.data() });
         });
         
         // Convertir a formato .rtm (JSON con metadatos)
@@ -3730,11 +4121,13 @@ body {
       const loansQuery = query(collection(db, "Loans"), where("userId", "==", currentUser.uid));
       const collaboratorsQuery = query(collection(db, "Collaborators"), where("userId", "==", currentUser.uid));
       const usersQuery = query(collection(db, "LoanUsers"), where("createdBy", "==", currentUser.uid));
+      const paymentHistoryQuery = query(collection(db, "PaymentHistory"), where("userId", "==", currentUser.uid));
       
-      const [loansSnapshot, collaboratorsSnapshot, usersSnapshot] = await Promise.all([
+      const [loansSnapshot, collaboratorsSnapshot, usersSnapshot, paymentHistorySnapshot] = await Promise.all([
         getDocs(loansQuery),
         getDocs(collaboratorsQuery),
-        getDocs(usersQuery)
+        getDocs(usersQuery),
+        getDocs(paymentHistoryQuery)
       ]);
       
       // Eliminar préstamos
@@ -3746,14 +4139,18 @@ body {
       // Eliminar usuarios
       const userDeletes = usersSnapshot.docs.map(doc => deleteDoc(doc.ref));
       
-      await Promise.all([...loanDeletes, ...collaboratorDeletes, ...userDeletes]);
+      // Eliminar historial de pagos
+      const paymentHistoryDeletes = paymentHistorySnapshot.docs.map(doc => deleteDoc(doc.ref));
+      
+      await Promise.all([...loanDeletes, ...collaboratorDeletes, ...userDeletes, ...paymentHistoryDeletes]);
       
       // Restaurar nuevos datos
       const loanRestores = backupData.loans.map(loan => addDoc(collection(db, "Loans"), loan));
       const collaboratorRestores = backupData.collaborators.map(collaborator => addDoc(collection(db, "Collaborators"), collaborator));
       const userRestores = backupData.users.map(user => addDoc(collection(db, "LoanUsers"), user));
+      const paymentHistoryRestores = backupData.paymentHistory.map(payment => addDoc(collection(db, "PaymentHistory"), payment));
       
-      await Promise.all([...loanRestores, ...collaboratorRestores, ...userRestores]);
+      await Promise.all([...loanRestores, ...collaboratorRestores, ...userRestores, ...paymentHistoryRestores]);
       
       // Actualizar configuración
       if (backupData.systemConfig) {
@@ -3783,6 +4180,11 @@ body {
         const historyList = document.getElementById('backupHistoryList');
         historyList.innerHTML = '';
         
+        if (backupsSnapshot.empty) {
+          historyList.innerHTML = '<p>No hay copias de seguridad registradas</p>';
+          return;
+        }
+        
         backupsSnapshot.forEach(doc => {
           const backup = doc.data();
           const backupItem = document.createElement('div');
@@ -3799,6 +4201,9 @@ body {
             <div class="backup-actions-item">
               <button class="btn btn-info download-backup-btn" data-url="${backup.downloadUrl}" data-filename="${backup.filename}">
                 <i class="fas fa-download"></i>
+              </button>
+              <button class="btn btn-success use-backup-btn" data-url="${backup.downloadUrl}">
+                <i class="fas fa-check"></i> Usar
               </button>
             </div>
           `;
@@ -3833,8 +4238,40 @@ body {
             }
           });
         });
+        
+        // Agregar event listeners para los botones de usar copia
+        document.querySelectorAll('.use-backup-btn').forEach(button => {
+          button.addEventListener('click', async () => {
+            const url = button.getAttribute('data-url');
+            
+            try {
+              showLoading();
+              const response = await fetch(url);
+              const rtmData = await response.json();
+              
+              // Validar formato
+              if (!rtmData.format || !rtmData.format.startsWith('PLUSMONEY_RTM')) {
+                throw new Error('Formato de archivo inválido');
+              }
+              
+              // Restaurar datos
+              await restoreBackupData(rtmData.data);
+              
+              showInfoModal('Éxito', 'Copia de seguridad restaurada correctamente');
+              
+              // Recargar datos
+              initializeAppData();
+            } catch (error) {
+              console.error("Error usando copia de seguridad: ", error);
+              showInfoModal('Error', 'Error al usar la copia de seguridad');
+            } finally {
+              hideLoading();
+            }
+          });
+        });
       } catch (error) {
         console.error("Error cargando historial de copias: ", error);
+        document.getElementById('backupHistoryList').innerHTML = '<p>Error al cargar el historial de copias de seguridad</p>';
       }
     }
 
@@ -3858,8 +4295,12 @@ body {
             document.getElementById('customSchedule').style.display = 'block';
           }
           
-          // Iniciar contador si hay programación activa
-          if (schedule.schedule12am || schedule.schedule12pm || schedule.customTime) {
+          // Configurar estado de pausa
+          isBackupPaused = schedule.paused || false;
+          updatePauseButton();
+          
+          // Iniciar contador si hay programación activa y no está pausada
+          if ((schedule.schedule12am || schedule.schedule12pm || schedule.customTime) && !isBackupPaused) {
             startBackupCountdown(schedule);
           }
         }
@@ -3900,6 +4341,27 @@ body {
       } catch (error) {
         console.error("Error guardando programación: ", error);
         showInfoModal('Error', 'Error al guardar la programación');
+      }
+    }
+
+    // Función para eliminar programación de copias
+    async function deleteBackupSchedule() {
+      try {
+        const scheduleRef = doc(db, "BackupSchedule", currentUser.uid);
+        await deleteDoc(scheduleRef);
+        
+        stopBackupCountdown();
+        
+        // Resetear formulario
+        document.getElementById('schedule12am').checked = false;
+        document.getElementById('schedule12pm').checked = false;
+        document.getElementById('scheduleCustom').checked = false;
+        document.getElementById('customSchedule').style.display = 'none';
+        
+        showInfoModal('Éxito', 'Programación eliminada correctamente');
+      } catch (error) {
+        console.error("Error eliminando programación: ", error);
+        showInfoModal('Error', 'Error al eliminar la programación');
       }
     }
 
@@ -3985,6 +4447,45 @@ body {
       document.getElementById('countdownTimer').style.display = 'none';
     }
 
+    // Función para pausar/reanudar copias
+    async function toggleBackupPause() {
+      try {
+        isBackupPaused = !isBackupPaused;
+        
+        const scheduleRef = doc(db, "BackupSchedule", currentUser.uid);
+        await setDoc(scheduleRef, { paused: isBackupPaused }, { merge: true });
+        
+        if (isBackupPaused) {
+          stopBackupCountdown();
+        } else {
+          // Recargar programación y reiniciar contador
+          loadBackupSchedule();
+        }
+        
+        updatePauseButton();
+        
+        showInfoModal('Éxito', `Copias de seguridad ${isBackupPaused ? 'pausadas' : 'reanudadas'} correctamente`);
+      } catch (error) {
+        console.error("Error cambiando estado de pausa: ", error);
+        showInfoModal('Error', 'Error al cambiar el estado de pausa');
+      }
+    }
+
+    // Función para actualizar botón de pausa
+    function updatePauseButton() {
+      const pauseBtn = document.getElementById('pauseBackupBtn');
+      if (isBackupPaused) {
+        pauseBtn.innerHTML = '<i class="fas fa-play"></i> Reanudar Copias';
+        pauseBtn.classList.remove('btn-warning');
+        pauseBtn.classList.add('btn-success');
+      } else {
+        pauseBtn.innerHTML = '<i class="fas fa-pause"></i> Pausar Copias';
+        pauseBtn.classList.remove('btn-success');
+        pauseBtn.classList.add('btn-warning');
+      }
+      pauseBtn.style.display = 'block';
+    }
+
     // Función para generar PDF de respaldo
     async function generateBackupPDF(backupData) {
       const { jsPDF } = window.jspdf;
@@ -4066,188 +4567,79 @@ body {
       pdf.save(`respaldo_${currentUser.uid}_${Date.now()}.pdf`);
     }
 
-    // Función para cargar reporte general
-    async function loadGeneralReport() {
+    // Función para cargar préstamos completados con botones de reenganche
+    async function loadCompletedLoans() {
       try {
         showLoading();
+        let q;
         
-        const loansQuery = query(
-          collection(db, "Loans"),
-          where("userId", "==", currentUser.uid)
-        );
+        if (currentUser && currentUser.uid !== 'admin') {
+          q = query(
+            collection(db, "Loans"), 
+            where("userId", "==", currentUser.uid),
+            where("status", "==", "completed")
+          );
+        } else {
+          q = query(
+            collection(db, "Loans"), 
+            where("status", "==", "completed")
+          );
+        }
         
-        const loansSnapshot = await getDocs(loansQuery);
-        
-        let totalInteresesPagados = 0;
-        let totalCapitalPagado = 0;
-        let totalMorasPagadas = 0;
-        let totalClientesCompletados = 0;
-        let totalInteresesPendientes = 0;
-        let totalMorasPendientes = 0;
-        
-        const clientesCompletados = new Set();
-        
-        loansSnapshot.forEach(doc => {
-          const loan = doc.data();
+        const querySnapshot = await getDocs(q);
+        const tableBody = document.getElementById('completedLoansTableBody');
+        tableBody.innerHTML = '';
+
+        querySnapshot.forEach(doc => {
+          const loan = { id: doc.id, ...doc.data() };
           
-          // Calcular intereses pagados
-          if (loan.payments) {
-            loan.payments.forEach(payment => {
-              if (payment.type === 'interest' || payment.type === 'full') {
-                const interestPayment = payment.type === 'full' ? 
-                  payment.amount - (payment.amount * (loan.remainingCapital / loan.balance)) : 
-                  payment.amount;
-                
-                totalInteresesPagados += interestPayment;
-              }
-              
-              if (payment.lateFee) {
-                totalMorasPagadas += payment.lateFee;
-              }
-            });
-          }
+          // Calificar al cliente para nuevo préstamo
+          const qualification = evaluateClientQualification(loan);
           
-          // Calcular capital pagado
-          totalCapitalPagado += loan.amount - (loan.remainingCapital || 0);
-          
-          // Contar clientes completados
-          if (loan.status === 'completed') {
-            clientesCompletados.add(loan.client.id);
-          }
-          
-          // Calcular intereses pendientes
-          const remainingInterest = (loan.totalInterest || 0) - totalInteresesPagados;
-          if (remainingInterest > 0) {
-            totalInteresesPendientes += remainingInterest;
-          }
-          
-          // Calcular moras pendientes (simplificado)
-          const today = new Date();
-          const overduePayments = loan.paymentSchedule?.filter(p => 
-            p.status === 'pending' && new Date(p.dueDate) < today
-          ) || [];
-          
-          totalMorasPendientes += overduePayments.length * systemConfig.lateFeeAmount;
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${loan.client.name}</td>
+            <td>${loan.client.id}</td>
+            <td>$${formatNumber(loan.amount)}</td>
+            <td>$${formatNumber(loan.totalInterest || 0)}</td>
+            <td>${loan.endDate ? formatDate(new Date(loan.endDate)) : 'N/A'}</td>
+            <td>
+              <span class="qualification-badge ${qualification.class}">${qualification.text}</span>
+            </td>
+            <td>
+              <button class="btn btn-info view-completed-loan-btn" data-loan-id="${loan.id}">
+                <i class="fas fa-eye"></i> Ver
+              </button>
+              ${qualification.canRenegotiate ? 
+                `<button class="btn btn-success reengagement-loan-btn" data-client-id="${loan.client.id}">
+                  <i class="fas fa-handshake"></i> Reenganche
+                </button>` : ''}
+            </td>
+          `;
+          tableBody.appendChild(row);
         });
         
-        totalClientesCompletados = clientesCompletados.size;
+        // Agregar event listeners
+        document.querySelectorAll('.view-completed-loan-btn').forEach(button => {
+          button.addEventListener('click', () => {
+            const loanId = button.getAttribute('data-loan-id');
+            showCompletedLoanDetails(loanId);
+          });
+        });
         
-        // Actualizar UI
-        document.getElementById('totalInteresesPagados').textContent = `$${formatNumber(totalInteresesPagados)}`;
-        document.getElementById('totalCapitalPagado').textContent = `$${formatNumber(totalCapitalPagado)}`;
-        document.getElementById('totalMorasPagadas').textContent = `$${formatNumber(totalMorasPagadas)}`;
-        document.getElementById('totalClientesCompletados').textContent = totalClientesCompletados;
-        document.getElementById('totalInteresesPendientes').textContent = `$${formatNumber(totalInteresesPendientes)}`;
-        document.getElementById('totalMorasPendientes').textContent = `$${formatNumber(totalMorasPendientes)}`;
-        
-        // Actualizar gráfico
-        updateReportChart(totalInteresesPagados, totalCapitalPagado, totalMorasPagadas, 
-                         totalInteresesPendientes, totalMorasPendientes);
-                         
+        document.querySelectorAll('.reengagement-loan-btn').forEach(button => {
+          button.addEventListener('click', () => {
+            const clientId = button.getAttribute('data-client-id');
+            showReengagementModal(clientId);
+          });
+        });
       } catch (error) {
-        console.error("Error cargando reporte general: ", error);
-        showInfoModal('Error', 'Error al cargar el reporte general');
+        console.error("Error loading completed loans: ", error);
+        showInfoModal('Error', 'Error al cargar los préstamos completados.');
       } finally {
         hideLoading();
       }
     }
-
-    // Función para actualizar gráfico del reporte
-    function updateReportChart(interesesPagados, capitalPagado, morasPagadas, interesesPendientes, morasPendientes) {
-      const ctx = document.getElementById('reporteChart').getContext('2d');
-      
-      // Destruir gráfico existente si existe
-      const existingChart = Chart.getChart('reporteChart');
-      if (existingChart) {
-        existingChart.destroy();
-      }
-      
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: ['Intereses Pagados', 'Capital Pagado', 'Moras Pagadas', 'Intereses Pendientes', 'Moras Pendientes'],
-          datasets: [{
-            label: 'Montos ($)',
-            data: [interesesPagados, capitalPagado, morasPagadas, interesesPendientes, morasPendientes],
-            backgroundColor: [
-              'rgba(26, 188, 156, 0.6)',
-              'rgba(52, 152, 219, 0.6)',
-              'rgba(243, 156, 18, 0.6)',
-              'rgba(231, 76, 60, 0.6)',
-              'rgba(155, 89, 182, 0.6)'
-            ],
-            borderColor: [
-              'rgba(26, 188, 156, 1)',
-              'rgba(52, 152, 219, 1)',
-              'rgba(243, 156, 18, 1)',
-              'rgba(231, 76, 60, 1)',
-              'rgba(155, 89, 182, 1)'
-            ],
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                color: 'white',
-                callback: function(value) {
-                  return '$' + value.toLocaleString('en-US');
-                }
-              },
-              grid: {
-                color: 'rgba(255, 255, 255, 0.1)'
-              }
-            },
-            x: {
-              ticks: {
-                color: 'white'
-              },
-              grid: {
-                display: false
-              }
-            }
-          },
-          plugins: {
-            legend: {
-              display: false
-            },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  return context.dataset.label + ': $' + formatNumber(context.parsed.y);
-                }
-              }
-            }
-          }
-        }
-      });
-    }
-
-    // Configurar vista previa de imagen para colaboradores
-    document.getElementById('collaboratorPhoto').addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      
-      if (!file.type.match('image.*')) {
-        showInfoModal('Error', 'Por favor, selecciona una imagen válida');
-        return;
-      }
-      
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const preview = document.getElementById('collaboratorImagePreview');
-        const placeholder = document.getElementById('imagePlaceholder');
-        
-        preview.src = e.target.result;
-        preview.style.display = 'block';
-        placeholder.style.display = 'none';
-      };
-      reader.readAsDataURL(file);
-    });
 
     // El resto del código permanece igual...
     // [Aquí iría el resto del código JavaScript que no ha cambiado significativamente]
@@ -4351,7 +4743,6 @@ body {
       loadActiveLoans();
       loadCompletedLoans();
       loadCollaborators();
-      loadGeneralReport();
     }
 
     // Función para cargar datos del dashboard
@@ -4424,81 +4815,6 @@ body {
       } catch (error) {
         console.error("Error loading dashboard data: ", error);
         showInfoModal('Error', 'Error al cargar los datos del panel.');
-      } finally {
-        hideLoading();
-      }
-    }
-
-    // Función para cargar préstamos completados
-    async function loadCompletedLoans() {
-      try {
-        showLoading();
-        let q;
-        
-        if (currentUser && currentUser.uid !== 'admin') {
-          q = query(
-            collection(db, "Loans"), 
-            where("userId", "==", currentUser.uid),
-            where("status", "==", "completed")
-          );
-        } else {
-          q = query(
-            collection(db, "Loans"), 
-            where("status", "==", "completed")
-          );
-        }
-        
-        const querySnapshot = await getDocs(q);
-        const tableBody = document.getElementById('completedLoansTableBody');
-        tableBody.innerHTML = '';
-
-        querySnapshot.forEach(doc => {
-          const loan = { id: doc.id, ...doc.data() };
-          
-          // Calificar al cliente para nuevo préstamo
-          const qualification = evaluateClientQualification(loan);
-          
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${loan.client.name}</td>
-            <td>${loan.client.id}</td>
-            <td>$${formatNumber(loan.amount)}</td>
-            <td>$${formatNumber(loan.totalInterest || 0)}</td>
-            <td>${loan.endDate ? formatDate(new Date(loan.endDate)) : 'N/A'}</td>
-            <td>
-              <span class="qualification-badge ${qualification.class}">${qualification.text}</span>
-            </td>
-            <td>
-              <button class="btn btn-info view-completed-loan-btn" data-loan-id="${loan.id}">
-                <i class="fas fa-eye"></i> Ver
-              </button>
-              ${qualification.canRenegotiate ? 
-                `<button class="btn btn-success renegotiate-loan-btn" data-loan-id="${loan.id}" data-client-id="${loan.client.id}">
-                  <i class="fas fa-handshake"></i> Renegociar
-                </button>` : ''}
-            </td>
-          `;
-          tableBody.appendChild(row);
-        });
-        
-        // Agregar event listeners
-        document.querySelectorAll('.view-completed-loan-btn').forEach(button => {
-          button.addEventListener('click', () => {
-            const loanId = button.getAttribute('data-loan-id');
-            showCompletedLoanDetails(loanId);
-          });
-        });
-        
-        document.querySelectorAll('.renegotiate-loan-btn').forEach(button => {
-          button.addEventListener('click', () => {
-            const loanId = button.getAttribute('data-loan-id');
-            const clientId = button.getAttribute('data-client-id');
-            renegotiateLoan(loanId, clientId);
-          });
-        });
-      } catch (error) {
-        console.error("Error loading completed loans: ", error);
-        showInfoModal('Error', 'Error al cargar los préstamos completados.');
       } finally {
         hideLoading();
       }
@@ -4578,63 +4894,6 @@ body {
       } catch (error) {
         console.error("Error showing completed loan details: ", error);
         showInfoModal('Error', 'Error al cargar los detalles del préstamo completado.');
-      } finally {
-        hideLoading();
-      }
-    }
-
-    // Función para renegociar préstamo
-    async function renegotiateLoan(loanId, clientId) {
-      try {
-        showLoading();
-        
-        // Obtener datos del cliente
-        const clientQuery = query(
-          collection(db, "Loans"),
-          where("client.id", "==", clientId),
-          where("userId", "==", currentUser.uid)
-        );
-        
-        const clientSnapshot = await getDocs(clientQuery);
-        let clientData = null;
-        
-        clientSnapshot.forEach(doc => {
-          const loan = doc.data();
-          if (!clientData) {
-            clientData = loan.client;
-          }
-        });
-        
-        if (!clientData) {
-          showInfoModal('Error', 'No se encontraron datos del cliente.');
-          return;
-        }
-        
-        // Redirigir a la sección de nuevo préstamo con los datos del cliente
-        const sections = document.querySelectorAll('.main-container section');
-        const navLinks = document.querySelectorAll('.nav-link');
-        sections.forEach(section => section.style.display = 'none');
-        navLinks.forEach(link => link.classList.remove('active'));
-        document.getElementById('new-loan').style.display = 'block';
-        document.querySelectorAll('.nav-link[href="#new-loan"]').forEach(link => link.classList.add('active'));
-        
-        // Llenar los datos del cliente
-        document.getElementById('clientName').value = clientData.name;
-        document.getElementById('clientId').value = clientData.id;
-        document.getElementById('clientAddress').value = clientData.address;
-        document.getElementById('clientPhone').value = clientData.phone;
-        document.getElementById('clientNationality').value = clientData.nationality;
-        document.getElementById('clientCompany').value = clientData.company || '';
-        document.getElementById('companyStartDate').value = '';
-        document.getElementById('companyTime').textContent = '';
-        document.getElementById('referenceName').value = clientData.reference?.name || '';
-        document.getElementById('referencePhone').value = clientData.reference?.phone || '';
-        document.getElementById('referenceRelation').value = clientData.reference?.relation || '';
-        
-        showInfoModal('Información', 'Los datos del cliente han sido cargados. Complete la información del nuevo préstamo.');
-      } catch (error) {
-        console.error("Error renegotiating loan: ", error);
-        showInfoModal('Error', 'Error al iniciar la renegociación del préstamo.');
       } finally {
         hideLoading();
       }
@@ -4722,8 +4981,6 @@ body {
             loadCompletedLoans();
           } else if (targetId === 'collaborators') {
             loadCollaborators();
-          } else if (targetId === 'reporte-general') {
-            loadGeneralReport();
           }
         });
       });
@@ -5171,28 +5428,15 @@ body {
           });
           
           if (loan.status === 'completed') {
-            const reengagementForm = document.createElement('div');
-            reengagementForm.className = 'reengagement-form';
-            reengagementForm.innerHTML = `
-              <h5>Renegociar Préstamo</h5>
-              <form class="reengagement-form-inner" data-loan-id="${loan.id}">
-                <div class="form-group">
-                  <label for="reengagementAmount">Monto Adicional</label>
-                  <input type="number" id="reengagementAmount" class="form-control" min="0" step="0.01">
-                </div>
-                <button type="submit" class="btn btn-success">
-                  <i class="fas fa-handshake"></i> Renegociar
-                </button>
-              </form>
-            `;
-            
-            reengagementForm.querySelector('form').addEventListener('submit', (e) => {
-              e.preventDefault();
-              const additionalAmount = parseFloat(reengagementForm.querySelector('#reengagementAmount').value) || 0;
-              reengageLoan(loan.id, additionalAmount);
+            const reengagementBtn = document.createElement('button');
+            reengagementBtn.className = 'btn btn-success';
+            reengagementBtn.innerHTML = '<i class="fas fa-handshake"></i> Reenganche';
+            reengagementBtn.style.marginLeft = '0.5rem';
+            reengagementBtn.addEventListener('click', () => {
+              showReengagementModal(clientData.id);
             });
             
-            loanItem.appendChild(reengagementForm);
+            loanItem.appendChild(reengagementBtn);
           }
           
           loanItem.appendChild(historyBtn);
@@ -5240,69 +5484,6 @@ body {
       document.getElementById('infoModalMessage').innerHTML = '';
       document.getElementById('infoModalMessage').appendChild(container);
       document.getElementById('infoModal').classList.add('active');
-    }
-
-    // Función para renegociar préstamo
-    async function reengageLoan(loanId, additionalAmount) {
-      try {
-        showLoading();
-        
-        const loanRef = doc(db, "Loans", loanId);
-        const loanSnap = await getDoc(loanRef);
-        
-        if (!loanSnap.exists()) {
-          showInfoModal('Error', 'El préstamo no existe.');
-          return;
-        }
-        
-        const loan = loanSnap.data();
-        
-        if (loan.status !== 'completed') {
-          showInfoModal('Error', 'Solo se pueden renegociar préstamos completados.');
-          return;
-        }
-        
-        if (additionalAmount <= 0) {
-          showInfoModal('Error', 'El monto adicional debe ser mayor que cero.');
-          return;
-        }
-        
-        const newLoanData = {
-          ...loan,
-          amount: additionalAmount,
-          balance: additionalAmount,
-          remainingCapital: additionalAmount,
-          status: 'active',
-          startDate: new Date().toISOString().split('T')[0],
-          payments: [],
-          paymentSchedule: generatePaymentSchedule({
-            amount: additionalAmount,
-            interestRate: loan.interestRate,
-            term: loan.term,
-            frequency: loan.frequency,
-            startDate: new Date().toISOString().split('T')[0]
-          }),
-          totalInterest: additionalAmount * (loan.interestRate / 100) * loan.term,
-          totalPayment: additionalAmount + (additionalAmount * (loan.interestRate / 100) * loan.term),
-          createdAt: Timestamp.now(),
-          createdBy: currentUser.uid
-        };
-        
-        delete newLoanData.id;
-        
-        await addDoc(collection(db, "Loans"), newLoanData);
-        
-        showInfoModal('Éxito', 'Préstamo renegociado correctamente.');
-        
-        loadUsersData();
-        loadDashboardData();
-        loadActiveLoans();
-      } catch (error) {
-        console.error("Error reengaging loan: ", error);
-        showInfoModal('Error', 'Error al renegociar el préstamo.');
-      } finally {
-        hideLoading();
-      }
     }
 
     // Función para buscar usuarios
@@ -5963,231 +6144,6 @@ body {
       return true;
     }
 
-    // Función para registrar pago
-    async function registerPayment(e) {
-      e.preventDefault();
-      
-      if (!selectedLoanForPayment) {
-        showInfoModal('Error', 'No se ha seleccionado un préstamo.');
-        return;
-      }
-      
-      const paymentAmount = parseFloat(document.getElementById('paymentAmount').value);
-      const paymentDate = document.getElementById('paymentDate').value;
-      const paymentType = document.getElementById('paymentType').value;
-      const applyLateFee = document.getElementById('applyLateFee').checked;
-      
-      if (isNaN(paymentAmount) || paymentAmount <= 0) {
-        showInfoModal('Error', 'El monto del pago debe ser mayor a cero.');
-        return;
-      }
-      if (!paymentDate) {
-        showInfoModal('Error', 'Seleccione una fecha de pago válida.');
-        return;
-      }
-      if (!paymentType) {
-        showInfoModal('Error', 'Seleccione un tipo de pago.');
-        return;
-      }
-      
-      const nextPayment = selectedLoanForPayment.paymentSchedule?.find(p => p.status === 'pending');
-      if (!nextPayment && paymentType !== 'custom') {
-        showInfoModal('Error', 'No hay pagos pendientes para este préstamo.');
-        return;
-      }
-      
-      const paymentsMade = selectedLoanForPayment.payments?.length || 0;
-      const totalPayments = selectedLoanForPayment.paymentSchedule?.length || 0;
-      const remainingQuincenas = totalPayments - paymentsMade;
-      
-      const capitalToPay = remainingQuincenas > 0 ? selectedLoanForPayment.remainingCapital / remainingQuincenas : 0;
-      
-      const tasaQuincenal = selectedLoanForPayment.interestRate / (selectedLoanForPayment.frequency === 'biweekly' ? 1 : 2);
-      const interestToPay = selectedLoanForPayment.remainingCapital * (tasaQuincenal / 100);
-      
-      const totalToPay = capitalToPay + interestToPay;
-      
-      let lateFee = 0;
-      if (applyLateFee && (paymentType === 'full' || paymentType === 'custom')) {
-        lateFee = parseFloat(document.getElementById('lateFeeAmount').value.replace(',', '.')) || 0;
-      }
-      
-      const totalPayment = paymentAmount + lateFee;
-      
-      if (paymentType === 'full' && totalPayment < totalToPay) {
-        showInfoModal('Error', `El monto total ($${formatNumber(totalPayment)}) es menor al requerido ($${formatNumber(totalToPay)}) para un pago completo.`);
-        return;
-      }
-      if (paymentType === 'capital' && paymentAmount < capitalToPay) {
-        showInfoModal('Error', `El monto ($${formatNumber(paymentAmount)}) es menor al capital requerido ($${formatNumber(capitalToPay)}) para el próximo pago.`);
-        return;
-      }
-      if (paymentType === 'interest' && paymentAmount < interestToPay) {
-        showInfoModal('Error', `El monto ($${formatNumber(paymentAmount)}) es menor al interés requerido ($${formatNumber(interestToPay)}) para el próximo pago.`);
-        return;
-      }
-      
-      const now = new Date();
-      const selectedDate = new Date(paymentDate);
-      const paymentDateTime = new Date(
-        selectedDate.getFullYear(),
-        selectedDate.getMonth(),
-        selectedDate.getDate(),
-        now.getHours(),
-        now.getMinutes(),
-        now.getSeconds()
-      );
-      
-      const paymentData = {
-        amount: paymentAmount,
-        date: Timestamp.fromDate(paymentDateTime),
-        type: paymentType,
-        timestamp: Timestamp.now(),
-        recordedBy: currentUser.uid
-      };
-      
-      if (lateFee > 0 && (paymentType === 'full' || paymentType === 'custom')) {
-        paymentData.lateFee = lateFee;
-        paymentData.lateFeeDays = parseInt(document.getElementById('lateFeeDays').value) || 0;
-        paymentData.lateFeeAmount = systemConfig.lateFeeAmount;
-      }
-      
-      try {
-        showLoading();
-        const loanRef = doc(db, "Loans", selectedLoanForPayment.id);
-        
-        const loanSnap = await getDoc(loanRef);
-        if (!loanSnap.exists()) {
-          hideLoading();
-          showInfoModal('Error', 'El préstamo no existe en la base de datos.');
-          return;
-        }
-        
-        let capitalPayment = 0;
-        let interestPayment = 0;
-        let totalLateFees = (selectedLoanForPayment.payments || []).reduce((sum, p) => sum + (p.lateFee || 0), 0) + lateFee;
-        
-        if (paymentType === 'full') {
-          const interestDue = selectedLoanForPayment.remainingCapital * (tasaQuincenal / 100);
-          interestPayment = Math.min(paymentAmount, interestDue);
-          capitalPayment = paymentAmount - interestPayment;
-          if (lateFee > 0) interestPayment += lateFee;
-        } else if (paymentType === 'interest') {
-          interestPayment = paymentAmount;
-        } else if (paymentType === 'capital') {
-          capitalPayment = paymentAmount;
-        } else if (paymentType === 'custom') {
-          const interestDue = selectedLoanForPayment.remainingCapital * (tasaQuincenal / 100);
-          capitalPayment = Math.min(paymentAmount, selectedLoanForPayment.remainingCapital);
-          interestPayment = Math.min(paymentAmount - capitalPayment, interestDue);
-          if (lateFee > 0) interestPayment += lateFee;
-        }
-        
-        const newBalance = Math.max(0, selectedLoanForPayment.balance - totalPayment);
-        const newRemainingCapital = Math.max(0, selectedLoanForPayment.remainingCapital - capitalPayment);
-        
-        const today = new Date();
-        let hasOverdue = false;
-        if (nextPayment) {
-          const dueDate = new Date(nextPayment.dueDate);
-          if (dueDate < today) {
-            hasOverdue = true;
-          }
-        }
-        
-        const hasInterestDue = selectedLoanForPayment.remainingCapital * (tasaQuincenal / 100) > 0;
-        
-        let updatedPaymentSchedule = [...(selectedLoanForPayment.paymentSchedule || [])];
-        if (paymentType === 'full' && totalPayment >= totalToPay) {
-          const paymentIndex = updatedPaymentSchedule.findIndex(p => p.number === nextPayment.number);
-          if (paymentIndex !== -1) {
-            updatedPaymentSchedule[paymentIndex].status = 'paid';
-            if (paymentIndex < updatedPaymentSchedule.length - 1) {
-              const nextDueDate = new Date(updatedPaymentSchedule[paymentIndex].dueDate);
-              nextDueDate.setDate(nextDueDate.getDate() + (selectedLoanForPayment.frequency === 'biweekly' ? 15 : 30));
-              updatedPaymentSchedule[paymentIndex + 1].dueDate = nextDueDate.toISOString().split('T')[0];
-            }
-          }
-        }
-        
-        let newStatus = selectedLoanForPayment.status;
-        
-        if (newRemainingCapital <= 0 && !hasInterestDue && totalLateFees <= 0) {
-          newStatus = 'completed';
-          
-          updatedPaymentSchedule = updatedPaymentSchedule.map(payment => ({
-            ...payment,
-            status: 'paid'
-          }));
-        } 
-        else {
-          const finalPayment = updatedPaymentSchedule[updatedPaymentSchedule.length - 1];
-          if (finalPayment && new Date(finalPayment.dueDate) < today && newStatus !== 'completed') {
-            newStatus = 'expired';
-            
-            if (systemConfig.autoExtend) {
-              const newTerm = Math.ceil(selectedLoanForPayment.term / 2);
-              const newPayments = generatePaymentSchedule({
-                ...selectedLoanForPayment,
-                term: newTerm,
-                startDate: finalPayment.dueDate
-              });
-              
-              updatedPaymentSchedule = [...updatedPaymentSchedule, ...newPayments];
-              newStatus = 'active';
-            }
-          } else if (hasOverdue) {
-            newStatus = 'overdue';
-          } else {
-            newStatus = 'active';
-          }
-        }
-        
-        await updateDoc(loanRef, {
-          payments: selectedLoanForPayment.payments ? arrayUnion(paymentData) : [paymentData],
-          balance: newBalance,
-          remainingCapital: newRemainingCapital,
-          paymentSchedule: updatedPaymentSchedule,
-          status: newStatus
-        });
-        
-        lastPaymentData = {
-          ...paymentData,
-          loanId: selectedLoanForPayment.id,
-          clientName: selectedLoanForPayment.client.name,
-          clientId: selectedLoanForPayment.client.id,
-          recordedBy: currentUser.displayName || 'Administrador'
-        };
-        
-        showInfoModal('Éxito', 'Pago registrado correctamente.');
-        
-        document.getElementById('paymentForm').reset();
-        document.getElementById('paymentDate').value = new Date().toISOString().split('T')[0];
-        document.getElementById('lateFeeDetails').style.display = 'none';
-        document.getElementById('applyLateFee').checked = false;
-        document.getElementById('lateFeeAmount').value = '0.00';
-        
-        document.getElementById('generateReceiptBtn').style.display = 'block';
-        document.getElementById('shareReceiptBtn').style.display = 'block';
-        document.getElementById('generateTicketBtn').style.display = 'block';
-        
-        const updatedLoanSnap = await getDoc(loanRef);
-        selectedLoanForPayment = { id: loanRef.id, ...updatedLoanSnap.data() };
-        displayLoanDetails(selectedLoanForPayment);
-        evaluateClientStatus(selectedLoanForPayment);
-        displayPaymentHistory(selectedLoanForPayment);
-        
-        await loadDashboardData();
-        await loadUsersData();
-        await loadActiveLoans();
-      } catch (error) {
-        console.error("Error registrando pago: ", error);
-        showInfoModal('Error', `Error al registrar el pago: ${error.message}. Verifica tu conexión y permisos de Firestore.`);
-      } finally {
-        hideLoading();
-      }
-    }
-
     // Función para generar recibo
     async function generateReceipt() {
       if (!lastPaymentData) {
@@ -6596,6 +6552,249 @@ body {
     // Función para configurar el selector de imágenes
     function setupImageSelector() {
       // Esta función se mantiene igual que en el código original
+    }
+
+    // Función para registrar pago con historial separado
+    async function registerPayment(e) {
+      e.preventDefault();
+      
+      if (!selectedLoanForPayment) {
+        showInfoModal('Error', 'No se ha seleccionado un préstamo.');
+        return;
+      }
+      
+      const paymentAmount = parseFloat(document.getElementById('paymentAmount').value);
+      const paymentDate = document.getElementById('paymentDate').value;
+      const paymentType = document.getElementById('paymentType').value;
+      const applyLateFee = document.getElementById('applyLateFee').checked;
+      
+      if (isNaN(paymentAmount) || paymentAmount <= 0) {
+        showInfoModal('Error', 'El monto del pago debe ser mayor a cero.');
+        return;
+      }
+      if (!paymentDate) {
+        showInfoModal('Error', 'Seleccione una fecha de pago válida.');
+        return;
+      }
+      if (!paymentType) {
+        showInfoModal('Error', 'Seleccione un tipo de pago.');
+        return;
+      }
+      
+      const nextPayment = selectedLoanForPayment.paymentSchedule?.find(p => p.status === 'pending');
+      if (!nextPayment && paymentType !== 'custom') {
+        showInfoModal('Error', 'No hay pagos pendientes para este préstamo.');
+        return;
+      }
+      
+      const paymentsMade = selectedLoanForPayment.payments?.length || 0;
+      const totalPayments = selectedLoanForPayment.paymentSchedule?.length || 0;
+      const remainingQuincenas = totalPayments - paymentsMade;
+      
+      const capitalToPay = remainingQuincenas > 0 ? selectedLoanForPayment.remainingCapital / remainingQuincenas : 0;
+      
+      const tasaQuincenal = selectedLoanForPayment.interestRate / (selectedLoanForPayment.frequency === 'biweekly' ? 1 : 2);
+      const interestToPay = selectedLoanForPayment.remainingCapital * (tasaQuincenal / 100);
+      
+      const totalToPay = capitalToPay + interestToPay;
+      
+      let lateFee = 0;
+      if (applyLateFee && (paymentType === 'full' || paymentType === 'custom')) {
+        lateFee = parseFloat(document.getElementById('lateFeeAmount').value.replace(',', '.')) || 0;
+      }
+      
+      const totalPayment = paymentAmount + lateFee;
+      
+      if (paymentType === 'full' && totalPayment < totalToPay) {
+        showInfoModal('Error', `El monto total ($${formatNumber(totalPayment)}) es menor al requerido ($${formatNumber(totalToPay)}) para un pago completo.`);
+        return;
+      }
+      if (paymentType === 'capital' && paymentAmount < capitalToPay) {
+        showInfoModal('Error', `El monto ($${formatNumber(paymentAmount)}) es menor al capital requerido ($${formatNumber(capitalToPay)}) para el próximo pago.`);
+        return;
+      }
+      if (paymentType === 'interest' && paymentAmount < interestToPay) {
+        showInfoModal('Error', `El monto ($${formatNumber(paymentAmount)}) es menor al interés requerido ($${formatNumber(interestToPay)}) para el próximo pago.`);
+        return;
+      }
+      
+      const now = new Date();
+      const selectedDate = new Date(paymentDate);
+      const paymentDateTime = new Date(
+        selectedDate.getFullYear(),
+        selectedDate.getMonth(),
+        selectedDate.getDate(),
+        now.getHours(),
+        now.getMinutes(),
+        now.getSeconds()
+      );
+      
+      const paymentData = {
+        amount: paymentAmount,
+        date: Timestamp.fromDate(paymentDateTime),
+        type: paymentType,
+        timestamp: Timestamp.now(),
+        recordedBy: currentUser.uid
+      };
+      
+      if (lateFee > 0 && (paymentType === 'full' || paymentType === 'custom')) {
+        paymentData.lateFee = lateFee;
+        paymentData.lateFeeDays = parseInt(document.getElementById('lateFeeDays').value) || 0;
+        paymentData.lateFeeAmount = systemConfig.lateFeeAmount;
+      }
+      
+      try {
+        showLoading();
+        const loanRef = doc(db, "Loans", selectedLoanForPayment.id);
+        
+        const loanSnap = await getDoc(loanRef);
+        if (!loanSnap.exists()) {
+          hideLoading();
+          showInfoModal('Error', 'El préstamo no existe en la base de datos.');
+          return;
+        }
+        
+        let capitalPayment = 0;
+        let interestPayment = 0;
+        let totalLateFees = (selectedLoanForPayment.payments || []).reduce((sum, p) => sum + (p.lateFee || 0), 0) + lateFee;
+        
+        if (paymentType === 'full') {
+          const interestDue = selectedLoanForPayment.remainingCapital * (tasaQuincenal / 100);
+          interestPayment = Math.min(paymentAmount, interestDue);
+          capitalPayment = paymentAmount - interestPayment;
+          if (lateFee > 0) interestPayment += lateFee;
+        } else if (paymentType === 'interest') {
+          interestPayment = paymentAmount;
+        } else if (paymentType === 'capital') {
+          capitalPayment = paymentAmount;
+        } else if (paymentType === 'custom') {
+          const interestDue = selectedLoanForPayment.remainingCapital * (tasaQuincenal / 100);
+          capitalPayment = Math.min(paymentAmount, selectedLoanForPayment.remainingCapital);
+          interestPayment = Math.min(paymentAmount - capitalPayment, interestDue);
+          if (lateFee > 0) interestPayment += lateFee;
+        }
+        
+        const newBalance = Math.max(0, selectedLoanForPayment.balance - totalPayment);
+        const newRemainingCapital = Math.max(0, selectedLoanForPayment.remainingCapital - capitalPayment);
+        
+        const today = new Date();
+        let hasOverdue = false;
+        if (nextPayment) {
+          const dueDate = new Date(nextPayment.dueDate);
+          if (dueDate < today) {
+            hasOverdue = true;
+          }
+        }
+        
+        const hasInterestDue = selectedLoanForPayment.remainingCapital * (tasaQuincenal / 100) > 0;
+        
+        let updatedPaymentSchedule = [...(selectedLoanForPayment.paymentSchedule || [])];
+        if (paymentType === 'full' && totalPayment >= totalToPay) {
+          const paymentIndex = updatedPaymentSchedule.findIndex(p => p.number === nextPayment.number);
+          if (paymentIndex !== -1) {
+            updatedPaymentSchedule[paymentIndex].status = 'paid';
+            if (paymentIndex < updatedPaymentSchedule.length - 1) {
+              const nextDueDate = new Date(updatedPaymentSchedule[paymentIndex].dueDate);
+              nextDueDate.setDate(nextDueDate.getDate() + (selectedLoanForPayment.frequency === 'biweekly' ? 15 : 30));
+              updatedPaymentSchedule[paymentIndex + 1].dueDate = nextDueDate.toISOString().split('T')[0];
+            }
+          }
+        }
+        
+        let newStatus = selectedLoanForPayment.status;
+        
+        if (newRemainingCapital <= 0 && !hasInterestDue && totalLateFees <= 0) {
+          newStatus = 'completed';
+          
+          updatedPaymentSchedule = updatedPaymentSchedule.map(payment => ({
+            ...payment,
+            status: 'paid'
+          }));
+        } 
+        else {
+          const finalPayment = updatedPaymentSchedule[updatedPaymentSchedule.length - 1];
+          if (finalPayment && new Date(finalPayment.dueDate) < today && newStatus !== 'completed') {
+            newStatus = 'expired';
+            
+            if (systemConfig.autoExtend) {
+              const newTerm = Math.ceil(selectedLoanForPayment.term / 2);
+              const newPayments = generatePaymentSchedule({
+                ...selectedLoanForPayment,
+                term: newTerm,
+                startDate: finalPayment.dueDate
+              });
+              
+              updatedPaymentSchedule = [...updatedPaymentSchedule, ...newPayments];
+              newStatus = 'active';
+            }
+          } else if (hasOverdue) {
+            newStatus = 'overdue';
+          } else {
+            newStatus = 'active';
+          }
+        }
+        
+        // Guardar en historial de pagos separado
+        const paymentHistoryData = {
+          loanId: selectedLoanForPayment.id,
+          clientId: selectedLoanForPayment.client.id,
+          clientName: selectedLoanForPayment.client.name,
+          amount: paymentAmount,
+          capitalAmount: capitalPayment,
+          interestAmount: interestPayment,
+          lateFee: lateFee,
+          paymentType: paymentType,
+          date: Timestamp.fromDate(paymentDateTime),
+          timestamp: Timestamp.now(),
+          userId: currentUser.uid,
+          recordedBy: currentUser.uid
+        };
+        
+        await addDoc(collection(db, "PaymentHistory"), paymentHistoryData);
+        
+        await updateDoc(loanRef, {
+          payments: selectedLoanForPayment.payments ? arrayUnion(paymentData) : [paymentData],
+          balance: newBalance,
+          remainingCapital: newRemainingCapital,
+          paymentSchedule: updatedPaymentSchedule,
+          status: newStatus
+        });
+        
+        lastPaymentData = {
+          ...paymentData,
+          loanId: selectedLoanForPayment.id,
+          clientName: selectedLoanForPayment.client.name,
+          clientId: selectedLoanForPayment.client.id,
+          recordedBy: currentUser.displayName || 'Administrador'
+        };
+        
+        showInfoModal('Éxito', 'Pago registrado correctamente.');
+        
+        document.getElementById('paymentForm').reset();
+        document.getElementById('paymentDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('lateFeeDetails').style.display = 'none';
+        document.getElementById('applyLateFee').checked = false;
+        document.getElementById('lateFeeAmount').value = '0.00';
+        
+        document.getElementById('generateReceiptBtn').style.display = 'block';
+        document.getElementById('shareReceiptBtn').style.display = 'block';
+        document.getElementById('generateTicketBtn').style.display = 'block';
+        
+        const updatedLoanSnap = await getDoc(loanRef);
+        selectedLoanForPayment = { id: loanRef.id, ...updatedLoanSnap.data() };
+        displayLoanDetails(selectedLoanForPayment);
+        evaluateClientStatus(selectedLoanForPayment);
+        displayPaymentHistory(selectedLoanForPayment);
+        
+        await loadDashboardData();
+        await loadUsersData();
+        await loadActiveLoans();
+      } catch (error) {
+        console.error("Error registrando pago: ", error);
+        showInfoModal('Error', `Error al registrar el pago: ${error.message}. Verifica tu conexión y permisos de Firestore.`);
+      } finally {
+        hideLoading();
+      }
     }
   </script>
 </body>
