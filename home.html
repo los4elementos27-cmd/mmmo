@@ -1877,6 +1877,57 @@ body {
   font-size: 0.8rem;
   color: #666;
 }
+
+/* Estilos para la vista previa de datos */
+.data-preview-container {
+  margin-top: 1.5rem;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
+  background-color: var(--background-color);
+}
+
+.data-preview-item {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.data-preview-item:last-child {
+  border-bottom: none;
+}
+
+.data-preview-title {
+  font-weight: bold;
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+}
+
+.data-preview-content {
+  font-size: 0.9rem;
+  color: var(--text-light);
+}
+
+.data-preview-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+}
+
+.data-preview-table th,
+.data-preview-table td {
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  text-align: left;
+  font-size: 0.8rem;
+}
+
+.data-preview-table th {
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+}
   </style>
 </head>
 <body>
@@ -2525,6 +2576,12 @@ body {
           <p>Generar y restaurar copias de seguridad</p>
         </div>
         
+        <div class="config-card" id="saveDataCard">
+          <i class="fas fa-save"></i>
+          <h3>Salvar Datos</h3>
+          <p>Importar y restaurar datos desde copias</p>
+        </div>
+        
         <div class="config-card">
           <a href="colaboradores.html" style="text-decoration: none; color: inherit;">
             <i class="fas fa-list"></i>
@@ -2788,6 +2845,11 @@ body {
         <button id="pauseBackupBtn" class="btn btn-warning" style="display: none;">
           <i class="fas fa-pause"></i> Pausar Copias
         </button>
+        
+        <!-- Botón para eliminar copia programada -->
+        <button id="deleteScheduleBtn" class="btn btn-danger">
+          <i class="fas fa-trash"></i> Eliminar Programación
+        </button>
       </div>
       
       <div class="countdown-timer" id="countdownTimer" style="display: none;">
@@ -2825,16 +2887,46 @@ body {
         <button id="saveScheduleBtn" class="btn btn-success">
           <i class="fas fa-save"></i> Guardar Programación
         </button>
-        
-        <!-- Botón para eliminar programación -->
-        <button id="deleteScheduleBtn" class="btn btn-danger" style="margin-top: 1rem;">
-          <i class="fas fa-trash"></i> Eliminar Programación
-        </button>
       </div>
       
       <div class="backup-history">
         <h4>Historial de Copias de Seguridad</h4>
         <div id="backupHistoryList">
+          <!-- Se llenará dinámicamente -->
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button onclick="closeModal()" class="btn">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para salvar datos -->
+  <div class="modal" id="saveDataModal">
+    <div class="modal-content" style="max-width: 800px;">
+      <h3 class="modal-title">Salvar Datos</h3>
+      
+      <div class="backup-actions">
+        <div class="file-input-container">
+          <div class="file-input-button">
+            <i class="fas fa-upload"></i> Seleccionar Copia de Seguridad
+          </div>
+          <input type="file" id="selectBackupFile" class="file-input" accept=".rtm">
+        </div>
+        
+        <button id="loadBackupBtn" class="btn btn-info" disabled>
+          <i class="fas fa-eye"></i> Vista Previa
+        </button>
+        
+        <button id="uploadBackupBtn" class="btn btn-success" disabled>
+          <i class="fas fa-cloud-upload-alt"></i> Subir Copia
+        </button>
+      </div>
+      
+      <div class="data-preview-container" id="dataPreviewContainer" style="display: none;">
+        <h4>Vista Previa de Datos</h4>
+        <div id="dataPreviewContent">
           <!-- Se llenará dinámicamente -->
         </div>
       </div>
@@ -3047,6 +3139,10 @@ body {
     // Variables para reenganche
     let selectedClientForReengagement = null;
     let clientReengagements = [];
+    
+    // Variables para salvar datos
+    let selectedBackupFile = null;
+    let backupPreviewData = null;
 
     // Función para validar cédula duplicada para el usuario actual
     async function validateDuplicateClientId(clientId) {
@@ -3600,7 +3696,242 @@ body {
       setupCompanyConfigModal();
       setupBackupSystem();
       setupReengagementSystem();
+      setupSaveDataSystem();
     });
+
+    // Función para configurar el sistema de salvar datos
+    function setupSaveDataSystem() {
+      // Configurar eventos para el modal de salvar datos
+      document.getElementById('saveDataCard').addEventListener('click', () => {
+        document.getElementById('saveDataModal').classList.add('active');
+        resetSaveDataModal();
+      });
+      
+      document.getElementById('selectBackupFile').addEventListener('change', handleBackupFileSelect);
+      document.getElementById('loadBackupBtn').addEventListener('click', loadBackupPreview);
+      document.getElementById('uploadBackupBtn').addEventListener('click', uploadBackupData);
+    }
+
+    // Función para manejar la selección de archivo de copia de seguridad
+    function handleBackupFileSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      if (!file.name.endsWith('.rtm')) {
+        showInfoModal('Error', 'Solo se permiten archivos .rtm');
+        resetSaveDataModal();
+        return;
+      }
+      
+      selectedBackupFile = file;
+      document.getElementById('loadBackupBtn').disabled = false;
+      document.getElementById('uploadBackupBtn').disabled = true;
+      document.getElementById('dataPreviewContainer').style.display = 'none';
+    }
+
+    // Función para cargar la vista previa de la copia de seguridad
+    async function loadBackupPreview() {
+      if (!selectedBackupFile) {
+        showInfoModal('Error', 'No se ha seleccionado ningún archivo');
+        return;
+      }
+      
+      try {
+        showLoading();
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            backupPreviewData = JSON.parse(e.target.result);
+            
+            // Validar formato
+            if (!backupPreviewData.format || !backupPreviewData.format.startsWith('PLUSMONEY_RTM')) {
+              throw new Error('Formato de archivo inválido');
+            }
+            
+            // Mostrar vista previa
+            displayBackupPreview(backupPreviewData.data);
+            
+            document.getElementById('uploadBackupBtn').disabled = false;
+            document.getElementById('dataPreviewContainer').style.display = 'block';
+          } catch (error) {
+            console.error("Error procesando archivo de respaldo: ", error);
+            showInfoModal('Error', 'Error al procesar el archivo de respaldo');
+            resetSaveDataModal();
+          } finally {
+            hideLoading();
+          }
+        };
+        
+        reader.readAsText(selectedBackupFile);
+      } catch (error) {
+        console.error("Error cargando vista previa: ", error);
+        showInfoModal('Error', 'Error al cargar la vista previa');
+        hideLoading();
+      }
+    }
+
+    // Función para mostrar vista previa de la copia de seguridad
+    function displayBackupPreview(backupData) {
+      const previewContainer = document.getElementById('dataPreviewContent');
+      previewContainer.innerHTML = '';
+      
+      // Mostrar resumen general
+      const summaryItem = document.createElement('div');
+      summaryItem.className = 'data-preview-item';
+      summaryItem.innerHTML = `
+        <div class="data-preview-title">Resumen General</div>
+        <div class="data-preview-content">
+          <p><strong>Préstamos activos:</strong> ${backupData.loans.filter(l => l.status !== 'completed').length}</p>
+          <p><strong>Préstamos completados:</strong> ${backupData.loans.filter(l => l.status === 'completed').length}</p>
+          <p><strong>Colaboradores:</strong> ${backupData.collaborators.length}</p>
+          <p><strong>Usuarios:</strong> ${backupData.users.length}</p>
+          <p><strong>Historial de pagos:</strong> ${backupData.paymentHistory.length}</p>
+        </div>
+      `;
+      previewContainer.appendChild(summaryItem);
+      
+      // Mostrar préstamos activos
+      const activeLoans = backupData.loans.filter(l => l.status !== 'completed');
+      if (activeLoans.length > 0) {
+        const loansItem = document.createElement('div');
+        loansItem.className = 'data-preview-item';
+        loansItem.innerHTML = `
+          <div class="data-preview-title">Préstamos Activos (${activeLoans.length})</div>
+          <div class="data-preview-content">
+            <table class="data-preview-table">
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Monto</th>
+                  <th>Saldo</th>
+                  <th>Interés</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${activeLoans.slice(0, 5).map(loan => `
+                  <tr>
+                    <td>${loan.client.name}</td>
+                    <td>$${formatNumber(loan.amount)}</td>
+                    <td>$${formatNumber(loan.balance)}</td>
+                    <td>${loan.interestRate}%</td>
+                  </tr>
+                `).join('')}
+                ${activeLoans.length > 5 ? `<tr><td colspan="4">... y ${activeLoans.length - 5} más</td></tr>` : ''}
+              </tbody>
+            </table>
+          </div>
+        `;
+        previewContainer.appendChild(loansItem);
+      }
+      
+      // Mostrar colaboradores
+      if (backupData.collaborators.length > 0) {
+        const collaboratorsItem = document.createElement('div');
+        collaboratorsItem.className = 'data-preview-item';
+        collaboratorsItem.innerHTML = `
+          <div class="data-preview-title">Colaboradores (${backupData.collaborators.length})</div>
+          <div class="data-preview-content">
+            <table class="data-preview-table">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Posición</th>
+                  <th>Empresa</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${backupData.collaborators.slice(0, 5).map(collaborator => `
+                  <tr>
+                    <td>${collaborator.firstName} ${collaborator.lastName}</td>
+                    <td>${collaborator.position}</td>
+                    <td>${collaborator.company}</td>
+                  </tr>
+                `).join('')}
+                ${backupData.collaborators.length > 5 ? `<tr><td colspan="3">... y ${backupData.collaborators.length - 5} más</td></tr>` : ''}
+              </tbody>
+            </table>
+          </div>
+        `;
+        previewContainer.appendChild(collaboratorsItem);
+      }
+      
+      // Mostrar usuarios
+      if (backupData.users.length > 0) {
+        const usersItem = document.createElement('div');
+        usersItem.className = 'data-preview-item';
+        usersItem.innerHTML = `
+          <div class="data-preview-title">Usuarios (${backupData.users.length})</div>
+          <div class="data-preview-content">
+            <table class="data-preview-table">
+              <thead>
+                <tr>
+                  <th>Usuario</th>
+                  <th>Cliente ID</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${backupData.users.slice(0, 5).map(user => `
+                  <tr>
+                    <td>${user.username}</td>
+                    <td>${user.clientId}</td>
+                  </tr>
+                `).join('')}
+                ${backupData.users.length > 5 ? `<tr><td colspan="2">... y ${backupData.users.length - 5} más</td></tr>` : ''}
+              </tbody>
+            </table>
+          </div>
+        `;
+        previewContainer.appendChild(usersItem);
+      }
+    }
+
+    // Función para subir la copia de seguridad a Firebase
+    async function uploadBackupData() {
+      if (!backupPreviewData || !backupPreviewData.data) {
+        showInfoModal('Error', 'No hay datos para subir');
+        return;
+      }
+      
+      try {
+        showLoading();
+        
+        // Confirmar antes de proceder
+        const confirm = await showConfirmModal(
+          'Confirmar Subida de Datos',
+          '¿Está seguro de que desea subir esta copia de seguridad? Esto reemplazará todos los datos actuales en Firebase.'
+        );
+        
+        if (!confirm) {
+          hideLoading();
+          return;
+        }
+        
+        // Restaurar datos
+        await restoreBackupData(backupPreviewData.data);
+        
+        showInfoModal('Éxito', 'Datos restaurados correctamente desde la copia de seguridad');
+        
+        // Cerrar modal y recargar datos
+        closeModal();
+        initializeAppData();
+      } catch (error) {
+        console.error("Error subiendo datos de copia de seguridad: ", error);
+        showInfoModal('Error', 'Error al subir los datos de la copia de seguridad');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Función para resetear el modal de salvar datos
+    function resetSaveDataModal() {
+      selectedBackupFile = null;
+      backupPreviewData = null;
+      document.getElementById('selectBackupFile').value = '';
+      document.getElementById('loadBackupBtn').disabled = true;
+      document.getElementById('uploadBackupBtn').disabled = true;
+      document.getElementById('dataPreviewContainer').style.display = 'none';
+    }
 
     // Función para configurar el sistema de reenganche
     function setupReengagementSystem() {
@@ -4145,10 +4476,24 @@ body {
       await Promise.all([...loanDeletes, ...collaboratorDeletes, ...userDeletes, ...paymentHistoryDeletes]);
       
       // Restaurar nuevos datos
-      const loanRestores = backupData.loans.map(loan => addDoc(collection(db, "Loans"), loan));
-      const collaboratorRestores = backupData.collaborators.map(collaborator => addDoc(collection(db, "Collaborators"), collaborator));
-      const userRestores = backupData.users.map(user => addDoc(collection(db, "LoanUsers"), user));
-      const paymentHistoryRestores = backupData.paymentHistory.map(payment => addDoc(collection(db, "PaymentHistory"), payment));
+      const loanRestores = backupData.loans.map(loan => addDoc(collection(db, "Loans"), {
+        ...loan,
+        userId: currentUser.uid,
+        createdBy: currentUser.uid
+      }));
+      const collaboratorRestores = backupData.collaborators.map(collaborator => addDoc(collection(db, "Collaborators"), {
+        ...collaborator,
+        userId: currentUser.uid
+      }));
+      const userRestores = backupData.users.map(user => addDoc(collection(db, "LoanUsers"), {
+        ...user,
+        createdBy: currentUser.uid
+      }));
+      const paymentHistoryRestores = backupData.paymentHistory.map(payment => addDoc(collection(db, "PaymentHistory"), {
+        ...payment,
+        userId: currentUser.uid,
+        recordedBy: currentUser.uid
+      }));
       
       await Promise.all([...loanRestores, ...collaboratorRestores, ...userRestores, ...paymentHistoryRestores]);
       
