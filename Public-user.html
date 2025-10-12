@@ -2418,9 +2418,84 @@
                 </div>
                 <div class="assistant-messages" id="assistantMessages">
                     <div class="assistant-message bot">
-                        ¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy? Puedes escribir tu consulta directamente.
+                        ¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy? Puedes escribir tu consulta directamente o seleccionar una de las preguntas frecuentes:
                     </div>
-                    <!-- SE HA ELIMINADO EL CONTENEDOR DE PREGUNTAS FRECUENTES -->
+                    
+                    <!-- CONTENEDOR DE PREGUNTAS FRECUENTES AGREGADO -->
+                    <div class="faq-container" id="faqContainer">
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <i class="fas fa-question-circle"></i>
+                                ¿Cómo puedo realizar un pago?
+                            </div>
+                            <div class="faq-answer">
+                                Puedes realizar pagos a través de nuestras cuentas bancarias, transferencias o en nuestras oficinas. Consulta la sección de información de la empresa para ver las cuentas disponibles.
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <i class="fas fa-question-circle"></i>
+                                ¿Qué hago si tengo un pago atrasado?
+                            </div>
+                            <div class="faq-answer">
+                                Si tienes un pago atrasado, comunícate con nosotros lo antes posible para regularizar tu situación y evitar cargos adicionales por mora.
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <i class="fas fa-question-circle"></i>
+                                ¿Cómo puedo ver mi saldo actual?
+                            </div>
+                            <div class="faq-answer">
+                                Tu saldo actual se muestra en la sección principal de la aplicación. También puedes ver el detalle completo en "Ver Detalles".
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <i class="fas fa-question-circle"></i>
+                                ¿Cuándo es mi próximo pago?
+                            </div>
+                            <div class="faq-answer">
+                                Tu próximo pago se muestra en la sección principal y en el calendario de pagos. Consulta la sección de calendario para ver todas las fechas.
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <i class="fas fa-question-circle"></i>
+                                ¿Cómo descargar mis recibos de pago?
+                            </div>
+                            <div class="faq-answer">
+                                Para descargar recibos, ve a la sección "Documentos", haz clic en el ícono de ojo para previsualizar y luego en "Descargar". Solo disponible en versión de escritorio.
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <i class="fas fa-question-circle"></i>
+                                ¿Cómo cambiar mi foto de perfil?
+                            </div>
+                            <div class="faq-answer">
+                                Ve a la sección "Perfil" y haz clic en "Cambiar Foto de Perfil". Puedes elegir avatares predeterminados o subir tu propia imagen.
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <i class="fas fa-question-circle"></i>
+                                ¿Qué significan los colores en el calendario?
+                            </div>
+                            <div class="faq-answer">
+                                Verde - Pago realizado, Amarillo - Pago pendiente, Rojo - Pago vencido. El día actual se marca con un fondo especial.
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <i class="fas fa-question-circle"></i>
+                                ¿Cómo contactar con soporte?
+                            </div>
+                            <div class="faq-answer">
+                                Puedes contactarnos al teléfono: 809-555-5555, o visitando nuestras oficinas en Calle Principal #123, Santo Domingo.
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="assistant-input-container">
                     <input type="text" class="assistant-input" id="assistantInput" placeholder="Escribe tu mensaje...">
@@ -2904,7 +2979,23 @@ function initializeAssistant() {
         }
     });
 
-    // SE HA ELIMINADO LA CONFIGURACIÓN DE PREGUNTAS FRECUENTES
+    // CONFIGURACIÓN DE PREGUNTAS FRECUENTES AGREGADA
+    const faqItems = document.querySelectorAll('.faq-item');
+    faqItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const isActive = this.classList.contains('active');
+            
+            // Cerrar todas las preguntas
+            faqItems.forEach(faq => {
+                faq.classList.remove('active');
+            });
+            
+            // Abrir la pregunta actual si no estaba activa
+            if (!isActive) {
+                this.classList.add('active');
+            }
+        });
+    });
 }
 
 // Navegar a la sección del asistente
@@ -2981,7 +3072,7 @@ function getAssistantResponse(message) {
     
     // Preguntas frecuentes con coincidencias de palabras clave
     if (lowerMessage.includes('hola') || lowerMessage.includes('buenos días') || lowerMessage.includes('buenas tardes')) {
-        return '¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy? Puedes escribir tu consulta directamente.';
+        return '¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy? Puedes escribir tu consulta directamente o seleccionar una de las preguntas frecuentes.';
     } else if (lowerMessage.includes('pago') || lowerMessage.includes('cuota') || lowerMessage.includes('realizar pago')) {
         return 'Puedes realizar pagos a través de nuestras cuentas bancarias, transferencias o en nuestras oficinas. Consulta la sección de información de la empresa para ver las cuentas disponibles.';
     } else if (lowerMessage.includes('atrasado') || lowerMessage.includes('mora') || lowerMessage.includes('vencido')) {
@@ -3023,7 +3114,7 @@ function getAssistantResponse(message) {
     } else if (lowerMessage.includes('adiós') || lowerMessage.includes('chao') || lowerMessage.includes('nos vemos')) {
         return '¡Hasta luego! Que tengas un excelente día.';
     } else {
-        return 'Lo siento, no entendí tu pregunta. ¿Puedes intentar reformularla?';
+        return 'Lo siento, no entendí tu pregunta. ¿Puedes intentar reformularla o seleccionar una de las preguntas frecuentes?';
     }
 }
 
@@ -3033,7 +3124,7 @@ function toggleMicroMenu() {
     document.getElementById('overlay').classList.toggle('active');
 }
 
-// Manejar login
+// CORRECCIÓN 1: Manejar login para permitir préstamos completados
 async function handleLogin(e) {
     e.preventDefault();
     const username = document.getElementById('loginUsername').value.trim();
@@ -3082,15 +3173,15 @@ async function handleLogin(e) {
         // Buscar préstamos asociados al cliente (compatible con ambos sistemas)
         let clientId = currentUser.clientId || currentUser.id; // clientId para sistema nuevo, id para sistema antiguo
         
-        // Buscar préstamos activos para este cliente
+        // CORRECCIÓN: Buscar préstamos activos Y completados para este cliente
         q = query(collection(db, "Loans"), 
              where("client.id", "==", clientId),
-             where("status", "in", ["active", "overdue"]));
+             where("status", "in", ["active", "overdue", "completed"])); // INCLUIMOS "completed"
         
         const loansSnapshot = await getDocs(q);
         
         if (loansSnapshot.empty) {
-            showAlert(translate('No se encontró préstamo activo asociado a este usuario'), 'danger', 'loginAlert');
+            showAlert(translate('No se encontró préstamo asociado a este usuario'), 'danger', 'loginAlert');
             hideLoading();
             return;
         }
@@ -4412,6 +4503,6 @@ function logout() {
 function translate(key) {
     return translations[userSettings.language][key] || key;
 }
-</script>
+</script> 
 </body>
 </html>
