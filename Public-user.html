@@ -1455,34 +1455,50 @@
             z-index: 1;
         }
 
-        /* Nuevos estilos para el chat de guía */
-        .chat-container {
+        /* NUEVOS ESTILOS PARA EL ASISTENTE VIRTUAL EN SESIÓN */
+        #assistant-section {
+            display: none;
+            min-height: 100vh;
+            padding-bottom: calc(var(--wave-top-offset) + var(--wave-size) + 20px);
+        }
+
+        .assistant-header {
+            background: var(--gradient-card);
+            padding: 1.2rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
             position: fixed;
-            bottom: calc(var(--nav-height) + 30px);
-            right: 20px;
-            width: 320px;
-            height: 400px;
-            background: var(--gradient-chat);
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            animation: slideDown 0.5s ease;
+        }
+
+        .assistant-main-container {
+            padding: 1.5rem;
+            margin-top: 80px;
+            height: calc(100vh - 80px - var(--nav-height) - 20px);
             display: flex;
             flex-direction: column;
-            z-index: 999;
+        }
+
+        .assistant-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--gradient-chat);
+            border-radius: 16px;
             overflow: hidden;
-            transform: translateY(20px);
-            opacity: 0;
-            visibility: hidden;
-            transition: var(--smooth-transition);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .chat-container.active {
-            transform: translateY(0);
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .chat-header {
+        .assistant-header-inner {
             padding: 1rem;
             background: var(--gradient-primary);
             color: white;
@@ -1492,20 +1508,28 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .chat-title {
+        .assistant-title {
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        .chat-close {
+        .assistant-close {
             background: none;
             border: none;
             color: white;
             cursor: pointer;
             font-size: 1.2rem;
+            transition: var(--smooth-transition);
         }
 
-        .chat-messages {
+        .assistant-close:hover {
+            transform: scale(1.2);
+        }
+
+        .assistant-messages {
             flex: 1;
             padding: 1rem;
             overflow-y: auto;
@@ -1514,21 +1538,21 @@
             gap: 0.75rem;
         }
 
-        .chat-messages::-webkit-scrollbar {
+        .assistant-messages::-webkit-scrollbar {
             width: 6px;
         }
 
-        .chat-messages::-webkit-scrollbar-thumb {
+        .assistant-messages::-webkit-scrollbar-thumb {
             background: var(--gradient-primary);
             border-radius: 3px;
         }
 
-        .chat-messages::-webkit-scrollbar-track {
+        .assistant-messages::-webkit-scrollbar-track {
             background-color: var(--background-color);
             border-radius: 3px;
         }
 
-        .message {
+        .assistant-message {
             max-width: 80%;
             padding: 0.75rem 1rem;
             border-radius: 18px;
@@ -1537,28 +1561,28 @@
             animation: fadeInUp 0.3s ease;
         }
 
-        .message.bot {
+        .assistant-message.bot {
             align-self: flex-start;
             background-color: var(--chat-bot-bg);
             color: var(--text-color);
             border-bottom-left-radius: 4px;
         }
 
-        .message.user {
+        .assistant-message.user {
             align-self: flex-end;
             background: var(--gradient-primary);
             color: white;
             border-bottom-right-radius: 4px;
         }
 
-        .chat-input-container {
+        .assistant-input-container {
             padding: 0.75rem;
             border-top: 1px solid var(--border-color);
             display: flex;
             gap: 0.5rem;
         }
 
-        .chat-input {
+        .assistant-input {
             flex: 1;
             padding: 0.75rem;
             border: 1px solid var(--border-color);
@@ -1569,12 +1593,12 @@
             font-family: 'Poppins', sans-serif;
         }
 
-        .chat-input:focus {
+        .assistant-input:focus {
             outline: none;
             border-color: var(--primary-color);
         }
 
-        .chat-send {
+        .assistant-send {
             background: var(--gradient-primary);
             color: white;
             border: none;
@@ -1588,10 +1612,11 @@
             transition: var(--smooth-transition);
         }
 
-        .chat-send:hover {
+        .assistant-send:hover {
             transform: scale(1.1);
         }
 
+        /* Botón de chat flotante */
         .chat-button {
             position: fixed;
             bottom: calc(var(--nav-height) + 30px);
@@ -2301,66 +2326,6 @@
             <i class="fas fa-comments"></i>
         </div>
 
-        <!-- Contenedor de chat -->
-        <div class="chat-container" id="chatContainer">
-            <div class="chat-header">
-                <div class="chat-title">Asistente Virtual</div>
-                <button class="chat-close" id="chatClose">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="chat-messages" id="chatMessages">
-                <div class="message bot">
-                    ¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy?
-                </div>
-                <!-- Preguntas frecuentes -->
-                <div class="faq-container" id="faqContainer">
-                    <div class="faq-item">
-                        <div class="faq-question">
-                            <i class="fas fa-question-circle"></i>
-                            <span>¿Cómo realizar un pago?</span>
-                        </div>
-                        <div class="faq-answer">
-                            Puedes realizar pagos a través de nuestras cuentas bancarias, transferencias o en nuestras oficinas. Consulta la sección de información de la empresa para ver las cuentas disponibles.
-                        </div>
-                    </div>
-                    <div class="faq-item">
-                        <div class="faq-question">
-                            <i class="fas fa-question-circle"></i>
-                            <span>¿Qué hacer si tengo un pago atrasado?</span>
-                        </div>
-                        <div class="faa-answer">
-                            Si tienes un pago atrasado, comunícate con nosotros lo antes posible para regularizar tu situación y evitar cargos adicionales por mora.
-                        </div>
-                    </div>
-                    <div class="faq-item">
-                        <div class="faq-question">
-                            <i class="fas fa-question-circle"></i>
-                            <span>¿Cómo consultar mi saldo pendiente?</span>
-                        </div>
-                        <div class="faq-answer">
-                            Tu saldo pendiente se muestra en la sección principal de la aplicación. También puedes ver el detalle completo en la sección "Ver Detalles".
-                        </div>
-                    </div>
-                    <div class="faq-item">
-                        <div class="faq-question">
-                            <i class="fas fa-question-circle"></i>
-                            <span>¿Dónde descargar mis recibos de pago?</span>
-                        </div>
-                        <div class="faq-answer">
-                            En la sección "Documentos" puedes ver y descargar todos tus recibos de pago. Solo haz clic en el ícono de ojo para previsualizar y descargar.
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="chat-input-container">
-                <input type="text" class="chat-input" id="chatInput" placeholder="Escribe tu mensaje...">
-                <button class="chat-send" id="chatSend">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-            </div>
-        </div>
-
         <!-- Menú de navegación inferior con efecto de onda -->
         <div class="bottom-nav-container">
             <nav class="bottom-nav">
@@ -2426,6 +2391,54 @@
                 <i class="fas fa-info-circle"></i>
                 <span>Acerca de</span>
             </a>
+        </div>
+    </section>
+
+    <!-- Sección del Asistente Virtual -->
+    <section id="assistant-section">
+        <div class="assistant-header">
+            <div class="client-profile">
+                <div id="assistantAvatar" class="client-avatar"><i class="fas fa-robot"></i></div>
+                <div class="client-info">
+                    <h2 class="client-name">Asistente Virtual</h2>
+                    <span class="client-id">Estoy aquí para ayudarte</span>
+                </div>
+            </div>
+            <button class="assistant-close" id="assistantClose">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+        </div>
+
+        <div class="assistant-main-container">
+            <div class="assistant-container">
+                <div class="assistant-header-inner">
+                    <div class="assistant-title">
+                        <i class="fas fa-robot"></i> Asistente Virtual
+                    </div>
+                </div>
+                <div class="assistant-messages" id="assistantMessages">
+                    <div class="assistant-message bot">
+                        ¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy? Puedes escribir tu consulta directamente.
+                    </div>
+                    <!-- SE HA ELIMINADO EL CONTENEDOR DE PREGUNTAS FRECUENTES -->
+                </div>
+                <div class="assistant-input-container">
+                    <input type="text" class="assistant-input" id="assistantInput" placeholder="Escribe tu mensaje...">
+                    <button class="assistant-send" id="assistantSend">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menú de navegación inferior para el asistente -->
+        <div class="bottom-nav-container">
+            <nav class="bottom-nav">
+                <a href="#" class="nav-item" data-section="client" data-icon-class="fas fa-arrow-left">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Volver</span>
+                </a>
+            </nav>
         </div>
     </section>
 
@@ -2782,7 +2795,7 @@ document.addEventListener('DOMContentLoaded', () => {
     showLoading();
     checkRememberedSession();
     setupEventListeners();
-    initializeChat();
+    initializeAssistant();
 });
 
 // Verificar sesión recordada
@@ -2823,7 +2836,13 @@ function setupEventListeners() {
             }
 
             this.classList.add('active');
-            navigateToSection(this.dataset.section);
+            
+            // Manejar navegación especial para el asistente
+            if (this.dataset.section === 'client') {
+                navigateToClientSection();
+            } else {
+                navigateToSection(this.dataset.section);
+            }
         });
     });
 
@@ -2863,93 +2882,106 @@ function setupEventListeners() {
     document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings);
 }
 
-// Inicializar chat
-function initializeChat() {
+// Inicializar asistente
+function initializeAssistant() {
     const chatButton = document.getElementById('chatButton');
-    const chatContainer = document.getElementById('chatContainer');
-    const chatClose = document.getElementById('chatClose');
-    const chatSend = document.getElementById('chatSend');
-    const chatInput = document.getElementById('chatInput');
+    const assistantClose = document.getElementById('assistantClose');
+    const assistantSend = document.getElementById('assistantSend');
+    const assistantInput = document.getElementById('assistantInput');
 
     chatButton.addEventListener('click', () => {
-        chatContainer.classList.toggle('active');
+        navigateToAssistantSection();
     });
 
-    chatClose.addEventListener('click', () => {
-        chatContainer.classList.remove('active');
+    assistantClose.addEventListener('click', () => {
+        navigateToClientSection();
     });
 
-    chatSend.addEventListener('click', sendChatMessage);
-    chatInput.addEventListener('keypress', (e) => {
+    assistantSend.addEventListener('click', sendAssistantMessage);
+    assistantInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
-            sendChatMessage();
+            sendAssistantMessage();
         }
     });
 
-    // Configurar preguntas frecuentes
-    const faqItems = document.querySelectorAll('.faq-item');
-    faqItems.forEach(item => {
-        item.addEventListener('click', function() {
-            // Cerrar otras preguntas
-            faqItems.forEach(otherItem => {
-                if (otherItem !== this) {
-                    otherItem.classList.remove('active');
-                }
-            });
-            
-            // Alternar la pregunta actual
-            this.classList.toggle('active');
-            
-            // Si se está abriendo, enviar la pregunta al chat
-            if (this.classList.contains('active')) {
-                const question = this.querySelector('.faq-question span').textContent;
-                document.getElementById('chatInput').value = question;
-                sendChatMessage();
-            }
-        });
-    });
+    // SE HA ELIMINADO LA CONFIGURACIÓN DE PREGUNTAS FRECUENTES
 }
 
-// Enviar mensaje de chat
-function sendChatMessage() {
-    const chatInput = document.getElementById('chatInput');
-    const chatMessages = document.getElementById('chatMessages');
-    const message = chatInput.value.trim();
+// Navegar a la sección del asistente
+function navigateToAssistantSection() {
+    document.getElementById('client-section').style.display = 'none';
+    document.getElementById('assistant-section').style.display = 'block';
+    
+    // Actualizar el menú de navegación
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    
+    // Activar el botón de volver en el menú
+    const backButton = document.querySelector('.nav-item[data-section="client"]');
+    if (backButton) {
+        backButton.classList.add('active');
+    }
+}
+
+// Navegar a la sección del cliente
+function navigateToClientSection() {
+    document.getElementById('assistant-section').style.display = 'none';
+    document.getElementById('client-section').style.display = 'block';
+    
+    // Actualizar el menú de navegación
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    
+    // Activar el primer ítem del menú
+    const firstItem = document.querySelector('.nav-item[data-section="summary"]');
+    if (firstItem) {
+        firstItem.classList.add('active');
+        navigateToSection('summary');
+    }
+}
+
+// Enviar mensaje al asistente
+function sendAssistantMessage() {
+    const assistantInput = document.getElementById('assistantInput');
+    const assistantMessages = document.getElementById('assistantMessages');
+    const message = assistantInput.value.trim();
     
     if (!message) return;
     
     // Agregar mensaje del usuario
     const userMessage = document.createElement('div');
-    userMessage.className = 'message user';
+    userMessage.className = 'assistant-message user';
     userMessage.textContent = message;
-    chatMessages.appendChild(userMessage);
+    assistantMessages.appendChild(userMessage);
     
     // Limpiar input
-    chatInput.value = '';
+    assistantInput.value = '';
     
     // Scroll to bottom
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    assistantMessages.scrollTop = assistantMessages.scrollHeight;
     
-    // Simular respuesta del bot después de un breve retraso
+    // Simular respuesta del asistente después de un breve retraso
     setTimeout(() => {
-        const botResponse = getBotResponse(message);
-        const botMessage = document.createElement('div');
-        botMessage.className = 'message bot';
-        botMessage.textContent = botResponse;
-        chatMessages.appendChild(botMessage);
+        const assistantResponse = getAssistantResponse(message);
+        const assistantMessage = document.createElement('div');
+        assistantMessage.className = 'assistant-message bot';
+        assistantMessage.textContent = assistantResponse;
+        assistantMessages.appendChild(assistantMessage);
         
         // Scroll to bottom
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        assistantMessages.scrollTop = assistantMessages.scrollHeight;
     }, 1000);
 }
 
-// Obtener respuesta del bot
-function getBotResponse(message) {
+// Obtener respuesta del asistente - FUNCIÓN CORREGIDA
+function getAssistantResponse(message) {
     const lowerMessage = message.toLowerCase();
     
     // Preguntas frecuentes con coincidencias de palabras clave
     if (lowerMessage.includes('hola') || lowerMessage.includes('buenos días') || lowerMessage.includes('buenas tardes')) {
-        return '¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy? Puedes hacer clic en las preguntas frecuentes o escribir tu consulta.';
+        return '¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy? Puedes escribir tu consulta directamente.';
     } else if (lowerMessage.includes('pago') || lowerMessage.includes('cuota') || lowerMessage.includes('realizar pago')) {
         return 'Puedes realizar pagos a través de nuestras cuentas bancarias, transferencias o en nuestras oficinas. Consulta la sección de información de la empresa para ver las cuentas disponibles.';
     } else if (lowerMessage.includes('atrasado') || lowerMessage.includes('mora') || lowerMessage.includes('vencido')) {
@@ -2971,14 +3003,27 @@ function getBotResponse(message) {
         return 'No tengo información sobre tu próximo pago en este momento. Consulta la sección de calendario para ver todas las fechas de pago.';
     } else if (lowerMessage.includes('historial') || lowerMessage.includes('pagos anteriores')) {
         return 'Puedes ver tu historial de pagos en la sección "Historial" de la aplicación. Allí encontrarás todos tus pagos realizados con fechas y montos.';
-    } else if (lowerMessage.includes('documento') || lowerMessage.includes('recibo') || lowerMessage.includes('comprobante')) {
-        return 'En la sección "Documentos" puedes ver y descargar todos tus recibos de pago. Solo haz clic en el ícono de ojo para previsualizar y descargar.';
+    } else if (lowerMessage.includes('documento') || lowerMessage.includes('recibo') || lowerMessage.includes('comprobante') || lowerMessage.includes('descargar recibo')) {
+        // CORRECCIÓN: Respuesta específica para descargar recibos
+        if (isPC) {
+            return 'Para descargar tus recibos de pago, ve a la sección "Documentos", haz clic en el ícono de ojo para previsualizar el recibo y luego en el botón "Descargar". Los recibos solo están disponibles para descarga desde la versión de escritorio.';
+        } else {
+            return 'La descarga de recibos de pago está disponible solo desde la versión de escritorio (PC) o la versión web online. Desde dispositivos móviles puedes previsualizar los recibos en la sección "Documentos".';
+        }
+    } else if (lowerMessage.includes('foto') || lowerMessage.includes('perfil') || lowerMessage.includes('avatar')) {
+        return 'Para cambiar tu foto de perfil, ve a la sección "Perfil" y haz clic en "Cambiar Foto de Perfil". Puedes elegir entre los avatares predeterminados o subir tu propia imagen.';
+    } else if (lowerMessage.includes('calendario') || lowerMessage.includes('color') || lowerMessage.includes('vencimiento')) {
+        return 'En el calendario de pagos, los colores indican: Verde - Pago realizado, Amarillo - Pago pendiente, Rojo - Pago vencido. El día actual se marca con un fondo especial.';
+    } else if (lowerMessage.includes('contactar') || lowerMessage.includes('soporte') || lowerMessage.includes('ayuda')) {
+        return 'Puedes contactar con nuestro soporte a través del teléfono: 809-555-5555, o visitando nuestras oficinas en Calle Principal #123, Santo Domingo.';
+    } else if (lowerMessage.includes('tipo') || lowerMessage.includes('préstamo') || lowerMessage.includes('oferta')) {
+        return 'Ofrecemos dos tipos de préstamos: Préstamos a Plazo Fijo (pagos fijos) y Préstamos con Intereses (pagos variables de capital + interés). Consulta los detalles en la sección "Ver Detalles".';
     } else if (lowerMessage.includes('gracias') || lowerMessage.includes('agradezco')) {
         return '¡De nada! Estoy aquí para ayudarte. ¿Hay algo más en lo que pueda asistirte?';
     } else if (lowerMessage.includes('adiós') || lowerMessage.includes('chao') || lowerMessage.includes('nos vemos')) {
         return '¡Hasta luego! Que tengas un excelente día.';
     } else {
-        return 'Lo siento, no entendí tu pregunta. ¿Puedes intentar reformularla? También puedes hacer clic en las preguntas frecuentes para obtener respuestas rápidas.';
+        return 'Lo siento, no entendí tu pregunta. ¿Puedes intentar reformularla?';
     }
 }
 
@@ -3369,7 +3414,7 @@ function navigateCalendarMonth(direction) {
     generateFullCalendar(document.getElementById('fullCalendar'));
 }
 
-// Mostrar detalles de pago para un día específico
+// Mostrar detalles de pago para un día específico - FUNCIÓN CORREGIDA
 function showDayPaymentDetails(date) {
     if (!currentLoan || !currentLoan.paymentSchedule) return;
     
@@ -3387,16 +3432,13 @@ function showDayPaymentDetails(date) {
     
     let message = '';
     paymentsOnDate.forEach(payment => {
-        const status = payment.status === 'paid' ? 'Pagado' : 
-                      date < new Date() ? 'Vencido' : 'Pendiente';
+        const status = payment.status === 'paid' ? 'Pagado con éxito' : 
+                      date < new Date() ? 'Pago vencido' : 'Pago pendiente';
         
+        // CORRECCIÓN: Mostrar solo la información solicitada (sin monto y sin fecha de pago)
         message += `
-            <div class="payment-detail-item">
-                <strong>Monto:</strong> ${formatCurrency(payment.amount)}<br>
-                <strong>Estado:</strong> ${status}<br>
-                <strong>Fecha de vencimiento:</strong> ${new Date(payment.dueDate).toLocaleDateString()}
-            </div>
-            <hr>
+- Fecha de vencimiento: ${new Date(payment.dueDate).toLocaleDateString()}
+- Estado: ${status}
         `;
     });
     
@@ -4089,10 +4131,19 @@ window.previewDocument = async function(type, receiptId = null) {
             `;
             previewContainer.innerHTML = content;
 
+            // CORRECCIÓN: Solo mostrar botón de descarga en PC
             if (isPC) {
                 modalFooter.innerHTML += `
                     <button class="btn btn-success" onclick="downloadReceipt('${receiptId}')" data-lang="download">${translate('download')}</button>
                 `;
+            } else {
+                // En dispositivos móviles, mostrar mensaje informativo
+                const infoMessage = document.createElement('p');
+                infoMessage.textContent = 'La descarga de recibos está disponible solo en la versión de escritorio.';
+                infoMessage.style.color = 'var(--text-light)';
+                infoMessage.style.textAlign = 'center';
+                infoMessage.style.marginTop = '1rem';
+                previewContainer.appendChild(infoMessage);
             }
         } else {
             showInfoModal(translate('info'), translate('No se encontró el recibo solicitado'));
@@ -4104,8 +4155,14 @@ window.previewDocument = async function(type, receiptId = null) {
     updateLanguage();
 }
 
-// Descargar recibo
+// Descargar recibo - FUNCIÓN CORREGIDA
 window.downloadReceipt = async function(receiptId) {
+    // CORRECCIÓN: Verificar que solo se pueda descargar desde PC
+    if (!isPC) {
+        showInfoModal(translate('info'), 'La descarga de recibos solo está disponible desde la versión de escritorio (PC) o la versión web online.');
+        return;
+    }
+
     showLoading();
     try {
         const receipt = paymentReceipts.find(r => r.id === receiptId);
@@ -4341,6 +4398,7 @@ function logout() {
     companyInfo = null;
     document.getElementById('login-section').style.display = 'flex';
     document.getElementById('client-section').style.display = 'none';
+    document.getElementById('assistant-section').style.display = 'none';
     document.getElementById('loginForm').reset();
     document.getElementById('loginAlert').style.display = 'none';
     localStorage.removeItem('rememberedUser');
@@ -4355,3 +4413,5 @@ function translate(key) {
     return translations[userSettings.language][key] || key;
 }
 </script>
+</body>
+</html>
