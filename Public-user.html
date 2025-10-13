@@ -2069,6 +2069,93 @@
             background-color: rgba(46, 204, 113, 0.2);
             color: var(--success-color);
         }
+
+        /* Nuevos estilos para el menú superior */
+        .top-menu {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .top-menu-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: var(--smooth-transition);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .top-menu-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: scale(1.1);
+        }
+
+        /* Estilos para la calculadora */
+        .calculator-container {
+            background: var(--gradient-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 1.5rem;
+        }
+
+        .calculator-title {
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .calculator-form {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .calculator-result {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: var(--background-color);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .calculator-result h4 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .calculator-result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .calculator-result-label {
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+
+        .calculator-result-value {
+            text-align: right;
+            color: var(--text-light);
+        }
     </style>
 </head>
 <body>
@@ -2119,12 +2206,20 @@
                     <span class="client-id" id="clientId">ID: 000-0000000-0</span>
                 </div>
             </div>
-            <button class="company-icon-btn" id="companyInfoBtn" title="Información de la empresa">
-                <i class="fas fa-building"></i>
-            </button>
-            <button class="menu-btn" id="menuBtn">
-                <i class="fas fa-bars"></i>
-            </button>
+            <div class="top-menu">
+                <button class="top-menu-btn" id="calculatorBtn" title="Calculadora de Préstamos">
+                    <i class="fas fa-calculator"></i>
+                </button>
+                <button class="top-menu-btn" id="logoutTopBtn" title="Cerrar Sesión">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+                <button class="company-icon-btn" id="companyInfoBtn" title="Información de la empresa">
+                    <i class="fas fa-building"></i>
+                </button>
+                <button class="menu-btn" id="menuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
         </div>
 
         <div class="main-container-client">
@@ -2400,7 +2495,7 @@
             <div class="client-profile">
                 <div id="assistantAvatar" class="client-avatar"><i class="fas fa-robot"></i></div>
                 <div class="client-info">
-                    <h2 class="client-name">Asistente Virtual</h2>
+                    <h2 class="client-name">Perla - Asistente Virtual</h2>
                     <span class="client-id">Estoy aquí para ayudarte</span>
                 </div>
             </div>
@@ -2413,14 +2508,63 @@
             <div class="assistant-container">
                 <div class="assistant-header-inner">
                     <div class="assistant-title">
-                        <i class="fas fa-robot"></i> Asistente Virtual
+                        <i class="fas fa-robot"></i> Perla - Asistente Virtual
                     </div>
                 </div>
                 <div class="assistant-messages" id="assistantMessages">
                     <div class="assistant-message bot">
-                        ¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy? Puedes escribir tu consulta directamente.
+                        ¡Hola! Soy Perla, tu asistente virtual. ¿En qué puedo ayudarte hoy? Puedes escribir tu consulta directamente o seleccionar una de las preguntas frecuentes.
                     </div>
-                    <!-- SE HA ELIMINADO EL CONTENEDOR DE PREGUNTAS FRECUENTES -->
+                    <div class="faq-container" id="faqContainer">
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <i class="fas fa-question-circle"></i> ¿Cómo realizar un pago?
+                            </div>
+                            <div class="faq-answer">
+                                Puedes realizar pagos a través de nuestras cuentas bancarias, transferencias o en nuestras oficinas. Consulta la sección de información de la empresa para ver las cuentas disponibles.
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <i class="fas fa-question-circle"></i> ¿Qué hacer si tengo un pago atrasado?
+                            </div>
+                            <div class="faq-answer">
+                                Si tienes un pago atrasado, comunícate con nosotros lo antes posible para regularizar tu situación y evitar cargos adicionales por mora.
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <i class="fas fa-question-circle"></i> ¿Cómo consultar mi saldo actual?
+                            </div>
+                            <div class="faq-answer">
+                                Tu saldo actual se muestra en la sección de inicio. También puedes ver el detalle completo en la sección "Ver Detalles".
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <i class="fas fa-question-circle"></i> ¿Dónde ver mi próximo pago?
+                            </div>
+                            <div class="faq-answer">
+                                Tu próximo pago se muestra en la sección de inicio. También puedes consultar todas las fechas de pago en la sección de calendario.
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <i class="fas fa-question-circle"></i> ¿Cómo descargar mis recibos de pago?
+                            </div>
+                            <div class="faq-answer">
+                                Puedes descargar tus recibos de pago desde la sección "Documentos". Los recibos solo están disponibles para descarga desde la versión de escritorio.
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <i class="fas fa-question-circle"></i> ¿Cómo cambiar mi foto de perfil?
+                            </div>
+                            <div class="faq-answer">
+                                Para cambiar tu foto de perfil, ve a la sección "Perfil" y haz clic en "Cambiar Foto de Perfil". Puedes elegir entre los avatares predeterminados o subir tu propia imagen.
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="assistant-input-container">
                     <input type="text" class="assistant-input" id="assistantInput" placeholder="Escribe tu mensaje...">
@@ -2538,6 +2682,61 @@
             <p id="infoModalMessage"></p>
             <div class="modal-footer">
                 <button class="btn btn-info" onclick="closeModal()" data-lang="accept">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Calculadora de Préstamos -->
+    <div class="modal" id="calculatorModal">
+        <div class="modal-content">
+            <h3 class="modal-title"><i class="fas fa-calculator"></i> Calculadora de Préstamos</h3>
+            <div class="calculator-container">
+                <form id="calculatorForm">
+                    <div class="form-group">
+                        <label for="calcLoanAmount">Monto del Préstamo</label>
+                        <input type="number" id="calcLoanAmount" class="form-control" min="1" required placeholder="Ingrese el monto">
+                    </div>
+                    <div class="form-group">
+                        <label for="calcInterestRate">Tasa de Interés (% quincenal)</label>
+                        <input type="number" id="calcInterestRate" class="form-control" min="0" step="0.1" required placeholder="Ej: 5.0">
+                    </div>
+                    <div class="form-group">
+                        <label for="calcTerm">Plazo (quincenas)</label>
+                        <input type="number" id="calcTerm" class="form-control" min="1" required placeholder="Ej: 12">
+                    </div>
+                    <div class="form-group">
+                        <label for="calcLoanType">Tipo de Préstamo</label>
+                        <select id="calcLoanType" class="form-control">
+                            <option value="interest">Préstamo con Intereses</option>
+                            <option value="fixed">Préstamo a Plazo Fijo</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-success btn-block">
+                        <i class="fas fa-calculator"></i> Calcular
+                    </button>
+                </form>
+                <div class="calculator-result" id="calculatorResult" style="display: none;">
+                    <h4>Resultados del Cálculo</h4>
+                    <div class="calculator-result-item">
+                        <span class="calculator-result-label">Pago Quincenal:</span>
+                        <span class="calculator-result-value" id="calcPaymentAmount">$0.00</span>
+                    </div>
+                    <div class="calculator-result-item">
+                        <span class="calculator-result-label">Total a Pagar:</span>
+                        <span class="calculator-result-value" id="calcTotalPayment">$0.00</span>
+                    </div>
+                    <div class="calculator-result-item">
+                        <span class="calculator-result-label">Total de Intereses:</span>
+                        <span class="calculator-result-value" id="calcTotalInterest">$0.00</span>
+                    </div>
+                    <div class="calculator-result-item">
+                        <span class="calculator-result-label">Tipo de Préstamo:</span>
+                        <span class="calculator-result-value" id="calcLoanTypeResult">-</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-info" onclick="closeModal()" data-lang="close">Cerrar</button>
             </div>
         </div>
     </div>
@@ -2858,6 +3057,15 @@ function setupEventListeners() {
     // Botón de información de empresa
     document.getElementById('companyInfoBtn').addEventListener('click', showCompanyInfoModal);
 
+    // Botón de calculadora
+    document.getElementById('calculatorBtn').addEventListener('click', showCalculatorModal);
+
+    // Botón de cerrar sesión en el menú superior
+    document.getElementById('logoutTopBtn').addEventListener('click', logout);
+
+    // Calculadora de préstamos
+    document.getElementById('calculatorForm').addEventListener('submit', calculateLoan);
+
     // Resto de event listeners
     document.getElementById('detailsBtn').addEventListener('click', showLoanDetails);
     document.getElementById('historySearch').addEventListener('input', filterPaymentHistory);
@@ -2904,7 +3112,23 @@ function initializeAssistant() {
         }
     });
 
-    // SE HA ELIMINADO LA CONFIGURACIÓN DE PREGUNTAS FRECUENTES
+    // Configurar preguntas frecuentes
+    const faqItems = document.querySelectorAll('.faq-item');
+    faqItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const isActive = item.classList.contains('active');
+            
+            // Cerrar todas las preguntas
+            faqItems.forEach(faq => {
+                faq.classList.remove('active');
+            });
+            
+            // Abrir la pregunta seleccionada si no estaba activa
+            if (!isActive) {
+                item.classList.add('active');
+            }
+        });
+    });
 }
 
 // Navegar a la sección del asistente
@@ -2981,7 +3205,7 @@ function getAssistantResponse(message) {
     
     // Preguntas frecuentes con coincidencias de palabras clave
     if (lowerMessage.includes('hola') || lowerMessage.includes('buenos días') || lowerMessage.includes('buenas tardes')) {
-        return '¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy? Puedes escribir tu consulta directamente.';
+        return '¡Hola! Soy Perla, tu asistente virtual. ¿En qué puedo ayudarte hoy? Puedes escribir tu consulta directamente o seleccionar una de las preguntas frecuentes.';
     } else if (lowerMessage.includes('pago') || lowerMessage.includes('cuota') || lowerMessage.includes('realizar pago')) {
         return 'Puedes realizar pagos a través de nuestras cuentas bancarias, transferencias o en nuestras oficinas. Consulta la sección de información de la empresa para ver las cuentas disponibles.';
     } else if (lowerMessage.includes('atrasado') || lowerMessage.includes('mora') || lowerMessage.includes('vencido')) {
@@ -3018,6 +3242,14 @@ function getAssistantResponse(message) {
         return 'Puedes contactar con nuestro soporte a través del teléfono: 809-555-5555, o visitando nuestras oficinas en Calle Principal #123, Santo Domingo.';
     } else if (lowerMessage.includes('tipo') || lowerMessage.includes('préstamo') || lowerMessage.includes('oferta')) {
         return 'Ofrecemos dos tipos de préstamos: Préstamos a Plazo Fijo (pagos fijos) y Préstamos con Intereses (pagos variables de capital + interés). Consulta los detalles en la sección "Ver Detalles".';
+    } else if (lowerMessage.includes('creador') || lowerMessage.includes('desarrollador') || lowerMessage.includes('quién te creó')) {
+        return 'Fui desarrollada por Retom, un equipo dirigido por Andreilin Segura Santana y su madre Marlennys Mateo, con la colaboración de su hermano Erick Yahir.';
+    } else if (lowerMessage.includes('retom') || lowerMessage.includes('empresa') || lowerMessage.includes('compañía')) {
+        return 'Retom es una empresa que se encarga de vender servicios de software para empresas, realizar inventarios físicos y venta de software. Visita nuestra página web: www.retomrt.com';
+    } else if (lowerMessage.includes('director') || lowerMessage.includes('dueño') || lowerMessage.includes('propietario') || lowerMessage.includes('henry')) {
+        return 'El director de Retom se llama Henry Ferreras. En la vida real es el padre de una niña llamada Perla.';
+    } else if (lowerMessage.includes('perla') || lowerMessage.includes('foto') || lowerMessage.includes('imagen')) {
+        return 'Perla es una niña muy especial. Aquí tienes una foto de ella: [perla.png]';
     } else if (lowerMessage.includes('gracias') || lowerMessage.includes('agradezco')) {
         return '¡De nada! Estoy aquí para ayudarte. ¿Hay algo más en lo que pueda asistirte?';
     } else if (lowerMessage.includes('adiós') || lowerMessage.includes('chao') || lowerMessage.includes('nos vemos')) {
@@ -3031,6 +3263,58 @@ function getAssistantResponse(message) {
 function toggleMicroMenu() {
     document.getElementById('microMenu').classList.toggle('active');
     document.getElementById('overlay').classList.toggle('active');
+}
+
+// Mostrar modal de calculadora
+function showCalculatorModal() {
+    document.getElementById('calculatorModal').classList.add('active');
+    document.getElementById('calculatorResult').style.display = 'none';
+}
+
+// Calcular préstamo
+function calculateLoan(e) {
+    e.preventDefault();
+    
+    const loanAmount = parseFloat(document.getElementById('calcLoanAmount').value);
+    const interestRate = parseFloat(document.getElementById('calcInterestRate').value);
+    const term = parseInt(document.getElementById('calcTerm').value);
+    const loanType = document.getElementById('calcLoanType').value;
+    
+    if (!loanAmount || !interestRate || !term) {
+        showInfoModal('Información', 'Por favor, complete todos los campos.');
+        return;
+    }
+    
+    let paymentAmount = 0;
+    let totalPayment = 0;
+    let totalInterest = 0;
+    let loanTypeText = '';
+    
+    if (loanType === 'fixed') {
+        // Préstamo a plazo fijo - pagos fijos sin intereses
+        paymentAmount = loanAmount / term;
+        totalPayment = loanAmount;
+        totalInterest = 0;
+        loanTypeText = 'Préstamo a Plazo Fijo';
+    } else {
+        // Préstamo con intereses - pagos variables (capital + interés)
+        const tasaQuincenal = interestRate / 100;
+        const capitalQuincenal = loanAmount / term;
+        const interesQuincenal = loanAmount * tasaQuincenal;
+        paymentAmount = capitalQuincenal + interesQuincenal;
+        totalPayment = paymentAmount * term;
+        totalInterest = totalPayment - loanAmount;
+        loanTypeText = 'Préstamo con Intereses';
+    }
+    
+    const currencySymbol = userSettings.currency === 'USD' ? '$' : 'RD$';
+    
+    document.getElementById('calcPaymentAmount').textContent = `${currencySymbol}${formatCurrency(paymentAmount)}`;
+    document.getElementById('calcTotalPayment').textContent = `${currencySymbol}${formatCurrency(totalPayment)}`;
+    document.getElementById('calcTotalInterest').textContent = `${currencySymbol}${formatCurrency(totalInterest)}`;
+    document.getElementById('calcLoanTypeResult').textContent = loanTypeText;
+    
+    document.getElementById('calculatorResult').style.display = 'block';
 }
 
 // CORRECCIÓN PRINCIPAL: Manejar login para permitir acceso a clientes con préstamos activos y completados
@@ -3618,9 +3902,10 @@ function loadClientData() {
 
 // Actualizar visualización del saldo con formato de moneda
 function updateBalanceDisplay() {
-    const balance = currentLoan.balance || 0;
+    // CORRECCIÓN: Mostrar solo el capital pendiente en lugar del saldo total
+    const capitalBalance = currentLoan.remainingCapital || 0;
     const currencySymbol = userSettings.currency === 'USD' ? '$' : 'RD$';
-    document.getElementById('loanBalance').textContent = `${currencySymbol}${formatCurrency(balance)}`;
+    document.getElementById('loanBalance').textContent = `${currencySymbol}${formatCurrency(capitalBalance)}`;
 }
 
 // Mostrar detalles del préstamo en modal con formato de moneda
@@ -3718,7 +4003,7 @@ function showLoanDetails() {
     updateLanguage();
 }
 
-// Cargar progreso del préstamo
+// Cargar progreso del préstamo - FUNCIÓN CORREGIDA
 function loadLoanProgress() {
     const container = document.getElementById('loanProgress');
     const paymentsMade = currentLoan.payments ? currentLoan.payments.length : 0;
@@ -3770,14 +4055,15 @@ function loadLoanProgress() {
             document.getElementById('latePaymentText').style.display = 'none';
         }
 
+        // CORRECCIÓN: Mostrar el progreso correctamente sin el código {percent}%
         statusHTML = `
             <div class="alert ${statusClass}">
                 <i class="fas fa-info-circle"></i>
                 <span>${message}</span>
             </div>
             <div class="loan-summary-item">
-                <span class="loan-detail-label" data-lang="progress">${translate('progress').replace('{percent}', '')}:</span>
-                <span data-lang="progress" data-progress="${progress.toFixed(0)}">${translate('progress').replace('{percent}', progress.toFixed(0))}</span>
+                <span class="loan-detail-label" data-lang="progress">Progreso:</span>
+                <span data-lang="progress" data-progress="${progress.toFixed(0)}">${progress.toFixed(0)}% completado</span>
             </div>
             <div class="loan-summary-item">
                 <span class="loan-detail-label">Tipo de préstamo:</span>
