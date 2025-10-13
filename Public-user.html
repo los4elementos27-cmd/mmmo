@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -1143,7 +1143,7 @@
             }
         }
 
-        /* Tema claro */
+        /* Tema claro - CORRECCIÓN MEJORADA */
         .light-theme {
             --background-color: #f5f5f5;
             --text-color: #333333;
@@ -1156,6 +1156,8 @@
             --chat-bg: #ffffff;
             --chat-user-bg: #15a086;
             --chat-bot-bg: #e6e6e6;
+            --icon-inactive-color: #666666;
+            --icon-active-color: #15a086;
         }
 
         /* Tamaños de fuente */
@@ -2207,12 +2209,7 @@
                 </div>
             </div>
             <div class="top-menu">
-                <button class="top-menu-btn" id="calculatorBtn" title="Calculadora de Préstamos">
-                    <i class="fas fa-calculator"></i>
-                </button>
-                <button class="top-menu-btn" id="logoutTopBtn" title="Cerrar Sesión">
-                    <i class="fas fa-sign-out-alt"></i>
-                </button>
+                <!-- CORRECCIÓN: Se eliminaron los botones de calculadora y cerrar sesión del header -->
                 <button class="company-icon-btn" id="companyInfoBtn" title="Información de la empresa">
                     <i class="fas fa-building"></i>
                 </button>
@@ -2414,6 +2411,58 @@
                     </button>
                 </div>
             </div>
+
+            <!-- NUEVA SECCIÓN: Calculadora -->
+            <div id="calculator-section" class="section">
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-calculator"></i> Calculadora de Préstamos</h3>
+                    <div class="calculator-container">
+                        <form id="calculatorForm">
+                            <div class="form-group">
+                                <label for="calcLoanAmount">Monto del Préstamo</label>
+                                <input type="number" id="calcLoanAmount" class="form-control" min="1" required placeholder="Ingrese el monto">
+                            </div>
+                            <div class="form-group">
+                                <label for="calcInterestRate">Tasa de Interés (% quincenal)</label>
+                                <input type="number" id="calcInterestRate" class="form-control" min="0" step="0.1" required placeholder="Ej: 5.0">
+                            </div>
+                            <div class="form-group">
+                                <label for="calcTerm">Plazo (quincenas)</label>
+                                <input type="number" id="calcTerm" class="form-control" min="1" required placeholder="Ej: 12">
+                            </div>
+                            <div class="form-group">
+                                <label for="calcLoanType">Tipo de Préstamo</label>
+                                <select id="calcLoanType" class="form-control">
+                                    <option value="interest">Préstamo con Intereses</option>
+                                    <option value="fixed">Préstamo a Plazo Fijo</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-success btn-block">
+                                <i class="fas fa-calculator"></i> Calcular
+                            </button>
+                        </form>
+                        <div class="calculator-result" id="calculatorResult" style="display: none;">
+                            <h4>Resultados del Cálculo</h4>
+                            <div class="calculator-result-item">
+                                <span class="calculator-result-label">Pago Quincenal:</span>
+                                <span class="calculator-result-value" id="calcPaymentAmount">$0.00</span>
+                            </div>
+                            <div class="calculator-result-item">
+                                <span class="calculator-result-label">Total a Pagar:</span>
+                                <span class="calculator-result-value" id="calcTotalPayment">$0.00</span>
+                            </div>
+                            <div class="calculator-result-item">
+                                <span class="calculator-result-label">Total de Intereses:</span>
+                                <span class="calculator-result-value" id="calcTotalInterest">$0.00</span>
+                            </div>
+                            <div class="calculator-result-item">
+                                <span class="calculator-result-label">Tipo de Préstamo:</span>
+                                <span class="calculator-result-value" id="calcLoanTypeResult">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Botón de chat flotante -->
@@ -2435,7 +2484,11 @@
                 <a href="#" class="nav-item" data-section="calendar" data-icon-class="fas fa-calendar-days">
                     <i class="fas fa-calendar-days"></i>
                     <span>Calendario</span>
-                </a>
+                </a><!--
+                <a href="#" class="nav-item" data-section="calculator" data-icon-class="fas fa-calculator">
+                    <i class="fas fa-calculator"></i>
+                    <span>Calculadora</span>
+                </a>-->
                 <a href="#" class="nav-item" data-section="profile" data-icon-class="fas fa-user">
                     <i class="fas fa-user"></i>
                     <span data-lang="profile">Perfil</span>
@@ -2451,13 +2504,13 @@
             </nav>
         </div>
 
-        <!-- Micro menú superior -->
+        <!-- Micro menú superior - CORREGIDO: Se agregaron los botones de calculadora y cerrar sesión -->
         <div class="overlay" id="overlay"></div>
         <div class="micro-menu" id="microMenu">
             <div class="micro-menu-header">
                 <img src="logo.png" alt="PlusMoney Retom" class="micro-menu-logo">
                 <div class="micro-menu-title">PlusMoney Retom</div>
-            </div>
+            </div><!--
             <a href="info-prestamo.html" class="micro-menu-item">
                 <i class="fas fa-info-circle"></i>
                 <span>Información de Préstamos</span>
@@ -2465,7 +2518,11 @@
             <a href="pagar.html" class="micro-menu-item">
                 <i class="fas fa-money-bill-wave"></i>
                 <span>Realizar Pagos</span>
-            </a>
+            </a>-->
+            <a href="#" class="micro-menu-item" id="microCalculatorBtn">
+                <i class="fas fa-calculator"></i>
+                <span>Calculadora</span>
+            </a><!--
             <a href="#" class="micro-menu-item">
                 <i class="fas fa-history"></i>
                 <span>Mi Historial Financiero</span>
@@ -2473,18 +2530,23 @@
             <a href="#" class="micro-menu-item">
                 <i class="fas fa-question-circle"></i>
                 <span>Ayuda</span>
-            </a>
-            <a href="#" class="micro-menu-item">
+            </a>-->
+            <a href="privacidad.html" class="micro-menu-item">
                 <i class="fas fa-shield-alt"></i>
                 <span>Política de Privacidad</span>
             </a>
-            <a href="#" class="micro-menu-item">
+            <a href="seguridad.html" class="micro-menu-item">
                 <i class="fas fa-lock"></i>
                 <span>Política de Seguridad</span>
             </a>
-            <a href="#" class="micro-menu-item">
+            <a href="acerca.html" class="micro-menu-item">
                 <i class="fas fa-info-circle"></i>
                 <span>Acerca de</span>
+            </a>
+            <!-- CORRECCIÓN: Se agregó el botón de cerrar sesión -->
+            <a href="#" class="micro-menu-item" id="microLogoutBtn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Cerrar Sesión</span>
             </a>
         </div>
     </section>
@@ -2562,6 +2624,47 @@
                             </div>
                             <div class="faq-answer">
                                 Para cambiar tu foto de perfil, ve a la sección "Perfil" y haz clic en "Cambiar Foto de Perfil". Puedes elegir entre los avatares predeterminados o subir tu propia imagen.
+                            </div>
+                        </div>
+                        <!-- NUEVAS PREGUNTAS AGREGADAS -->
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <i class="fas fa-question-circle"></i> ¿Cómo usar la calculadora de préstamos?
+                            </div>
+                            <div class="faq-answer">
+                                Para usar la calculadora, ve a la sección "Calculadora", ingresa el monto del préstamo, la tasa de interés, el plazo y selecciona el tipo de préstamo. Luego haz clic en "Calcular" para ver los resultados.
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <i class="fas fa-question-circle"></i> ¿Qué tipos de préstamo puedo calcular?
+                            </div>
+                            <div class="faq-answer">
+                                La calculadora soporta dos tipos: Préstamos con Intereses (pagos variables de capital + interés) y Préstamos a Plazo Fijo (pagos fijos sin intereses).
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <i class="fas fa-question-circle"></i> ¿Cómo configurar el tema claro/oscuro?
+                            </div>
+                            <div class="faq-answer">
+                                Ve a la sección "Configuración" y selecciona el tema que prefieras: Retom (oscuro), Claro o Personalizado. También puedes cambiar el color personalizado si seleccionas esa opción.
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <i class="fas fa-question-circle"></i> ¿Cómo cambiar el idioma de la aplicación?
+                            </div>
+                            <div class="faq-answer">
+                                En la sección "Configuración", selecciona el idioma que prefieras entre Español e Inglés. Los cambios se aplicarán inmediatamente.
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <i class="fas fa-question-circle"></i> ¿Cómo activar las notificaciones?
+                            </div>
+                            <div class="faq-answer">
+                                En la sección "Configuración", puedes activar las notificaciones por email y/o SMS marcando las casillas correspondientes en la sección de notificaciones.
                             </div>
                         </div>
                     </div>
@@ -2686,60 +2789,7 @@
         </div>
     </div>
 
-    <!-- Modal de Calculadora de Préstamos -->
-    <div class="modal" id="calculatorModal">
-        <div class="modal-content">
-            <h3 class="modal-title"><i class="fas fa-calculator"></i> Calculadora de Préstamos</h3>
-            <div class="calculator-container">
-                <form id="calculatorForm">
-                    <div class="form-group">
-                        <label for="calcLoanAmount">Monto del Préstamo</label>
-                        <input type="number" id="calcLoanAmount" class="form-control" min="1" required placeholder="Ingrese el monto">
-                    </div>
-                    <div class="form-group">
-                        <label for="calcInterestRate">Tasa de Interés (% quincenal)</label>
-                        <input type="number" id="calcInterestRate" class="form-control" min="0" step="0.1" required placeholder="Ej: 5.0">
-                    </div>
-                    <div class="form-group">
-                        <label for="calcTerm">Plazo (quincenas)</label>
-                        <input type="number" id="calcTerm" class="form-control" min="1" required placeholder="Ej: 12">
-                    </div>
-                    <div class="form-group">
-                        <label for="calcLoanType">Tipo de Préstamo</label>
-                        <select id="calcLoanType" class="form-control">
-                            <option value="interest">Préstamo con Intereses</option>
-                            <option value="fixed">Préstamo a Plazo Fijo</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-success btn-block">
-                        <i class="fas fa-calculator"></i> Calcular
-                    </button>
-                </form>
-                <div class="calculator-result" id="calculatorResult" style="display: none;">
-                    <h4>Resultados del Cálculo</h4>
-                    <div class="calculator-result-item">
-                        <span class="calculator-result-label">Pago Quincenal:</span>
-                        <span class="calculator-result-value" id="calcPaymentAmount">$0.00</span>
-                    </div>
-                    <div class="calculator-result-item">
-                        <span class="calculator-result-label">Total a Pagar:</span>
-                        <span class="calculator-result-value" id="calcTotalPayment">$0.00</span>
-                    </div>
-                    <div class="calculator-result-item">
-                        <span class="calculator-result-label">Total de Intereses:</span>
-                        <span class="calculator-result-value" id="calcTotalInterest">$0.00</span>
-                    </div>
-                    <div class="calculator-result-item">
-                        <span class="calculator-result-label">Tipo de Préstamo:</span>
-                        <span class="calculator-result-value" id="calcLoanTypeResult">-</span>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-info" onclick="closeModal()" data-lang="close">Cerrar</button>
-            </div>
-        </div>
-    </div>
+    <!-- CORRECCIÓN: Se eliminó el modal de calculadora -->
 
     <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
@@ -3057,11 +3107,18 @@ function setupEventListeners() {
     // Botón de información de empresa
     document.getElementById('companyInfoBtn').addEventListener('click', showCompanyInfoModal);
 
-    // Botón de calculadora
-    document.getElementById('calculatorBtn').addEventListener('click', showCalculatorModal);
+    // CORRECCIÓN: Event listeners para los botones del micro menú
+    document.getElementById('microCalculatorBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        toggleMicroMenu();
+        navigateToSection('calculator');
+    });
 
-    // Botón de cerrar sesión en el menú superior
-    document.getElementById('logoutTopBtn').addEventListener('click', logout);
+    document.getElementById('microLogoutBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        toggleMicroMenu();
+        logout();
+    });
 
     // Calculadora de préstamos
     document.getElementById('calculatorForm').addEventListener('submit', calculateLoan);
@@ -3199,7 +3256,7 @@ function sendAssistantMessage() {
     }, 1000);
 }
 
-// Obtener respuesta del asistente - FUNCIÓN CORREGIDA
+// Obtener respuesta del asistente - FUNCIÓN CORREGIDA CON NUEVAS PREGUNTAS
 function getAssistantResponse(message) {
     const lowerMessage = message.toLowerCase();
     
@@ -3239,17 +3296,27 @@ function getAssistantResponse(message) {
     } else if (lowerMessage.includes('calendario') || lowerMessage.includes('color') || lowerMessage.includes('vencimiento')) {
         return 'En el calendario de pagos, los colores indican: Verde - Pago realizado, Amarillo - Pago pendiente, Rojo - Pago vencido. El día actual se marca con un fondo especial.';
     } else if (lowerMessage.includes('contactar') || lowerMessage.includes('soporte') || lowerMessage.includes('ayuda')) {
-        return 'Puedes contactar con nuestro soporte a través del teléfono: 809-555-5555, o visitando nuestras oficinas en Calle Principal #123, Santo Domingo.';
+        return 'Puedes contactar con nuestro soporte a través del teléfono: (849) 515-8440, o visitando, Santo Domingo.';
     } else if (lowerMessage.includes('tipo') || lowerMessage.includes('préstamo') || lowerMessage.includes('oferta')) {
         return 'Ofrecemos dos tipos de préstamos: Préstamos a Plazo Fijo (pagos fijos) y Préstamos con Intereses (pagos variables de capital + interés). Consulta los detalles en la sección "Ver Detalles".';
     } else if (lowerMessage.includes('creador') || lowerMessage.includes('desarrollador') || lowerMessage.includes('quién te creó')) {
-        return 'Fui desarrollada por Retom, un equipo dirigido por Andreilin Segura Santana y su madre Marlennys Mateo, con la colaboración de su hermano Erick Yahir.';
+        return 'Fui desarrollada por Retom, un equipo dirigido por Andreilin Segura Santana.';
     } else if (lowerMessage.includes('retom') || lowerMessage.includes('empresa') || lowerMessage.includes('compañía')) {
         return 'Retom es una empresa que se encarga de vender servicios de software para empresas, realizar inventarios físicos y venta de software. Visita nuestra página web: www.retomrt.com';
     } else if (lowerMessage.includes('director') || lowerMessage.includes('dueño') || lowerMessage.includes('propietario') || lowerMessage.includes('henry')) {
-        return 'El director de Retom se llama Henry Ferreras. En la vida real es el padre de una niña llamada Perla.';
+        return 'El director de Retom se llama Henry Ferreras.';
     } else if (lowerMessage.includes('perla') || lowerMessage.includes('foto') || lowerMessage.includes('imagen')) {
-        return 'Perla es una niña muy especial. Aquí tienes una foto de ella: [perla.png]';
+        return 'Hola Soy Perla tu asitente virtual, en la vida real Soy una niña muy especialm. Aquí ,  una foto de ella: [perla.png]';
+    } else if (lowerMessage.includes('calculadora') || lowerMessage.includes('calcular') || lowerMessage.includes('simular')) {
+        return 'Para usar la calculadora de préstamos, ve a la sección "Calculadora" en el menú inferior. Allí podrás ingresar el monto, tasa de interés, plazo y tipo de préstamo para calcular tus pagos.';
+    } else if (lowerMessage.includes('configuración') || lowerMessage.includes('ajustes') || lowerMessage.includes('tema') || lowerMessage.includes('idioma')) {
+        return 'En la sección "Configuración" puedes personalizar la aplicación: cambiar el tema (oscuro, claro o personalizado), idioma, tamaño de fuente, moneda y activar notificaciones.';
+    } else if (lowerMessage.includes('tema claro') || lowerMessage.includes('modo claro') || lowerMessage.includes('blanco')) {
+        return 'Para activar el tema claro, ve a "Configuración" y selecciona la opción "Claro" en Tema de la Aplicación. Todos los fondos cambiarán a blanco y los textos a negro.';
+    } else if (lowerMessage.includes('tema oscuro') || lowerMessage.includes('modo oscuro') || lowerMessage.includes('retom')) {
+        return 'Para activar el tema Retom (oscuro), ve a "Configuración" y selecciona la opción "Retom" en Tema de la Aplicación. Es el tema predeterminado de la aplicación.';
+    } else if (lowerMessage.includes('personalizar') || lowerMessage.includes('color personalizado')) {
+        return 'Para personalizar los colores, ve a "Configuración", selecciona "Personalizado" en Tema de la Aplicación y elige el color que prefieras con el selector de color.';
     } else if (lowerMessage.includes('gracias') || lowerMessage.includes('agradezco')) {
         return '¡De nada! Estoy aquí para ayudarte. ¿Hay algo más en lo que pueda asistirte?';
     } else if (lowerMessage.includes('adiós') || lowerMessage.includes('chao') || lowerMessage.includes('nos vemos')) {
@@ -3263,12 +3330,6 @@ function getAssistantResponse(message) {
 function toggleMicroMenu() {
     document.getElementById('microMenu').classList.toggle('active');
     document.getElementById('overlay').classList.toggle('active');
-}
-
-// Mostrar modal de calculadora
-function showCalculatorModal() {
-    document.getElementById('calculatorModal').classList.add('active');
-    document.getElementById('calculatorResult').style.display = 'none';
 }
 
 // Calcular préstamo
@@ -4514,7 +4575,7 @@ function updateCustomColor(e) {
     applyTheme();
 }
 
-// Aplicar tema
+// Aplicar tema - FUNCIÓN MEJORADA
 function applyTheme() {
     document.body.classList.remove('light-theme');
     document.documentElement.style.setProperty('--primary-color', '#15a086');
@@ -4524,6 +4585,16 @@ function applyTheme() {
     if (userSettings.theme === 'light') {
         document.body.classList.add('light-theme');
         document.documentElement.style.setProperty('--bar-bg-color', '#f0f0f0');
+        document.documentElement.style.setProperty('--text-color', '#333333');
+        document.documentElement.style.setProperty('--text-light', '#666666');
+        document.documentElement.style.setProperty('--border-color', '#dddddd');
+        document.documentElement.style.setProperty('--card-bg', '#ffffff');
+        document.documentElement.style.setProperty('--secondary-color', '#f0f0f0');
+        document.documentElement.style.setProperty('--dark-bg-color', '#e0e0e0');
+        document.documentElement.style.setProperty('--chat-bg', '#ffffff');
+        document.documentElement.style.setProperty('--chat-bot-bg', '#e6e6e6');
+        document.documentElement.style.setProperty('--icon-inactive-color', '#666666');
+        document.documentElement.style.setProperty('--icon-active-color', '#15a086');
     } else if (userSettings.theme === 'custom') {
         document.documentElement.style.setProperty('--primary-color', userSettings.customColor);
         document.documentElement.style.setProperty('--primary-dark', darkenColor(userSettings.customColor, 0.8));
