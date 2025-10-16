@@ -3922,11 +3922,39 @@ function loadUpcomingPayments() {
     
     const currencySymbol = userSettings.currency === 'USD' ? '$' : 'RD$';
     
+    // CORRECCIÓN: Calcular el total a pagar usando la misma lógica que el modal de detalles
+    const paymentsMade = currentLoan.payments ? currentLoan.payments.length : 0;
+    const totalPayments = currentLoan.paymentSchedule.length;
+    const isFixedLoan = currentLoan.loanType === 'fixed';
+    
+    let totalToPay = 0;
+    
+    if (isFixedLoan) {
+        // Préstamo a plazo fijo - pagos fijos sin intereses
+        const remainingPayments = totalPayments - paymentsMade;
+        totalToPay = remainingPayments > 0 ? (currentLoan.remainingCapital || 0) / remainingPayments : 0;
+    } else {
+        // Préstamo con intereses - pagos variables (capital + interés)
+        const remainingQuincenas = totalPayments - paymentsMade;
+        const capitalToPay = remainingQuincenas > 0 ? (currentLoan.remainingCapital || 0) / remainingQuincenas : 0;
+        const tasaQuincenal = (currentLoan.interestRate || 0) / (currentLoan.frequency === 'biweekly' ? 1 : 2);
+        const interestToPay = (currentLoan.remainingCapital || 0) * (tasaQuincenal / 100);
+        totalToPay = capitalToPay + interestToPay;
+    }
+    
+    // Validar que el total sea un número válido
+    if (isNaN(totalToPay) || totalToPay <= 0) {
+        console.error('Total calculado no válido:', totalToPay);
+        container.innerHTML = '<p>Error: No se pudo calcular el monto del próximo pago.</p>';
+        return;
+    }
+    
     container.innerHTML = `
         <div class="upcoming-payment-item">
             <div>
                 <div class="upcoming-payment-date">${dueDate.toLocaleDateString()}</div>
-                <div class="upcoming-payment-amount">${currencySymbol}${formatCurrency(nextPayment.amount)}</div>
+                <div class="upcoming-payment-amount">${currencySymbol}${formatCurrency(totalToPay)}</div>
+                <div class="upcoming-payment-detail">Total a pagar (próxima cuota)</div>
             </div>
             <div class="upcoming-payment-status ${statusClass}">${statusText}</div>
         </div>
