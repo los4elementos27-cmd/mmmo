@@ -3216,7 +3216,7 @@ const translations = {
         payment_due: 'Próximo pago en {days} días',
         payment_late: 'Pago atrasado por {days} días',
         late_payment_alert: '¡Atención! Tiene un pago atrasado por {days} días',
-        progress: '{percent}% completado',
+        progress: 'Progreso:',
         original_amount: 'Monto original',
         interest_rate: 'Tasa de interés',
         frequency: 'Frecuencia',
@@ -4197,14 +4197,26 @@ function showDayPaymentDetails(date) {
         const status = payment.status === 'paid' ? 'Pagado con éxito' : 
                       date < new Date() ? 'Pago vencido' : 'Pago pendiente';
         
-        // CORRECCIÓN: Mostrar solo la información solicitada (sin monto y sin fecha de pago)
-        message += `
-- Fecha de vencimiento: ${new Date(payment.dueDate).toLocaleDateString()}
-- Estado: ${status}
-        `;
+        // CORRECCIÓN: Usar HTML para mejor formato
+        message += `<div style="margin-bottom: 15px;">
+<strong>- Fecha de vencimiento:</strong><br>
+${new Date(payment.dueDate).toLocaleDateString()}<br><br>
+<strong>- Estado:</strong><br>
+${status}
+</div>`;
     });
     
-    showInfoModal('Pagos del día', message);
+    // Crear un modal personalizado con HTML
+    const modalContent = `
+        <div style="text-align: left; line-height: 1.8;">
+            ${message}
+        </div>
+    `;
+    
+    // Mostrar en el modal
+    document.getElementById('infoModalMessage').innerHTML = modalContent;
+    document.getElementById('infoModalTitle').textContent = 'Pagos del día';
+    document.getElementById('infoModal').classList.add('active');
 }
 
 // Mostrar modal de información de la empresa
@@ -4520,8 +4532,8 @@ function loadLoanProgress() {
                 <span>${message}</span>
             </div>
             <div class="loan-summary-item">
-                <span class="loan-detail-label" data-lang="progress">Progreso:</span>
-                <span data-lang="progress" data-progress="${progress.toFixed(0)}">${progress.toFixed(0)}% completado</span>
+                <span class="loan-detail-label">Progreso:</span> 
+                <span>${progress.toFixed(0)}% completado</span>
             </div>
             <div class="loan-summary-item">
                 <span class="loan-detail-label">Tipo de préstamo:</span>
