@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro de Colaboradores - PlusMoney Retom</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #1abc9c;
+      --primary-dark: #16a085;
+      --secondary-color: #2a2a3f;
+      --background-color: #2c3e50;
+      --text-color: #ffffff;
+      --text-light: #a8a8a8;
+      --border-color: #444;
+      --card-bg: #34495e;
+      --danger-color: #e74c3c;
+      --warning-color: #f39c12;
+      --success-color: #2ecc71;
+      --info-color: #15a086;
+      --futuristic-glow: 0 0 10px rgba(26, 188, 156, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--background-color);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(21, 160, 134, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(231, 76, 60, 0.1) 0%, transparent 20%);
+      color: var(--text-color);
+      margin: 0;
+      min-height: 100vh;
+      padding: 2rem;
+      transition: all 0.3s ease;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-title {
+      color: var(--primary-color);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--border-color);
+      text-shadow: var(--futuristic-glow);
+      transition: all 0.3s ease;
+      font-size: 2.2rem;
+      text-align: center;
+      letter-spacing: 1px;
+    }
+
+    .card {
+      background-color: var(--secondary-color);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-color), var(--info-color));
+    }
+
+    .card:hover {
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), var(--futuristic-glow);
+      transform: translateY(-5px);
+    }
+
+    .form-horizontal {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--text-light);
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary-color);
+      box-shadow: var(--futuristic-glow);
+      outline: none;
+    }
+
+    .btn {
+      background-color: var(--primary-color);
+      color: var(--text-color);
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    .btn i {
+      margin-right: 8px;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-dark);
+      box-shadow: var(--futuristic-glow);
+      transform: translateY(-2px);
+    }
+
+    .btn-success {
+      background-color: var(--success-color);
+    }
+
+    .btn-danger {
+      background-color: var(--danger-color);
+    }
+
+    .btn-danger:hover {
+      background-color: #c0392b;
+    }
+
+    .btn-warning {
+      background-color: var(--warning-color);
+    }
+
+    .alert {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+
+    .alert-error {
+      background-color: rgba(231, 76, 60, 0.2);
+      border-left: 4px solid var(--danger-color);
+      color: #fff;
+    }
+
+    .alert-success {
+      background-color: rgba(46, 204, 113, 0.2);
+      border-left: 4px solid var(--success-color);
+      color: #fff;
+    }
+
+    .alert-warning {
+      background-color: rgba(243, 156, 18, 0.2);
+      border-left: 4px solid var(--warning-color);
+      color: #fff;
+    }
+
+    .alert i {
+      margin-right: 0.75rem;
+      font-size: 1.2rem;
+    }
+
+    .alert-content {
+      flex: 1;
+    }
+
+    .alert-close {
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+
+    .file-input-container {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .file-input-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem 1.5rem;
+      background-color: var(--primary-color);
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    .file-input-button:hover {
+      background-color: var(--primary-dark);
+      box-shadow: var(--futuristic-glow);
+    }
+
+    .file-input {
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .image-preview-container {
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    .image-preview {
+      width: 150px;
+      height: 150px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 2px solid var(--primary-color);
+      box-shadow: var(--futuristic-glow);
+      margin: 0 auto;
+      display: none;
+    }
+
+    .image-preview-placeholder {
+      width: 150px;
+      height: 150px;
+      border-radius: 8px;
+      background-color: var(--background-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      border: 2px dashed var(--border-color);
+      color: var(--text-light);
+    }
+
+    .image-preview-placeholder i {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .registration-info {
+      background-color: var(--card-bg);
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .registration-count {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+
+    .registration-limit {
+      font-size: 1.2rem;
+      color: var(--text-light);
+    }
+
+    .registration-user {
+      font-size: 1.2rem;
+      color: var(--text-color);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+
+    .modal.active {
+      display: flex;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-content {
+      background-color: var(--secondary-color);
+      padding: 2rem;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), var(--futuristic-glow);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: none;
+      border: none;
+      color: var(--text-light);
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .modal-close:hover {
+      color: var(--primary-color);
+    }
+
+    .modal-title {
+      margin-bottom: 1.5rem;
+      color: var(--primary-color);
+      text-align: center;
+      text-shadow: var(--futuristic-glow);
+      font-size: 1.5rem;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .loading-overlay.active {
+      display: flex;
+    }
+
+    .loader {
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid var(--primary-color);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .form-row {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .form-row .form-group {
+      flex: 1;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+      
+      .form-horizontal {
+        grid-template-columns: 1fr;
+      }
+      
+      .card {
+        padding: 1rem;
+      }
+      
+      .registration-info {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .form-row {
+        flex-direction: column;
+        gap: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="section-title">Registro de Colaboradores</h1>
+    
+    <!-- Información de registro -->
+    <div class="registration-info">
+      <div class="registration-count" id="registrationCount">Registros realizados: 0</div>
+      <div class="registration-limit" id="registrationLimit">Límite de registros: 0</div>
+      <div class="registration-user" id="registrationUser">Usuario: Cargando...</div>
+    </div>
+    
+    <!-- Alertas -->
+    <div id="registrationAlert" class="alert alert-error" style="display: none;">
+      <i class="fas fa-exclamation-circle"></i>
+      <div class="alert-content"></div>
+      <button class="alert-close" onclick="this.parentElement.style.display='none'">&times;</button>
+    </div>
+    
+    <!-- Formulario de registro -->
+    <div class="card">
+      <form id="collaboratorForm">
+        <div class="form-horizontal">
+          <div>
+            <div class="form-group">
+              <label for="collaboratorCode">Código Laboral</label>
+              <input type="text" id="collaboratorCode" class="form-control" readonly>
+              <small>Este código se genera automáticamente</small>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="collaboratorFirstName">Nombre</label>
+                <input type="text" id="collaboratorFirstName" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="collaboratorLastName">Apellido</label>
+                <input type="text" id="collaboratorLastName" class="form-control" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="collaboratorId">Cédula</label>
+              <input type="text" id="collaboratorId" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="collaboratorPhone">Número de Celular</label>
+              <input type="tel" id="collaboratorPhone" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="collaboratorAddress">Dirección</label>
+              <input type="text" id="collaboratorAddress" class="form-control" required>
+            </div>
+          </div>
+          <div>
+            <div class="form-group">
+              <label for="collaboratorPosition">Posición</label>
+              <input type="text" id="collaboratorPosition" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="collaboratorCompany">Empresa</label>
+              <input type="text" id="collaboratorCompany" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="collaboratorSalary">Sueldo</label>
+              <input type="number" id="collaboratorSalary" class="form-control" min="0" step="0.01" required>
+            </div>
+            <div class="form-group">
+              <label for="collaboratorGender">Sexo</label>
+              <select id="collaboratorGender" class="form-control" required>
+                <option value="">-- Seleccione --</option>
+                <option value="masculino">Masculino</option>
+                <option value="femenino">Femenino</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="collaboratorBirthDate">Fecha de Nacimiento</label>
+              <input type="date" id="collaboratorBirthDate" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="collaboratorBirthPlace">Lugar de Nacimiento</label>
+              <input type="text" id="collaboratorBirthPlace" class="form-control" required>
+            </div>
+          </div>
+          <div>
+            <!-- Selector de imagen con vista previa -->
+            <div class="form-group">
+              <label>Foto del Colaborador</label>
+              <div class="file-input-container">
+                <div class="file-input-button">
+                  <i class="fas fa-cloud-upload-alt"></i> Seleccionar Imagen
+                </div>
+                <input type="file" id="collaboratorPhoto" class="file-input" accept="image/*">
+              </div>
+            </div>
+            
+            <div class="image-preview-container">
+              <div class="image-preview-placeholder" id="imagePlaceholder">
+                <div>
+                  <i class="fas fa-user"></i>
+                  <div>Vista previa</div>
+                </div>
+              </div>
+              <img id="collaboratorImagePreview" class="image-preview" alt="Vista previa de la imagen">
+            </div>
+            
+            <div class="form-group">
+              <label for="collaboratorUsername">Nombre de Usuario</label>
+              <input type="text" id="collaboratorUsername" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="collaboratorPin">PIN</label>
+              <input type="password" id="collaboratorPin" class="form-control" minlength="8" required>
+              <small></small>
+            </div>
+          </div>
+        </div>
+        
+        <button type="submit" class="btn btn-success" style="margin-top: 1.5rem; width: 100%;">
+          <i class="fas fa-user-plus"></i> Registrar Colaborador
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal para información -->
+  <div class="modal" id="infoModal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+      <h3 class="modal-title" id="infoModalTitle"></h3>
+      <p id="infoModalMessage"></p>
+      <div class="modal-footer">
+        <button onclick="closeModal()" class="btn">Aceptar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loader"></div>
+  </div>
+
+  <script type="module">
+    // Importaciones de Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      getDocs, 
+      doc, 
+      getDoc,
+      query, 
+      where,
+      addDoc,
+      setDoc,
+      orderBy,
+      startAt,
+      endAt
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-storage.js";
+
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+      authDomain: "inventario-35d6b.firebaseapp.com",
+      databaseURL: "https://inventario-35d6b-default-rtdb.firebaseio.com",
+      projectId: "inventario-35d6b",
+      storageBucket: "inventario-35d6b.appspot.com",
+      messagingSenderId: "266100399659",
+      appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+    };
+
+    // Inicialización de Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const storage = getStorage(app);
+
+    // Variables globales
+    let currentUser = null;
+    let userRegistrationLimit = 0;
+    let currentRegistrations = 0;
+
+    // Función para formatear números
+    function formatNumber(number) {
+      return number.toLocaleString('en-US', { 
+        minimumFractionDigits: 2, 
+        maximumFractionDigits: 2 
+      });
+    }
+
+    // Función para mostrar alerta elegante
+    function showElegantError(message) {
+      const alertElement = document.getElementById('registrationAlert');
+      const alertContent = alertElement.querySelector('.alert-content');
+      
+      alertContent.textContent = message;
+      alertElement.style.display = 'flex';
+      
+      // Ocultar automáticamente después de 5 segundos
+      setTimeout(() => {
+        alertElement.style.display = 'none';
+      }, 5000);
+    }
+
+    // Función para mostrar modal de información
+    function showInfoModal(title, message) {
+      document.getElementById('infoModalTitle').textContent = title;
+      document.getElementById('infoModalMessage').textContent = message;
+      document.getElementById('infoModal').classList.add('active');
+    }
+
+    // Función para cerrar modales
+    function closeModal() {
+      document.querySelectorAll('.modal').forEach(modal => modal.classList.remove('active'));
+    }
+
+    // Función para mostrar loading
+    function showLoading() {
+      document.getElementById('loadingOverlay').classList.add('active');
+    }
+
+    // Función para ocultar loading
+    function hideLoading() {
+      document.getElementById('loadingOverlay').classList.remove('active');
+    }
+
+    // Función para generar código de colaborador
+    async function generateCollaboratorCode() {
+      try {
+        // Obtener todos los colaboradores existentes para este usuario
+        const collaboratorsQuery = query(
+          collection(db, "Collaborators"),
+          where("userId", "==", currentUser.uid)
+        );
+        const collaboratorsSnapshot = await getDocs(collaboratorsQuery);
+        
+        // Encontrar el código más alto
+        let maxCode = 0;
+        collaboratorsSnapshot.forEach(doc => {
+          const collaborator = doc.data();
+          const code = parseInt(collaborator.code);
+          if (code > maxCode) {
+            maxCode = code;
+          }
+        });
+        
+        // Generar nuevo código (2-6 dígitos)
+        const newCode = (maxCode + 1).toString().padStart(2, '0');
+        
+        // Si el código excede 6 dígitos, reiniciar desde 01
+        if (newCode.length > 6) {
+          return "01";
+        }
+        
+        return newCode;
+      } catch (error) {
+        console.error("Error generando código de colaborador: ", error);
+        return "01";
+      }
+    }
+
+    // Función para validar cédula de colaborador duplicada
+    async function validateDuplicateCollaboratorId(collaboratorId) {
+      try {
+        if (!currentUser) return false;
+        
+        const collaboratorsQuery = query(
+          collection(db, "Collaborators"),
+          where("userId", "==", currentUser.uid),
+          where("id", "==", collaboratorId)
+        );
+        
+        const collaboratorsSnapshot = await getDocs(collaboratorsQuery);
+        return !collaboratorsSnapshot.empty;
+      } catch (error) {
+        console.error("Error validando cédula de colaborador duplicada: ", error);
+        return false;
+      }
+    }
+
+    // Función para validar usuario existente
+    async function validateExistingUser(username) {
+      try {
+        const usersQuery = query(
+          collection(db, "LoanUsers"), 
+          where("username", "==", username)
+        );
+        const usersSnapshot = await getDocs(usersQuery);
+        
+        if (!usersSnapshot.empty) {
+          return "El nombre de usuario ya está en uso";
+        }
+        
+        return null; // No hay errores
+      } catch (error) {
+        console.error("Error validando usuario existente: ", error);
+        return "Error al validar los datos";
+      }
+    }
+
+    // Función para cargar límite de registro del usuario actual
+    async function loadUserRegistrationLimit() {
+      try {
+        if (!currentUser) return;
+        
+        const userLimitsQuery = query(
+          collection(db, "UserRegistrationLimits"),
+          where("userId", "==", currentUser.uid)
+        );
+        
+        const userLimitsSnapshot = await getDocs(userLimitsQuery);
+        
+        if (!userLimitsSnapshot.empty) {
+          const userLimit = userLimitsSnapshot.docs[0].data();
+          userRegistrationLimit = userLimit.collaboratorLimit || 0;
+        } else {
+          // Si no hay límite establecido, usar valor por defecto (0 = sin límite)
+          userRegistrationLimit = 0;
+        }
+        
+        // Actualizar la interfaz
+        document.getElementById('registrationLimit').textContent = 
+          userRegistrationLimit === 0 ? 
+          "Límite de registros: Sin límite" : 
+          `Límite de registros: ${userRegistrationLimit}`;
+          
+      } catch (error) {
+        console.error("Error cargando límite de registro: ", error);
+        userRegistrationLimit = 0;
+      }
+    }
+
+    // Función para contar registros actuales del usuario
+    async function countCurrentRegistrations() {
+      try {
+        if (!currentUser) return 0;
+        
+        const collaboratorsQuery = query(
+          collection(db, "Collaborators"),
+          where("userId", "==", currentUser.uid)
+        );
+        
+        const collaboratorsSnapshot = await getDocs(collaboratorsQuery);
+        currentRegistrations = collaboratorsSnapshot.size;
+        
+        // Actualizar la interfaz
+        document.getElementById('registrationCount').textContent = 
+          `Registros realizados: ${currentRegistrations}`;
+          
+        return currentRegistrations;
+      } catch (error) {
+        console.error("Error contando registros actuales: ", error);
+        return 0;
+      }
+    }
+
+    // Función para verificar si el usuario puede registrar más colaboradores
+    function canRegisterMore() {
+      // Si el límite es 0, no hay restricción
+      if (userRegistrationLimit === 0) return true;
+      
+      // Verificar si ha alcanzado el límite
+      return currentRegistrations < userRegistrationLimit;
+    }
+
+    // Función para crear colaborador
+    async function createCollaborator(e) {
+      e.preventDefault();
+      
+      // Verificar si el usuario puede registrar más colaboradores
+      if (!canRegisterMore()) {
+        showElegantError(`Ha alcanzado el límite de ${userRegistrationLimit} registros. No puede registrar más colaboradores.`);
+        return;
+      }
+      
+      const collaboratorData = {
+        code: document.getElementById('collaboratorCode').value,
+        firstName: document.getElementById('collaboratorFirstName').value.trim(),
+        lastName: document.getElementById('collaboratorLastName').value.trim(),
+        id: document.getElementById('collaboratorId').value.trim(),
+        phone: document.getElementById('collaboratorPhone').value.trim(),
+        address: document.getElementById('collaboratorAddress').value.trim(),
+        position: document.getElementById('collaboratorPosition').value.trim(),
+        company: document.getElementById('collaboratorCompany').value.trim(),
+        salary: parseFloat(document.getElementById('collaboratorSalary').value),
+        gender: document.getElementById('collaboratorGender').value,
+        birthDate: document.getElementById('collaboratorBirthDate').value,
+        birthPlace: document.getElementById('collaboratorBirthPlace').value.trim(),
+        username: document.getElementById('collaboratorUsername').value.trim(),
+        pin: document.getElementById('collaboratorPin').value.trim(),
+        userId: currentUser.uid,
+        createdAt: new Date()
+      };
+      
+      // Validar campos obligatorios
+      if (!collaboratorData.firstName || !collaboratorData.lastName || !collaboratorData.id || 
+          !collaboratorData.phone || !collaboratorData.address || !collaboratorData.position || 
+          !collaboratorData.company || !collaboratorData.gender || !collaboratorData.birthDate || 
+          !collaboratorData.birthPlace || !collaboratorData.username || !collaboratorData.pin) {
+        showElegantError('Todos los campos son obligatorios');
+        return;
+      }
+      
+      // Validar que el PIN tenga al menos 8 caracteres
+      if (collaboratorData.pin.length < 8) {
+        showElegantError('El PIN debe tener al menos 8 caracteres');
+        return;
+      }
+      
+      // Validar cédula duplicada
+      const isDuplicate = await validateDuplicateCollaboratorId(collaboratorData.id);
+      if (isDuplicate) {
+        showElegantError('Ya existe un colaborador con esta cédula');
+        return;
+      }
+      
+      // Validar usuario duplicado
+      const validationError = await validateExistingUser(collaboratorData.username);
+      if (validationError) {
+        showElegantError(validationError);
+        return;
+      }
+      
+      try {
+        showLoading();
+        
+        // Subir foto si existe
+        const photoFile = document.getElementById('collaboratorPhoto').files[0];
+        let photoURL = '';
+        
+        if (photoFile) {
+          const storagePath = `collaborator_photos/${currentUser.uid}/${Date.now()}_${photoFile.name}`;
+          const storageRef = ref(storage, storagePath);
+          await uploadBytes(storageRef, photoFile);
+          photoURL = await getDownloadURL(storageRef);
+          collaboratorData.photoURL = photoURL;
+        }
+        
+        // Guardar colaborador en Firestore
+        await addDoc(collection(db, "Collaborators"), collaboratorData);
+        
+        showInfoModal('Éxito', 'Colaborador registrado correctamente');
+        document.getElementById('collaboratorForm').reset();
+        
+        // Generar nuevo código
+        const newCode = await generateCollaboratorCode();
+        document.getElementById('collaboratorCode').value = newCode;
+        
+        // Resetear vista previa de imagen
+        document.getElementById('collaboratorImagePreview').style.display = 'none';
+        document.getElementById('imagePlaceholder').style.display = 'flex';
+        
+        // Actualizar contador de registros
+        await countCurrentRegistrations();
+        
+      } catch (error) {
+        console.error("Error creating collaborator: ", error);
+        showElegantError('Error al registrar el colaborador');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Evento cuando el DOM está cargado
+    document.addEventListener('DOMContentLoaded', () => {
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          currentUser = user;
+          initializeForm();
+        } else {
+          // Redirigir al login si no está autenticado
+          window.location.href = 'index.html';
+        }
+      });
+
+      // Configurar eventos del formulario
+      document.getElementById('collaboratorForm').addEventListener('submit', createCollaborator);
+      
+      // Configurar vista previa de imagen
+      document.getElementById('collaboratorPhoto').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            document.getElementById('collaboratorImagePreview').src = e.target.result;
+            document.getElementById('collaboratorImagePreview').style.display = 'block';
+            document.getElementById('imagePlaceholder').style.display = 'none';
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+      
+      // Cerrar modal al hacer clic fuera del contenido
+      document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('modal')) {
+          closeModal();
+        }
+      });
+    });
+
+    // Función para inicializar el formulario
+    async function initializeForm() {
+      try {
+        showLoading();
+        
+        // Mostrar información del usuario actual
+        document.getElementById('registrationUser').textContent = `Usuario: ${currentUser.name || currentUser.displayName || 'Usuario Actual'}`;
+        
+        // Generar código inicial  
+        const initialCode = await generateCollaboratorCode(); 
+        document.getElementById('collaboratorCode').value = initialCode;
+        
+        // Cargar límite de registro del usuario
+        await loadUserRegistrationLimit();
+        
+        // Contar registros actuales
+        await countCurrentRegistrations();
+        
+      } catch (error) {
+        console.error("Error inicializando formulario: ", error);
+        showElegantError('Error al inicializar el formulario');
+      } finally {
+        hideLoading();
+      }
+    }
+  </script>
+</body>
+</html>
