@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asignación de Permisos - PlusMoney Retom</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #1abc9c;
+      --primary-dark: #16a085;
+      --secondary-color: #2a2a3f;
+      --background-color: #2c3e50;
+      --text-color: #ffffff;
+      --text-light: #a8a8a8;
+      --border-color: #444;
+      --card-bg: #34495e;
+      --danger-color: #e74c3c;
+      --warning-color: #f39c12;
+      --success-color: #2ecc71;
+      --info-color: #15a086;
+      --futuristic-glow: 0 0 10px rgba(26, 188, 156, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--background-color);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(21, 160, 134, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(231, 76, 60, 0.1) 0%, transparent 20%);
+      color: var(--text-color);
+      margin: 0;
+      min-height: 100vh;
+      padding: 2rem;
+      transition: all 0.3s ease;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-title {
+      color: var(--primary-color);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--border-color);
+      text-shadow: var(--futuristic-glow);
+      transition: all 0.3s ease;
+    }
+
+    .card {
+      background-color: var(--secondary-color);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .card:hover {
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), var(--futuristic-glow);
+      transform: translateY(-5px);
+    }
+
+    .form-horizontal {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary-color);
+      box-shadow: var(--futuristic-glow);
+      outline: none;
+    }
+
+    .btn {
+      background-color: var(--primary-color);
+      color: var(--text-color);
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn i {
+      margin-right: 8px;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-dark);
+      box-shadow: var(--futuristic-glow);
+      transform: translateY(-2px);
+    }
+
+    .btn-success {
+      background-color: var(--success-color);
+    }
+
+    .btn-danger {
+      background-color: var(--danger-color);
+    }
+
+    .btn-danger:hover {
+      background-color: #c0392b;
+    }
+
+    .btn-warning {
+      background-color: var(--warning-color);
+    }
+
+    .alert {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+
+    .alert-error {
+      background-color: rgba(231, 76, 60, 0.2);
+      border-left: 4px solid var(--danger-color);
+      color: #fff;
+    }
+
+    .alert-success {
+      background-color: rgba(46, 204, 113, 0.2);
+      border-left: 4px solid var(--success-color);
+      color: #fff;
+    }
+
+    .alert-warning {
+      background-color: rgba(243, 156, 18, 0.2);
+      border-left: 4px solid var(--warning-color);
+      color: #fff;
+    }
+
+    .alert i {
+      margin-right: 0.75rem;
+      font-size: 1.2rem;
+    }
+
+    .alert-content {
+      flex: 1;
+    }
+
+    .alert-close {
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      margin-top: 1.5rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      background-color: rgba(0, 0, 0, 0.2);
+      color: var(--primary-color);
+      font-weight: 500;
+    }
+
+    tr:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .search-container {
+      display: flex;
+      margin-bottom: 1.5rem;
+      gap: 1rem;
+    }
+
+    .search-input {
+      flex: 1;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .user-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .user-details {
+      flex: 1;
+    }
+
+    .user-name {
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+
+    .user-email {
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    .limit-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .limit-value {
+      color: var(--primary-color);
+      font-weight: 500;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+
+    .modal.active {
+      display: flex;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-content {
+      background-color: var(--secondary-color);
+      padding: 2rem;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), var(--futuristic-glow);
+      transition: all 0.3s ease;
+    }
+
+    .modal-title {
+      margin-bottom: 1.5rem;
+      color: var(--primary-color);
+      text-align: center;
+      text-shadow: var(--futuristic-glow);
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .loading-overlay.active {
+      display: flex;
+    }
+
+    .loader {
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid var(--primary-color);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .action-btn {
+      padding: 0.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .edit-btn {
+      background-color: var(--warning-color);
+    }
+
+    .delete-btn {
+      background-color: var(--danger-color);
+    }
+
+    .action-btn:hover {
+      opacity: 0.8;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+      
+      .form-horizontal {
+        grid-template-columns: 1fr;
+      }
+      
+      .card {
+        padding: 1rem;
+      }
+      
+      .search-container {
+        flex-direction: column;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="section-title">Asignación de Permisos de Registro</h1>
+    
+    <!-- Alertas -->
+    <div id="permissionAlert" class="alert alert-error" style="display: none;">
+      <i class="fas fa-exclamation-circle"></i>
+      <div class="alert-content"></div>
+      <button class="alert-close" onclick="this.parentElement.style.display='none'">&times;</button>
+    </div>
+    
+    <!-- Formulario de asignación de permisos -->
+    <div class="card">
+      <h2 style="margin-bottom: 1.5rem; color: var(--primary-color);">Asignar Límite de Registros</h2>
+      
+      <div class="search-container">
+        <div class="form-group search-input">
+          <label for="userSearch">Buscar Usuario</label>
+          <input type="text" id="userSearch" class="form-control" placeholder="Buscar por nombre o email...">
+        </div>
+        <div class="form-group">
+          <label for="userRole">Filtrar por Rol</label>
+          <select id="userRole" class="form-control">
+            <option value="">Todos los roles</option>
+            <option value="admin">Administrador</option>
+            <option value="user">Usuario</option>
+            <option value="manager">Gerente</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="table-container">
+        <table id="usersTable">
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Límite Actual</th>
+              <th>Registros Realizados</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody">
+            <!-- Los usuarios se cargarán aquí dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para asignar/editar límite -->
+  <div class="modal" id="limitModal">
+    <div class="modal-content">
+      <h3 class="modal-title" id="limitModalTitle">Asignar Límite de Registros</h3>
+      
+      <div class="user-info">
+        <div class="user-avatar">
+          <i class="fas fa-user"></i>
+        </div>
+        <div class="user-details">
+          <div class="user-name" id="modalUserName">Nombre de Usuario</div>
+          <div class="user-email" id="modalUserEmail">usuario@ejemplo.com</div>
+          <div class="limit-info">
+            <span>Límite actual:</span>
+            <span class="limit-value" id="modalCurrentLimit">0</span>
+          </div>
+          <div class="limit-info">
+            <span>Registros realizados:</span>
+            <span class="limit-value" id="modalCurrentRegistrations">0</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="newLimit">Nuevo Límite de Registros</label>
+        <input type="number" id="newLimit" class="form-control" min="0" placeholder="0 = Sin límite">
+        <small>Establecer en 0 para permitir registros ilimitados</small>
+      </div>
+      
+      <div class="modal-footer">
+        <button onclick="closeModal()" class="btn btn-danger">Cancelar</button>
+        <button onclick="saveUserLimit()" class="btn btn-success">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loader"></div>
+  </div>
+
+  <script type="module">
+    // Importaciones de Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      getDocs, 
+      doc, 
+      getDoc,
+      query, 
+      where,
+      addDoc,
+      setDoc,
+      updateDoc,
+      orderBy,
+      startAt,
+      endAt
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+      authDomain: "inventario-35d6b.firebaseapp.com",
+      databaseURL: "https://inventario-35d6b-default-rtdb.firebaseio.com",
+      projectId: "inventario-35d6b",
+      storageBucket: "inventario-35d6b.appspot.com",
+      messagingSenderId: "266100399659",
+      appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+    };
+
+    // Inicialización de Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    // Variables globales
+    let currentUser = null;
+    let allUsers = [];
+    let selectedUserId = null;
+
+    // Función para mostrar alerta elegante
+    function showElegantError(message) {
+      const alertElement = document.getElementById('permissionAlert');
+      const alertContent = alertElement.querySelector('.alert-content');
+      
+      alertContent.textContent = message;
+      alertElement.style.display = 'flex';
+      
+      // Ocultar automáticamente después de 5 segundos
+      setTimeout(() => {
+        alertElement.style.display = 'none';
+      }, 5000);
+    }
+
+    // Función para mostrar loading
+    function showLoading() {
+      document.getElementById('loadingOverlay').classList.add('active');
+    }
+
+    // Función para ocultar loading
+    function hideLoading() {
+      document.getElementById('loadingOverlay').classList.remove('active');
+    }
+
+    // Función para cerrar modales
+    function closeModal() {
+      document.querySelectorAll('.modal').forEach(modal => modal.classList.remove('active'));
+    }
+
+    // Función para cargar todos los usuarios desde la colección "users"
+    async function loadAllUsers() {
+      try {
+        showLoading();
+        
+        // Obtener todos los usuarios de la colección "users"
+        const usersQuery = query(collection(db, "users"));
+        const usersSnapshot = await getDocs(usersQuery);
+        
+        allUsers = [];
+        
+        for (const userDoc of usersSnapshot.docs) {
+          const userData = userDoc.data();
+          const userId = userDoc.id;
+          
+          // Obtener el límite de registro del usuario desde UserRegistrationLimits
+          let userLimit = 0;
+          const userLimitsQuery = query(
+            collection(db, "UserRegistrationLimits"),
+            where("userId", "==", userId)
+          );
+          
+          const userLimitsSnapshot = await getDocs(userLimitsQuery);
+          if (!userLimitsSnapshot.empty) {
+            const limitData = userLimitsSnapshot.docs[0].data();
+            userLimit = limitData.collaboratorLimit || 0;
+          }
+          
+          // Contar registros actuales del usuario desde la colección Collaborators
+          let currentRegistrations = 0;
+          const collaboratorsQuery = query(
+            collection(db, "Collaborators"),
+            where("userId", "==", userId)
+          );
+          
+          const collaboratorsSnapshot = await getDocs(collaboratorsQuery);
+          currentRegistrations = collaboratorsSnapshot.size;
+          
+          // Agregar usuario a la lista
+          allUsers.push({
+            id: userId,
+            name: userData.name || 'Sin nombre',
+            email: userData.email || 'Sin email',
+            role: userData.role || 'user',
+            limit: userLimit,
+            currentRegistrations: currentRegistrations
+          });
+        }
+        
+        // Renderizar la tabla de usuarios
+        renderUsersTable(allUsers);
+        
+      } catch (error) {
+        console.error("Error cargando usuarios: ", error);
+        showElegantError('Error al cargar los usuarios');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Función para renderizar la tabla de usuarios
+    function renderUsersTable(users) {
+      const tableBody = document.getElementById('usersTableBody');
+      tableBody.innerHTML = '';
+      
+      if (users.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 2rem;">
+              No se encontraron usuarios
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      users.forEach(user => {
+        const row = document.createElement('tr');
+        
+        const limitText = user.limit === 0 ? 'Ilimitado' : user.limit;
+        const limitClass = user.limit === 0 ? 'limit-value' : '';
+        
+        row.innerHTML = `
+          <td>${user.name}</td>
+          <td>${user.email}</td>
+          <td>${user.role}</td>
+          <td><span class="${limitClass}">${limitText}</span></td>
+          <td>${user.currentRegistrations}</td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn edit-btn action-btn" onclick="window.openLimitModal('${user.id}')">
+                <i class="fas fa-edit"></i> Editar
+              </button>
+            </div>
+          </td>
+        `;
+        
+        tableBody.appendChild(row);
+      });
+    }
+
+    // Función para abrir el modal de asignación de límite
+    window.openLimitModal = function(userId) {
+      const user = allUsers.find(u => u.id === userId);
+      
+      if (!user) {
+        showElegantError('Usuario no encontrado');
+        return;
+      }
+      
+      selectedUserId = userId;
+      
+      // Configurar el modal con la información del usuario
+      document.getElementById('modalUserName').textContent = user.name;
+      document.getElementById('modalUserEmail').textContent = user.email;
+      document.getElementById('modalCurrentLimit').textContent = user.limit === 0 ? 'Ilimitado' : user.limit;
+      document.getElementById('modalCurrentRegistrations').textContent = user.currentRegistrations;
+      document.getElementById('newLimit').value = user.limit;
+      
+      // Mostrar el modal
+      document.getElementById('limitModal').classList.add('active');
+    }
+
+    // Función para guardar el límite de usuario
+    window.saveUserLimit = async function() {
+      try {
+        if (!selectedUserId) {
+          showElegantError('No se ha seleccionado un usuario');
+          return;
+        }
+        
+        const newLimit = parseInt(document.getElementById('newLimit').value);
+        
+        if (isNaN(newLimit) || newLimit < 0) {
+          showElegantError('El límite debe ser un número válido mayor o igual a 0');
+          return;
+        }
+        
+        showLoading();
+        
+        // Buscar si ya existe un límite para este usuario
+        const userLimitsQuery = query(
+          collection(db, "UserRegistrationLimits"),
+          where("userId", "==", selectedUserId)
+        );
+        
+        const userLimitsSnapshot = await getDocs(userLimitsQuery);
+        
+        if (!userLimitsSnapshot.empty) {
+          // Actualizar el límite existente
+          const limitDoc = userLimitsSnapshot.docs[0];
+          await updateDoc(doc(db, "UserRegistrationLimits", limitDoc.id), {
+            collaboratorLimit: newLimit,
+            updatedAt: new Date()
+          });
+        } else {
+          // Crear un nuevo límite
+          await addDoc(collection(db, "UserRegistrationLimits"), {
+            userId: selectedUserId,
+            collaboratorLimit: newLimit,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          });
+        }
+        
+        // Actualizar la lista de usuarios
+        await loadAllUsers();
+        
+        // Cerrar el modal
+        closeModal();
+        
+        // Mostrar mensaje de éxito
+        showElegantError('Límite actualizado correctamente');
+        
+      } catch (error) {
+        console.error("Error guardando límite: ", error);
+        showElegantError('Error al guardar el límite');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Función para filtrar usuarios
+    function filterUsers() {
+      const searchTerm = document.getElementById('userSearch').value.toLowerCase();
+      const roleFilter = document.getElementById('userRole').value;
+      
+      let filteredUsers = allUsers;
+      
+      // Filtrar por término de búsqueda
+      if (searchTerm) {
+        filteredUsers = filteredUsers.filter(user => 
+          user.name.toLowerCase().includes(searchTerm) || 
+          user.email.toLowerCase().includes(searchTerm)
+        );
+      }
+      
+      // Filtrar por rol
+      if (roleFilter) {
+        filteredUsers = filteredUsers.filter(user => user.role === roleFilter);
+      }
+      
+      // Renderizar la tabla filtrada
+      renderUsersTable(filteredUsers);
+    }
+
+    // Evento cuando el DOM está cargado
+    document.addEventListener('DOMContentLoaded', () => {
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          currentUser = user;
+          loadAllUsers();
+        } else {
+          // Redirigir al login si no está autenticado
+          window.location.href = 'index.html';
+        }
+      });
+
+      // Configurar eventos de búsqueda y filtro
+      document.getElementById('userSearch').addEventListener('input', filterUsers);
+      document.getElementById('userRole').addEventListener('change', filterUsers);
+    });
+  </script>
+</body>
+</html>
