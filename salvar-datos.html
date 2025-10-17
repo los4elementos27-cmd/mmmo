@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Salvar Datos - PlusMoney Retom</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #1abc9c;
+      --primary-dark: #16a085;
+      --secondary-color: #2a2a3f;
+      --background-color: #2c3e50;
+      --text-color: #ffffff;
+      --text-light: #a8a8a8;
+      --border-color: #444;
+      --card-bg: #34495e;
+      --danger-color: #e74c3c;
+      --warning-color: #f39c12;
+      --success-color: #2ecc71;
+      --info-color: #15a086;
+      --futuristic-glow: 0 0 10px rgba(26, 188, 156, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--background-color);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(21, 160, 134, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(231, 76, 60, 0.1) 0%, transparent 20%);
+      color: var(--text-color);
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s ease;
+    }
+
+    .header {
+      background-color: var(--secondary-color);
+      padding: 1rem 2rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      text-shadow: var(--futuristic-glow);
+    }
+
+    .back-btn {
+      background-color: var(--primary-color);
+      color: var(--text-color);
+      border: none;
+      border-radius: 6px;
+      padding: 0.7rem 1.2rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+    }
+
+    .back-btn i {
+      margin-right: 6px;
+    }
+
+    .back-btn:hover {
+      background-color: var(--primary-dark);
+      box-shadow: var(--futuristic-glow);
+      transform: translateY(-2px);
+    }
+
+    .main-container {
+      flex: 1;
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .section-title {
+      color: var(--primary-color);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--border-color);
+      text-shadow: var(--futuristic-glow);
+      transition: all 0.3s ease;
+      font-size: 1.8rem;
+      text-align: center;
+    }
+
+    .card {
+      background-color: var(--secondary-color);
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .card:hover {
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), var(--futuristic-glow);
+      transform: translateY(-5px);
+    }
+
+    .form-group {
+      margin-bottom: 1.2rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.4rem;
+      color: var(--text-light);
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.7rem;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary-color);
+      box-shadow: var(--futuristic-glow);
+      outline: none;
+    }
+
+    .btn {
+      background-color: var(--primary-color);
+      color: var(--text-color);
+      border: none;
+      border-radius: 6px;
+      padding: 0.7rem 1.2rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn i {
+      margin-right: 6px;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-dark);
+      box-shadow: var(--futuristic-glow);
+      transform: translateY(-2px);
+    }
+
+    .btn-success {
+      background-color: var(--success-color);
+    }
+
+    .btn-info {
+      background-color: var(--info-color);
+    }
+
+    .btn-danger {
+      background-color: var(--danger-color);
+    }
+
+    .btn-danger:hover {
+      background-color: #c0392b;
+    }
+
+    .btn-warning {
+      background-color: var(--warning-color);
+    }
+
+    .file-input-container {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .file-input-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.7rem 1.2rem;
+      background-color: var(--primary-color);
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    .file-input-button:hover {
+      background-color: var(--primary-dark);
+      box-shadow: var(--futuristic-glow);
+    }
+
+    .file-input {
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .data-preview-container {
+      margin-top: 1.2rem;
+      max-height: 280px;
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.8rem;
+      background-color: var(--background-color);
+    }
+
+    .data-preview-item {
+      margin-bottom: 0.8rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .data-preview-item:last-child {
+      border-bottom: none;
+    }
+
+    .data-preview-title {
+      font-weight: bold;
+      color: var(--primary-color);
+      margin-bottom: 0.4rem;
+    }
+
+    .data-preview-content {
+      font-size: 0.85rem;
+      color: var(--text-light);
+    }
+
+    .data-preview-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.4rem;
+    }
+
+    .data-preview-table th,
+    .data-preview-table td {
+      padding: 0.4rem;
+      border: 1px solid var(--border-color);
+      text-align: left;
+      font-size: 0.75rem;
+    }
+
+    .data-preview-table th {
+      background-color: var(--secondary-color);
+      color: var(--primary-color);
+    }
+
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .loading-overlay.active {
+      display: flex;
+    }
+
+    .loader {
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid var(--primary-color);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .alert {
+      padding: 0.8rem;
+      border-radius: 6px;
+      margin-bottom: 0.8rem;
+      display: flex;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+
+    .alert-error {
+      background-color: rgba(231, 76, 60, 0.2);
+      border-left: 4px solid var(--danger-color);
+      color: #fff;
+    }
+
+    .alert-success {
+      background-color: rgba(46, 204, 113, 0.2);
+      border-left: 4px solid var(--success-color);
+      color: #fff;
+    }
+
+    .alert-warning {
+      background-color: rgba(243, 156, 18, 0.2);
+      border-left: 4px solid var(--warning-color);
+      color: #fff;
+    }
+
+    .alert i {
+      margin-right: 0.6rem;
+      font-size: 1.1rem;
+    }
+
+    .alert-content {
+      flex: 1;
+    }
+
+    .alert-close {
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      font-size: 1.1rem;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.8rem;
+      margin-top: 1.2rem;
+      flex-wrap: wrap;
+    }
+
+    /* Estilos para la alerta de confirmación personalizada */
+    .confirm-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 3000;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .confirm-overlay.active {
+      display: flex;
+    }
+
+    .confirm-dialog {
+      background-color: var(--secondary-color);
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), var(--futuristic-glow);
+      padding: 2rem;
+      width: 90%;
+      max-width: 500px;
+      transform: scale(0.9);
+      animation: scaleIn 0.3s ease forwards;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .confirm-dialog::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-color), var(--info-color));
+    }
+
+    .confirm-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .confirm-icon {
+      background-color: rgba(243, 156, 18, 0.2);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 1rem;
+      font-size: 1.5rem;
+      color: var(--warning-color);
+      box-shadow: 0 0 15px rgba(243, 156, 18, 0.3);
+    }
+
+    .confirm-title {
+      font-size: 1.4rem;
+      color: var(--primary-color);
+      text-shadow: var(--futuristic-glow);
+    }
+
+    .confirm-message {
+      margin-bottom: 2rem;
+      line-height: 1.6;
+      color: var(--text-light);
+    }
+
+    .confirm-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+    }
+
+    .confirm-btn {
+      padding: 0.7rem 1.5rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      min-width: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .confirm-btn-cancel {
+      background-color: transparent;
+      color: var(--text-light);
+      border: 1px solid var(--border-color);
+    }
+
+    .confirm-btn-cancel:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+    }
+
+    .confirm-btn-confirm {
+      background-color: var(--warning-color);
+      color: white;
+    }
+
+    .confirm-btn-confirm:hover {
+      background-color: #e67e22;
+      box-shadow: 0 0 15px rgba(243, 156, 18, 0.5);
+      transform: translateY(-2px);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes scaleIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    @media (max-width: 768px) {
+      .header {
+        padding: 1rem;
+      }
+      
+      .main-container {
+        padding: 1rem;
+      }
+      
+      .section-title {
+        font-size: 1.4rem;
+      }
+      
+      .card {
+        padding: 1rem;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+      }
+      
+      .btn {
+        width: 100%;
+      }
+      
+      .confirm-dialog {
+        padding: 1.5rem;
+        margin: 1rem;
+      }
+      
+      .confirm-buttons {
+        flex-direction: column;
+      }
+      
+      .confirm-btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="logo">PlusMoney Retom - Salvar Datos</div>
+    <a href="index.html" class="back-btn">
+      <i class="fas fa-arrow-left"></i> Volver al Sistema
+    </a>
+  </header>
+
+  <main class="main-container">
+    <h1 class="section-title">Sistema de Respaldo y Restauración de Datos</h1>
+    
+    <div class="card">
+      <h2>Importar Datos desde Copia de Seguridad</h2>
+      <p>Selecciona un archivo de respaldo (.rtm) para cargar y restaurar tus datos.</p>
+      
+      <div class="form-group">
+        <div class="file-input-container">
+          <div class="file-input-button">
+            <i class="fas fa-upload"></i> Seleccionar Copia de Seguridad
+          </div>
+          <input type="file" id="selectBackupFile" class="file-input" accept=".rtm">
+        </div>
+      </div>
+      
+      <div class="action-buttons">
+        <button id="loadBackupBtn" class="btn btn-info" disabled>
+          <i class="fas fa-eye"></i> Vista Previa
+        </button>
+        
+        <button id="uploadBackupBtn" class="btn btn-success" disabled>
+          <i class="fas fa-cloud-upload-alt"></i> Restaurar Datos
+        </button>
+      </div>
+      
+      <div class="data-preview-container" id="dataPreviewContainer" style="display: none;">
+        <h3>Vista Previa de Datos</h3>
+        <div id="dataPreviewContent">
+          <!-- Se llenará dinámicamente -->
+        </div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>Crear Copia de Seguridad</h2>
+      <p>Genera un archivo de respaldo con todos tus datos actuales.</p>
+      
+      <button id="createBackupBtn" class="btn btn-success">
+        <i class="fas fa-download"></i> Crear Copia de Seguridad
+      </button>
+    </div>
+    
+    <div class="card">
+      <h2>Información Importante</h2>
+      <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div class="alert-content">
+          <strong>Advertencia:</strong> La restauración de datos reemplazará toda la información actual en el sistema. Asegúrate de tener una copia de seguridad reciente antes de proceder.
+        </div>
+      </div>
+      
+      <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i>
+        <div class="alert-content">
+          <strong>Formato de archivo:</strong> Los archivos de respaldo tienen extensión .rtm y contienen toda la información de préstamos, clientes, colaboradores y configuraciones del sistema.
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loader"></div>
+  </div>
+
+  <!-- Alerta de confirmación personalizada -->
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-dialog">
+      <div class="confirm-header">
+        <div class="confirm-icon">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h2 class="confirm-title">Confirmar Restauración</h2>
+      </div>
+      <div class="confirm-message" id="confirmMessage">
+        ¿Está seguro de que desea restaurar esta copia de seguridad? Esto reemplazará todos los datos actuales en el sistema.
+      </div>
+      <div class="confirm-buttons">
+        <button class="confirm-btn confirm-btn-cancel" id="confirmCancel">
+          Cancelar
+        </button>
+        <button class="confirm-btn confirm-btn-confirm" id="confirmOk">
+          <i class="fas fa-check"></i> Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    // Importaciones de Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      getDocs, 
+      doc, 
+      getDoc,
+      query, 
+      where,
+      updateDoc,
+      arrayUnion,
+      Timestamp,
+      addDoc,
+      setDoc,
+      orderBy,
+      startAt,
+      endAt,
+      deleteDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+    import { getStorage, ref, getDownloadURL, uploadBytes, uploadString } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-storage.js";
+
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+      authDomain: "inventario-35d6b.firebaseapp.com",
+      databaseURL: "https://inventario-35d6b-default-rtdb.firebaseio.com",
+      projectId: "inventario-35d6b",
+      storageBucket: "inventario-35d6b.appspot.com",
+      messagingSenderId: "266100399659",
+      appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+    };
+
+    // Inicialización de Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const storage = getStorage(app);
+
+    // Variables globales
+    let currentUser = null;
+    let selectedBackupFile = null;
+    let backupPreviewData = null;
+
+    // Función para formatear números
+    function formatNumber(number) {
+      return number.toLocaleString('en-US', { 
+        minimumFractionDigits: 2, 
+        maximumFractionDigits: 2 
+      });
+    }
+
+    // Función para mostrar loading
+    function showLoading() {
+      document.getElementById('loadingOverlay').classList.add('active');
+    }
+
+    // Función para ocultar loading
+    function hideLoading() {
+      document.getElementById('loadingOverlay').classList.remove('active');
+    }
+
+    // Función para mostrar alerta
+    function showAlert(message, type = 'error') {
+      // Crear elemento de alerta
+      const alertElement = document.createElement('div');
+      alertElement.className = `alert alert-${type}`;
+      alertElement.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 2000;
+        max-width: 400px;
+        animation: slideIn 0.3s ease;
+      `;
+      
+      // Agregar estilos de animación
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes slideIn {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+          from { transform: translateX(0); opacity: 1; }
+          to { transform: translateX(100%); opacity: 0; }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      const icon = type === 'success' ? 'fa-check-circle' : type === 'warning' ? 'fa-exclamation-triangle' : 'fa-exclamation-circle';
+      
+      alertElement.innerHTML = `
+        <i class="fas ${icon}"></i>
+        <div class="alert-content">${message}</div>
+        <button class="alert-close" onclick="this.parentElement.style.animation='slideOut 0.3s ease forwards'">&times;</button>
+      `;
+      
+      document.body.appendChild(alertElement);
+      
+      // Ocultar automáticamente después de 5 segundos
+      setTimeout(() => {
+        if (alertElement.parentElement) {
+          alertElement.style.animation = 'slideOut 0.3s ease forwards';
+          setTimeout(() => {
+            if (alertElement.parentElement) {
+              alertElement.remove();
+            }
+          }, 300);
+        }
+      }, 5000);
+    }
+
+    // Función para mostrar confirmación personalizada
+    function showConfirm(message) {
+      return new Promise((resolve) => {
+        const confirmOverlay = document.getElementById('confirmOverlay');
+        const confirmMessage = document.getElementById('confirmMessage');
+        const confirmCancel = document.getElementById('confirmCancel');
+        const confirmOk = document.getElementById('confirmOk');
+        
+        // Establecer el mensaje
+        confirmMessage.textContent = message;
+        
+        // Mostrar el overlay
+        confirmOverlay.classList.add('active');
+        
+        // Configurar eventos de los botones
+        const handleCancel = () => {
+          confirmOverlay.classList.remove('active');
+          resolve(false);
+          removeEventListeners();
+        };
+        
+        const handleConfirm = () => {
+          confirmOverlay.classList.remove('active');
+          resolve(true);
+          removeEventListeners();
+        };
+        
+        const handleKeydown = (e) => {
+          if (e.key === 'Escape') {
+            handleCancel();
+          } else if (e.key === 'Enter') {
+            handleConfirm();
+          }
+        };
+        
+        // Añadir event listeners
+        confirmCancel.addEventListener('click', handleCancel);
+        confirmOk.addEventListener('click', handleConfirm);
+        document.addEventListener('keydown', handleKeydown);
+        
+        // Función para remover event listeners
+        function removeEventListeners() {
+          confirmCancel.removeEventListener('click', handleCancel);
+          confirmOk.removeEventListener('click', handleConfirm);
+          document.removeEventListener('keydown', handleKeydown);
+        }
+      });
+    }
+
+    // Función para manejar la selección de archivo de copia de seguridad
+    function handleBackupFileSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      if (!file.name.endsWith('.rtm')) {
+        showAlert('Solo se permiten archivos .rtm', 'error');
+        resetSaveDataModal();
+        return;
+      }
+      
+      selectedBackupFile = file;
+      document.getElementById('loadBackupBtn').disabled = false;
+      document.getElementById('uploadBackupBtn').disabled = true;
+      document.getElementById('dataPreviewContainer').style.display = 'none';
+    }
+
+    // Función para cargar la vista previa de la copia de seguridad
+    async function loadBackupPreview() {
+      if (!selectedBackupFile) {
+        showAlert('No se ha seleccionado ningún archivo', 'error');
+        return;
+      }
+      
+      try {
+        showLoading();
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            backupPreviewData = JSON.parse(e.target.result);
+            
+            // Validar formato
+            if (!backupPreviewData.format || !backupPreviewData.format.startsWith('PLUSMONEY_RTM')) {
+              throw new Error('Formato de archivo inválido');
+            }
+            
+            // Mostrar vista previa
+            displayBackupPreview(backupPreviewData.data);
+            
+            document.getElementById('uploadBackupBtn').disabled = false;
+            document.getElementById('dataPreviewContainer').style.display = 'block';
+          } catch (error) {
+            console.error("Error procesando archivo de respaldo: ", error);
+            showAlert('Error al procesar el archivo de respaldo', 'error');
+            resetSaveDataModal();
+          } finally {
+            hideLoading();
+          }
+        };
+        
+        reader.readAsText(selectedBackupFile);
+      } catch (error) {
+        console.error("Error cargando vista previa: ", error);
+        showAlert('Error al cargar la vista previa', 'error');
+        hideLoading();
+      }
+    }
+
+    // Función para mostrar vista previa de la copia de seguridad
+    function displayBackupPreview(backupData) {
+      const previewContainer = document.getElementById('dataPreviewContent');
+      previewContainer.innerHTML = '';
+      
+      // Mostrar resumen general
+      const summaryItem = document.createElement('div');
+      summaryItem.className = 'data-preview-item';
+      summaryItem.innerHTML = `
+        <div class="data-preview-title">Resumen General</div>
+        <div class="data-preview-content">
+          <p><strong>Préstamos activos:</strong> ${backupData.loans.filter(l => l.status !== 'completed').length}</p>
+          <p><strong>Préstamos completados:</strong> ${backupData.loans.filter(l => l.status === 'completed').length}</p>
+          <p><strong>Colaboradores:</strong> ${backupData.collaborators.length}</p>
+          <p><strong>Usuarios:</strong> ${backupData.users.length}</p>
+          <p><strong>Historial de pagos:</strong> ${backupData.paymentHistory.length}</p>
+        </div>
+      `;
+      previewContainer.appendChild(summaryItem);
+      
+      // Mostrar préstamos activos
+      const activeLoans = backupData.loans.filter(l => l.status !== 'completed');
+      if (activeLoans.length > 0) {
+        const loansItem = document.createElement('div');
+        loansItem.className = 'data-preview-item';
+        loansItem.innerHTML = `
+          <div class="data-preview-title">Préstamos Activos (${activeLoans.length})</div>
+          <div class="data-preview-content">
+            <table class="data-preview-table">
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Monto</th>
+                  <th>Saldo</th>
+                  <th>Interés</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${activeLoans.slice(0, 5).map(loan => `
+                  <tr>
+                    <td>${loan.client.name}</td>
+                    <td>$${formatNumber(loan.amount)}</td>
+                    <td>$${formatNumber(loan.balance)}</td>
+                    <td>${loan.interestRate}%</td>
+                  </tr>
+                `).join('')}
+                ${activeLoans.length > 5 ? `<tr><td colspan="4">... y ${activeLoans.length - 5} más</td></tr>` : ''}
+              </tbody>
+            </table>
+          </div>
+        `;
+        previewContainer.appendChild(loansItem);
+      }
+      
+      // Mostrar colaboradores
+      if (backupData.collaborators.length > 0) {
+        const collaboratorsItem = document.createElement('div');
+        collaboratorsItem.className = 'data-preview-item';
+        collaboratorsItem.innerHTML = `
+          <div class="data-preview-title">Colaboradores (${backupData.collaborators.length})</div>
+          <div class="data-preview-content">
+            <table class="data-preview-table">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Posición</th>
+                  <th>Empresa</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${backupData.collaborators.slice(0, 5).map(collaborator => `
+                  <tr>
+                    <td>${collaborator.firstName} ${collaborator.lastName}</td>
+                    <td>${collaborator.position}</td>
+                    <td>${collaborator.company}</td>
+                  </tr>
+                `).join('')}
+                ${backupData.collaborators.length > 5 ? `<tr><td colspan="3">... y ${backupData.collaborators.length - 5} más</td></tr>` : ''}
+              </tbody>
+            </table>
+          </div>
+        `;
+        previewContainer.appendChild(collaboratorsItem);
+      }
+      
+      // Mostrar usuarios
+      if (backupData.users.length > 0) {
+        const usersItem = document.createElement('div');
+        usersItem.className = 'data-preview-item';
+        usersItem.innerHTML = `
+          <div class="data-preview-title">Usuarios (${backupData.users.length})</div>
+          <div class="data-preview-content">
+            <table class="data-preview-table">
+              <thead>
+                <tr>
+                  <th>Usuario</th>
+                  <th>Cliente ID</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${backupData.users.slice(0, 5).map(user => `
+                  <tr>
+                    <td>${user.username}</td>
+                    <td>${user.clientId}</td>
+                  </tr>
+                `).join('')}
+                ${backupData.users.length > 5 ? `<tr><td colspan="2">... y ${backupData.users.length - 5} más</td></tr>` : ''}
+              </tbody>
+            </table>
+          </div>
+        `;
+        previewContainer.appendChild(usersItem);
+      }
+    }
+
+    // Función para subir la copia de seguridad a Firebase
+    async function uploadBackupData() {
+      if (!backupPreviewData || !backupPreviewData.data) {
+        showAlert('No hay datos para restaurar', 'error');
+        return;
+      }
+      
+      try {
+        showLoading();
+        
+        // Usar la alerta de confirmación personalizada
+        const confirm = await showConfirm(
+          '¿Está seguro de que desea restaurar esta copia de seguridad? Esto reemplazará todos los datos actuales en el sistema.'
+        );
+        
+        if (!confirm) {
+          hideLoading();
+          return;
+        }
+        
+        // Restaurar datos
+        await restoreBackupData(backupPreviewData.data);
+        
+        showAlert('Datos restaurados correctamente desde la copia de seguridad', 'success');
+        
+        // Resetear formulario
+        resetSaveDataModal();
+      } catch (error) {
+        console.error("Error subiendo datos de copia de seguridad: ", error);
+        showAlert('Error al restaurar los datos de la copia de seguridad', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Función para restaurar datos de copia de seguridad
+    async function restoreBackupData(backupData) {
+      // Eliminar datos existentes
+      const loansQuery = query(collection(db, "Loans"), where("userId", "==", currentUser.uid));
+      const collaboratorsQuery = query(collection(db, "Collaborators"), where("userId", "==", currentUser.uid));
+      const usersQuery = query(collection(db, "LoanUsers"), where("createdBy", "==", currentUser.uid));
+      const paymentHistoryQuery = query(collection(db, "PaymentHistory"), where("userId", "==", currentUser.uid));
+      
+      const [loansSnapshot, collaboratorsSnapshot, usersSnapshot, paymentHistorySnapshot] = await Promise.all([
+        getDocs(loansQuery),
+        getDocs(collaboratorsQuery),
+        getDocs(usersQuery),
+        getDocs(paymentHistoryQuery)
+      ]);
+      
+      // Eliminar préstamos
+      const loanDeletes = loansSnapshot.docs.map(doc => deleteDoc(doc.ref));
+      
+      // Eliminar colaboradores
+      const collaboratorDeletes = collaboratorsSnapshot.docs.map(doc => deleteDoc(doc.ref));
+      
+      // Eliminar usuarios
+      const userDeletes = usersSnapshot.docs.map(doc => deleteDoc(doc.ref));
+      
+      // Eliminar historial de pagos
+      const paymentHistoryDeletes = paymentHistorySnapshot.docs.map(doc => deleteDoc(doc.ref));
+      
+      await Promise.all([...loanDeletes, ...collaboratorDeletes, ...userDeletes, ...paymentHistoryDeletes]);
+      
+      // Restaurar nuevos datos
+      const loanRestores = backupData.loans.map(loan => addDoc(collection(db, "Loans"), {
+        ...loan,
+        userId: currentUser.uid,
+        createdBy: currentUser.uid
+      }));
+      const collaboratorRestores = backupData.collaborators.map(collaborator => addDoc(collection(db, "Collaborators"), {
+        ...collaborator,
+        userId: currentUser.uid
+      }));
+      const userRestores = backupData.users.map(user => addDoc(collection(db, "LoanUsers"), {
+        ...user,
+        createdBy: currentUser.uid
+      }));
+      const paymentHistoryRestores = backupData.paymentHistory.map(payment => addDoc(collection(db, "PaymentHistory"), {
+        ...payment,
+        userId: currentUser.uid,
+        recordedBy: currentUser.uid
+      }));
+      
+      await Promise.all([...loanRestores, ...collaboratorRestores, ...userRestores, ...paymentHistoryRestores]);
+      
+      // Actualizar configuración
+      if (backupData.systemConfig) {
+        const configRef = doc(db, "SystemConfig", "loanSettings");
+        await setDoc(configRef, backupData.systemConfig, { merge: true });
+      }
+      
+      // Actualizar datos de empresa
+      if (backupData.companyData) {
+        const companyRef = doc(db, "informacionCompany", currentUser.uid);
+        await setDoc(companyRef, backupData.companyData, { merge: true });
+      }
+    }
+
+    // Función para resetear el modal de salvar datos
+    function resetSaveDataModal() {
+      selectedBackupFile = null;
+      backupPreviewData = null;
+      document.getElementById('selectBackupFile').value = '';
+      document.getElementById('loadBackupBtn').disabled = true;
+      document.getElementById('uploadBackupBtn').disabled = true;
+      document.getElementById('dataPreviewContainer').style.display = 'none';
+    }
+
+    // Función para crear copia de seguridad
+    async function createBackup() {
+      try {
+        showLoading();
+        
+        // Obtener todos los datos del usuario
+        const loansQuery = query(
+          collection(db, "Loans"),
+          where("userId", "==", currentUser.uid)
+        );
+        
+        const collaboratorsQuery = query(
+          collection(db, "Collaborators"),
+          where("userId", "==", currentUser.uid)
+        );
+        
+        const usersQuery = query(
+          collection(db, "LoanUsers"),
+          where("createdBy", "==", currentUser.uid)
+        );
+        
+        const paymentHistoryQuery = query(
+          collection(db, "PaymentHistory"),
+          where("userId", "==", currentUser.uid)
+        );
+        
+        const systemConfigRef = doc(db, "SystemConfig", "loanSettings");
+        const companyDataRef = doc(db, "informacionCompany", currentUser.uid);
+        
+        const [loansSnapshot, collaboratorsSnapshot, usersSnapshot, paymentHistorySnapshot, systemConfigSnap, companyDataSnap] = await Promise.all([
+          getDocs(loansQuery),
+          getDocs(collaboratorsQuery),
+          getDocs(usersQuery),
+          getDocs(paymentHistoryQuery),
+          getDoc(systemConfigRef),
+          getDoc(companyDataRef)
+        ]);
+        
+        // Preparar datos para la copia de seguridad
+        const backupData = {
+          userId: currentUser.uid,
+          timestamp: Timestamp.now(),
+          loans: [],
+          collaborators: [],
+          users: [],
+          paymentHistory: [],
+          systemConfig: systemConfigSnap.exists() ? systemConfigSnap.data() : {},
+          companyData: companyDataSnap.exists() ? companyDataSnap.data() : {}
+        };
+        
+        loansSnapshot.forEach(doc => {
+          backupData.loans.push({ id: doc.id, ...doc.data() });
+        });
+        
+        collaboratorsSnapshot.forEach(doc => {
+          backupData.collaborators.push({ id: doc.id, ...doc.data() });
+        });
+        
+        usersSnapshot.forEach(doc => {
+          backupData.users.push({ id: doc.id, ...doc.data() });
+        });
+        
+        paymentHistorySnapshot.forEach(doc => {
+          backupData.paymentHistory.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // Convertir a formato .rtm (JSON con metadatos)
+        const rtmData = {
+          format: "PLUSMONEY_RTM_1.0",
+          created: new Date().toISOString(),
+          userId: currentUser.uid,
+          data: backupData
+        };
+        
+        // Crear archivo .rtm
+        const rtmContent = JSON.stringify(rtmData, null, 2);
+        const blob = new Blob([rtmContent], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        
+        // Descargar archivo
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `backup_plusmoney_${currentUser.uid}_${Date.now()}.rtm`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        showAlert('Copia de seguridad creada y descargada correctamente', 'success');
+      } catch (error) {
+        console.error("Error creando copia de seguridad: ", error);
+        showAlert('Error al crear la copia de seguridad', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Evento cuando el DOM está cargado
+    document.addEventListener('DOMContentLoaded', () => {
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          currentUser = user;
+        } else {
+          window.location.href = 'index.html';
+        }
+      });
+
+      // Configurar eventos
+      document.getElementById('selectBackupFile').addEventListener('change', handleBackupFileSelect);
+      document.getElementById('loadBackupBtn').addEventListener('click', loadBackupPreview);
+      document.getElementById('uploadBackupBtn').addEventListener('click', uploadBackupData);
+      document.getElementById('createBackupBtn').addEventListener('click', createBackup);
+    });
+  </script>
+</body>
+</html>
