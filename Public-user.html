@@ -4192,17 +4192,42 @@ function showDayPaymentDetails(date) {
         return;
     }
     
+    // CORRECCIÓN: Calcular el total a pagar usando la misma lógica que el modal de detalles
+    const paymentsMade = currentLoan.payments ? currentLoan.payments.length : 0;
+    const totalPayments = currentLoan.paymentSchedule.length;
+    const isFixedLoan = currentLoan.loanType === 'fixed';
+    const currencySymbol = userSettings.currency === 'USD' ? '$' : 'RD$';
+    
+    let totalToPay = 0;
+    
+    if (isFixedLoan) {
+        // Préstamo a plazo fijo - pagos fijos sin intereses
+        const remainingPayments = totalPayments - paymentsMade;
+        totalToPay = remainingPayments > 0 ? (currentLoan.remainingCapital || 0) / remainingPayments : 0;
+    } else {
+        // Préstamo con intereses - pagos variables (capital + interés)
+        const remainingQuincenas = totalPayments - paymentsMade;
+        const capitalToPay = remainingQuincenas > 0 ? (currentLoan.remainingCapital || 0) / remainingQuincenas : 0;
+        const tasaQuincenal = (currentLoan.interestRate || 0) / (currentLoan.frequency === 'biweekly' ? 1 : 2);
+        const interestToPay = (currentLoan.remainingCapital || 0) * (tasaQuincenal / 100);
+        totalToPay = capitalToPay + interestToPay;
+    }
+    
     let message = '';
     paymentsOnDate.forEach(payment => {
         const status = payment.status === 'paid' ? 'Pagado con éxito' : 
                       date < new Date() ? 'Pago vencido' : 'Pago pendiente';
         
-        // CORRECCIÓN: Usar HTML para mejor formato
-        message += `<div style="margin-bottom: 15px;">
-<strong>- Fecha de vencimiento:</strong><br>
+        // CORRECCIÓN: Mostrar en líneas completamente separadas con el total a pagar
+        message += `<div style="margin-bottom: 20px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+<strong>Fecha de vencimiento:</strong><br>
 ${new Date(payment.dueDate).toLocaleDateString()}<br><br>
-<strong>- Estado:</strong><br>
-${status}
+
+<strong>Estado:</strong><br>
+${status}<br><br>
+
+<strong>Total a pagar (próxima cuota):</strong><br>
+${currencySymbol}${formatCurrency(totalToPay)}
 </div>`;
     });
     
