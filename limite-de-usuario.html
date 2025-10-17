@@ -6,6 +6,8 @@
   <title>Asignación de Permisos - PlusMoney Retom</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
   <style>
     :root {
       --primary-color: #1abc9c;
@@ -21,6 +23,8 @@
       --success-color: #2ecc71;
       --info-color: #15a086;
       --futuristic-glow: 0 0 10px rgba(26, 188, 156, 0.5);
+      --glass-bg: rgba(42, 42, 63, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.1);
     }
 
     * {
@@ -38,8 +42,9 @@
       color: var(--text-color);
       margin: 0;
       min-height: 100vh;
-      padding: 2rem;
+      padding: 1rem;
       transition: all 0.3s ease;
+      font-size: 14px;
     }
 
     .container {
@@ -47,56 +52,231 @@
       margin: 0 auto;
     }
 
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
     .section-title {
       color: var(--primary-color);
-      margin-bottom: 1.5rem;
       padding-bottom: 0.5rem;
-      border-bottom: 2px solid var(--border-color);
       text-shadow: var(--futuristic-glow);
       transition: all 0.3s ease;
+      font-size: 1.8rem;
+      letter-spacing: 0.5px;
+    }
+
+    .user-section {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .user-welcome {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: var(--glass-bg);
+      padding: 0.6rem 1rem;
+      border-radius: 10px;
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+    }
+
+    .user-avatar {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-color), var(--info-color));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    .user-details {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name {
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .user-role {
+      color: var(--text-light);
+      font-size: 0.75rem;
+    }
+
+    .export-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-left: 1rem;
+    }
+
+    .export-btn {
+      background: var(--danger-color);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0.5rem 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.8rem;
+    }
+
+    .export-btn:hover {
+      background: #c0392b;
+      transform: translateY(-1px);
+      box-shadow: var(--futuristic-glow);
+    }
+
+    .bulk-btn {
+      background: var(--warning-color);
+    }
+
+    .bulk-btn:hover {
+      background: #e67e22;
     }
 
     .card {
-      background-color: var(--secondary-color);
+      background: var(--glass-bg);
       border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-      padding: 1.5rem;
-      margin-bottom: 2rem;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+      padding: 1.2rem;
+      margin-bottom: 1.5rem;
       transition: all 0.3s ease;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary-color), var(--info-color));
     }
 
     .card:hover {
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), var(--futuristic-glow);
-      transform: translateY(-5px);
+      transform: translateY(-3px);
+    }
+
+    .card-title {
+      color: var(--primary-color);
+      margin-bottom: 1.2rem;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-title i {
+      font-size: 1.1rem;
+    }
+
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transition: all 0.3s ease;
+      border: 1px solid var(--glass-border);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .stat-icon {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .stat-icon.users {
+      background: rgba(26, 188, 156, 0.2);
+      color: var(--primary-color);
+    }
+
+    .stat-icon.limit {
+      background: rgba(243, 156, 18, 0.2);
+      color: var(--warning-color);
+    }
+
+    .stat-icon.registrations {
+      background: rgba(46, 204, 113, 0.2);
+      color: var(--success-color);
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+    }
+
+    .stat-label {
+      color: var(--text-light);
+      font-size: 0.8rem;
     }
 
     .form-horizontal {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.2rem;
     }
 
     .form-group {
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.2rem;
       transition: all 0.3s ease;
     }
 
     .form-group label {
       display: block;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.4rem;
       color: var(--text-light);
       font-weight: 500;
+      font-size: 0.85rem;
     }
 
     .form-control {
       width: 100%;
-      padding: 0.75rem;
+      padding: 0.6rem 0.8rem;
       border: 1px solid var(--border-color);
-      border-radius: 8px;
-      background-color: var(--background-color);
+      border-radius: 6px;
+      background-color: rgba(0, 0, 0, 0.2);
       color: var(--text-color);
-      font-size: 1rem;
+      font-size: 0.85rem;
       transition: all 0.3s ease;
     }
 
@@ -110,24 +290,26 @@
       background-color: var(--primary-color);
       color: var(--text-color);
       border: none;
-      border-radius: 8px;
-      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      padding: 0.6rem 1.2rem;
       cursor: pointer;
-      font-size: 1rem;
+      font-size: 0.85rem;
       transition: all 0.3s ease;
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      font-weight: 500;
     }
 
     .btn i {
-      margin-right: 8px;
+      margin-right: 6px;
+      font-size: 0.9rem;
     }
 
     .btn:hover {
       background-color: var(--primary-dark);
       box-shadow: var(--futuristic-glow);
-      transform: translateY(-2px);
+      transform: translateY(-1px);
     }
 
     .btn-success {
@@ -146,36 +328,42 @@
       background-color: var(--warning-color);
     }
 
+    .btn-sm {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.75rem;
+    }
+
     .alert {
-      padding: 1rem;
-      border-radius: 8px;
+      padding: 0.8rem;
+      border-radius: 6px;
       margin-bottom: 1rem;
       display: flex;
       align-items: center;
       transition: all 0.3s ease;
+      font-size: 0.85rem;
     }
 
     .alert-error {
       background-color: rgba(231, 76, 60, 0.2);
-      border-left: 4px solid var(--danger-color);
+      border-left: 3px solid var(--danger-color);
       color: #fff;
     }
 
     .alert-success {
       background-color: rgba(46, 204, 113, 0.2);
-      border-left: 4px solid var(--success-color);
+      border-left: 3px solid var(--success-color);
       color: #fff;
     }
 
     .alert-warning {
       background-color: rgba(243, 156, 18, 0.2);
-      border-left: 4px solid var(--warning-color);
+      border-left: 3px solid var(--warning-color);
       color: #fff;
     }
 
     .alert i {
-      margin-right: 0.75rem;
-      font-size: 1.2rem;
+      margin-right: 0.6rem;
+      font-size: 1rem;
     }
 
     .alert-content {
@@ -187,30 +375,36 @@
       border: none;
       color: inherit;
       cursor: pointer;
-      font-size: 1.2rem;
+      font-size: 1rem;
     }
 
     .table-container {
       overflow-x: auto;
-      margin-top: 1.5rem;
+      margin-top: 1.2rem;
+      border-radius: 8px;
+      border: 1px solid var(--glass-border);
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 1rem;
+      margin-bottom: 0.8rem;
+      font-size: 0.8rem;
     }
 
     th, td {
-      padding: 0.75rem;
+      padding: 0.8rem;
       text-align: left;
       border-bottom: 1px solid var(--border-color);
     }
 
     th {
-      background-color: rgba(0, 0, 0, 0.2);
+      background-color: rgba(0, 0, 0, 0.3);
       color: var(--primary-color);
       font-weight: 500;
+      position: sticky;
+      top: 0;
+      font-size: 0.85rem;
     }
 
     tr:hover {
@@ -219,56 +413,90 @@
 
     .search-container {
       display: flex;
-      margin-bottom: 1.5rem;
-      gap: 1rem;
+      margin-bottom: 1.2rem;
+      gap: 0.8rem;
+      flex-wrap: wrap;
     }
 
     .search-input {
       flex: 1;
+      min-width: 250px;
+    }
+
+    .filters-container {
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .filter-label {
+      margin-bottom: 0.4rem;
+      color: var(--text-light);
+      font-size: 0.8rem;
     }
 
     .user-info {
       display: flex;
       align-items: center;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
+      gap: 0.8rem;
+      margin-bottom: 1.2rem;
+      padding: 0.8rem;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
     }
 
-    .user-avatar {
+    .user-avatar-lg {
       width: 50px;
       height: 50px;
       border-radius: 50%;
-      background-color: var(--primary-color);
+      background: linear-gradient(135deg, var(--primary-color), var(--info-color));
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5rem;
+      font-size: 1.4rem;
     }
 
-    .user-details {
+    .user-details-lg {
       flex: 1;
     }
 
-    .user-name {
+    .user-name-lg {
       font-weight: 500;
-      margin-bottom: 0.25rem;
+      font-size: 1rem;
+      margin-bottom: 0.2rem;
     }
 
-    .user-email {
+    .user-email-lg {
       color: var(--text-light);
-      font-size: 0.9rem;
+      margin-bottom: 0.4rem;
+      font-size: 0.85rem;
     }
 
     .limit-info {
       display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-top: 0.5rem;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+
+    .limit-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .limit-label {
+      color: var(--text-light);
+      font-size: 0.75rem;
     }
 
     .limit-value {
       color: var(--primary-color);
       font-weight: 500;
+      font-size: 0.9rem;
     }
 
     .modal {
@@ -296,29 +524,50 @@
     }
 
     .modal-content {
-      background-color: var(--secondary-color);
-      padding: 2rem;
+      background: var(--glass-bg);
+      padding: 1.5rem;
       border-radius: 12px;
       width: 90%;
       max-width: 500px;
-      max-height: 90vh;
+      max-height: 85vh;
       overflow-y: auto;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), var(--futuristic-glow);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5), var(--futuristic-glow);
       transition: all 0.3s ease;
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: none;
+      border: none;
+      color: var(--text-light);
+      font-size: 1.3rem;
+      cursor: pointer;
+      transition: color 0.3s ease;
+      z-index: 10;
+    }
+
+    .modal-close:hover {
+      color: var(--primary-color);
     }
 
     .modal-title {
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.2rem;
       color: var(--primary-color);
       text-align: center;
       text-shadow: var(--futuristic-glow);
+      font-size: 1.3rem;
     }
 
     .modal-footer {
       display: flex;
       justify-content: flex-end;
-      gap: 1rem;
-      margin-top: 1.5rem;
+      gap: 0.8rem;
+      margin-top: 1.2rem;
     }
 
     .loading-overlay {
@@ -339,11 +588,11 @@
     }
 
     .loader {
-      border: 8px solid #f3f3f3;
-      border-top: 8px solid var(--primary-color);
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid var(--primary-color);
       border-radius: 50%;
-      width: 60px;
-      height: 60px;
+      width: 50px;
+      height: 50px;
       animation: spin 1s linear infinite;
     }
 
@@ -354,14 +603,18 @@
 
     .action-buttons {
       display: flex;
-      gap: 0.5rem;
+      gap: 0.4rem;
     }
 
     .action-btn {
-      padding: 0.5rem;
+      padding: 0.4rem;
       border-radius: 4px;
       cursor: pointer;
       transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
     }
 
     .edit-btn {
@@ -372,13 +625,132 @@
       background-color: var(--danger-color);
     }
 
+    .view-btn {
+      background-color: var(--info-color);
+    }
+
     .action-btn:hover {
       opacity: 0.8;
+      transform: translateY(-1px);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.4rem;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 500;
+    }
+
+    .badge-admin {
+      background-color: rgba(231, 76, 60, 0.2);
+      color: var(--danger-color);
+    }
+
+    .badge-user {
+      background-color: rgba(52, 152, 219, 0.2);
+      color: #3498db;
+    }
+
+    .badge-manager {
+      background-color: rgba(155, 89, 182, 0.2);
+      color: #9b59b6;
+    }
+
+    .badge-success {
+      background-color: rgba(46, 204, 113, 0.2);
+      color: var(--success-color);
+    }
+
+    .badge-warning {
+      background-color: rgba(243, 156, 18, 0.2);
+      color: var(--warning-color);
+    }
+
+    .tabs {
+      display: flex;
+      margin-bottom: 1.2rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .tab {
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-bottom: 2px solid transparent;
+      font-size: 0.85rem;
+    }
+
+    .tab.active {
+      color: var(--primary-color);
+      border-bottom: 2px solid var(--primary-color);
+    }
+
+    .tab:hover:not(.active) {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .permissions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 0.8rem;
+      margin-top: 0.8rem;
+    }
+
+    .permission-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.6rem;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      font-size: 0.8rem;
+    }
+
+    .permission-item:hover {
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .permission-checkbox {
+      width: 16px;
+      height: 16px;
+    }
+
+    .permission-label {
+      flex: 1;
     }
 
     @media (max-width: 768px) {
       body {
-        padding: 1rem;
+        padding: 0.8rem;
+        font-size: 13px;
+      }
+      
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.8rem;
+      }
+      
+      .user-section {
+        width: 100%;
+        justify-content: space-between;
+      }
+      
+      .export-actions {
+        margin-left: 0;
+        margin-top: 0.5rem;
+        width: 100%;
+        justify-content: flex-end;
       }
       
       .form-horizontal {
@@ -396,12 +768,101 @@
       .action-buttons {
         flex-direction: column;
       }
+      
+      .stats-container {
+        grid-template-columns: 1fr;
+      }
+      
+      .filters-container {
+        flex-direction: column;
+      }
+      
+      .modal-content {
+        padding: 1.2rem;
+        margin: 1rem;
+      }
+      
+      .section-title {
+        font-size: 1.5rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 0.5rem;
+      }
+      
+      .user-welcome {
+        padding: 0.5rem 0.8rem;
+      }
+      
+      .export-btn {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.75rem;
+      }
+      
+      .card {
+        padding: 0.8rem;
+      }
+      
+      .modal-content {
+        padding: 1rem;
+        margin: 0.5rem;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1 class="section-title">Asignación de Permisos de Registro</h1>
+    <div class="header">
+      <h1 class="section-title">
+        <i class="fas fa-user-shield"></i> Asignación de Permisos
+      </h1>
+      <div class="user-section">
+        <div class="user-welcome">
+          <div class="user-avatar">
+            <i class="fas fa-user-cog"></i>
+          </div>
+          <div class="user-details">
+            <div class="user-name" id="currentUserName">Administrador</div>
+            <div class="user-role" id="currentUserRole">Administrador del Sistema</div>
+          </div>
+        </div>
+        <div class="export-actions">
+          <button class="export-btn" onclick="exportToPDF()">
+            <i class="fas fa-file-pdf"></i> Exportar PDF
+          </button>
+          <button class="export-btn bulk-btn" onclick="bulkEditLimits()">
+            <i class="fas fa-edit"></i> Edición Masiva
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Estadísticas rápidas -->
+    <div class="stats-container">
+      <div class="stat-card">
+        <div class="stat-icon users">
+          <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-value" id="totalUsers">0</div>
+        <div class="stat-label">Usuarios Totales</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon limit">
+          <i class="fas fa-tachometer-alt"></i>
+        </div>
+        <div class="stat-value" id="avgLimit">0</div>
+        <div class="stat-label">Límite Promedio</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon registrations">
+          <i class="fas fa-clipboard-list"></i>
+        </div>
+        <div class="stat-value" id="totalRegistrations">0</div>
+        <div class="stat-label">Registros Totales</div>
+      </div>
+    </div>
     
     <!-- Alertas -->
     <div id="permissionAlert" class="alert alert-error" style="display: none;">
@@ -412,21 +873,35 @@
     
     <!-- Formulario de asignación de permisos -->
     <div class="card">
-      <h2 style="margin-bottom: 1.5rem; color: var(--primary-color);">Asignar Límite de Registros</h2>
+      <h2 class="card-title">
+        <i class="fas fa-sliders-h"></i> Gestión de Límites de Usuarios
+      </h2>
       
       <div class="search-container">
         <div class="form-group search-input">
           <label for="userSearch">Buscar Usuario</label>
-          <input type="text" id="userSearch" class="form-control" placeholder="Buscar por nombre o email...">
+          <input type="text" id="userSearch" class="form-control" placeholder="Buscar por nombre, email o rol...">
         </div>
-        <div class="form-group">
-          <label for="userRole">Filtrar por Rol</label>
-          <select id="userRole" class="form-control">
-            <option value="">Todos los roles</option>
-            <option value="admin">Administrador</option>
-            <option value="user">Usuario</option>
-            <option value="manager">Gerente</option>
-          </select>
+        <div class="filters-container">
+          <div class="filter-group">
+            <div class="filter-label">Filtrar por Rol</div>
+            <select id="userRole" class="form-control">
+              <option value="">Todos los roles</option>
+              <option value="admin">Administrador</option>
+              <option value="user">Usuario</option>
+              <option value="manager">Gerente</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <div class="filter-label">Filtrar por Estado</div>
+            <select id="userStatus" class="form-control">
+              <option value="">Todos los estados</option>
+              <option value="active">Activos</option>
+              <option value="inactive">Inactivos</option>
+              <option value="limited">Con límite</option>
+              <option value="unlimited">Sin límite</option>
+            </select>
+          </div>
         </div>
       </div>
       
@@ -437,8 +912,9 @@
               <th>Usuario</th>
               <th>Email</th>
               <th>Rol</th>
-              <th>Límite Actual</th>
-              <th>Registros Realizados</th>
+              <th>Estado</th>
+              <th>Límite</th>
+              <th>Registros</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -453,22 +929,25 @@
   <!-- Modal para asignar/editar límite -->
   <div class="modal" id="limitModal">
     <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('limitModal')">&times;</button>
       <h3 class="modal-title" id="limitModalTitle">Asignar Límite de Registros</h3>
       
       <div class="user-info">
-        <div class="user-avatar">
+        <div class="user-avatar-lg">
           <i class="fas fa-user"></i>
         </div>
-        <div class="user-details">
-          <div class="user-name" id="modalUserName">Nombre de Usuario</div>
-          <div class="user-email" id="modalUserEmail">usuario@ejemplo.com</div>
+        <div class="user-details-lg">
+          <div class="user-name-lg" id="modalUserName">Nombre de Usuario</div>
+          <div class="user-email-lg" id="modalUserEmail">usuario@ejemplo.com</div>
           <div class="limit-info">
-            <span>Límite actual:</span>
-            <span class="limit-value" id="modalCurrentLimit">0</span>
-          </div>
-          <div class="limit-info">
-            <span>Registros realizados:</span>
-            <span class="limit-value" id="modalCurrentRegistrations">0</span>
+            <div class="limit-item">
+              <span class="limit-label">Límite actual:</span>
+              <span class="limit-value" id="modalCurrentLimit">0</span>
+            </div>
+            <div class="limit-item">
+              <span class="limit-label">Registros realizados:</span>
+              <span class="limit-value" id="modalCurrentRegistrations">0</span>
+            </div>
           </div>
         </div>
       </div>
@@ -476,12 +955,62 @@
       <div class="form-group">
         <label for="newLimit">Nuevo Límite de Registros</label>
         <input type="number" id="newLimit" class="form-control" min="0" placeholder="0 = Sin límite">
-        <small>Establecer en 0 para permitir registros ilimitados</small>
+        <small style="color: var(--text-light); font-size: 0.75rem;">Establecer en 0 para permitir registros ilimitados</small>
+      </div>
+      
+      <div class="form-group">
+        <label for="limitReason">Motivo del Cambio (Opcional)</label>
+        <textarea id="limitReason" class="form-control" rows="2" placeholder="Explique el motivo del cambio de límite..."></textarea>
       </div>
       
       <div class="modal-footer">
-        <button onclick="closeModal()" class="btn btn-danger">Cancelar</button>
-        <button onclick="saveUserLimit()" class="btn btn-success">Guardar</button>
+        <button onclick="closeModal('limitModal')" class="btn btn-danger">Cancelar</button>
+        <button onclick="saveUserLimit()" class="btn btn-success">Guardar Cambios</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para edición masiva -->
+  <div class="modal" id="bulkEditModal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('bulkEditModal')">&times;</button>
+      <h3 class="modal-title">Edición Masiva de Límites</h3>
+      
+      <div class="form-group">
+        <label for="bulkLimitType">Aplicar a:</label>
+        <select id="bulkLimitType" class="form-control">
+          <option value="all">Todos los usuarios</option>
+          <option value="role">Por rol</option>
+          <option value="status">Por estado</option>
+        </select>
+      </div>
+      
+      <div class="form-group" id="bulkRoleContainer" style="display: none;">
+        <label for="bulkRole">Seleccionar Rol</label>
+        <select id="bulkRole" class="form-control">
+          <option value="admin">Administradores</option>
+          <option value="user">Usuarios</option>
+          <option value="manager">Gerentes</option>
+        </select>
+      </div>
+      
+      <div class="form-group" id="bulkStatusContainer" style="display: none;">
+        <label for="bulkStatus">Seleccionar Estado</label>
+        <select id="bulkStatus" class="form-control">
+          <option value="active">Activos</option>
+          <option value="inactive">Inactivos</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="bulkNewLimit">Nuevo Límite</label>
+        <input type="number" id="bulkNewLimit" class="form-control" min="0" placeholder="0 = Sin límite">
+        <small style="color: var(--text-light); font-size: 0.75rem;">Establecer en 0 para permitir registros ilimitados</small>
+      </div>
+      
+      <div class="modal-footer">
+        <button onclick="closeModal('bulkEditModal')" class="btn btn-danger">Cancelar</button>
+        <button onclick="applyBulkLimits()" class="btn btn-success">Aplicar Cambios</button>
       </div>
     </div>
   </div>
@@ -556,8 +1085,14 @@
     }
 
     // Función para cerrar modales
-    function closeModal() {
-      document.querySelectorAll('.modal').forEach(modal => modal.classList.remove('active'));
+    function closeModal(modalId = null) {
+      if (modalId) {
+        document.getElementById(modalId).classList.remove('active');
+      } else {
+        document.querySelectorAll('.modal').forEach(modal => {
+          modal.classList.remove('active');
+        });
+      }
     }
 
     // Función para cargar todos los usuarios desde la colección "users"
@@ -565,17 +1100,19 @@
       try {
         showLoading();
         
-        // Obtener todos los usuarios de la colección "users"
         const usersQuery = query(collection(db, "users"));
         const usersSnapshot = await getDocs(usersQuery);
         
         allUsers = [];
+        let totalLimit = 0;
+        let totalRegistrations = 0;
+        let usersWithLimit = 0;
         
         for (const userDoc of usersSnapshot.docs) {
           const userData = userDoc.data();
           const userId = userDoc.id;
           
-          // Obtener el límite de registro del usuario desde UserRegistrationLimits
+          // Obtener el límite de registro del usuario
           let userLimit = 0;
           const userLimitsQuery = query(
             collection(db, "UserRegistrationLimits"),
@@ -586,9 +1123,10 @@
           if (!userLimitsSnapshot.empty) {
             const limitData = userLimitsSnapshot.docs[0].data();
             userLimit = limitData.collaboratorLimit || 0;
+            usersWithLimit++;
           }
           
-          // Contar registros actuales del usuario desde la colección Collaborators
+          // Contar registros actuales del usuario
           let currentRegistrations = 0;
           const collaboratorsQuery = query(
             collection(db, "Collaborators"),
@@ -604,10 +1142,21 @@
             name: userData.name || 'Sin nombre',
             email: userData.email || 'Sin email',
             role: userData.role || 'user',
+            status: userData.status || 'active',
+            registrationDate: userData.registrationDate || new Date(),
+            lastActivity: userData.lastActivity || new Date(),
             limit: userLimit,
             currentRegistrations: currentRegistrations
           });
+          
+          totalLimit += userLimit;
+          totalRegistrations += currentRegistrations;
         }
+        
+        // Actualizar estadísticas
+        document.getElementById('totalUsers').textContent = allUsers.length;
+        document.getElementById('avgLimit').textContent = usersWithLimit > 0 ? Math.round(totalLimit / usersWithLimit) : 0;
+        document.getElementById('totalRegistrations').textContent = totalRegistrations;
         
         // Renderizar la tabla de usuarios
         renderUsersTable(allUsers);
@@ -628,7 +1177,7 @@
       if (users.length === 0) {
         tableBody.innerHTML = `
           <tr>
-            <td colspan="6" style="text-align: center; padding: 2rem;">
+            <td colspan="7" style="text-align: center; padding: 1.5rem;">
               No se encontraron usuarios
             </td>
           </tr>
@@ -640,18 +1189,25 @@
         const row = document.createElement('tr');
         
         const limitText = user.limit === 0 ? 'Ilimitado' : user.limit;
-        const limitClass = user.limit === 0 ? 'limit-value' : '';
+        const limitClass = user.limit === 0 ? 'badge badge-success' : '';
+        
+        const roleBadge = user.role === 'admin' ? 'badge badge-admin' : 
+                         user.role === 'manager' ? 'badge badge-manager' : 'badge badge-user';
+        
+        const statusBadge = user.status === 'active' ? 'badge badge-success' : 'badge badge-warning';
+        const statusText = user.status === 'active' ? 'Activo' : 'Inactivo';
         
         row.innerHTML = `
           <td>${user.name}</td>
           <td>${user.email}</td>
-          <td>${user.role}</td>
+          <td><span class="${roleBadge}">${user.role}</span></td>
+          <td><span class="${statusBadge}">${statusText}</span></td>
           <td><span class="${limitClass}">${limitText}</span></td>
           <td>${user.currentRegistrations}</td>
           <td>
             <div class="action-buttons">
-              <button class="btn edit-btn action-btn" onclick="window.openLimitModal('${user.id}')">
-                <i class="fas fa-edit"></i> Editar
+              <button class="btn btn-sm edit-btn action-btn" onclick="openLimitModal('${user.id}')" title="Editar límite">
+                <i class="fas fa-edit"></i>
               </button>
             </div>
           </td>
@@ -662,7 +1218,7 @@
     }
 
     // Función para abrir el modal de asignación de límite
-    window.openLimitModal = function(userId) {
+    function openLimitModal(userId) {
       const user = allUsers.find(u => u.id === userId);
       
       if (!user) {
@@ -684,7 +1240,7 @@
     }
 
     // Función para guardar el límite de usuario
-    window.saveUserLimit = async function() {
+    async function saveUserLimit() {
       try {
         if (!selectedUserId) {
           showElegantError('No se ha seleccionado un usuario');
@@ -713,7 +1269,9 @@
           const limitDoc = userLimitsSnapshot.docs[0];
           await updateDoc(doc(db, "UserRegistrationLimits", limitDoc.id), {
             collaboratorLimit: newLimit,
-            updatedAt: new Date()
+            updatedAt: new Date(),
+            updatedBy: currentUser.uid,
+            reason: document.getElementById('limitReason').value || 'Sin motivo especificado'
           });
         } else {
           // Crear un nuevo límite
@@ -721,7 +1279,9 @@
             userId: selectedUserId,
             collaboratorLimit: newLimit,
             createdAt: new Date(),
-            updatedAt: new Date()
+            updatedAt: new Date(),
+            createdBy: currentUser.uid,
+            reason: document.getElementById('limitReason').value || 'Sin motivo especificado'
           });
         }
         
@@ -729,7 +1289,7 @@
         await loadAllUsers();
         
         // Cerrar el modal
-        closeModal();
+        closeModal('limitModal');
         
         // Mostrar mensaje de éxito
         showElegantError('Límite actualizado correctamente');
@@ -746,6 +1306,7 @@
     function filterUsers() {
       const searchTerm = document.getElementById('userSearch').value.toLowerCase();
       const roleFilter = document.getElementById('userRole').value;
+      const statusFilter = document.getElementById('userStatus').value;
       
       let filteredUsers = allUsers;
       
@@ -753,7 +1314,8 @@
       if (searchTerm) {
         filteredUsers = filteredUsers.filter(user => 
           user.name.toLowerCase().includes(searchTerm) || 
-          user.email.toLowerCase().includes(searchTerm)
+          user.email.toLowerCase().includes(searchTerm) ||
+          user.role.toLowerCase().includes(searchTerm)
         );
       }
       
@@ -762,8 +1324,202 @@
         filteredUsers = filteredUsers.filter(user => user.role === roleFilter);
       }
       
+      // Filtrar por estado
+      if (statusFilter) {
+        if (statusFilter === 'active') {
+          filteredUsers = filteredUsers.filter(user => user.status === 'active');
+        } else if (statusFilter === 'inactive') {
+          filteredUsers = filteredUsers.filter(user => user.status === 'inactive');
+        } else if (statusFilter === 'limited') {
+          filteredUsers = filteredUsers.filter(user => user.limit > 0);
+        } else if (statusFilter === 'unlimited') {
+          filteredUsers = filteredUsers.filter(user => user.limit === 0);
+        }
+      }
+      
       // Renderizar la tabla filtrada
       renderUsersTable(filteredUsers);
+    }
+
+    // Función para exportar a PDF
+    async function exportToPDF() {
+      try {
+        showLoading();
+        
+        if (allUsers.length === 0) {
+          showElegantError('No hay datos para exportar');
+          return;
+        }
+        
+        // Usar jsPDF para generar PDF
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        // Configuración del documento
+        const pageWidth = doc.internal.pageSize.getWidth();
+        
+        // Encabezado del PDF
+        doc.setFillColor(26, 188, 156);
+        doc.rect(0, 0, pageWidth, 25, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.text('PlusMoney Retom', pageWidth / 2, 12, { align: 'center' });
+        doc.setFontSize(12);
+        doc.text('Reporte de Usuarios', pageWidth / 2, 20, { align: 'center' });
+        
+        // Información del reporte
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Generado: ${new Date().toLocaleDateString('es-ES')}`, 14, 35);
+        doc.text(`Total de usuarios: ${allUsers.length}`, 14, 42);
+        
+        // Preparar datos para la tabla
+        const tableData = allUsers.map(user => [
+          user.name,
+          user.email,
+          user.role,
+          user.status,
+          user.limit === 0 ? 'Ilimitado' : user.limit.toString(),
+          user.currentRegistrations.toString()
+        ]);
+        
+        // Configurar y generar tabla
+        doc.autoTable({
+          startY: 50,
+          head: [['Nombre', 'Email', 'Rol', 'Estado', 'Límite', 'Registros']],
+          body: tableData,
+          theme: 'grid',
+          headStyles: {
+            fillColor: [52, 73, 94],
+            textColor: 255,
+            fontStyle: 'bold'
+          },
+          alternateRowStyles: {
+            fillColor: [245, 245, 245]
+          },
+          styles: {
+            fontSize: 7,
+            cellPadding: 2
+          },
+          margin: { top: 50 }
+        });
+        
+        // Pie de página
+        const finalY = doc.lastAutoTable.finalY + 10;
+        if (finalY < doc.internal.pageSize.getHeight() - 15) {
+          doc.setFontSize(7);
+          doc.setTextColor(100, 100, 100);
+          doc.text('Sistema de Gestión de Usuarios - PlusMoney Retom', pageWidth / 2, doc.internal.pageSize.getHeight() - 8, { align: 'center' });
+        }
+        
+        // Guardar PDF
+        doc.save(`reporte_usuarios_${new Date().toISOString().split('T')[0]}.pdf`);
+        
+        showElegantError('Archivo PDF exportado correctamente');
+        
+      } catch (error) {
+        console.error('Error exportando PDF:', error);
+        showElegantError('Error al exportar el archivo PDF');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Función para edición masiva
+    function bulkEditLimits() {
+      document.getElementById('bulkEditModal').classList.add('active');
+    }
+
+    // Configurar eventos para el modal de edición masiva
+    function setupBulkEditModal() {
+      const bulkLimitType = document.getElementById('bulkLimitType');
+      const bulkRoleContainer = document.getElementById('bulkRoleContainer');
+      const bulkStatusContainer = document.getElementById('bulkStatusContainer');
+      
+      bulkLimitType.addEventListener('change', function() {
+        bulkRoleContainer.style.display = this.value === 'role' ? 'block' : 'none';
+        bulkStatusContainer.style.display = this.value === 'status' ? 'block' : 'none';
+      });
+    }
+
+    // Función para aplicar límites masivos
+    async function applyBulkLimits() {
+      try {
+        const newLimit = parseInt(document.getElementById('bulkNewLimit').value);
+        const limitType = document.getElementById('bulkLimitType').value;
+        
+        if (isNaN(newLimit) || newLimit < 0) {
+          showElegantError('El límite debe ser un número válido mayor o igual a 0');
+          return;
+        }
+        
+        showLoading();
+        
+        let usersToUpdate = [];
+        
+        // Filtrar usuarios según el tipo seleccionado
+        switch (limitType) {
+          case 'all':
+            usersToUpdate = allUsers;
+            break;
+          case 'role':
+            const selectedRole = document.getElementById('bulkRole').value;
+            usersToUpdate = allUsers.filter(user => user.role === selectedRole);
+            break;
+          case 'status':
+            const selectedStatus = document.getElementById('bulkStatus').value;
+            usersToUpdate = allUsers.filter(user => user.status === selectedStatus);
+            break;
+        }
+        
+        if (usersToUpdate.length === 0) {
+          showElegantError('No hay usuarios que coincidan con los criterios seleccionados');
+          return;
+        }
+        
+        // Actualizar límites en lote
+        for (const user of usersToUpdate) {
+          const userLimitsQuery = query(
+            collection(db, "UserRegistrationLimits"),
+            where("userId", "==", user.id)
+          );
+          
+          const userLimitsSnapshot = await getDocs(userLimitsQuery);
+          
+          if (!userLimitsSnapshot.empty) {
+            const limitDoc = userLimitsSnapshot.docs[0];
+            await updateDoc(doc(db, "UserRegistrationLimits", limitDoc.id), {
+              collaboratorLimit: newLimit,
+              updatedAt: new Date(),
+              updatedBy: currentUser.uid
+            });
+          } else {
+            await addDoc(collection(db, "UserRegistrationLimits"), {
+              userId: user.id,
+              collaboratorLimit: newLimit,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              createdBy: currentUser.uid
+            });
+          }
+        }
+        
+        // Actualizar la lista de usuarios
+        await loadAllUsers();
+        
+        // Cerrar el modal
+        closeModal('bulkEditModal');
+        
+        showElegantError(`Límites actualizados para ${usersToUpdate.length} usuarios`);
+        
+      } catch (error) {
+        console.error('Error en edición masiva:', error);
+        showElegantError('Error al aplicar los cambios masivos');
+      } finally {
+        hideLoading();
+      }
     }
 
     // Evento cuando el DOM está cargado
@@ -771,7 +1527,13 @@
       onAuthStateChanged(auth, (user) => {
         if (user) {
           currentUser = user;
+          
+          // Actualizar información del usuario actual
+          document.getElementById('currentUserName').textContent = user.displayName || user.email;
+          document.getElementById('currentUserRole').textContent = 'Administrador del Sistema';
+          
           loadAllUsers();
+          setupBulkEditModal();
         } else {
           // Redirigir al login si no está autenticado
           window.location.href = 'index.html';
@@ -781,7 +1543,23 @@
       // Configurar eventos de búsqueda y filtro
       document.getElementById('userSearch').addEventListener('input', filterUsers);
       document.getElementById('userRole').addEventListener('change', filterUsers);
+      document.getElementById('userStatus').addEventListener('change', filterUsers);
+      
+      // Cerrar modal al hacer clic fuera del contenido
+      document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('modal')) {
+          closeModal();
+        }
+      });
     });
+
+    // Hacer las funciones globales para que puedan ser llamadas desde los botones
+    window.closeModal = closeModal;
+    window.openLimitModal = openLimitModal;
+    window.saveUserLimit = saveUserLimit;
+    window.exportToPDF = exportToPDF;
+    window.bulkEditLimits = bulkEditLimits;
+    window.applyBulkLimits = applyBulkLimits;
   </script>
 </body>
 </html>
