@@ -351,6 +351,7 @@
       font-size: 1.5rem;
       cursor: pointer;
       transition: color 0.3s ease;
+      z-index: 10;
     }
 
     .modal-close:hover {
@@ -563,11 +564,11 @@
   <!-- Modal para información -->
   <div class="modal" id="infoModal">
     <div class="modal-content">
-      <button class="modal-close" onclick="closeModal()">&times;</button>
+      <button class="modal-close" onclick="closeModal('infoModal')">&times;</button>
       <h3 class="modal-title" id="infoModalTitle"></h3>
       <p id="infoModalMessage"></p>
       <div class="modal-footer">
-        <button onclick="closeModal()" class="btn">Aceptar</button>
+        <button onclick="closeModal('infoModal')" class="btn">Aceptar</button>
       </div>
     </div>
   </div>
@@ -647,9 +648,17 @@
       document.getElementById('infoModal').classList.add('active');
     }
 
-    // Función para cerrar modales
-    function closeModal() {
-      document.querySelectorAll('.modal').forEach(modal => modal.classList.remove('active'));
+    // Función para cerrar modales - CORREGIDA
+    function closeModal(modalId = null) {
+      if (modalId) {
+        // Cerrar un modal específico
+        document.getElementById(modalId).classList.remove('active');
+      } else {
+        // Cerrar todos los modales
+        document.querySelectorAll('.modal').forEach(modal => {
+          modal.classList.remove('active');
+        });
+      }
     }
 
     // Función para mostrar loading
@@ -928,7 +937,7 @@
         }
       });
       
-      // Cerrar modal al hacer clic fuera del contenido
+      // Cerrar modal al hacer clic fuera del contenido - CORREGIDO
       document.addEventListener('click', function(e) {
         if (e.target.classList.contains('modal')) {
           closeModal();
@@ -953,7 +962,7 @@
         
         // Contar registros actuales
         await countCurrentRegistrations();
-        
+         
       } catch (error) {
         console.error("Error inicializando formulario: ", error);
         showElegantError('Error al inicializar el formulario');
@@ -961,6 +970,9 @@
         hideLoading();
       }
     }
+
+    // Hacer las funciones globales para que puedan ser llamadas desde HTML
+    window.closeModal = closeModal;
   </script>
 </body>
 </html>
