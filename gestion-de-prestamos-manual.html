@@ -3,1096 +3,673 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Préstamos Registrados - PlusMoney Retom</title>
+  <title>Gestión de Clientes - PlusMoney Retom</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary-color: #15a086;
-      --primary-dark: #0e7a68;
-      --primary-light: #1abc9c;
-      --secondary-color: #2c3e50;
-      --secondary-dark: #1a252f;
-      --secondary-light: #34495e;
-      --accent-color: #e74c3c;
-      --light-color: #ffffff;
-      --dark-color: #2c3e50;
-      --success-color: #2ecc71;
-      --warning-color: #f39c12;
+      --primary-color: #1abc9c;
+      --primary-dark: #16a085;
+      --secondary-color: #2a2a3f;
+      --background-color: #2c3e50;
+      --text-color: #ffffff;
+      --text-light: #a8a8a8;
+      --border-color: #444;
+      --card-bg: #34495e;
       --danger-color: #e74c3c;
-      --info-color: #3498db;
-      --text-primary: #ecf0f1;
-      --text-secondary: #bdc3c7;
-      --glass-effect: rgba(44, 62, 80, 0.7);
-      --glass-border: rgba(255, 255, 255, 0.1);
-      --neon-glow: 0 0 10px rgba(21, 160, 134, 0.7);
+      --warning-color: #f39c12;
+      --success-color: #2ecc71;
+      --info-color: #15a086;
+      --futuristic-glow: 0 0 10px rgba(26, 188, 156, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: var(--secondary-dark);
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--background-color);
       background-image: 
         radial-gradient(circle at 10% 20%, rgba(21, 160, 134, 0.1) 0%, transparent 20%),
         radial-gradient(circle at 90% 80%, rgba(231, 76, 60, 0.1) 0%, transparent 20%);
-      color: var(--text-primary);
+      color: var(--text-color);
       margin: 0;
-      padding: 0;
       min-height: 100vh;
-    }
-
-    /* Efecto de vidrio futurista */
-    .glass-card {
-      background: var(--glass-effect);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid var(--glass-border);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-      border-radius: 12px;
       transition: all 0.3s ease;
     }
 
-    .glass-card:hover {
-      transform: translateY(-5px);
-      box-shadow: var(--neon-glow), 0 12px 40px rgba(0, 0, 0, 0.4);
-    }
-
-    /* Navbar futurista */
-    .navbar {
-      background: rgba(44, 62, 80, 0.8);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
-      border-bottom: 1px solid var(--glass-border);
-      padding: 15px 0;
-    }
-
-    .navbar-brand {
-      font-weight: 700;
-      color: var(--light-color);
-      font-size: 1.5rem;
-      letter-spacing: 1px;
-      display: flex;
-      align-items: center;
-    }
-
-    .navbar-brand img {
-      height: 40px;
-      margin-right: 10px;
-      filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
-    }
-
-    .company-logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .company-logo img {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid var(--primary-color);
-      box-shadow: 0 0 10px rgba(21, 160, 134, 0.5);
-    }
-
-    .main-content {
-      padding: 30px;
-      min-height: calc(100vh - 80px);
-    }
-
-    /* Estilos para tarjetas */
-    .card {
-      border: none;
-      border-radius: 12px;
-      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-      margin-bottom: 25px;
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      background: var(--secondary-light);
-      overflow: hidden;
-      position: relative;
-    }
-
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
-    }
-
-    .card:hover {
-      transform: translateY(-8px);
-      box-shadow: var(--neon-glow), 0 15px 30px rgba(0, 0, 0, 0.3);
-    }
-
-    .card-header {
+    .header {
       background-color: var(--secondary-color);
-      border-bottom: 1px solid var(--glass-border);
-      font-weight: 600;
+      padding: 1rem 2rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      color: white;
-      padding: 15px 20px;
     }
 
-    /* Estilos para acordeón */
-    .accordion {
-      --bs-accordion-bg: transparent;
-      --bs-accordion-border-color: var(--glass-border);
-      --bs-accordion-btn-color: var(--text-primary);
-      --bs-accordion-active-color: var(--text-primary);
-      --bs-accordion-active-bg: rgba(21, 160, 134, 0.2);
-    }
-
-    .accordion-button:not(.collapsed) {
-      background-color: rgba(21, 160, 134, 0.1);
-      color: var(--light-color);
-      box-shadow: inset 0 -1px 0 var(--glass-border);
-    }
-
-    .accordion-button {
-      background-color: var(--secondary-color);
-      color: white;
-      padding: 15px 20px;
-    }
-
-    .accordion-button:focus {
-      box-shadow: none;
-      border-color: var(--glass-border);
-    }
-
-    .accordion-body {
-      padding: 0;
-    }
-
-    /* Estilos para items de cliente */
-    .client-item {
-      background-color: rgba(44, 62, 80, 0.7);
-      display: flex;
-      align-items: center;
-      padding: 15px;
-      border-bottom: 1px solid var(--glass-border);
-      transition: all 0.3s ease;
-      color: #fff;
-    }
-
-    .client-item:hover {
-      background-color: rgba(21, 160, 134, 0.3);
-    }
-
-    .client-avatar {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin-right: 15px;
-      border: 2px solid var(--primary-color);
-      box-shadow: 0 0 10px rgba(21, 160, 134, 0.3);
-    }
-
-    .client-info {
-      flex-grow: 1;
-    }
-
-    .client-name {
-      font-weight: 600;
-      margin-bottom: 5px;
-      color: white;
-      font-size: 1.1rem;
-    }
-
-    .client-id {
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-    }
-
-    .client-status {
-      font-size: 0.75rem;
-      padding: 4px 10px;
-      border-radius: 15px;
-      background-color: rgba(21, 160, 134, 0.2);
-      color: var(--primary-light);
-      border: 1px solid var(--primary-color);
-      box-shadow: 0 0 5px rgba(21, 160, 134, 0.3);
-    }
-
-    .client-actions {
-      display: flex;
-      gap: 12px;
-    }
-
-    .action-btn {
-      background: none;
-      border: none;
-      color: white;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: 16px;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .action-btn:hover {
-      transform: scale(1.1);
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
-    }
-
-    .action-btn i {
-      transition: all 0.3s ease;
-    }
-
-    .action-btn:hover i {
-      transform: scale(1.2);
-    }
-
-    .view-btn {
-      color: var(--info-color);
-    }
-
-    .edit-btn {
-      color: var(--warning-color);
-    }
-
-    .delete-btn {
-      color: var(--danger-color);
-    }
-
-    .print-btn {
-      color: var(--primary-light);
-    }
-
-    /* Estilos para préstamo en acordeón */
-    .loan-title {
-      color: white !important;
-      font-size: 0.9rem;
-      margin-top: 5px;
-    }
-
-    .loan-title i {
-      color: white;
-      margin-right: 5px;
-    }
-
-    /* Estilos para modales */
-    .modal-content {
-      border-radius: 15px;
-      border: 1px solid var(--glass-border);
-      background-color: var(--secondary-light);
-      color: white;
-      min-height: 400px;
-      max-height: 90vh;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-    }
-
-    .modal-header {
-      border-bottom: 1px solid var(--glass-border);
-      padding: 15px 20px;
-      flex-shrink: 0;
-    }
-
-    .modal-title {
-      color: white;
-      font-weight: 600;
-    }
-
-    .modal-body {
-      overflow-y: auto;
-      flex-grow: 1;
-      display: flex;
-      flex-direction: column;
-      padding: 20px;
-    }
-
-    .modal-footer {
-      border-top: 1px solid var(--glass-border);
-      flex-shrink: 0;
-      padding: 15px 20px;
-    }
-
-    .btn-close {
-      filter: invert(1);
-      opacity: 0.8;
-    }
-
-    .btn-close:hover {
-      opacity: 1;
-    }
-
-    /* Vista previa de documentos */
-    .image-preview {
-      max-width: 100%;
-      max-height: 70vh;
-      display: block;
-      margin: 0 auto;
-      border-radius: 8px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    }
-
-    .document-preview {
-      width: 100%;
-      height: 70vh;
-      border: none;
-      background-color: white;
-      border-radius: 8px;
-    }
-
-    /* Detalles del cliente */
-    .client-details {
-      padding: 20px;
-      flex-grow: 1;
-      overflow-y: auto;
-    }
-
-    .detail-row {
-      display: flex;
-      margin-bottom: 12px;
-    }
-
-    .detail-label {
-      font-weight: 600;
-      min-width: 180px;
-      color: var(--text-primary);
-    }
-
-    .detail-value {
-      flex-grow: 1;
-      color: var(--text-secondary);
-    }
-
-    .documents-container {
-      margin-top: 25px;
-    }
-
-    .document-thumbnail {
-      width: 100px;
-      height: 100px;
-      object-fit: cover;
-      border: 1px solid var(--glass-border);
-      border-radius: 8px;
-      margin-right: 10px;
-      margin-bottom: 10px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .document-thumbnail:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 15px rgba(21, 160, 134, 0.3);
-    }
-
-    /* Subida de documentos */
-    .document-upload-container {
-      margin-top: 20px;
-    }
-
-    .document-preview-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 15px;
-    }
-
-    .document-preview-item {
-      position: relative;
-      width: 100px;
-      height: 100px;
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid var(--glass-border);
-      transition: all 0.3s ease;
-    }
-
-    .document-preview-item:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    .document-preview-item img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .remove-document {
-      position: absolute;
-      top: 5px;
-      right: 5px;
-      background-color: var(--danger-color);
-      color: white;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 12px;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .document-preview-item:hover .remove-document {
-      opacity: 1;
-    }
-
-    .upload-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      width: 100px;
-      height: 100px;
-      border: 2px dashed var(--glass-border);
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      color: var(--text-secondary);
-    }
-
-    .upload-btn:hover {
-      border-color: var(--primary-color);
-      color: var(--primary-light);
-      background: rgba(21, 160, 134, 0.1);
-    }
-
-    .upload-btn i {
-      font-size: 24px;
-      margin-bottom: 5px;
-      transition: all 0.3s ease;
-    }
-
-    .upload-btn:hover i {
-      transform: scale(1.1);
-      color: var(--primary-light);
-    }
-
-    /* Formularios */
-    .form-label {
-      color: var(--text-secondary);
-      font-weight: 500;
-    }
-
-    .form-control, .form-select {
-      background-color: rgba(61, 81, 102, 0.7);
-      border: 1px solid var(--glass-border);
-      color: white;
-      padding: 10px 15px;
-      border-radius: 8px;
-      transition: all 0.3s ease;
-    }
-
-    .form-control:focus, .form-select:focus {
-      background-color: rgba(61, 81, 102, 0.9);
-      color: white;
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 0.25rem rgba(21, 160, 134, 0.25);
-    }
-
-    /* Diseño horizontal para detalles */
-    .horizontal-details {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 30px;
-    }
-
-    .detail-group {
-      flex: 1;
-      min-width: 300px;
-    }
-
-    .detail-group h5 {
-      color: var(--primary-light);
-      margin-bottom: 20px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--glass-border);
-      font-weight: 600;
-    }
-
-    /* Alertas personalizadas */
-    .custom-alert {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 1100;
-      min-width: 300px;
-      border-radius: 8px;
-      padding: 15px 20px;
-      display: flex;
-      align-items: center;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-      opacity: 0;
-      transform: translateX(100%);
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      background: rgba(44, 62, 80, 0.9);
-      border-left: 4px solid var(--primary-color);
-    }
-
-    .custom-alert.show {
-      opacity: 1;
-      transform: translateX(0);
-    }
-
-    .custom-alert.success {
-      border-left-color: var(--success-color);
-    }
-
-    .custom-alert.error {
-      border-left-color: var(--danger-color);
-    }
-
-    .custom-alert.info {
-      border-left-color: var(--info-color);
-    }
-
-    .custom-alert i {
-      margin-right: 12px;
+    .logo {
       font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      text-shadow: var(--futuristic-glow);
     }
 
-    .custom-alert.success i {
-      color: var(--success-color);
-    }
-
-    .custom-alert.error i {
-      color: var(--danger-color);
-    }
-
-    .custom-alert.info i {
-      color: var(--info-color);
-    }
-
-    /* Estilos para botones */
-    .btn {
-      border-radius: 8px;
-      padding: 10px 20px;
-      font-weight: 500;
-      letter-spacing: 0.5px;
+    .main-container {
+      padding: 1.5rem;
+      width: 100%;
       transition: all 0.3s ease;
+    }
+
+    .section-title {
+      color: var(--primary-color);
+      margin-bottom: 1.2rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--border-color);
+      text-shadow: var(--futuristic-glow);
+      transition: all 0.3s ease;
+      font-size: 1.4rem;
+    }
+
+    .card {
+      background-color: var(--secondary-color);
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      padding: 1.2rem;
+      margin-bottom: 1.5rem;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .card:hover {
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), var(--futuristic-glow);
+      transform: translateY(-5px);
+    }
+
+    .form-group {
+      margin-bottom: 1.2rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.4rem;
+      color: var(--text-light);
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.7rem;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary-color);
+      box-shadow: var(--futuristic-glow);
+      outline: none;
+    }
+
+    .btn {
+      background-color: var(--primary-color);
+      color: var(--text-color);
       border: none;
+      border-radius: 6px;
+      padding: 0.7rem 1.2rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
       display: inline-flex;
       align-items: center;
       justify-content: center;
     }
 
     .btn i {
-      margin-right: 8px;
+      margin-right: 6px;
     }
 
-    .btn-primary {
-      background-color: var(--primary-color);
-      color: white;
-    }
-
-    .btn-primary:hover {
+    .btn:hover {
       background-color: var(--primary-dark);
+      box-shadow: var(--futuristic-glow);
       transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(21, 160, 134, 0.4);
     }
 
-    .btn-secondary {
-      background-color: var(--secondary-color);
-      color: white;
-      border: 1px solid var(--glass-border);
+    .btn-success {
+      background-color: var(--success-color);
     }
 
-    .btn-secondary:hover {
-      background-color: var(--secondary-light);
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    .btn-info {
+      background-color: var(--info-color);
     }
 
     .btn-danger {
       background-color: var(--danger-color);
-      color: white;
     }
 
     .btn-danger:hover {
       background-color: #c0392b;
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
     }
 
-    /* Barra de búsqueda */
-    .search-container {
-      position: relative;
-      max-width: 350px;
+    .btn-warning {
+      background-color: var(--warning-color);
     }
 
-    .search-container .form-control {
-      padding-left: 40px;
-      border-radius: 30px;
-      background: rgba(61, 81, 102, 0.7);
+    .table-container {
+      overflow-x: auto;
+      margin-bottom: 1.5rem;
+      transition: all 0.3s ease;
     }
 
-    .search-container .btn {
-      position: absolute;
-      left: 0;
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: var(--card-bg);
+      transition: all 0.3s ease;
+    }
+
+    th, td {
+      padding: 0.7rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+      transition: all 0.3s ease;
+      font-size: 0.85rem;
+    }
+
+    th {
+      background-color: var(--secondary-color);
+      color: var(--primary-color);
+    }
+
+    tr:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      transform: scale(1.01);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
       top: 0;
+      left: 0;
+      width: 100%;
       height: 100%;
-      background: transparent;
+      background-color: rgba(0, 0, 0, 0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+
+    .modal.active {
+      display: flex;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-content {
+      background-color: var(--secondary-color);
+      padding: 1.5rem;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 800px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), var(--futuristic-glow);
+      transition: all 0.3s ease;
+    }
+
+    .modal-title {
+      margin-bottom: 1.2rem;
+      color: var(--primary-color);
+      text-align: center;
+      text-shadow: var(--futuristic-glow);
+      font-size: 1.3rem;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.8rem;
+      margin-top: 1.2rem;
+    }
+
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .loading-overlay.active {
+      display: flex;
+    }
+
+    .loader {
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid var(--primary-color);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Estilos para alertas elegantes */
+    .alert {
+      padding: 0.8rem;
+      border-radius: 6px;
+      margin-bottom: 0.8rem;
+      display: flex;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+
+    .alert-error {
+      background-color: rgba(231, 76, 60, 0.2);
+      border-left: 4px solid var(--danger-color);
+      color: #fff;
+    }
+
+    .alert-success {
+      background-color: rgba(46, 204, 113, 0.2);
+      border-left: 4px solid var(--success-color);
+      color: #fff;
+    }
+
+    .alert-warning {
+      background-color: rgba(243, 156, 18, 0.2);
+      border-left: 4px solid var(--warning-color);
+      color: #fff;
+    }
+
+    .alert i {
+      margin-right: 0.6rem;
+      font-size: 1.1rem;
+    }
+
+    .alert-content {
+      flex: 1;
+    }
+
+    .alert-close {
+      background: none;
       border: none;
-      color: var(--text-secondary);
-      z-index: 5;
+      color: inherit;
+      cursor: pointer;
+      font-size: 1.1rem;
     }
 
-    .search-container .btn:hover {
-      color: var(--primary-light);
-      transform: none;
-      box-shadow: none;
-    }
-
-    /* Animaciones */
-    @keyframes float {
-      0% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
-      100% { transform: translateY(0px); }
-    }
-
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(21, 160, 134, 0.7); }
-      70% { box-shadow: 0 0 0 10px rgba(21, 160, 134, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(21, 160, 134, 0); }
-    }
-
-    /* Estilos para impresión */
-    @media print {
-      body * {
-        visibility: hidden;
-      }
-      
-      .modal,
-      .modal * {
-        visibility: visible;
-      }
-      
-      .modal {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        height: auto;
-        max-width: 100%;
-        border: none;
-        box-shadow: none;
-      }
-      
-      .modal-dialog {
-        max-width: 100%;
-        margin: 0;
-      }
-      
-      .modal-content {
-        border: none;
-        box-shadow: none;
-        background-color: white !important;
-        color: black !important;
-      }
-      
-      .no-print, .navbar, .sidebar, .client-actions, .modal-footer,
-      .input-group, .search-container, .action-btn {
-        display: none !important;
-      }
-      
-      .detail-label {
-        color: black !important;
-      }
-
-      .detail-value {
-        color: black !important;
-      }
-
-      .horizontal-details {
-        display: flex !important;
-        flex-wrap: wrap !important;
-      }
-
-      .horizontal-details .detail-group {
-        flex: 1 !important;
-        min-width: 45% !important;
-        page-break-inside: avoid;
-      }
-      
-      /* Ensure all content is visible in print */
-      .modal-body {
-        overflow: visible !important;
-        height: auto !important;
-      }
-      
-      /* Reset colors for printing */
-      body, .main-content, .card {
-        background-color: white !important;
-        color: black !important;
-      }
-    }
-
-    /* Responsive */
+    /* Mejoras para tablas en móvil */
     @media (max-width: 768px) {
-      .main-content {
-        padding: 20px;
+      .main-container {
+        padding: 1rem;
       }
 
-      .detail-row {
-        flex-direction: column;
+      table {
+        font-size: 0.7rem;
+      }
+      
+      th, td {
+        padding: 0.3rem;
       }
 
-      .detail-label {
-        margin-bottom: 5px;
-        min-width: 100%;
+      .btn {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.7rem;
+      }
+      
+      .btn i {
+        margin-right: 0.3rem;
       }
 
-      .client-item {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .client-actions {
-        margin-top: 15px;
-        width: 100%;
-        justify-content: flex-end;
-      }
-
-      .horizontal-details {
-        flex-direction: column;
-        gap: 20px;
+      .modal-content {
+        padding: 0.8rem;
+        width: 95%;
       }
     }
 
-    @media (max-width: 576px) {
-      .navbar-brand {
-        font-size: 1.2rem;
-      }
+    /* Estilos para el formulario de edición */
+    .form-horizontal {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.2rem;
+    }
 
-      .search-container {
-        max-width: 100%;
-        margin-top: 15px;
-      }
+    .form-horizontal .form-group {
+      margin-bottom: 0.8rem;
+    }
+
+    /* Estilos para la sección de préstamos */
+    .loan-section {
+      margin-top: 1.5rem;
+      padding-top: 1.2rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .loan-section-title {
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+    }
+
+    /* Estilos para los botones de acción en la tabla */
+    .action-buttons {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .action-buttons .btn {
+      padding: 0.4rem 0.7rem;
+      font-size: 0.75rem;
+    }
+
+    /* Estilos para el filtro de búsqueda */
+    .search-container {
+      margin-bottom: 1.5rem;
+    }
+
+    /* Estilos para el estado del cliente */
+    .client-status-badge {
+      padding: 0.2rem 0.4rem;
+      border-radius: 3px;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+
+    .client-status-active {
+      background-color: var(--success-color);
+      color: white;
+    }
+
+    .client-status-overdue {
+      background-color: var(--danger-color);
+      color: white;
+    }
+
+    .client-status-completed {
+      background-color: var(--info-color);
+      color: white;
+    }
+
+    .client-status-expired {
+      background-color: var(--warning-color);
+      color: white;
+    }
+
+    /* Estilos para las pestañas */
+    .tabs {
+      display: flex;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .tab {
+      padding: 0.8rem 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-bottom: 3px solid transparent;
+    }
+
+    .tab.active {
+      color: var(--primary-color);
+      border-bottom-color: var(--primary-color);
+    }
+
+    .tab:hover {
+      background-color: rgba(26, 188, 156, 0.1);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
     }
   </style>
 </head>
 <body>
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">
-        <div class="company-logo">
-          <img id="companyLogo" src="logo.png" alt="PlusMoney Retom">
-          <span id="companyName">PlusMoney Retom</span>
-        </div>
-      </a>
-    </div>
-  </nav>
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">PlusMoney Retom - Gestión de Clientes</div>
+  </header>
 
-  <!-- Main Content -->
-  <main class="main-content">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h4>Clientes con Préstamos</h4>
-      <div class="input-group search-container">
-        <button class="btn" type="button">
-          <i class="fas fa-search"></i>
-        </button>
-        <input type="text" class="form-control" placeholder="Buscar cliente..." id="searchInput">
+  <main class="main-container">
+    <!-- Gestión de Clientes Section -->
+    <section id="client-management" class="card">
+      <h1 class="section-title">Gestión de Clientes</h1>
+      
+      <!-- Pestañas -->
+      <div class="tabs">
+        <div class="tab active" data-tab="clients">Clientes Activos</div>
+        <div class="tab" data-tab="trash">Papelera</div>
       </div>
-    </div>
-    
-    <!-- Lista de Clientes -->
-    <div class="card glass-card">
-      <div class="card-header">
-        <span>Clientes Registrados</span>
-        <span class="badge bg-primary rounded-pill" id="clientCount">0</span>
-      </div>
-      <div class="card-body p-0">
-        <div class="accordion accordion-flush" id="clientsAccordion">
-          <!-- Los clientes se cargarán dinámicamente aquí -->
+      
+      <!-- Contenido de Clientes Activos -->
+      <div id="clients-tab" class="tab-content active">
+        <div class="search-container">
+          <div class="form-group">
+            <label for="searchClient">Buscar Cliente:</label>
+            <input type="text" id="searchClient" class="form-control" placeholder="Ingrese nombre o cédula del cliente">
+          </div>
+        </div>
+        
+        <div class="table-container">
+          <table id="clientsTable">
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Cédula</th>
+                <th>Teléfono</th>
+                <th>Préstamos Activos</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="clientsTableBody">
+              <!-- Se llenará dinámicamente -->
+            </tbody>
+          </table>
         </div>
       </div>
-    </div>
+      
+      <!-- Contenido de Papelera -->
+      <div id="trash-tab" class="tab-content">
+        <div class="search-container">
+          <div class="form-group">
+            <label for="searchTrash">Buscar en Papelera:</label>
+            <input type="text" id="searchTrash" class="form-control" placeholder="Ingrese nombre o cédula del cliente">
+          </div>
+        </div>
+        
+        <div class="table-container">
+          <table id="trashTable">
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Cédula</th>
+                <th>Teléfono</th>
+                <th>Fecha Eliminación</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="trashTableBody">
+              <!-- Se llenará dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
   </main>
 
-  <!-- Client Details Modal -->
-  <div class="modal fade" id="clientModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="clientModalTitle">Detalles del Cliente</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="d-flex align-items-center mb-4">
-            <img src="" alt="Client" class="client-avatar me-3" id="clientDetailAvatar">
-            <div>
-              <h4 id="clientDetailName"></h4>
-              <span class="text-muted" id="clientDetailId"></span>
+  <!-- Modal para editar cliente -->
+  <div class="modal" id="editClientModal">
+    <div class="modal-content" style="max-width: 800px;">
+      <h3 class="modal-title">Editar Cliente y Préstamo</h3>
+      <form id="editClientForm">
+        <div class="form-horizontal">
+          <!-- Datos Personales -->
+          <div>
+            <h4>Datos Personales</h4>
+            <input type="hidden" id="editLoanId">
+            <input type="hidden" id="editClientId">
+            
+            <div class="form-group">
+              <label for="editClientName">Nombre Completo</label>
+              <input type="text" id="editClientName" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="editClientId">Cédula/Número de Identificación</label>
+              <input type="text" id="editClientIdField" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="editClientAddress">Dirección</label>
+              <input type="text" id="editClientAddress" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="editClientPhone">Teléfono</label>
+              <input type="tel" id="editClientPhone" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="editClientNationality">Nacionalidad</label>
+              <input type="text" id="editClientNationality" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="editClientCompany">Empresa donde labora</label>
+              <input type="text" id="editClientCompany" class="form-control">
+            </div>
+            <div class="form-group">
+              <label for="editCompanyStartDate">Fecha de ingreso a la empresa</label>
+              <input type="date" id="editCompanyStartDate" class="form-control">
             </div>
           </div>
           
-          <div class="client-details">
-            <div class="horizontal-details">
-              <div class="detail-group">
-                <h5 class="mb-3">Información Personal</h5>
-                <div class="detail-row">
-                  <span class="detail-label">Teléfono:</span>
-                  <span class="detail-value" id="clientDetailPhone"></span>
-                </div>
-                <div class="detail-row">
-                  <span class="detail-label">Dirección:</span>
-                  <span class="detail-value" id="clientDetailAddress"></span>
-                </div>
-                <div class="detail-row">
-                  <span class="detail-label">Nacionalidad:</span>
-                  <span class="detail-value" id="clientDetailNationality"></span>
-                </div>
-                <div class="detail-row">
-                  <span class="detail-label">Empresa:</span>
-                  <span class="detail-value" id="clientDetailCompany"></span>
-                </div>
-                <div class="detail-row">
-                  <span class="detail-label">Tiempo en empresa:</span>
-                  <span class="detail-value" id="clientDetailCompanyTime"></span>
-                </div>
-              </div>
-              
-              <div class="detail-group">
-                <h5 class="mb-3">Detalles del Préstamo</h5>
-                <div class="detail-row">
-                  <span class="detail-label">Monto del préstamo:</span>
-                  <span class="detail-value" id="loanDetailAmount"></span>
-                </div>
-                <div class="detail-row">
-                  <span class="detail-label">Tasa de interés:</span>
-                  <span class="detail-value" id="loanDetailRate"></span>
-                </div>
-                <div class="detail-row">
-                  <span class="detail-label">Plazo:</span>
-                  <span class="detail-value" id="loanDetailTerm"></span>
-                </div>
-                <div class="detail-row">
-                  <span class="detail-label">Frecuencia de pago:</span>
-                  <span class="detail-value" id="loanDetailFrequency"></span>
-                </div>
-                <div class="detail-row">
-                  <span class="detail-label">Fecha de inicio:</span>
-                  <span class="detail-value" id="loanDetailStartDate"></span>
-                </div>
-                <div class="detail-row">
-                  <span class="detail-label">Saldo pendiente:</span>
-                  <span class="detail-value" id="loanDetailBalance"></span>
-                </div>
-                <div class="detail-row">
-                  <span class="detail-label">Estado:</span>
-                  <span class="detail-value" id="loanDetailStatus"></span>
-                </div>
+          <div>
+            <h4>Referencias Personales</h4>
+            <div class="form-group">
+              <label for="editReferenceName">Nombre</label>
+              <input type="text" id="editReferenceName" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="editReferencePhone">Teléfono</label>
+              <input type="tel" id="editReferencePhone" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="editReferenceRelation">Parentesco/Relación</label>
+              <input type="text" id="editReferenceRelation" class="form-control" required>
+            </div>
+          </div>
+
+          <!-- Datos del Préstamo -->
+          <div class="loan-section">
+            <h4 class="loan-section-title">Datos del Préstamo</h4>
+            <div class="form-group">
+              <label for="editLoanAmount">Monto del Préstamo (Capital)</label>
+              <input type="number" id="editLoanAmount" class="form-control" min="1" required>
+            </div>
+            <div class="form-group">
+              <label for="editInterestRate">Tasa de Interés (%)</label>
+              <input type="number" id="editInterestRate" class="form-control" min="1" max="100" step="0.1" required>
+            </div>
+            <div class="form-group">
+              <label>Frecuencia de Pago</label>
+              <div>
+                <input type="radio" id="editFrequencyMonthly" name="editPaymentFrequency" value="monthly">
+                <label for="editFrequencyMonthly">Mensual</label>
+                <input type="radio" id="editFrequencyBiweekly" name="editPaymentFrequency" value="biweekly" style="margin-left: 1rem;">
+                <label for="editFrequencyBiweekly">Quincenal</label>
+                <input type="radio" id="editFrequencyWeekly" name="editPaymentFrequency" value="weekly" style="margin-left: 1rem;">
+                <label for="editFrequencyWeekly">Semanal</label>
+                <input type="radio" id="editFrequencyDaily" name="editPaymentFrequency" value="daily" style="margin-left: 1rem;">
+                <label for="editFrequencyDaily">Diario</label>
               </div>
             </div>
-            
-            <h5 class="mb-3 mt-4">Documentos Adjuntos</h5>
-            <div class="documents-container d-flex flex-wrap" id="clientDocuments">
-              <!-- Los documentos se cargarán aquí -->
+            <div class="form-group">
+              <label for="editLoanTerm">Plazo (Meses)</label>
+              <input type="number" id="editLoanTerm" class="form-control" min="1" required>
+            </div>
+            <div class="form-group">
+              <label for="editLoanDate">Fecha de Inicio</label>
+              <input type="date" id="editLoanDate" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="editLoanType">Tipo de Préstamo</label>
+              <select id="editLoanType" class="form-control" required>
+                <option value="normal">Normal (con intereses)</option>
+                <option value="fixed">Plazo Fijo (sin intereses)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="editGuarantee">Garantía (Opcional)</label>
+              <textarea id="editGuarantee" class="form-control" rows="3"></textarea>
             </div>
           </div>
         </div>
-        <div class="modal-footer no-print">
-          <button type="button" class="btn btn-danger" id="deleteClientBtn">
-            <i class="fas fa-trash me-2"></i>Eliminar Cliente
-          </button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-          <button type="button" class="btn btn-primary" id="printClientBtn">
-            <i class="fas fa-print me-2"></i>Imprimir
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Document/Image Preview Modal -->
-  <div class="modal fade" id="documentModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="documentModalTitle">Vista Previa</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body text-center">
-          <img src="" alt="Preview" class="image-preview d-none" id="imagePreview">
-          <iframe src="" frameborder="0" class="document-preview d-none" id="pdfPreview"></iframe>
-        </div>
-        <div class="modal-footer no-print">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Edit Client Modal -->
-  <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Editar Información del Cliente</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form id="editClientForm">
-            <div class="row">
-              <div class="col-md-6">
-                <h5>Datos Personales</h5>
-                <div class="mb-3">
-                  <label for="editName" class="form-label">Nombre Completo</label>
-                  <input type="text" class="form-control" id="editName" required>
-                </div>
-                <div class="mb-3">
-                  <label for="editId" class="form-label">Cédula/Número de Identificación</label>
-                  <input type="text" class="form-control" id="editId" required>
-                </div>
-                <div class="mb-3">
-                  <label for="editPhone" class="form-label">Teléfono</label>
-                  <input type="tel" class="form-control" id="editPhone" required>
-                </div>
-                <div class="mb-3">
-                  <label for="editAddress" class="form-label">Dirección</label>
-                  <input type="text" class="form-control" id="editAddress" required>
-                </div>
-                <div class="mb-3">
-                  <label for="editNationality" class="form-label">Nacionalidad</label>
-                  <input type="text" class="form-control" id="editNationality" required>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <h5>Información Laboral</h5>
-                <div class="mb-3">
-                  <label for="editCompany" class="form-label">Empresa donde labora</label>
-                  <input type="text" class="form-control" id="editCompany">
-                </div>
-                <div class="mb-3">
-                  <label for="editCompanyDate" class="form-label">Fecha de ingreso a la empresa</label>
-                  <input type="date" class="form-control" id="editCompanyDate">
-                </div>
-                
-                <h5 class="mt-4">Referencia Personal</h5>
-                <div class="mb-3">
-                  <label for="editRefName" class="form-label">Nombre</label>
-                  <input type="text" class="form-control" id="editRefName" required>
-                </div>
-                <div class="mb-3">
-                  <label for="editRefPhone" class="form-label">Teléfono</label>
-                  <input type="tel" class="form-control" id="editRefPhone" required>
-                </div>
-                <div class="mb-3">
-                  <label for="editRefRelation" class="form-label">Parentesco/Relación</label>
-                  <input type="text" class="form-control" id="editRefRelation" required>
-                </div>
-              </div>
-            </div>
-            
-            <div class="row">
-              <div class="col-md-4">
-                <div class="mb-3">
-                  <label for="editLoanAmount" class="form-label">Monto del Préstamo</label>
-                  <input type="number" class="form-control" id="editLoanAmount" required>
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="mb-3">
-                  <label for="editInterestRate" class="form-label">Tasa de Interés (%)</label>
-                  <input type="number" class="form-control" id="editInterestRate" required>
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="mb-3">
-                  <label for="editLoanTerm" class="form-label">Plazo (Meses)</label>
-                  <input type="number" class="form-control" id="editLoanTerm" required>
-                </div>
-              </div>
-            </div>
-            
-            <div class="row">
-              <div class="col-md-6">
-                <div class="mb-3">
-                  <label for="editFrequency" class="form-label">Frecuencia de Pago</label>
-                  <select class="form-select" id="editFrequency" required>
-                    <option value="monthly">Mensual</option>
-                    <option value="biweekly">Quincenal</option>
-                  </select>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="mb-3">
-                  <label for="editStartDate" class="form-label">Fecha de Inicio</label>
-                  <input type="date" class="form-control" id="editStartDate" required>
-                </div>
-              </div>
-            </div>
-            
-            <div class="mb-3">
-              <label for="editGuarantee" class="form-label">Garantía (Opcional)</label>
-              <textarea class="form-control" id="editGuarantee" rows="3"></textarea>
-            </div>
-            
-            <div class="document-upload-container">
-              <label class="form-label">Documentos Adjuntos</label>
-              <div class="document-preview-container" id="documentPreviewContainer">
-                <!-- Existing documents will be added here -->
-              </div>
-              <label for="editDocuments" class="upload-btn">
-                <i class="fas fa-cloud-upload-alt"></i>
-                <span>Agregar documentos</span>
-                <input type="file" class="d-none" id="editDocuments" multiple>
-              </label>
-              <small class="text-muted">Puedes subir imágenes, PDFs u otros documentos</small>
-            </div>
-          </form>
-        </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="button" class="btn btn-primary" id="saveChangesBtn">
-            <i class="fas fa-save me-2"></i>Guardar Cambios
+          <button type="submit" class="btn btn-success">
+            <i class="fas fa-save"></i> Guardar Cambios
           </button>
+          <button type="button" onclick="closeModal()" class="btn btn-danger">Cancelar</button>
         </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal para confirmación de eliminación -->
+  <div class="modal" id="confirmDeleteModal">
+    <div class="modal-content">
+      <h3 class="modal-title">Confirmar Eliminación</h3>
+      <p id="confirmDeleteMessage">¿Está seguro de que desea eliminar este cliente?</p>
+      <div class="modal-footer">
+        <button id="confirmDeleteBtn" class="btn btn-danger">
+          <i class="fas fa-trash"></i> Eliminar Definitivamente
+        </button>
+        <button id="moveToTrashBtn" class="btn btn-warning">
+          <i class="fas fa-trash-alt"></i> Enviar a Papelera
+        </button>
+        <button onclick="closeModal()" class="btn">Cancelar</button>
       </div>
     </div>
   </div>
 
-  <!-- Delete Confirmation Modal -->
-  <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Confirmar Eliminación</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <p>¿Estás seguro que deseas eliminar permanentemente este cliente y todos sus datos?</p>
-          <p class="text-danger"><strong>Esta acción no se puede deshacer.</strong></p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
-            <i class="fas fa-trash me-2"></i>Eliminar Definitivamente
-          </button>
-        </div>
+  <!-- Modal para información -->
+  <div class="modal" id="infoModal">
+    <div class="modal-content">
+      <h3 class="modal-title" id="infoModalTitle"></h3>
+      <p id="infoModalMessage"></p>
+      <div class="modal-footer">
+        <button onclick="closeModal()" class="btn">Aceptar</button>
       </div>
     </div>
   </div>
 
-  <!-- Custom Alert Container -->
-  <div id="alertContainer"></div>
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loader"></div>
+  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script type="module">
     // Importaciones de Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
@@ -1106,17 +683,12 @@
       where,
       updateDoc,
       deleteDoc,
-      arrayUnion,
-      arrayRemove,
       Timestamp,
-      addDoc,
       setDoc,
       orderBy,
-      startAt,
-      endAt
+      writeBatch
     } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
-    import { getStorage, ref, getDownloadURL, uploadBytes, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-storage.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
 
     // Configuración de Firebase
     const firebaseConfig = {
@@ -1133,681 +705,895 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
-    const storage = getStorage(app);
 
     // Variables globales
     let currentUser = null;
-    let currentClientId = null;
-    let clientsData = [];
-    let currentClientDocuments = [];
-    let companyData = null;
+    let selectedClientForDelete = null;
 
-    // Función para cargar los datos de la empresa desde Firebase
-    async function loadCompanyData() {
-      try {
-        if (!currentUser) return;
-        
-        const companyRef = doc(db, "informacionCompany", currentUser.uid);
-        const docSnap = await getDoc(companyRef);
-        
-        if (docSnap.exists()) {
-          companyData = docSnap.data();
-          console.log("Datos de empresa cargados:", companyData);
-          
-          // Actualizar el logo y nombre de la empresa en el navbar
-          if (companyData.fotoURL) {
-            document.getElementById('companyLogo').src = companyData.fotoURL;
-          }
-          
-          if (companyData.nombreEmpresa) {
-            document.getElementById('companyName').textContent = companyData.nombreEmpresa;
-          }
-        } else {
-          console.log("No se encontraron datos de empresa para este usuario");
-        }
-      } catch (error) {
-        console.error("Error al cargar datos de la empresa:", error);
-      }
-    }
-
-    // Función para mostrar alertas personalizadas
-    function showAlert(message, type = 'success') {
-      const alertContainer = document.getElementById('alertContainer');
-      const alertDiv = document.createElement('div');
-      alertDiv.className = `custom-alert ${type}`;
-      
-      let icon = '';
-      if (type === 'success') {
-        icon = '<i class="fas fa-check-circle"></i>';
-      } else if (type === 'error') {
-        icon = '<i class="fas fa-exclamation-circle"></i>';
-      } else {
-        icon = '<i class="fas fa-info-circle"></i>';
-      }
-      
-      alertDiv.innerHTML = `${icon} ${message}`;
-      alertContainer.appendChild(alertDiv);
-      
-      // Mostrar alerta
-      setTimeout(() => {
-        alertDiv.classList.add('show');
-      }, 10);
-      
-      // Ocultar y eliminar alerta después de 5 segundos
-      setTimeout(() => {
-        alertDiv.classList.remove('show');
-        setTimeout(() => {
-          alertDiv.remove();
-        }, 300);
-      }, 5000);
-    }
-
-    // Función para formatear números con separadores de miles
+    // Función para formatear números
     function formatNumber(number) {
-      return new Intl.NumberFormat('es-ES', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }).format(number);
+      return number.toLocaleString('en-US', { 
+        minimumFractionDigits: 2, 
+        maximumFractionDigits: 2 
+      });
     }
 
     // Función para formatear fechas
-    function formatDate(dateString) {
-      const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
-      return new Date(dateString).toLocaleDateString('es-ES', options);
+    function formatDate(date) {
+      return date.toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      });
     }
 
-    // Función para calcular el tiempo en la empresa
-    function calculateCompanyTime(startDate) {
-      if (!startDate) return "";
-      
-      const today = new Date();
-      const start = new Date(startDate);
-      const diffTime = Math.abs(today - start);
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-      
-      const years = Math.floor(diffDays / 365);
-      const months = Math.floor((diffDays % 365) / 30);
-      const days = Math.floor((diffDays % 365) % 30);
-      
-      let result = "";
-      if (years > 0) result += `${years} año${years > 1 ? 's' : ''} `;
-      if (months > 0) result += `${months} mes${months > 1 ? 'es' : ''} `;
-      if (days > 0 || result === "") result += `${days} día${days > 1 ? 's' : ''}`;
-      
-      return result.trim();
+    // Función para mostrar modal de información
+    function showInfoModal(title, message) {
+      document.getElementById('infoModalTitle').textContent = title;
+      document.getElementById('infoModalMessage').textContent = message;
+      document.getElementById('infoModal').classList.add('active');
     }
 
-    // Función para cargar los clientes del usuario actual
-    async function loadUserClients() {
+    // Función para mostrar loading
+    function showLoading() {
+      document.getElementById('loadingOverlay').classList.add('active');
+    }
+
+    // Función para ocultar loading
+    function hideLoading() {
+      document.getElementById('loadingOverlay').classList.remove('active');
+    }
+
+    // Función para cerrar modales
+    window.closeModal = function() {
+      document.querySelectorAll('.modal').forEach(modal => modal.classList.remove('active'));
+    };
+
+    // Función para cargar clientes del usuario actual
+    async function loadClients() {
       try {
-        if (!currentUser) return;
+        showLoading();
         
-        const q = query(
-          collection(db, "Loans"), 
+        if (!currentUser) {
+          hideLoading();
+          return;
+        }
+        
+        // Obtener todos los préstamos del usuario actual
+        const loansQuery = query(
+          collection(db, "Loans"),
           where("userId", "==", currentUser.uid)
         );
         
-        const querySnapshot = await getDocs(q);
-        clientsData = [];
+        const loansSnapshot = await getDocs(loansQuery);
+        const clientsMap = new Map();
         
-        querySnapshot.forEach(doc => {
-          const loanData = doc.data();
-          clientsData.push({
-            id: doc.id,
-            ...loanData
+        loansSnapshot.forEach(doc => {
+          const loan = { id: doc.id, ...doc.data() };
+          const clientId = loan.client.id;
+          
+          if (!clientsMap.has(clientId)) {
+            clientsMap.set(clientId, {
+              name: loan.client.name,
+              id: clientId,
+              phone: loan.client.phone,
+              loans: [],
+              activeLoans: 0,
+              status: 'active'
+            });
+          }
+          
+          const client = clientsMap.get(clientId);
+          client.loans.push(loan);
+          
+          // Contar préstamos activos
+          if (loan.status === 'active' || loan.status === 'overdue') {
+            client.activeLoans++;
+          }
+          
+          // Determinar el estado del cliente
+          if (loan.status === 'overdue') {
+            client.status = 'overdue';
+          } else if (loan.status === 'completed' && client.status === 'active') {
+            client.status = 'completed';
+          } else if (loan.status === 'expired') {
+            client.status = 'expired';
+          }
+        });
+        
+        const tableBody = document.getElementById('clientsTableBody');
+        tableBody.innerHTML = '';
+
+        for (const client of clientsMap.values()) {
+          const row = document.createElement('tr');
+          
+          // Determinar la clase de estado
+          let statusClass = 'client-status-active';
+          let statusText = 'Activo';
+          
+          if (client.status === 'overdue') {
+            statusClass = 'client-status-overdue';
+            statusText = 'Atrasado';
+          } else if (client.status === 'completed') {
+            statusClass = 'client-status-completed';
+            statusText = 'Completado';
+          } else if (client.status === 'expired') {
+            statusClass = 'client-status-expired';
+            statusText = 'Vencido';
+          }
+          
+          row.innerHTML = `
+            <td>${client.name}</td>
+            <td>${client.id}</td>
+            <td>${client.phone}</td>
+            <td>${client.activeLoans}</td>
+            <td><span class="client-status-badge ${statusClass}">${statusText}</span></td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn btn-info edit-client-btn" data-client-id="${client.id}">
+                  <i class="fas fa-edit"></i> Editar
+                </button>
+                <button class="btn btn-danger delete-client-btn" data-client-id="${client.id}">
+                  <i class="fas fa-trash"></i> Eliminar
+                </button>
+              </div>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        }
+        
+        // Agregar event listeners para los botones de edición
+        document.querySelectorAll('.edit-client-btn').forEach(button => {
+          button.addEventListener('click', () => {
+            const clientId = button.getAttribute('data-client-id');
+            showEditClientModal(clientId);
           });
         });
         
-        renderClients();
+        // Agregar event listeners para los botones de eliminación
+        document.querySelectorAll('.delete-client-btn').forEach(button => {
+          button.addEventListener('click', () => {
+            const clientId = button.getAttribute('data-client-id');
+            showDeleteConfirmationModal(clientId);
+          });
+        });
       } catch (error) {
-        console.error("Error loading user clients:", error);
-        showAlert("Error al cargar los clientes. Por favor, recarga la página.", "error");
+        console.error("Error cargando clientes: ", error);
+        showInfoModal('Error', 'Error al cargar los clientes');
+      } finally {
+        hideLoading();
       }
     }
 
-    // Función para renderizar la lista de clientes
-    function renderClients(filter = '') {
-      const clientsAccordion = document.getElementById('clientsAccordion');
-      clientsAccordion.innerHTML = '';
+    // Función para cargar clientes en la papelera
+    async function loadTrash() {
+      try {
+        showLoading();
+        
+        if (!currentUser) {
+          hideLoading();
+          return;
+        }
+        
+        // Obtener todos los préstamos en la papelera del usuario actual
+        const trashQuery = query(
+          collection(db, "Papelera"),
+          where("deletedBy", "==", currentUser.uid)
+        );
+        
+        const trashSnapshot = await getDocs(trashQuery);
+        const clientsMap = new Map();
+        
+        trashSnapshot.forEach(doc => {
+          const loan = { id: doc.id, ...doc.data() };
+          const clientId = loan.client.id;
+          
+          if (!clientsMap.has(clientId)) {
+            clientsMap.set(clientId, {
+              name: loan.client.name,
+              id: clientId,
+              phone: loan.client.phone,
+              deletedAt: loan.deletedAt,
+              loanIds: [doc.id]
+            });
+          } else {
+            const client = clientsMap.get(clientId);
+            client.loanIds.push(doc.id);
+          }
+        });
+        
+        const tableBody = document.getElementById('trashTableBody');
+        tableBody.innerHTML = '';
+
+        for (const client of clientsMap.values()) {
+          const row = document.createElement('tr');
+          
+          row.innerHTML = `
+            <td>${client.name}</td>
+            <td>${client.id}</td>
+            <td>${client.phone}</td>
+            <td>${formatDate(client.deletedAt.toDate())}</td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn btn-success restore-client-btn" data-client-id="${client.id}">
+                  <i class="fas fa-undo"></i> Recuperar
+                </button>
+                <button class="btn btn-danger delete-permanently-btn" data-client-id="${client.id}">
+                  <i class="fas fa-trash"></i> Eliminar Definitivamente
+                </button>
+              </div>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        }
+        
+        // Agregar event listeners para los botones de recuperación
+        document.querySelectorAll('.restore-client-btn').forEach(button => {
+          button.addEventListener('click', () => {
+            const clientId = button.getAttribute('data-client-id');
+            restoreClientFromTrash(clientId);
+          });
+        });
+        
+        // Agregar event listeners para los botones de eliminación definitiva
+        document.querySelectorAll('.delete-permanently-btn').forEach(button => {
+          button.addEventListener('click', () => {
+            const clientId = button.getAttribute('data-client-id');
+            deleteClientPermanentlyFromTrash(clientId);
+          });
+        });
+      } catch (error) {
+        console.error("Error cargando papelera: ", error);
+        showInfoModal('Error', 'Error al cargar la papelera');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Función para mostrar modal de edición de cliente
+    async function showEditClientModal(clientId) {
+      try {
+        showLoading();
+        
+        // Obtener todos los préstamos del cliente
+        const clientQuery = query(
+          collection(db, "Loans"),
+          where("userId", "==", currentUser.uid),
+          where("client.id", "==", clientId)
+        );
+        
+        const clientSnapshot = await getDocs(clientQuery);
+        
+        if (clientSnapshot.empty) {
+          showInfoModal('Error', 'No se encontraron datos del cliente');
+          return;
+        }
+        
+        // Tomar el primer préstamo para mostrar los datos
+        const firstLoan = { id: clientSnapshot.docs[0].id, ...clientSnapshot.docs[0].data() };
+        const clientData = firstLoan.client;
+        
+        // Llenar el formulario con los datos del cliente
+        document.getElementById('editLoanId').value = firstLoan.id;
+        document.getElementById('editClientId').value = clientId;
+        document.getElementById('editClientName').value = clientData.name;
+        document.getElementById('editClientIdField').value = clientData.id;
+        document.getElementById('editClientAddress').value = clientData.address;
+        document.getElementById('editClientPhone').value = clientData.phone;
+        document.getElementById('editClientNationality').value = clientData.nationality;
+        document.getElementById('editClientCompany').value = clientData.company || '';
+        document.getElementById('editCompanyStartDate').value = clientData.companyStartDate || '';
+        document.getElementById('editReferenceName').value = clientData.reference?.name || '';
+        document.getElementById('editReferencePhone').value = clientData.reference?.phone || '';
+        document.getElementById('editReferenceRelation').value = clientData.reference?.relation || '';
+        
+        // Llenar los datos del préstamo
+        document.getElementById('editLoanAmount').value = firstLoan.amount;
+        document.getElementById('editInterestRate').value = firstLoan.interestRate;
+        document.getElementById('editLoanTerm').value = firstLoan.term;
+        document.getElementById('editLoanDate').value = firstLoan.startDate;
+        document.getElementById('editLoanType').value = firstLoan.loanType;
+        document.getElementById('editGuarantee').value = firstLoan.guarantee || '';
+        
+        // Seleccionar la frecuencia de pago correcta
+        document.querySelectorAll('input[name="editPaymentFrequency"]').forEach(radio => {
+          radio.checked = radio.value === firstLoan.frequency;
+        });
+        
+        document.getElementById('editClientModal').classList.add('active');
+      } catch (error) {
+        console.error("Error mostrando modal de edición: ", error);
+        showInfoModal('Error', 'Error al cargar los datos del cliente');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Función para guardar cambios del cliente
+    async function saveClientChanges(e) {
+      e.preventDefault();
       
-      const filteredClients = filter ? 
-        clientsData.filter(client => 
-          client.client.name.toLowerCase().includes(filter.toLowerCase()) ||
-          client.client.id.toLowerCase().includes(filter.toLowerCase())
-        ) : 
-        clientsData;
+      const loanId = document.getElementById('editLoanId').value;
+      const clientId = document.getElementById('editClientId').value;
       
-      document.getElementById('clientCount').textContent = filteredClients.length;
+      const clientData = {
+        name: document.getElementById('editClientName').value.trim(),
+        id: document.getElementById('editClientIdField').value.trim(),
+        address: document.getElementById('editClientAddress').value.trim(),
+        phone: document.getElementById('editClientPhone').value.trim(),
+        nationality: document.getElementById('editClientNationality').value.trim(),
+        company: document.getElementById('editClientCompany').value.trim(),
+        companyStartDate: document.getElementById('editCompanyStartDate').value,
+        reference: {
+          name: document.getElementById('editReferenceName').value.trim(),
+          phone: document.getElementById('editReferencePhone').value.trim(),
+          relation: document.getElementById('editReferenceRelation').value.trim()
+        }
+      };
       
-      if (filteredClients.length === 0) {
-        clientsAccordion.innerHTML = `
-          <div class="text-center py-4">
-            <i class="fas fa-users-slash fa-3x mb-3 text-muted"></i>
-            <p class="text-muted">No se encontraron clientes</p>
-          </div>
-        `;
+      const loanData = {
+        amount: parseFloat(document.getElementById('editLoanAmount').value),
+        interestRate: parseFloat(document.getElementById('editInterestRate').value),
+        term: parseInt(document.getElementById('editLoanTerm').value),
+        frequency: document.querySelector('input[name="editPaymentFrequency"]:checked').value,
+        startDate: document.getElementById('editLoanDate').value,
+        loanType: document.getElementById('editLoanType').value,
+        guarantee: document.getElementById('editGuarantee').value.trim(),
+        updatedAt: Timestamp.now()
+      };
+      
+      // Validar datos
+      if (!clientData.name || !clientData.id || !clientData.phone) {
+        showInfoModal('Error', 'Todos los campos obligatorios del cliente deben estar completos');
         return;
       }
       
-      filteredClients.forEach((client, index) => {
-        const clientId = `client-${index}`;
-        const clientElement = document.createElement('div');
-        clientElement.className = 'accordion-item';
-        clientElement.innerHTML = `
-          <h2 class="accordion-header" id="heading-${clientId}">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
-              data-bs-target="#collapse-${clientId}" aria-expanded="false" aria-controls="collapse-${clientId}">
-              <div class="d-flex align-items-center w-100">
-                <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(client.client.name)}&background=random" 
-                  alt="${client.client.name}" class="client-avatar me-3">
-                <div class="flex-grow-1">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <span class="client-name">${client.client.name}</span>
-                    <span class="client-status">${client.status === 'active' ? 'Activo' : 
-                      client.status === 'overdue' ? 'Atrasado' : 
-                      client.status === 'completed' ? 'Completado' : 'Inactivo'}</span>
-                  </div>
-                  <small class="client-id">ID: ${client.client.id}</small>
-                  <div class="loan-title">
-                    <i class="fas fa-hand-holding-usd"></i> Préstamo: $${formatNumber(client.amount)}
-                  </div>
-                </div>
-              </div>
-            </button>
-          </h2>
-          <div id="collapse-${clientId}" class="accordion-collapse collapse" aria-labelledby="heading-${clientId}" 
-            data-bs-parent="#clientsAccordion">
-            <div class="accordion-body p-0">
-              <div class="client-item">
-                <div class="client-info">
-                  <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="client-name">${client.client.name}</span>
-                    <span class="client-status">${client.status === 'active' ? 'Activo' : 
-                      client.status === 'overdue' ? 'Atrasado' : 
-                      client.status === 'completed' ? 'Completado' : 'Inactivo'}</span>
-                  </div>
-                  <div class="d-flex justify-content-between align-items-center">
-                    <small class="client-id">ID: ${client.client.id}</small>
-                    <small class="loan-title">
-                      <i class="fas fa-hand-holding-usd"></i> $${formatNumber(client.amount)}
-                    </small>
-                  </div>
-                </div>
-                <div class="client-actions">
-                  <button class="action-btn view-btn" data-client-id="${client.id}">
-                    <i class="fas fa-eye"></i>
-                  </button>
-                  <button class="action-btn edit-btn" data-client-id="${client.id}">
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button class="action-btn delete-btn" data-client-id="${client.id}">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                  <button class="action-btn print-btn" data-client-id="${client.id}">
-                    <i class="fas fa-print"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        `;
-        clientsAccordion.appendChild(clientElement);
-      });
+      if (loanData.amount <= 0 || loanData.term <= 0) {
+        showInfoModal('Error', 'Los valores del préstamo deben ser mayores a cero');
+        return;
+      }
       
-      // Agregar event listeners a los botones
-      document.querySelectorAll('.view-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const clientId = e.currentTarget.getAttribute('data-client-id');
-          showClientDetails(clientId);
-        });
-      });
+      if (loanData.loanType === 'normal' && loanData.interestRate <= 0) {
+        showInfoModal('Error', 'La tasa de interés debe ser mayor a cero para préstamos normales');
+        return;
+      }
       
-      document.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const clientId = e.currentTarget.getAttribute('data-client-id');
-          editClient(clientId);
-        });
-      });
-      
-      document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const clientId = e.currentTarget.getAttribute('data-client-id');
-          confirmDeleteClient(clientId);
-        });
-      });
-      
-      document.querySelectorAll('.print-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const clientId = e.currentTarget.getAttribute('data-client-id');
-          printClient(clientId);
-        });
-      });
-    }
-
-    // Función para mostrar los detalles de un cliente
-    async function showClientDetails(clientId) {
       try {
-        const client = clientsData.find(c => c.id === clientId);
-        if (!client) return;
+        showLoading();
         
-        currentClientId = clientId;
+        // Verificar que el documento existe antes de actualizar
+        const loanRef = doc(db, "Loans", loanId);
+        const loanSnap = await getDoc(loanRef);
         
-        // Configurar el modal con los datos del cliente
-        document.getElementById('clientModalTitle').textContent = `Detalles de ${client.client.name}`;
-        document.getElementById('clientDetailAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(client.client.name)}&background=random`;
-        document.getElementById('clientDetailName').textContent = client.client.name;
-        document.getElementById('clientDetailId').textContent = `ID: ${client.client.id}`;
-        
-        // Información personal
-        document.getElementById('clientDetailPhone').textContent = client.client.phone || 'No especificado';
-        document.getElementById('clientDetailAddress').textContent = client.client.address || 'No especificado';
-        document.getElementById('clientDetailNationality').textContent = client.client.nationality || 'No especificado';
-        document.getElementById('clientDetailCompany').textContent = client.client.company || 'No especificado';
-        document.getElementById('clientDetailCompanyTime').textContent = client.client.companyTime || 'No especificado';
-        
-        // Detalles del préstamo
-        document.getElementById('loanDetailAmount').textContent = `$${formatNumber(client.amount)}`;
-        document.getElementById('loanDetailRate').textContent = `${client.interestRate}%`;
-        document.getElementById('loanDetailTerm').textContent = `${client.term} meses`;
-        document.getElementById('loanDetailFrequency').textContent = client.frequency === 'biweekly' ? 'Quincenal' : 'Mensual';
-        document.getElementById('loanDetailStartDate').textContent = formatDate(client.startDate);
-        document.getElementById('loanDetailBalance').textContent = `$${formatNumber(client.balance)}`;
-        document.getElementById('loanDetailStatus').textContent = client.status === 'active' ? 'Activo' : 
-          client.status === 'overdue' ? 'Atrasado' : 
-          client.status === 'completed' ? 'Completado' : 'Inactivo';
-        
-        // Documentos adjuntos
-        const documentsContainer = document.getElementById('clientDocuments');
-        documentsContainer.innerHTML = '';
-        
-        if (client.documents && client.documents.length > 0) {
-          client.documents.forEach(doc => {
-            const docElement = document.createElement('img');
-            docElement.src = doc.url;
-            docElement.alt = doc.name;
-            docElement.className = 'document-thumbnail';
-            docElement.setAttribute('data-type', doc.type.includes('image') ? 'image' : 'pdf');
-            docElement.setAttribute('data-src', doc.url);
-            docElement.setAttribute('data-title', doc.name);
-            documentsContainer.appendChild(docElement);
-          });
-        } else {
-          documentsContainer.innerHTML = '<p class="text-muted">No hay documentos adjuntos</p>';
+        if (!loanSnap.exists()) {
+          showInfoModal('Error', 'El préstamo no existe en la base de datos');
+          return;
         }
         
-        // Mostrar el modal
-        const clientModal = new bootstrap.Modal(document.getElementById('clientModal'));
-        clientModal.show();
-        
-        // Agregar event listeners a las miniaturas de documentos
-        document.querySelectorAll('.document-thumbnail').forEach(thumb => {
-          thumb.addEventListener('click', (e) => {
-            const type = e.currentTarget.getAttribute('data-type');
-            const src = e.currentTarget.getAttribute('data-src');
-            const title = e.currentTarget.getAttribute('data-title');
-            
-            const docModal = new bootstrap.Modal(document.getElementById('documentModal'));
-            document.getElementById('documentModalTitle').textContent = title;
-            
-            if (type === 'image') {
-              document.getElementById('imagePreview').classList.remove('d-none');
-              document.getElementById('pdfPreview').classList.add('d-none');
-              document.getElementById('imagePreview').src = src;
-            } else {
-              document.getElementById('pdfPreview').classList.remove('d-none');
-              document.getElementById('imagePreview').classList.add('d-none');
-              document.getElementById('pdfPreview').src = src;
-            }
-            
-            clientModal.hide();
-            docModal.show();
-          });
+        // Actualizar el préstamo
+        await updateDoc(loanRef, {
+          ...loanData,
+          client: clientData
         });
-      } catch (error) {
-        console.error("Error showing client details:", error);
-        showAlert("Error al cargar los detalles del cliente.", "error");
-      }
-    }
-
-    // Función para confirmar la eliminación de un cliente
-    function confirmDeleteClient(clientId) {
-      currentClientId = clientId;
-      const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-      deleteModal.show();
-    }
-
-    // Función para eliminar un cliente
-    async function deleteClient() {
-      try {
-        if (!currentClientId) return;
         
-        const client = clientsData.find(c => c.id === currentClientId);
-        if (!client) return;
+        // Actualizar todos los préstamos del cliente con la nueva información
+        const clientLoansQuery = query(
+          collection(db, "Loans"),
+          where("userId", "==", currentUser.uid),
+          where("client.id", "==", clientId)
+        );
         
-        // Eliminar documentos del storage si existen
-        if (client.documents && client.documents.length > 0) {
-          for (const doc of client.documents) {
-            try {
-              const storageRef = ref(storage, doc.url);
-              await deleteObject(storageRef);
-            } catch (error) {
-              console.error("Error deleting document from storage:", error);
-            }
+        const clientLoansSnapshot = await getDocs(clientLoansQuery);
+        
+        const updatePromises = [];
+        clientLoansSnapshot.forEach(doc => {
+          if (doc.id !== loanId) {
+            updatePromises.push(updateDoc(doc.ref, {
+              client: clientData
+            }));
           }
-        }
-        
-        // Eliminar el documento de Firestore
-        await deleteDoc(doc(db, "Loans", currentClientId));
-        
-        // Eliminar de los datos locales
-        clientsData = clientsData.filter(c => c.id !== currentClientId);
-        
-        // Recargar la lista de clientes
-        renderClients();
-        
-        // Cerrar modales
-        bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
-        bootstrap.Modal.getInstance(document.getElementById('clientModal'))?.hide();
-        
-        showAlert('Cliente eliminado correctamente', 'success');
-      } catch (error) {
-        console.error("Error deleting client:", error);
-        showAlert("Error al eliminar el cliente.", "error");
-      }
-    }
-
-    // Función para editar un cliente
-    async function editClient(clientId) {
-      try {
-        const client = clientsData.find(c => c.id === clientId);
-        if (!client) return;
-        
-        currentClientId = clientId;
-        currentClientDocuments = client.documents || [];
-        
-        // Configurar el formulario con los datos del cliente
-        document.getElementById('editName').value = client.client.name;
-        document.getElementById('editId').value = client.client.id;
-        document.getElementById('editPhone').value = client.client.phone;
-        document.getElementById('editAddress').value = client.client.address;
-        document.getElementById('editNationality').value = client.client.nationality;
-        document.getElementById('editCompany').value = client.client.company || '';
-        
-        // Configurar la fecha de ingreso a la empresa si existe
-        if (client.client.companyStartDate) {
-          document.getElementById('editCompanyDate').value = client.client.companyStartDate;
-        }
-        
-        // Referencia personal
-        document.getElementById('editRefName').value = client.client.reference?.name || '';
-        document.getElementById('editRefPhone').value = client.client.reference?.phone || '';
-        document.getElementById('editRefRelation').value = client.client.reference?.relation || '';
-        
-        // Detalles del préstamo
-        document.getElementById('editLoanAmount').value = client.amount;
-        document.getElementById('editInterestRate').value = client.interestRate;
-        document.getElementById('editLoanTerm').value = client.term;
-        document.getElementById('editFrequency').value = client.frequency;
-        document.getElementById('editStartDate').value = client.startDate;
-        document.getElementById('editGuarantee').value = client.guarantee || '';
-        
-        // Mostrar documentos existentes
-        renderDocumentPreviews();
-        
-        // Mostrar el modal de edición
-        const editModal = new bootstrap.Modal(document.getElementById('editModal'));
-        editModal.show();
-      } catch (error) {
-        console.error("Error preparing edit form:", error);
-        showAlert("Error al preparar el formulario de edición.", "error");
-      }
-    }
-
-    // Función para renderizar las previsualizaciones de documentos
-    function renderDocumentPreviews() {
-      const container = document.getElementById('documentPreviewContainer');
-      container.innerHTML = '';
-      
-      currentClientDocuments.forEach((doc, index) => {
-        const docElement = document.createElement('div');
-        docElement.className = 'document-preview-item';
-        
-        if (doc.type.includes('image')) {
-          docElement.innerHTML = `
-            <img src="${doc.url}" alt="${doc.name}">
-            <div class="remove-document" data-index="${index}">
-              <i class="fas fa-times"></i>
-            </div>
-          `;
-        } else {
-          docElement.innerHTML = `
-            <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#3d5166;">
-              <i class="fas fa-file-pdf" style="font-size:24px;color:white;"></i>
-            </div>
-            <div class="remove-document" data-index="${index}">
-              <i class="fas fa-times"></i>
-            </div>
-          `;
-        }
-        
-        container.appendChild(docElement);
-      });
-      
-      // Agregar event listeners para eliminar documentos
-      document.querySelectorAll('.remove-document').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const index = e.currentTarget.getAttribute('data-index');
-          currentClientDocuments.splice(index, 1);
-          renderDocumentPreviews();
         });
-      });
+        
+        await Promise.all(updatePromises);
+        
+        showInfoModal('Éxito', 'Cliente y préstamo actualizados correctamente');
+        closeModal();
+        loadClients();
+      } catch (error) {
+        console.error("Error actualizando cliente: ", error);
+        showInfoModal('Error', 'Error al actualizar el cliente y préstamo: ' + error.message);
+      } finally {
+        hideLoading();
+      }
     }
 
-    // Función para manejar la subida de nuevos documentos
-    function setupDocumentUpload() {
-      const fileInput = document.getElementById('editDocuments');
-      
-      fileInput.addEventListener('change', (e) => {
-        const files = Array.from(e.target.files);
+    // Función para mostrar modal de confirmación de eliminación
+    async function showDeleteConfirmationModal(clientId) {
+      try {
+        showLoading();
         
-        files.forEach(file => {
-          const reader = new FileReader();
+        // Obtener información del cliente
+        const clientQuery = query(
+          collection(db, "Loans"),
+          where("userId", "==", currentUser.uid),
+          where("client.id", "==", clientId)
+        );
+        
+        const clientSnapshot = await getDocs(clientQuery);
+        
+        if (clientSnapshot.empty) {
+          showInfoModal('Error', 'No se encontraron datos del cliente');
+          return;
+        }
+        
+        const firstLoan = clientSnapshot.docs[0].data();
+        const clientName = firstLoan.client.name;
+        
+        selectedClientForDelete = {
+          id: clientId,
+          name: clientName,
+          loanIds: clientSnapshot.docs.map(doc => doc.id)
+        };
+        
+        document.getElementById('confirmDeleteMessage').textContent = 
+          `¿Está seguro de que desea eliminar al cliente "${clientName}"?`;
+        
+        document.getElementById('confirmDeleteModal').classList.add('active');
+      } catch (error) {
+        console.error("Error mostrando modal de confirmación: ", error);
+        showInfoModal('Error', 'Error al cargar la información del cliente');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Función para eliminar cliente definitivamente
+    async function deleteClientPermanently() {
+      if (!selectedClientForDelete) return;
+      
+      try {
+        showLoading();
+        
+        // Eliminar todos los préstamos del cliente
+        const deletePromises = selectedClientForDelete.loanIds.map(loanId => 
+          deleteDoc(doc(db, "Loans", loanId))
+        );
+        
+        await Promise.all(deletePromises);
+        
+        // Eliminar usuario del cliente si existe
+        await deleteClientUser(selectedClientForDelete.id);
+        
+        showInfoModal('Éxito', 'Cliente eliminado definitivamente');
+        closeModal();
+        loadClients();
+      } catch (error) {
+        console.error("Error eliminando cliente: ", error);
+        showInfoModal('Error', 'Error al eliminar el cliente');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Función para eliminar usuario del cliente
+    async function deleteClientUser(clientId) {
+      try {
+        const usersQuery = query(
+          collection(db, "LoanUsers"),
+          where("clientId", "==", clientId)
+        );
+        
+        const usersSnapshot = await getDocs(usersQuery);
+        const userDeletePromises = usersSnapshot.docs.map(doc => 
+          deleteDoc(doc.ref)
+        );
+        
+        await Promise.all(userDeletePromises);
+      } catch (error) {
+        console.error("Error eliminando usuario del cliente: ", error);
+      }
+    }
+
+    // Función para enviar cliente a la papelera
+    async function moveClientToTrash() {
+      if (!selectedClientForDelete) return;
+      
+      try {
+        showLoading();
+        
+        // Usar batch para operaciones atómicas
+        const batch = writeBatch(db);
+        
+        // Mover todos los préstamos del cliente a la papelera
+        for (const loanId of selectedClientForDelete.loanIds) {
+          const loanRef = doc(db, "Loans", loanId);
+          const loanSnap = await getDoc(loanRef);
           
-          reader.onload = (event) => {
-            currentClientDocuments.push({
-              name: file.name,
-              type: file.type,
-              url: event.target.result,
-              file: file // Guardamos el archivo para subirlo luego
+          if (loanSnap.exists()) {
+            const loanData = loanSnap.data();
+            
+            // Guardar en la colección de papelera
+            const trashRef = doc(collection(db, "Papelera"), loanId);
+            batch.set(trashRef, {
+              ...loanData,
+              deletedAt: Timestamp.now(),
+              deletedBy: currentUser.uid,
+              originalCollection: "Loans"
             });
             
-            renderDocumentPreviews();
-          };
-          
-          reader.readAsDataURL(file);
-        });
-        
-        // Limpiar el input para permitir nuevas selecciones
-        fileInput.value = '';
-      });
-    }
-
-    // Función para guardar los cambios del cliente
-    async function saveClientChanges() {
-      try {
-        if (!currentClientId) return;
-        
-        const clientIndex = clientsData.findIndex(c => c.id === currentClientId);
-        if (clientIndex === -1) return;
-        
-        // Obtener los datos del formulario
-        const clientData = {
-          name: document.getElementById('editName').value.trim(),
-          id: document.getElementById('editId').value.trim(),
-          phone: document.getElementById('editPhone').value.trim(),
-          address: document.getElementById('editAddress').value.trim(),
-          nationality: document.getElementById('editNationality').value.trim(),
-          company: document.getElementById('editCompany').value.trim(),
-          companyStartDate: document.getElementById('editCompanyDate').value,
-          companyTime: calculateCompanyTime(document.getElementById('editCompanyDate').value),
-          reference: {
-            name: document.getElementById('editRefName').value.trim(),
-            phone: document.getElementById('editRefPhone').value.trim(),
-            relation: document.getElementById('editRefRelation').value.trim()
+            // Eliminar de la colección original
+            batch.delete(loanRef);
           }
-        };
-        
-        const loanData = {
-          amount: parseFloat(document.getElementById('editLoanAmount').value),
-          interestRate: parseFloat(document.getElementById('editInterestRate').value),
-          term: parseInt(document.getElementById('editLoanTerm').value),
-          frequency: document.getElementById('editFrequency').value,
-          startDate: document.getElementById('editStartDate').value,
-          guarantee: document.getElementById('editGuarantee').value.trim()
-        };
-        
-        // Validar datos
-        if (!clientData.name || !clientData.id || !clientData.phone) {
-          showAlert('Los campos obligatorios del cliente deben estar completos', 'error');
-          return;
         }
         
-        if (loanData.amount <= 0 || loanData.term <= 0) {
-          showAlert('Los valores del préstamo deben ser mayores a cero', 'error');
-          return;
-        }
+        // Ejecutar todas las operaciones
+        await batch.commit();
         
-        // Subir nuevos documentos a Firebase Storage
-        const documentsToUpload = currentClientDocuments.filter(doc => doc.file);
-        const uploadedDocuments = currentClientDocuments.filter(doc => !doc.file);
+        // Eliminar usuario del cliente si existe
+        await deleteClientUser(selectedClientForDelete.id);
         
-        for (const doc of documentsToUpload) {
-          const storagePath = `loan_documents/${currentUser.uid}/${currentClientId}/${Date.now()}_${doc.name}`;
-          const storageRef = ref(storage, storagePath);
-          await uploadBytes(storageRef, doc.file);
-          const downloadUrl = await getDownloadURL(storageRef);
-          
-          uploadedDocuments.push({
-            name: doc.name,
-            type: doc.type,
-            url: downloadUrl
-          });
-        }
-        
-        // Actualizar los datos en Firebase
-        const loanRef = doc(db, "Loans", currentClientId);
-        await updateDoc(loanRef, {
-          client: clientData,
-          amount: loanData.amount,
-          interestRate: loanData.interestRate,
-          term: loanData.term,
-          frequency: loanData.frequency,
-          startDate: loanData.startDate,
-          guarantee: loanData.guarantee,
-          documents: uploadedDocuments
-        });
-        
-        // Actualizar los datos locales
-        clientsData[clientIndex] = {
-          ...clientsData[clientIndex],
-          client: clientData,
-          amount: loanData.amount,
-          interestRate: loanData.interestRate,
-          term: loanData.term,
-          frequency: loanData.frequency,
-          startDate: loanData.startDate,
-          guarantee: loanData.guarantee,
-          documents: uploadedDocuments
-        };
-        
-        // Recargar la lista de clientes
-        renderClients();
-        
-        // Cerrar el modal
-        const editModal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
-        editModal.hide();
-        
-        showAlert('Cambios guardados correctamente', 'success');
+        showInfoModal('Éxito', 'Cliente enviado a la papelera');
+        closeModal();
+        loadClients();
       } catch (error) {
-        console.error("Error saving client changes:", error);
-        showAlert("Error al guardar los cambios del cliente.", "error");
+        console.error("Error moviendo cliente a la papelera: ", error);
+        showInfoModal('Error', 'Error al enviar el cliente a la papelera: ' + error.message);
+      } finally {
+        hideLoading();
       }
     }
 
-    // Función para imprimir la información del cliente
-    async function printClient(clientId) {
+    // Función para recuperar cliente de la papelera
+    async function restoreClientFromTrash(clientId) {
       try {
-        const client = clientsData.find(c => c.id === clientId);
-        if (!client) return;
+        showLoading();
         
-        // Mostrar primero los detalles del cliente
-        await showClientDetails(clientId);
+        // Obtener todos los préstamos del cliente en la papelera
+        const trashQuery = query(
+          collection(db, "Papelera"),
+          where("deletedBy", "==", currentUser.uid)
+        );
         
-        // Esperar un momento para que el modal se muestre completamente
-        setTimeout(() => {
-          // Activar el botón de imprimir
-          document.getElementById('printClientBtn').click();
-        }, 500);
+        const trashSnapshot = await getDocs(trashQuery);
+        const batch = writeBatch(db);
+        
+        trashSnapshot.forEach(docSnapshot => {
+          const loanData = docSnapshot.data();
+          if (loanData.client.id === clientId) {
+            // Crear un nuevo objeto sin los campos de eliminación
+            const { deletedAt, deletedBy, originalCollection, ...cleanLoanData } = loanData;
+            
+            // Restaurar a la colección original
+            const loanRef = doc(db, "Loans", docSnapshot.id);
+            batch.set(loanRef, cleanLoanData);
+            
+            // Eliminar de la papelera
+            batch.delete(docSnapshot.ref);
+          }
+        });
+        
+        // Ejecutar todas las operaciones
+        await batch.commit();
+        
+        showInfoModal('Éxito', 'Cliente recuperado de la papelera');
+        loadTrash();
+        loadClients();
       } catch (error) {
-        console.error("Error printing client:", error);
-        showAlert("Error al preparar la impresión.", "error");
+        console.error("Error recuperando cliente: ", error);
+        showInfoModal('Error', 'Error al recuperar el cliente: ' + error.message);
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Función para eliminar cliente definitivamente desde la papelera
+    async function deleteClientPermanentlyFromTrash(clientId) {
+      try {
+        showLoading();
+        
+        // Obtener todos los préstamos del cliente en la papelera
+        const trashQuery = query(
+          collection(db, "Papelera"),
+          where("deletedBy", "==", currentUser.uid)
+        );
+        
+        const trashSnapshot = await getDocs(trashQuery);
+        const batch = writeBatch(db);
+        
+        trashSnapshot.forEach(docSnapshot => {
+          const loanData = docSnapshot.data();
+          if (loanData.client.id === clientId) {
+            batch.delete(docSnapshot.ref);
+          }
+        });
+        
+        // Ejecutar todas las operaciones
+        await batch.commit();
+        
+        // Eliminar usuario del cliente si existe
+        await deleteClientUser(clientId);
+        
+        showInfoModal('Éxito', 'Cliente eliminado definitivamente de la papelera');
+        loadTrash();
+      } catch (error) {
+        console.error("Error eliminando cliente de la papelera: ", error);
+        showInfoModal('Error', 'Error al eliminar el cliente');
+      } finally {
+        hideLoading();
       }
     }
 
     // Función para buscar clientes
-    function setupSearch() {
-      const searchInput = document.getElementById('searchInput');
-      searchInput.addEventListener('input', (e) => {
-        renderClients(e.target.value);
-      });
+    async function searchClients() {
+      const searchTerm = document.getElementById('searchClient').value.trim().toLowerCase();
+      
+      if (!searchTerm) {
+        loadClients();
+        return;
+      }
+      
+      try {
+        showLoading();
+        
+        const loansQuery = query(
+          collection(db, "Loans"),
+          where("userId", "==", currentUser.uid)
+        );
+        
+        const loansSnapshot = await getDocs(loansQuery);
+        const clientsMap = new Map();
+        
+        loansSnapshot.forEach(doc => {
+          const loan = doc.data();
+          const clientId = loan.client.id;
+          const clientName = loan.client.name.toLowerCase();
+          
+          if (clientName.includes(searchTerm) || clientId.includes(searchTerm)) {
+            if (!clientsMap.has(clientId)) {
+              clientsMap.set(clientId, {
+                name: loan.client.name,
+                id: clientId,
+                phone: loan.client.phone,
+                loans: [],
+                activeLoans: 0,
+                status: 'active'
+              });
+            }
+            
+            const client = clientsMap.get(clientId);
+            client.loans.push(loan);
+            
+            // Contar préstamos activos
+            if (loan.status === 'active' || loan.status === 'overdue') {
+              client.activeLoans++;
+            }
+            
+            // Determinar el estado del cliente
+            if (loan.status === 'overdue') {
+              client.status = 'overdue';
+            } else if (loan.status === 'completed' && client.status === 'active') {
+              client.status = 'completed';
+            } else if (loan.status === 'expired') {
+              client.status = 'expired';
+            }
+          }
+        });
+        
+        const tableBody = document.getElementById('clientsTableBody');
+        tableBody.innerHTML = '';
+
+        for (const client of clientsMap.values()) {
+          const row = document.createElement('tr');
+          
+          // Determinar la clase de estado
+          let statusClass = 'client-status-active';
+          let statusText = 'Activo';
+          
+          if (client.status === 'overdue') {
+            statusClass = 'client-status-overdue';
+            statusText = 'Atrasado';
+          } else if (client.status === 'completed') {
+            statusClass = 'client-status-completed';
+            statusText = 'Completado';
+          } else if (client.status === 'expired') {
+            statusClass = 'client-status-expired';
+            statusText = 'Vencido';
+          }
+          
+          row.innerHTML = `
+            <td>${client.name}</td>
+            <td>${client.id}</td>
+            <td>${client.phone}</td>
+            <td>${client.activeLoans}</td>
+            <td><span class="client-status-badge ${statusClass}">${statusText}</span></td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn btn-info edit-client-btn" data-client-id="${client.id}">
+                  <i class="fas fa-edit"></i> Editar
+                </button>
+                <button class="btn btn-danger delete-client-btn" data-client-id="${client.id}">
+                  <i class="fas fa-trash"></i> Eliminar
+                </button>
+              </div>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        }
+        
+        // Agregar event listeners para los botones de edición
+        document.querySelectorAll('.edit-client-btn').forEach(button => {
+          button.addEventListener('click', () => {
+            const clientId = button.getAttribute('data-client-id');
+            showEditClientModal(clientId);
+          });
+        });
+        
+        // Agregar event listeners para los botones de eliminación
+        document.querySelectorAll('.delete-client-btn').forEach(button => {
+          button.addEventListener('click', () => {
+            const clientId = button.getAttribute('data-client-id');
+            showDeleteConfirmationModal(clientId);
+          });
+        });
+      } catch (error) {
+        console.error("Error buscando clientes: ", error);
+        showInfoModal('Error', 'Error al buscar clientes');
+      } finally {
+        hideLoading();
+      }
     }
 
-    // Función para configurar el evento de impresión
-    function setupPrintButton() {
-      document.getElementById('printClientBtn').addEventListener('click', () => {
-        window.print();
-      });
+    // Función para buscar en la papelera
+    async function searchTrash() {
+      const searchTerm = document.getElementById('searchTrash').value.trim().toLowerCase();
+      
+      if (!searchTerm) {
+        loadTrash();
+        return;
+      }
+      
+      try {
+        showLoading();
+        
+        const trashQuery = query(
+          collection(db, "Papelera"),
+          where("deletedBy", "==", currentUser.uid)
+        );
+        
+        const trashSnapshot = await getDocs(trashQuery);
+        const clientsMap = new Map();
+        
+        trashSnapshot.forEach(doc => {
+          const loan = doc.data();
+          const clientId = loan.client.id;
+          const clientName = loan.client.name.toLowerCase();
+          
+          if (clientName.includes(searchTerm) || clientId.includes(searchTerm)) {
+            if (!clientsMap.has(clientId)) {
+              clientsMap.set(clientId, {
+                name: loan.client.name,
+                id: clientId,
+                phone: loan.client.phone,
+                deletedAt: loan.deletedAt,
+                loanIds: [doc.id]
+              });
+            } else {
+              const client = clientsMap.get(clientId);
+              client.loanIds.push(doc.id);
+            }
+          }
+        });
+        
+        const tableBody = document.getElementById('trashTableBody');
+        tableBody.innerHTML = '';
+
+        for (const client of clientsMap.values()) {
+          const row = document.createElement('tr');
+          
+          row.innerHTML = `
+            <td>${client.name}</td>
+            <td>${client.id}</td>
+            <td>${client.phone}</td>
+            <td>${formatDate(client.deletedAt.toDate())}</td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn btn-success restore-client-btn" data-client-id="${client.id}">
+                  <i class="fas fa-undo"></i> Recuperar
+                </button>
+                <button class="btn btn-danger delete-permanently-btn" data-client-id="${client.id}">
+                  <i class="fas fa-trash"></i> Eliminar Definitivamente
+                </button>
+              </div>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        }
+        
+        // Agregar event listeners para los botones de recuperación
+        document.querySelectorAll('.restore-client-btn').forEach(button => {
+          button.addEventListener('click', () => {
+            const clientId = button.getAttribute('data-client-id');
+            restoreClientFromTrash(clientId);
+          });
+        });
+        
+        // Agregar event listeners para los botones de eliminación definitiva
+        document.querySelectorAll('.delete-permanently-btn').forEach(button => {
+          button.addEventListener('click', () => {
+            const clientId = button.getAttribute('data-client-id');
+            deleteClientPermanentlyFromTrash(clientId);
+          });
+        });
+      } catch (error) {
+        console.error("Error buscando en papelera: ", error);
+        showInfoModal('Error', 'Error al buscar en la papelera');
+      } finally {
+        hideLoading();
+      }
     }
 
-    // Función para configurar el botón de guardar cambios
-    function setupSaveButton() {
-      document.getElementById('saveChangesBtn').addEventListener('click', saveClientChanges);
-    }
-
-    // Función para configurar el botón de eliminar cliente
-    function setupDeleteButtons() {
-      document.getElementById('deleteClientBtn').addEventListener('click', () => {
-        confirmDeleteClient(currentClientId);
+    // Función para cambiar entre pestañas
+    function switchTab(tabName) {
+      // Ocultar todas las pestañas
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
       });
       
-      document.getElementById('confirmDeleteBtn').addEventListener('click', deleteClient);
+      // Mostrar la pestaña seleccionada
+      document.getElementById(`${tabName}-tab`).classList.add('active');
+      
+      // Actualizar estado de las pestañas
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+        if (tab.getAttribute('data-tab') === tabName) {
+          tab.classList.add('active');
+        }
+      });
+      
+      // Cargar datos según la pestaña
+      if (tabName === 'clients') {
+        loadClients();
+      } else if (tabName === 'trash') {
+        loadTrash();
+      }
     }
 
-    // Inicialización cuando el DOM está listo
+    // Evento cuando el DOM está cargado
     document.addEventListener('DOMContentLoaded', () => {
-      // Configurar Firebase Auth state observer
       onAuthStateChanged(auth, (user) => {
         if (user) {
           currentUser = user;
-          
-          // Cargar los datos de la empresa
-          loadCompanyData();
-          
-          // Cargar los clientes del usuario
-          loadUserClients();
-          
-          // Configurar eventos
-          setupSearch();
-          setupPrintButton();
-          setupSaveButton();
-          setupDeleteButtons();
-          setupDocumentUpload();
+          loadClients();
         } else {
-          // Redirigir a la página de inicio de sesión
           window.location.href = 'index.html';
         }
       });
+
+      // Configurar event listeners
+      document.getElementById('editClientForm').addEventListener('submit', saveClientChanges);
+      document.getElementById('confirmDeleteBtn').addEventListener('click', deleteClientPermanently);
+      document.getElementById('moveToTrashBtn').addEventListener('click', moveClientToTrash);
+      document.getElementById('searchClient').addEventListener('input', debounce(searchClients, 300));
+      document.getElementById('searchTrash').addEventListener('input', debounce(searchTrash, 300));
+      
+      // Configurar event listeners para las pestañas
+      document.querySelectorAll('.tab').forEach(tab => { 
+        tab.addEventListener('click', () => {
+          const tabName = tab.getAttribute('data-tab');
+          switchTab(tabName);
+        });
+      });
     });
+
+    // Función debounce para búsquedas
+    function debounce(func, wait) {
+      let timeout;
+      return function(...args) {
+        const context = this;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), wait);
+      };
+    }
   </script>
 </body>
 </html>
