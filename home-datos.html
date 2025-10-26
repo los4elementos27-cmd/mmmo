@@ -1,144 +1,1413 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>cctv</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #2c3e50;
-            color: #fff;
-            margin: 0;
-            padding: 0;
-        }
-        header {
-            background-color: #2c3e50;
-            color: #fff;
-            padding: 20px;
-            text-align: center;
-        }
-        h1 {
-            margin: 0;
-            font-size: 24px;
-        }
-        .container {
-            max-width: 1000px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #34495e;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-        }
-        .config-item {
-            background-color: #2c3e50;
-            padding: 15px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.3s;
-            text-align: center;
-        }
-        .config-item:hover {
-            background-color: #16a085;
-        }
-        .icon {
-            font-size: 24px;
-            margin-bottom: 10px;
-            color: #fff;
-        }
-        .config-title {
-            font-size: 16px;
-            color: #fff;
-        }
-        a {
-            text-decoration: none;
-            color: inherit;
-        }
-        .back-button {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            background-color: #16a085;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            transition: background-color 0.3s;
-            z-index: 1000;
-        }
-        .back-button i {
-            margin-right: 8px;
-        }
-        .back-button:hover {
-            background-color: #2c2e50;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configuración de Empresa</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* Tus estilos CSS permanecen igual */
+    :root {
+      --primary-color: #1abc9c;
+      --primary-dark: #16a085;
+      --secondary-color: #2a2a3f;
+      --background-color: #2c3e50;
+      --text-color: #ffffff;
+      --text-light: #a8a8a8;
+      --border-color: #444;
+      --card-bg: #34495e;
+      --danger-color: #e74c3c;
+      --warning-color: #f39c12;
+      --success-color: #2ecc71;
+      --info-color: #3498db;
+      --modal-bg: rgba(0, 0, 0, 0.8);
+      --modal-content-bg: #2a2a3f;
+      --modal-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+      --modal-border-radius: 12px;
+      --modal-padding: 2rem;
+      --modal-title-size: 1.5rem;
+      --modal-message-size: 1rem;
+      --modal-footer-gap: 1rem;
+      --alert-success-bg: rgba(46, 204, 113, 0.2);
+      --alert-success-border: #2ecc71;
+      --alert-error-bg: rgba(231, 76, 60, 0.2);
+      --alert-error-border: #e74c3c;
+      --alert-warning-bg: rgba(243, 156, 18, 0.2);
+      --alert-warning-border: #f39c12;
+      --alert-info-bg: rgba(52, 152, 219, 0.2);
+      --alert-info-border: #3498db;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      margin: 0;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1000px;
+      background-color: var(--secondary-color);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      padding: 2rem;
+      margin: 0 auto;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    h1 {
+      color: var(--primary-color);
+      text-align: center;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .nav-tab {
+      background-color: var(--card-bg);
+      color: var(--text-color);
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-tab i {
+      margin-right: 8px;
+    }
+
+    .nav-tab:hover {
+      background-color: var(--primary-color);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .nav-tab.active {
+      background-color: var(--primary-color);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary-color);
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(26, 188, 156, 0.2);
+    }
+
+    .form-control:disabled {
+      background-color: var(--card-bg);
+      color: var(--text-light);
+      cursor: not-allowed;
+    }
+
+    .btn {
+      background-color: var(--primary-color);
+      color: var(--text-color);
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn i {
+      margin-right: 8px;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-block {
+      display: block;
+      width: 100%;
+    }
+
+    .btn-success {
+      background-color: var(--success-color);
+    }
+
+    .btn-success:hover {
+      background-color: #27ae60;
+    }
+
+    .btn-danger {
+      background-color: var(--danger-color);
+    }
+
+    .btn-danger:hover {
+      background-color: #c0392b;
+    }
+
+    .btn-secondary {
+      background-color: var(--secondary-color);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: #3a3a4f;
+    }
+
+    .btn-warning {
+      background-color: var(--warning-color);
+    }
+
+    .btn-warning:hover {
+      background-color: #e67e22;
+    }
+
+    .upload-icon-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100px;
+      height: 100px;
+      background-color: var(--background-color);
+      border: 2px dashed var(--border-color);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 1rem;
+    }
+
+    .upload-icon-btn:hover {
+      border-color: var(--primary-color);
+      background-color: rgba(26, 188, 156, 0.1);
+    }
+
+    .upload-icon-btn i {
+      font-size: 2rem;
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+    }
+
+    .upload-icon-btn span {
+      font-size: 0.8rem;
+      color: var(--text-light);
+    }
+
+    .hidden-file-input {
+      display: none;
+    }
+
+    .image-preview-container {
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    .image-preview {
+      max-width: 200px;
+      max-height: 150px;
+      border-radius: 8px;
+      border: 2px solid var(--border-color);
+      display: none;
+    }
+
+    .default-logo {
+      width: 100px;
+      height: 100px;
+      border-radius: 8px;
+      background-color: var(--background-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      margin-bottom: 1rem;
+    }
+
+    .default-logo i {
+      font-size: 3rem;
+      color: var(--primary-color);
+    }
+
+    .bank-accounts-container {
+      margin-top: 2rem;
+      border-top: 2px solid var(--border-color);
+      padding-top: 1.5rem;
+    }
+
+    .bank-account-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .bank-account-title {
+      color: var(--primary-color);
+      font-size: 1.2rem;
+    }
+
+    .bank-account-card {
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .bank-account-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .remove-bank-account {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: var(--danger-color);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 25px;
+      height: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .remove-bank-account:hover {
+      background-color: #c0392b;
+      transform: scale(1.1);
+    }
+
+    .bank-logo-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .bank-logo-preview {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background-color: var(--background-color);
+    }
+
+    .bank-logo-preview i {
+      font-size: 1.5rem;
+      color: var(--primary-color);
+    }
+
+    .bank-logo-preview img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .bank-logo-upload-btn {
+      padding: 0.5rem 1rem;
+      background-color: var(--background-color);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+
+    .bank-logo-upload-btn:hover {
+      border-color: var(--primary-color);
+      background-color: rgba(26, 188, 156, 0.1);
+    }
+
+    .client-selector {
+      margin-top: 1.5rem;
+      border-top: 1px solid var(--border-color);
+      padding-top: 1.5rem;
+    }
+
+    .client-selector-title {
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+    }
+
+    .client-list {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+
+    .client-item {
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .client-item:hover {
+      background-color: rgba(26, 188, 156, 0.1);
+    }
+
+    .client-item.selected {
+      background-color: rgba(26, 188, 156, 0.2);
+      border-left: 4px solid var(--primary-color);
+    }
+
+    .client-item:last-child {
+      border-bottom: none;
+    }
+
+    .client-info {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .client-name {
+      font-weight: 500;
+    }
+
+    .client-id {
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    .client-loans {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      margin-top: 0.25rem;
+    }
+
+    .buttons-container {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    /* Loading overlay y modales... */
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .loading-overlay.active {
+      display: flex;
+    }
+
+    .loader {
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid var(--primary-color);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--modal-bg);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal-content {
+      background-color: var(--modal-content-bg);
+      padding: var(--modal-padding);
+      border-radius: var(--modal-border-radius);
+      width: 90%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--modal-shadow);
+      transform: translateY(-20px);
+      transition: transform 0.3s ease;
+    }
+
+    .modal.active .modal-content {
+      transform: translateY(0);
+    }
+
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      z-index: 3000;
+      transform: translateX(120%);
+      transition: transform 0.3s ease;
+      max-width: 350px;
+    }
+
+    .toast.active {
+      transform: translateX(0);
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+      .buttons-container {
+        flex-direction: column;
+      }
+    }
+  </style>
 </head>
 <body>
-
-<header>
-
-    <h1>INFORMACIÓN DE TU EMPRESA</h1>
-</header>
-
-<div class="container">
-    <div class="config-item">
-        <a href="datos-de-la-empresa.html">
-            <i class="fas fa-file icon"></i>
-            <div class="config-title">Registrar / Editar</div>
-        </a>
+  <div class="container">
+    <div class="header">
+      <h1><i class="fas fa-building"></i> Configuración de Empresa</h1>
     </div>
-    <div class="config-item">
-        <a href="Datos-cliente-empresa.html">
-            <i class="fas fa-users icon"></i>
-            <div class="config-title">Compartir con clientes</div>
-        </a>
+    
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-tab="view-config">
+        <i class="fas fa-eye"></i> Ver Configuración
+      </button>
+      <button class="nav-tab" data-tab="edit-config">
+        <i class="fas fa-cog"></i> Configurar Empresa
+      </button>
     </div>
-  <!--
-        <div class="config-item">
-        <a href="cctv-bitacora-home.html">
-            <i class="fa-solid fa-file-medical icon"></i>
-            <div class="config-title">Bitácora Médica</div>
-        </a>
+    
+    <!-- Pestaña 1: Ver Configuración -->
+    <div id="view-config" class="tab-content active">
+      <form id="companyViewForm">
+        <!-- Logo de la empresa -->
+        <div class="form-group">
+          <label>Logo de la Empresa</label>
+          <div class="image-preview-container">
+            <div class="default-logo" id="defaultLogoView">
+              <i class="fas fa-building"></i>
+            </div>
+            <img id="companyLogoPreviewView" src="" alt="Logo de la empresa" class="image-preview" style="display: none;">
+          </div>
+        </div>
+        
+        <!-- Nombre de la empresa -->
+        <div class="form-group">
+          <label for="companyNameView">Nombre de la Empresa</label>
+          <input type="text" id="companyNameView" class="form-control" disabled>
+        </div>
+        
+        <!-- RNC -->
+        <div class="form-group">
+          <label for="companyRNCView">RNC</label>
+          <input type="text" id="companyRNCView" class="form-control" disabled>
+        </div>
+        
+        <!-- Teléfono -->
+        <div class="form-group">
+          <label for="companyPhoneView">Teléfono</label>
+          <input type="tel" id="companyPhoneView" class="form-control" disabled>
+        </div>
+        
+        <!-- Dirección -->
+        <div class="form-group">
+          <label for="companyAddressView">Dirección</label>
+          <input type="text" id="companyAddressView" class="form-control" disabled>
+        </div>
+        
+        <!-- Cuentas Bancarias -->
+        <div class="bank-accounts-container">
+          <h3 class="bank-account-title"><i class="fas fa-university"></i> Cuentas Bancarias</h3>
+          <div id="bankAccountsListView">
+            <!-- Las cuentas bancarias se mostrarán aquí dinámicamente -->
+          </div>
+        </div>
+        
+        <!-- Selector de Clientes -->
+        <div class="client-selector">
+          <h3 class="client-selector-title"><i class="fas fa-users"></i> Asociar Configuración a Clientes</h3>
+          <div class="form-group">
+            <label for="searchClient">Buscar Cliente:</label>
+            <input type="text" id="searchClient" class="form-control" placeholder="Ingrese nombre o cédula del cliente">
+          </div>
+          <div class="client-list" id="clientList">
+            <!-- Los clientes se cargarán aquí dinámicamente -->
+          </div>
+        </div>
+        
+        <div class="buttons-container">
+          <button type="button" id="associateBtn" class="btn btn-success btn-block">
+            <i class="fas fa-link"></i> Asociar al Cliente Seleccionado
+          </button>
+          <button type="button" id="associateAllBtn" class="btn btn-warning btn-block">
+            <i class="fas fa-users"></i> Asociar a Todos los Clientes
+          </button>
+        </div>
+      </form>
     </div>
- 
-    <div class="config-item">
-        <a href="importar-archivo-dayli.html">
-            <i class="fas fa-file-import icon"></i>
-            <div class="config-title">Importa RTMdayli</div>
-        </a>
-    </div> -->
-                   
-</div>
+    
+    <!-- Pestaña 2: Configurar Empresa -->
+    <div id="edit-config" class="tab-content">
+      <form id="companyConfigForm">
+        <!-- Logo de la empresa -->
+        <div class="form-group">
+          <label>Logo de la Empresa (PNG)</label>
+          <div class="default-logo" id="defaultLogo">
+            <i class="fas fa-building"></i>
+          </div>
+          <div class="upload-icon-btn" id="companyLogoUploadBtn">
+            <i class="fas fa-image"></i>
+            <span>Seleccionar Imagen</span>
+          </div>
+          <input type="file" id="companyLogoUpload" class="hidden-file-input" accept="image/png">
+          
+          <div class="image-preview-container">
+            <img id="companyLogoPreview" src="" alt="Logo de la empresa" class="image-preview">
+          </div>
+        </div>
+        
+        <!-- Nombre de la empresa -->
+        <div class="form-group">
+          <label for="companyName">Nombre de la Empresa</label>
+          <input type="text" id="companyName" class="form-control" required>
+        </div>
+        
+        <!-- RNC -->
+        <div class="form-group">
+          <label for="companyRNC">RNC</label>
+          <input type="text" id="companyRNC" class="form-control" required>
+        </div>
+        
+        <!-- Teléfono -->
+        <div class="form-group">
+          <label for="companyPhone">Teléfono</label>
+          <input type="tel" id="companyPhone" class="form-control" required>
+        </div>
+        
+        <!-- Dirección -->
+        <div class="form-group">
+          <label for="companyAddress">Dirección</label>
+          <input type="text" id="companyAddress" class="form-control" required>
+        </div>
+        
+        <!-- Cuentas Bancarias -->
+        <div class="bank-accounts-container">
+          <div class="bank-account-header">
+            <h3 class="bank-account-title"><i class="fas fa-university"></i> Cuentas Bancarias</h3>
+            <button type="button" id="addBankAccountBtn" class="btn btn-secondary">
+              <i class="fas fa-plus"></i> Agregar Cuenta
+            </button>
+          </div>
+          
+          <div id="bankAccountsList">
+            <!-- Las cuentas bancarias se agregarán aquí dinámicamente -->
+          </div>
+        </div>
+        
+        <button type="submit" class="btn btn-success btn-block">
+          <i class="fas fa-save"></i> Guardar Configuración
+        </button>
+      </form>
+    </div>
+  </div>
 
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-<script>
-    function goBack() {
-        window.history.back();
-    }
-</script>
+  <!-- Elementos de UI (modales, loading, etc.) -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loader"></div>
+  </div>
 
-<script>
-    document.addEventListener('contextmenu', function(e) {
-        e.preventDefault();
-    });
+  <div class="toast" id="toastNotification">
+    <i class="fas fa-check-circle"></i>
+    <span id="toastMessage">Operación realizada con éxito</span>
+  </div>
 
-    document.addEventListener('keydown', function(e) {
-        if (e.key === "F12" || (e.ctrlKey && (e.key === 'u' || (e.shiftKey && (e.key === 'I' || e.key === 'J'))))) {
-            e.preventDefault();
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+  <script>
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+      authDomain: "inventario-35d6b.firebaseapp.com",
+      databaseURL: "https://inventario-35d6b-default-rtdb.firebaseio.com",
+      projectId: "inventario-35d6b",
+      storageBucket: "inventario-35d6b.appspot.com",
+      messagingSenderId: "266100399659",
+      appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+    };
+
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+    const storage = firebase.storage();
+
+    // Variables globales
+    let currentUser = null;
+    let companyLogoFile = null;
+    let bankAccounts = [];
+    let nextBankAccountId = 1;
+    let companyData = null;
+    let clientsList = [];
+    let selectedClient = null;
+    let isInitialLoad = true; // NUEVA VARIABLE PARA CONTROLAR CARGA INICIAL
+
+    // Inicializar la aplicación cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', () => {
+      auth.onAuthStateChanged(user => {
+        if (user) {
+          currentUser = user;
+          console.log('Usuario autenticado:', user.uid);
+          setupEventListeners();
+          loadCompanyData();
+          loadClients();
+        } else {
+          window.location.href = 'index.html';
         }
+      });
     });
-</script>
 
+    // Configurar event listeners
+    function setupEventListeners() {
+      // Navegación entre pestañas
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          const tabId = tab.getAttribute('data-tab');
+          switchTab(tabId);
+        });
+      });
+      
+      // Botón de subir logo
+      document.getElementById('companyLogoUploadBtn').addEventListener('click', () => {
+        document.getElementById('companyLogoUpload').click();
+      });
+      
+      document.getElementById('companyLogoUpload').addEventListener('change', handleLogoUpload);
+      document.getElementById('addBankAccountBtn').addEventListener('click', addBankAccount);
+      document.getElementById('companyConfigForm').addEventListener('submit', saveCompanyConfig);
+      document.getElementById('searchClient').addEventListener('input', searchClients);
+      document.getElementById('associateBtn').addEventListener('click', associateCompanyToClient);
+      document.getElementById('associateAllBtn').addEventListener('click', associateCompanyToAllClients);
+    }
+
+    // Cambiar entre pestañas
+    function switchTab(tabId) {
+      document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      
+      document.querySelector(`.nav-tab[data-tab="${tabId}"]`).classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+      
+      if (tabId === 'view-config') {
+        displayCompanyDataView(companyData);
+      }
+    }
+
+    // Manejar la subida del logo
+    function handleLogoUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      if (file.type !== 'image/png') {
+        showToast('Error', 'Por favor, selecciona una imagen en formato PNG.', 'error');
+        e.target.value = '';
+        return;
+      }
+      
+      companyLogoFile = file;
+      
+      const preview = document.getElementById('companyLogoPreview');
+      const defaultLogo = document.getElementById('defaultLogo');
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+        defaultLogo.style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // LIMPIAR COMPLETAMENTE LAS CUENTAS BANCARIAS
+    function clearBankAccounts() {
+      console.log('Limpiando cuentas bancarias...');
+      const bankAccountsList = document.getElementById('bankAccountsList');
+      bankAccountsList.innerHTML = '';
+      bankAccounts = [];
+      nextBankAccountId = 1;
+      console.log('Cuentas bancarias limpiadas. nextBankAccountId:', nextBankAccountId);
+    }
+
+    // Agregar nueva cuenta bancaria
+    function addBankAccount(bankData = null) {
+      const bankAccountId = nextBankAccountId++;
+      const bankAccountsList = document.getElementById('bankAccountsList');
+      
+      console.log('Agregando cuenta bancaria ID:', bankAccountId);
+      
+      const bankAccountElement = document.createElement('div');
+      bankAccountElement.className = 'bank-account-card';
+      bankAccountElement.dataset.id = bankAccountId;
+      bankAccountElement.innerHTML = `
+        <button type="button" class="remove-bank-account" onclick="removeBankAccount(${bankAccountId})">
+          <i class="fas fa-times"></i>
+        </button>
+        
+        <div class="form-group">
+          <label for="bankName_${bankAccountId}">Nombre del Banco</label>
+          <input type="text" id="bankName_${bankAccountId}" class="form-control" required>
+        </div>
+        
+        <div class="form-group">
+          <label>Logo del Banco (Opcional)</label>
+          <div class="bank-logo-container">
+            <div class="bank-logo-preview" id="bankLogoPreview_${bankAccountId}">
+              <i class="fas fa-university"></i>
+            </div>
+            <button type="button" class="bank-logo-upload-btn" id="bankLogoUploadBtn_${bankAccountId}">
+              <i class="fas fa-image"></i> Seleccionar Logo
+            </button>
+            <input type="file" id="bankLogoUpload_${bankAccountId}" class="hidden-file-input" accept="image/*">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="accountNumber_${bankAccountId}">Número de Cuenta</label>
+          <input type="text" id="accountNumber_${bankAccountId}" class="form-control" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="accountType_${bankAccountId}">Tipo de Cuenta</label>
+          <select id="accountType_${bankAccountId}" class="form-control" required>
+            <option value="ahorro">Ahorro</option>
+            <option value="corriente">Corriente</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="accountHolder_${bankAccountId}">Nombre del Titular</label>
+          <input type="text" id="accountHolder_${bankAccountId}" class="form-control" required>
+        </div>
+      `;
+      
+      bankAccountsList.appendChild(bankAccountElement);
+      
+      const uploadBtn = document.getElementById(`bankLogoUploadBtn_${bankAccountId}`);
+      const fileInput = document.getElementById(`bankLogoUpload_${bankAccountId}`);
+      
+      uploadBtn.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', (e) => handleBankLogoUpload(e, bankAccountId));
+      
+      if (bankData) {
+        document.getElementById(`bankName_${bankAccountId}`).value = bankData.bankName || '';
+        document.getElementById(`accountNumber_${bankAccountId}`).value = bankData.accountNumber || '';
+        document.getElementById(`accountType_${bankAccountId}`).value = bankData.accountType || 'ahorro';
+        document.getElementById(`accountHolder_${bankAccountId}`).value = bankData.accountHolder || '';
+        
+        if (bankData.logoURL) {
+          const preview = document.getElementById(`bankLogoPreview_${bankAccountId}`);
+          preview.innerHTML = `<img src="${bankData.logoURL}" alt="Logo del banco">`;
+        }
+      }
+      
+      bankAccounts.push({
+        id: bankAccountId,
+        logoFile: null,
+        logoURL: bankData ? bankData.logoURL : null
+      });
+      
+      console.log('Cuenta bancaria agregada. Total de cuentas:', bankAccounts.length);
+    }
+
+    // Manejar la subida del logo del banco
+    function handleBankLogoUpload(e, bankAccountId) {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      if (!file.type.match('image.*')) {
+        showToast('Error', 'Por favor, selecciona una imagen válida.', 'error');
+        e.target.value = '';
+        return;
+      }
+      
+      const bankAccount = bankAccounts.find(acc => acc.id === bankAccountId);
+      if (bankAccount) {
+        bankAccount.logoFile = file;
+        bankAccount.logoURL = null;
+        
+        const preview = document.getElementById(`bankLogoPreview_${bankAccountId}`);
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.innerHTML = `<img src="${e.target.result}" alt="Logo del banco">`;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // Eliminar cuenta bancaria
+    window.removeBankAccount = function(bankAccountId) {
+      if (confirm('¿Estás seguro de eliminar esta cuenta bancaria?')) {
+        const element = document.querySelector(`.bank-account-card[data-id="${bankAccountId}"]`);
+        if (element) element.remove();
+        bankAccounts = bankAccounts.filter(acc => acc.id !== bankAccountId);
+        showToast('Éxito', 'Cuenta bancaria eliminada correctamente.', 'success');
+        console.log('Cuenta bancaria eliminada. Total de cuentas:', bankAccounts.length);
+      }
+    };
+
+    // CARGAR DATOS DE EMPRESA - COMPLETAMENTE REESCRITO
+    async function loadCompanyData() {
+      try {
+        showLoading();
+        
+        if (!currentUser) return;
+        
+        console.log('=== INICIANDO CARGA DE DATOS ===');
+        console.log('Usuario:', currentUser.uid);
+        
+        // LIMPIAR COMPLETAMENTE ANTES DE CARGAR
+        clearBankAccounts();
+        
+        const companyRef = db.collection("informacionCompany").doc(currentUser.uid);
+        const companySnap = await companyRef.get();
+        
+        if (companySnap.exists) {
+          companyData = companySnap.data();
+          console.log('Datos de empresa cargados:', companyData);
+          console.log('Número de cuentas bancarias en Firebase:', companyData.bankAccounts ? companyData.bankAccounts.length : 0);
+          
+          // Llenar formulario con datos existentes
+          document.getElementById('companyName').value = companyData.nombreEmpresa || '';
+          document.getElementById('companyRNC').value = companyData.rnc || '';
+          document.getElementById('companyPhone').value = companyData.telefono || '';
+          document.getElementById('companyAddress').value = companyData.direccion || '';
+          
+          // Mostrar logo si existe
+          if (companyData.fotoURL) {
+            const preview = document.getElementById('companyLogoPreview');
+            const defaultLogo = document.getElementById('defaultLogo');
+            preview.src = companyData.fotoURL;
+            preview.style.display = 'block';
+            defaultLogo.style.display = 'none';
+          }
+          
+          // Cargar cuentas bancarias si existen - SOLO UNA VEZ
+          if (companyData.bankAccounts && companyData.bankAccounts.length > 0) {
+            console.log('Cargando cuentas bancarias desde Firebase...');
+            companyData.bankAccounts.forEach(account => {
+              addBankAccount(account);
+            });
+            console.log('Cuentas bancarias cargadas. Total en interfaz:', bankAccounts.length);
+          } else {
+            console.log('No hay cuentas bancarias para cargar');
+          }
+          
+          displayCompanyDataView(companyData);
+        } else {
+          console.log('No se encontraron datos de empresa para este usuario');
+          displayEmptyData();
+        }
+        
+        console.log('=== CARGA DE DATOS COMPLETADA ===');
+        isInitialLoad = false;
+      } catch (error) {
+        console.error("Error al cargar datos:", error);
+        showToast('Error', 'No se pudieron cargar los datos: ' + error.message, 'error');
+        displayEmptyData();
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Mostrar datos vacíos
+    function displayEmptyData() {
+      document.getElementById('companyNameView').value = 'No configurado';
+      document.getElementById('companyRNCView').value = 'No configurado';
+      document.getElementById('companyPhoneView').value = 'No configurado';
+      document.getElementById('companyAddressView').value = 'No configurado';
+      
+      const bankAccountsList = document.getElementById('bankAccountsListView');
+      bankAccountsList.innerHTML = '<p style="color: var(--text-light);">No hay cuentas bancarias registradas.</p>';
+    }
+
+    // Mostrar datos en la vista
+    function displayCompanyDataView(data) {
+      if (!data) {
+        displayEmptyData();
+        return;
+      }
+      
+      const preview = document.getElementById('companyLogoPreviewView');
+      const defaultLogo = document.getElementById('defaultLogoView');
+      
+      if (data.fotoURL) {
+        preview.src = data.fotoURL;
+        preview.style.display = 'block';
+        defaultLogo.style.display = 'none';
+      } else {
+        preview.style.display = 'none';
+        defaultLogo.style.display = 'flex';
+      }
+      
+      document.getElementById('companyNameView').value = data.nombreEmpresa || 'No configurado';
+      document.getElementById('companyRNCView').value = data.rnc || 'No configurado';
+      document.getElementById('companyPhoneView').value = data.telefono || 'No configurado';
+      document.getElementById('companyAddressView').value = data.direccion || 'No configurado';
+      
+      displayBankAccountsView(data.bankAccounts);
+    }
+
+    // Mostrar cuentas bancarias en vista
+    function displayBankAccountsView(accounts) {
+      const bankAccountsList = document.getElementById('bankAccountsListView');
+      bankAccountsList.innerHTML = '';
+      
+      if (!accounts || accounts.length === 0) {
+        bankAccountsList.innerHTML = '<p style="color: var(--text-light);">No hay cuentas bancarias registradas.</p>';
+        return;
+      }
+      
+      accounts.forEach((account) => {
+        const accountElement = document.createElement('div');
+        accountElement.className = 'bank-account-card';
+        accountElement.innerHTML = `
+          <div class="form-group">
+            <label>Banco</label>
+            <input type="text" class="form-control" value="${account.bankName || 'No especificado'}" disabled>
+          </div>
+          
+          <div class="form-group">
+            <label>Número de Cuenta</label>
+            <input type="text" class="form-control" value="${account.accountNumber || 'No especificado'}" disabled>
+          </div>
+          
+          <div class="form-group">
+            <label>Tipo de Cuenta</label>
+            <input type="text" class="form-control" value="${account.accountType === 'ahorro' ? 'Ahorro' : account.accountType === 'corriente' ? 'Corriente' : 'No especificado'}" disabled>
+          </div>
+          
+          <div class="form-group">
+            <label>Titular</label>
+            <input type="text" class="form-control" value="${account.accountHolder || 'No especificado'}" disabled>
+          </div>
+          
+          <div class="bank-logo-container">
+            <div class="bank-logo-preview">
+              ${account.logoURL ? 
+                `<img src="${account.logoURL}" alt="Logo del banco">` : 
+                '<i class="fas fa-university"></i>'}
+            </div>
+          </div>
+        `;
+        
+        bankAccountsList.appendChild(accountElement);
+      });
+    }
+
+    // GUARDAR CONFIGURACIÓN - COMPLETAMENTE REESCRITO
+    async function saveCompanyConfig(e) {
+      e.preventDefault();
+      
+      try {
+        showLoading();
+        
+        console.log('=== INICIANDO GUARDADO ===');
+        console.log('Número de cuentas bancarias en interfaz:', bankAccounts.length);
+        
+        const companyName = document.getElementById('companyName').value.trim();
+        const companyRNC = document.getElementById('companyRNC').value.trim();
+        const companyPhone = document.getElementById('companyPhone').value.trim();
+        const companyAddress = document.getElementById('companyAddress').value.trim();
+        
+        if (!companyName || !companyRNC || !companyPhone || !companyAddress) {
+          showToast('Error', 'Todos los campos son obligatorios.', 'error');
+          return;
+        }
+        
+        let logoUrl = companyData?.fotoURL || '';
+        const preview = document.getElementById('companyLogoPreview');
+        
+        // Si hay un nuevo archivo de logo, subirlo
+        if (companyLogoFile) {
+          console.log('Subiendo nuevo logo...');
+          const storageRef = storage.ref(`company_logos/${currentUser.uid}`);
+          const snapshot = await storageRef.put(companyLogoFile);
+          logoUrl = await snapshot.ref.getDownloadURL();
+        } else if (preview.style.display === 'block' && preview.src) {
+          // Si no hay nuevo archivo pero hay un logo existente, mantenerlo
+          logoUrl = preview.src;
+        }
+        
+        const bankAccountsData = [];
+        
+        console.log('Procesando cuentas bancarias...');
+        for (const bankAccount of bankAccounts) {
+          const accountId = bankAccount.id;
+          const bankName = document.getElementById(`bankName_${accountId}`).value.trim();
+          const accountNumber = document.getElementById(`accountNumber_${accountId}`).value.trim();
+          const accountType = document.getElementById(`accountType_${accountId}`).value;
+          const accountHolder = document.getElementById(`accountHolder_${accountId}`).value.trim();
+          
+          if (!bankName || !accountNumber || !accountHolder) {
+            showToast('Error', 'Todos los campos de las cuentas bancarias son obligatorios.', 'error');
+            return;
+          }
+          
+          let bankLogoUrl = bankAccount.logoURL;
+          
+          // Si hay un nuevo logo para el banco, subirlo
+          if (bankAccount.logoFile) {
+            console.log(`Subiendo logo para cuenta ${accountId}...`);
+            const storageRef = storage.ref(`bank_logos/${currentUser.uid}/${accountId}`);
+            const snapshot = await storageRef.put(bankAccount.logoFile);
+            bankLogoUrl = await snapshot.ref.getDownloadURL();
+          }
+          
+          bankAccountsData.push({
+            bankName,
+            accountNumber,
+            accountType,
+            accountHolder,
+            logoURL: bankLogoUrl
+          });
+        }
+        
+        console.log('Cuentas bancarias procesadas:', bankAccountsData.length);
+        
+        // Preparar los datos para actualizar
+        const updatedCompanyData = {
+          nombreEmpresa: companyName,
+          rnc: companyRNC,
+          telefono: companyPhone,
+          direccion: companyAddress,
+          userId: currentUser.uid,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        if (logoUrl) updatedCompanyData.fotoURL = logoUrl;
+        if (bankAccountsData.length > 0) updatedCompanyData.bankAccounts = bankAccountsData;
+        
+        console.log('Guardando en Firebase...', updatedCompanyData);
+        
+        // USAR SET CON MERGE: TRUE PARA ACTUALIZAR
+        await db.collection("informacionCompany").doc(currentUser.uid).set(updatedCompanyData, { merge: true });
+        
+        showToast('Éxito', 'Datos actualizados correctamente.', 'success');
+        console.log('=== GUARDADO COMPLETADO ===');
+        
+        // NO recargar los datos automáticamente para evitar duplicación
+        // Solo actualizar la variable companyData localmente
+        companyData = updatedCompanyData;
+        displayCompanyDataView(companyData);
+        
+      } catch (error) {
+        console.error("Error al guardar:", error);
+        showToast('Error', 'Error al guardar: ' + error.message, 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // CARGAR CLIENTES
+    async function loadClients() {
+      try {
+        showLoading();
+        
+        const q = db.collection("Loans").where("userId", "==", currentUser.uid);
+        const querySnapshot = await q.get();
+        clientsList = [];
+        const uniqueClients = new Map();
+        
+        querySnapshot.forEach(doc => {
+          const loan = doc.data();
+          if (loan.client && loan.client.id) {
+            const clientId = loan.client.id;
+            
+            if (!uniqueClients.has(clientId)) {
+              uniqueClients.set(clientId, {
+                id: clientId,
+                name: loan.client.name || 'Cliente sin nombre',
+                phone: loan.client.phone || 'Sin teléfono',
+                address: loan.client.address || 'Sin dirección',
+                loansCount: 1,
+                loanId: doc.id
+              });
+            } else {
+              const client = uniqueClients.get(clientId);
+              client.loansCount++;
+              uniqueClients.set(clientId, client);
+            }
+          }
+        });
+        
+        clientsList = Array.from(uniqueClients.values());
+        console.log('Clientes cargados:', clientsList.length);
+        displayClients(clientsList);
+      } catch (error) {
+        console.error("Error al cargar clientes:", error);
+        showToast('Error', 'No se pudieron cargar los clientes.', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Mostrar clientes
+    function displayClients(clients) {
+      const clientListElement = document.getElementById('clientList');
+      clientListElement.innerHTML = '';
+      
+      if (!clients || clients.length === 0) {
+        clientListElement.innerHTML = '<p style="color: var(--text-light);">No hay clientes registrados.</p>';
+        return;
+      }
+      
+      clients.forEach(client => {
+        const clientElement = document.createElement('div');
+        clientElement.className = 'client-item';
+        clientElement.dataset.id = client.id;
+        clientElement.innerHTML = `
+          <div class="client-info">
+            <div>
+              <div class="client-name">${client.name}</div>
+              <div class="client-id">${client.id}</div>
+            </div>
+          </div>
+        `;
+        
+        clientElement.addEventListener('click', () => {
+          document.querySelectorAll('.client-item').forEach(item => item.classList.remove('selected'));
+          clientElement.classList.add('selected');
+          selectedClient = client;
+        });
+        
+        clientListElement.appendChild(clientElement);
+      });
+    }
+
+    // Buscar clientes
+    function searchClients() {
+      const searchTerm = document.getElementById('searchClient').value.trim().toLowerCase();
+      
+      if (!searchTerm) {
+        displayClients(clientsList);
+        return;
+      }
+      
+      const filteredClients = clientsList.filter(client => 
+        client.name.toLowerCase().includes(searchTerm) || 
+        (client.id && client.id.toLowerCase().includes(searchTerm))
+      );
+      
+      displayClients(filteredClients);
+    }
+
+    // Asociar automáticamente
+    async function autoAssociateClients() {
+      if (!companyData || !clientsList || clientsList.length === 0) return;
+      
+      try {
+        for (const client of clientsList) {
+          await db.collection("Loans").doc(client.loanId).update({
+            companyInfo: {
+              nombreEmpresa: companyData.nombreEmpresa || '',
+              rnc: companyData.rnc || '',
+              telefono: companyData.telefono || '',
+              direccion: companyData.direccion || '',
+              fotoURL: companyData.fotoURL || '',
+              bankAccounts: companyData.bankAccounts || []
+            }
+          });
+        }
+        console.log('Configuración asociada automáticamente a todos los clientes');
+      } catch (error) {
+        console.error("Error en asociación automática:", error);
+      }
+    }
+
+    // Asociar a cliente seleccionado
+    async function associateCompanyToClient() {
+      if (!selectedClient) {
+        showToast('Error', 'Selecciona un cliente primero.', 'error');
+        return;
+      }
+      
+      if (!companyData) {
+        showToast('Error', 'No hay configuración de empresa para asociar.', 'error');
+        return;
+      }
+      
+      try {
+        showLoading();
+        
+        await db.collection("Loans").doc(selectedClient.loanId).update({
+          companyInfo: {
+            nombreEmpresa: companyData.nombreEmpresa || '',
+            rnc: companyData.rnc || '',
+            telefono: companyData.telefono || '',
+            direccion: companyData.direccion || '',
+            fotoURL: companyData.fotoURL || '',
+            bankAccounts: companyData.bankAccounts || []
+          }
+        });
+        
+        showToast('Éxito', `Configuración asociada a ${selectedClient.name} correctamente.`, 'success');
+      } catch (error) {
+        console.error("Error asociando:", error);
+        showToast('Error', 'Error al asociar configuración.', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Asociar a todos los clientes
+    async function associateCompanyToAllClients() {
+      if (!companyData) {
+        showToast('Error', 'No hay configuración de empresa para asociar.', 'error');
+        return;
+      }
+      
+      if (!clientsList || clientsList.length === 0) {
+        showToast('Error', 'No hay clientes para asociar.', 'error');
+        return;
+      }
+      
+      try {
+        showLoading();
+        
+        for (const client of clientsList) {
+          await db.collection("Loans").doc(client.loanId).update({
+            companyInfo: {
+              nombreEmpresa: companyData.nombreEmpresa || '',
+              rnc: companyData.rnc || '',
+              telefono: companyData.telefono || '',
+              direccion: companyData.direccion || '',
+              fotoURL: companyData.fotoURL || '',
+              bankAccounts: companyData.bankAccounts || []
+            }
+          });
+        }
+        
+        showToast('Éxito', `Configuración asociada a ${clientsList.length} clientes correctamente.`, 'success');
+      } catch (error) {
+        console.error("Error asociando:", error);
+        showToast('Error', 'Error al asociar configuración.', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Utilidades
+    function showToast(title, message, type = 'success') {
+      const toast = document.getElementById('toastNotification');
+      toast.className = `toast toast-${type}`;
+      
+      let icon = 'fa-check-circle';
+      if (type === 'error') icon = 'fa-exclamation-circle';
+      if (type === 'warning') icon = 'fa-exclamation-triangle';
+      if (type === 'info') icon = 'fa-info-circle';
+      
+      toast.innerHTML = `<i class="fas ${icon}"></i><span id="toastMessage">${message}</span>`;
+      toast.classList.add('active');
+      
+      setTimeout(() => toast.classList.remove('active'), 5000);
+    }
+
+    function showLoading() {
+      document.getElementById('loadingOverlay').classList.add('active');
+    }
+
+    function hideLoading() {
+      document.getElementById('loadingOverlay').classList.remove('active');
+    }
+  </script>
 </body>
 </html>
