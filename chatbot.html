@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente Virtual - Perla</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        /* Variables CSS para el diseño general */
+        :root {
+            --primary-color: #1abc9c;
+            --primary-dark: #16a085;
+            --secondary-color: #2a2a3f;
+            --background-color: #2c3e50;
+            --text-color: #ffffff;
+            --text-light: #a8a8a8;
+            --border-color: #444;
+            --card-bg: #34495e;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --success-color: #15b086;
+            --info-color: #15a086;
+            --chat-bg: #1e1e2f;
+            --chat-user-bg: #15a086;
+            --chat-bot-bg: #2a2a3f;
+            
+            /* Variables para mejoras visuales */
+            --text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            --card-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+            --smooth-transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            --gradient-primary: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            --gradient-card: linear-gradient(135deg, var(--card-bg), #2c3e50);
+            --gradient-chat: linear-gradient(135deg, var(--chat-bg), #1a1a28);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', 'Roboto', sans-serif;
+            background: var(--gradient-chat);
+            color: var(--text-color);
+            margin: 0;
+            min-height: 100vh;
+            line-height: 1.6;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Estilos para el asistente virtual */
+        #assistant-section {
+            display: block;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .assistant-header {
+            background: var(--gradient-card);
+            padding: 1.2rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            z-index: 10;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+
+        .assistant-main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .assistant-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .assistant-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .assistant-messages::-webkit-scrollbar-thumb {
+            background: var(--gradient-primary);
+            border-radius: 3px;
+        }
+
+        .assistant-messages::-webkit-scrollbar-track {
+            background-color: var(--background-color);
+            border-radius: 3px;
+        }
+
+        .assistant-message {
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            border-radius: 18px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .assistant-message.bot {
+            align-self: flex-start;
+            background-color: var(--chat-bot-bg);
+            color: var(--text-color);
+            border-bottom-left-radius: 4px;
+        }
+
+        .assistant-message.user {
+            align-self: flex-end;
+            background: var(--gradient-primary);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .assistant-input-container {
+            padding: 0.75rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 0.5rem;
+            background: var(--gradient-card);
+        }
+
+        .assistant-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-size: 0.9rem;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .assistant-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .assistant-send {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--smooth-transition);
+        }
+
+        .assistant-send:hover {
+            transform: scale(1.1);
+        }
+
+        /* Estilo para preguntas frecuentes */
+        .faq-container {
+            margin-top: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.5rem;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .faq-item {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: var(--smooth-transition);
+        }
+
+        .faq-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+
+        .faq-question {
+            font-weight: 500;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .faq-answer {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background-color: var(--background-color);
+            border-radius: 5px;
+            display: none;
+        }
+
+        .faq-item.active .faq-answer {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Estilos responsivos */
+        @media (max-width: 600px) {
+            .assistant-header {
+                padding: 1rem;
+            }
+
+            .assistant-message {
+                max-width: 90%;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .assistant-header {
+                padding: 0.8rem;
+            }
+
+            .assistant-message {
+                max-width: 95%;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Perfil del cliente */
+        .client-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .client-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            flex-shrink: 0;
+            transition: var(--smooth-transition);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .client-avatar:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .client-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .client-name {
+            font-size: 1.2rem;
+            margin: 0;
+            font-weight: 600;
+            color: var(--text-color);
+            line-height: 1.3;
+        }
+
+        .client-id {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sección del Asistente Virtual -->
+    <section id="assistant-section">
+        <div class="assistant-header">
+            <div class="client-profile">
+                <div id="assistantAvatar" class="client-avatar"><i class="fas fa-robot"></i></div>
+                <div class="client-info">
+                    <h2 class="client-name">Perla - Asistente Virtual</h2>
+                    <span class="client-id">Estoy aquí para ayudarte</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="assistant-main-container">
+            <div class="assistant-messages" id="assistantMessages">
+                <div class="assistant-message bot">
+                    ¡Hola! Soy Perla, tu asistente virtual. ¿En qué puedo ayudarte hoy? Puedes escribir tu consulta directamente o seleccionar una de las preguntas frecuentes.
+                </div>
+                <div class="faq-container" id="faqContainer">
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle"></i> ¿Cómo realizar un pago?
+                        </div>
+                        <div class="faq-answer">
+                            Puedes realizar pagos a través de nuestras cuentas bancarias, transferencias o en nuestras oficinas. Consulta la sección de información de la empresa para ver las cuentas disponibles.
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle"></i> ¿Qué hacer si tengo un pago atrasado?
+                        </div>
+                        <div class="faq-answer">
+                            Si tienes un pago atrasado, comunícate con nosotros lo antes posible para regularizar tu situación y evitar cargos adicionales por mora.
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle"></i> ¿Cómo consultar mi saldo actual?
+                        </div>
+                        <div class="faq-answer">
+                            Tu saldo actual se muestra en la sección de inicio. También puedes ver el detalle completo en la sección "Ver Detalles".
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle"></i> ¿Dónde ver mi próximo pago?
+                        </div>
+                        <div class="faq-answer">
+                            Tu próximo pago se muestra en la sección de inicio. También puedes consultar todas las fechas de pago en la sección de calendario.
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle"></i> ¿Cómo descargar mis recibos de pago?
+                        </div>
+                        <div class="faq-answer">
+                            Puedes descargar tus recibos de pago desde la sección "Documentos". Los recibos solo están disponibles para descarga desde la versión de escritorio.
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle"></i> ¿Cómo cambiar mi foto de perfil?
+                        </div>
+                        <div class="faq-answer">
+                            Para cambiar tu foto de perfil, ve a la sección "Perfil" y haz clic en "Cambiar Foto de Perfil". Puedes elegir entre los avatares predeterminados o subir tu propia imagen.
+                        </div>
+                    </div>
+                    <!-- NUEVAS PREGUNTAS AGREGADAS -->
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle"></i> ¿Cómo usar la calculadora de préstamos?
+                        </div>
+                        <div class="faq-answer">
+                            Para usar la calculadora, ve a la sección "Calculadora", ingresa el monto del préstamo, la tasa de interés, el plazo y selecciona el tipo de préstamo. Luego haz clic en "Calcular" para ver los resultados.
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle"></i> ¿Qué tipos de préstamo puedo calcular?
+                        </div>
+                        <div class="faq-answer">
+                            La calculadora soporta dos tipos: Préstamos con Intereses (pagos variables de capital + interés) y Préstamos a Plazo Fijo (pagos fijos sin intereses).
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle"></i> ¿Cómo configurar el tema claro/oscuro?
+                        </div>
+                        <div class="faq-answer">
+                            Ve a la sección "Configuración" y selecciona el tema que prefieras: Retom (oscuro) o Personalizado. También puedes cambiar el color personalizado si seleccionas esa opción.
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle"></i> ¿Cómo cambiar el idioma de la aplicación?
+                        </div>
+                        <div class="faq-answer">
+                            En la sección "Configuración", selecciona el idioma que prefieras entre Español e Inglés. Los cambios se aplicarán inmediatamente.
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle"></i> ¿Cómo activar las notificaciones?
+                        </div>
+                        <div class="faq-answer">
+                            En la sección "Configuración", puedes activar las notificaciones por email y/o SMS marcando las casillas correspondientes en la sección de notificaciones.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="assistant-input-container">
+                <input type="text" class="assistant-input" id="assistantInput" placeholder="Escribe tu mensaje...">
+                <button class="assistant-send" id="assistantSend">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeAssistant();
+        });
+
+        // Inicializar asistente
+        function initializeAssistant() {
+            const assistantSend = document.getElementById('assistantSend');
+            const assistantInput = document.getElementById('assistantInput');
+
+            assistantSend.addEventListener('click', sendAssistantMessage);
+            assistantInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendAssistantMessage();
+                }
+            });
+
+            // Configurar preguntas frecuentes
+            const faqItems = document.querySelectorAll('.faq-item');
+            faqItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const isActive = item.classList.contains('active');
+                    
+                    // Cerrar todas las preguntas
+                    faqItems.forEach(faq => {
+                        faq.classList.remove('active');
+                    });
+                    
+                    // Abrir la pregunta seleccionada si no estaba activa
+                    if (!isActive) {
+                        item.classList.add('active');
+                    }
+                });
+            });
+        }
+
+        // Enviar mensaje al asistente
+        function sendAssistantMessage() {
+            const assistantInput = document.getElementById('assistantInput');
+            const assistantMessages = document.getElementById('assistantMessages');
+            const message = assistantInput.value.trim();
+            
+            if (!message) return;
+            
+            // Agregar mensaje del usuario
+            const userMessage = document.createElement('div');
+            userMessage.className = 'assistant-message user';
+            userMessage.textContent = message;
+            assistantMessages.appendChild(userMessage);
+            
+            // Limpiar input
+            assistantInput.value = '';
+            
+            // Scroll to bottom
+            assistantMessages.scrollTop = assistantMessages.scrollHeight;
+            
+            // Simular respuesta del asistente después de un breve retraso
+            setTimeout(() => {
+                const assistantResponse = getAssistantResponse(message);
+                const assistantMessage = document.createElement('div');
+                assistantMessage.className = 'assistant-message bot';
+                assistantMessage.textContent = assistantResponse;
+                assistantMessages.appendChild(assistantMessage);
+                
+                // Scroll to bottom
+                assistantMessages.scrollTop = assistantMessages.scrollHeight;
+            }, 1000);
+        }
+
+        // Obtener respuesta del asistente
+        function getAssistantResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            // Preguntas frecuentes con coincidencias de palabras clave
+            if (lowerMessage.includes('hola') || lowerMessage.includes('buenos días') || lowerMessage.includes('buenas tardes')) {
+                return '¡Hola! Soy Perla, tu asistente virtual. ¿En qué puedo ayudarte hoy? Puedes escribir tu consulta directamente o seleccionar una de las preguntas frecuentes.';
+            } else if (lowerMessage.includes('pago') || lowerMessage.includes('cuota') || lowerMessage.includes('realizar pago')) {
+                return 'Puedes realizar pagos a través de nuestras cuentas bancarias, transferencias o en nuestras oficinas. Consulta la sección de información de la empresa para ver las cuentas disponibles.';
+            } else if (lowerMessage.includes('atrasado') || lowerMessage.includes('mora') || lowerMessage.includes('vencido')) {
+                return 'Si tienes un pago atrasado, comunícate con nosotros lo antes posible para regularizar tu situación y evitar cargos adicionales por mora.';
+            } else if (lowerMessage.includes('saldo') || lowerMessage.includes('cuánto debo') || lowerMessage.includes('balance')) {
+                return 'Para consultar tu saldo actual, por favor inicia sesión en la aplicación principal. Allí podrás ver toda la información detallada de tu préstamo.';
+            } else if (lowerMessage.includes('próximo pago') || lowerMessage.includes('cuándo pagar') || lowerMessage.includes('fecha pago')) {
+                return 'Para consultar las fechas de pago, por favor inicia sesión en la aplicación principal. Allí podrás ver el calendario completo de pagos.';
+            } else if (lowerMessage.includes('historial') || lowerMessage.includes('pagos anteriores')) {
+                return 'Puedes ver tu historial de pagos en la sección "Historial" de la aplicación principal. Allí encontrarás todos tus pagos realizados con fechas y montos.';
+            } else if (lowerMessage.includes('documento') || lowerMessage.includes('recibo') || lowerMessage.includes('comprobante') || lowerMessage.includes('descargar recibo')) {
+                return 'Para descargar tus recibos de pago, ve a la sección "Documentos" de la aplicación principal. Los recibos solo están disponibles para descarga desde la versión de escritorio.';
+            } else if (lowerMessage.includes('foto') || lowerMessage.includes('perfil') || lowerMessage.includes('avatar')) {
+                return 'Para cambiar tu foto de perfil, ve a la sección "Perfil" de la aplicación principal y haz clic en "Cambiar Foto de Perfil". Puedes elegir entre los avatares predeterminados o subir tu propia imagen.';
+            } else if (lowerMessage.includes('calendario') || lowerMessage.includes('color') || lowerMessage.includes('vencimiento')) {
+                return 'En el calendario de pagos, los colores indican: Verde - Pago realizado, Amarillo - Pago pendiente, Rojo - Pago vencido. El día actual se marca con un fondo especial.';
+            } else if (lowerMessage.includes('contactar') || lowerMessage.includes('soporte') || lowerMessage.includes('ayuda')) {
+                return 'Puedes contactar con nuestro soporte a través del teléfono: (849) 515-8440, o visitando, Santo Domingo.';
+            } else if (lowerMessage.includes('tipo') || lowerMessage.includes('préstamo') || lowerMessage.includes('oferta')) {
+                return 'Ofrecemos dos tipos de préstamos: Préstamos a Plazo Fijo (pagos fijos) y Préstamos con Intereses (pagos variables de capital + interés). Consulta los detalles en la aplicación principal.';
+            } else if (lowerMessage.includes('creador') || lowerMessage.includes('desarrollador') || lowerMessage.includes('quién te creó')) {
+                return 'Fui desarrollada por Retom, un equipo dirigido por Andreilin Segura Santana.';
+            } else if (lowerMessage.includes('retom') || lowerMessage.includes('empresa') || lowerMessage.includes('compañía')) {
+                return 'Retom es una empresa que se encarga de vender servicios de software para empresas, realizar inventarios físicos y venta de software. Visita nuestra página web: www.retomrt.com';
+            } else if (lowerMessage.includes('director') || lowerMessage.includes('dueño') || lowerMessage.includes('propietario') || lowerMessage.includes('henry')) {
+                return 'El director de Retom se llama Henry Ferreras.';
+            } else if (lowerMessage.includes('perla') || lowerMessage.includes('foto') || lowerMessage.includes('imagen')) {
+                return 'Hola Soy Perla tu asistente virtual, en la vida real Soy una niña muy especial. Aquí ,  una foto de ella: [perla.png]';
+            } else if (lowerMessage.includes('calculadora') || lowerMessage.includes('calcular') || lowerMessage.includes('simular')) {
+                return 'Para usar la calculadora de préstamos, ve a la sección "Calculadora" en la aplicación principal. Allí podrás ingresar el monto, tasa de interés, plazo y tipo de préstamo para calcular tus pagos.';
+            } else if (lowerMessage.includes('configuración') || lowerMessage.includes('ajustes') || lowerMessage.includes('tema') || lowerMessage.includes('idioma')) {
+                return 'En la sección "Configuración" de la aplicación principal puedes personalizar la aplicación: cambiar el tema (Retom oscuro o Personalizado), idioma, tamaño de fuente, moneda y activar notificaciones.';
+            } else if (lowerMessage.includes('tema claro') || lowerMessage.includes('modo claro') || lowerMessage.includes('blanco')) {
+                return 'Actualmente solo ofrecemos el tema Retom (oscuro) y la opción de personalización de colores. Puedes seleccionar "Personalizado" en Configuración para elegir tu color preferido.';
+            } else if (lowerMessage.includes('tema oscuro') || lowerMessage.includes('modo oscuro') || lowerMessage.includes('retom')) {
+                return 'Para activar el tema Retom (oscuro), ve a "Configuración" y selecciona la opción "Retom" en Tema de la Aplicación. Es el tema predeterminado de la aplicación.';
+            } else if (lowerMessage.includes('personalizar') || lowerMessage.includes('color personalizado')) {
+                return 'Para personalizar los colores, ve a "Configuración", selecciona "Personalizado" en Tema de la Aplicación y elige el color que prefieras con el selector de color.';
+            } else if (lowerMessage.includes('gracias') || lowerMessage.includes('agradezco')) {
+                return '¡De nada! Estoy aquí para ayudarte. ¿Hay algo más en lo que pueda asistirte?';
+            } else if (lowerMessage.includes('adiós') || lowerMessage.includes('chao') || lowerMessage.includes('nos vemos')) {
+                return '¡Hasta luego! Que tengas un excelente día.';
+            } else {
+                return 'Lo siento, no entendí tu pregunta. ¿Puedes intentar reformularla?';
+            }
+        }
+    </script>
+</body>
+</html>
