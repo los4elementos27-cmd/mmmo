@@ -1,753 +1,805 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mis Solicitudes - Sistema de Préstamos</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #1abc9c;
-            --primary-dark: #16a085;
-            --background-color: #2c3e50;
-            --text-color: #ffffff;
-            --text-light: #a8a8a8;
-            --border-color: #444;
-            --card-bg: #34495e;
-            --danger-color: #e74c3c;
-            --success-color: #15b086;
-            --warning-color: #f39c12;
-            --info-color: #3498db;
-            --gradient-primary: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            --smooth-transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        html, body {
-            width: 100%;
-            height: 100%;
-            overflow-x: hidden;
-            font-size: 12px;
-        }
-
-        body {
-            font-family: 'Poppins', 'Roboto', sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            min-height: 100vh;
-            line-height: 1.4;
-            display: flex;
-            flex-direction: column;
-            padding: 0;
-            margin: 0;
-        }
-
-        /* HEADER */
-        .app-header {
-            background: var(--card-bg);
-            padding: 0.5rem 0.8rem;
-            text-align: center;
-            border-bottom: 1px solid var(--border-color);
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            height: 50px;
-        }
-
-        .header-content {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex: 1;
-            gap: 0.4rem;
-        }
-
-        .logo {
-            width: 28px;
-            height: 28px;
-            border-radius: 6px;
-        }
-
-        .header-title {
-            color: var(--primary-color);
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin: 0;
-        }
-
-        /* CONTENEDOR PRINCIPAL */
-        .container {
-            flex: 1;
-            width: 100%;
-            max-width: 100%;
-            padding: 0;
-            margin-top: 50px;
-            margin-bottom: 60px;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .content {
-            padding: 0.8rem;
-            width: 100%;
-            max-width: 100%;
-            box-sizing: border-box;
-        }
-
-        /* CARD */
-        .card {
-            background: var(--card-bg);
-            border-radius: 10px;
-            padding: 0.8rem;
-            margin-bottom: 0.8rem;
-            box-shadow: var(--card-shadow);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: var(--smooth-transition);
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .card-title {
-            color: var(--primary-color);
-            margin-top: 0;
-            margin-bottom: 0.8rem;
-            font-size: 0.85rem;
-            font-weight: 600;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 0.4rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        /* USER INFO PANEL */
-        .user-panel {
-            text-align: center;
-            padding: 0.8rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, rgba(26, 188, 156, 0.1), rgba(22, 160, 133, 0.1));
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-        }
-
-        .user-avatar {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            background: var(--gradient-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 0.6rem;
-            font-size: 1.1rem;
-            color: white;
-            font-weight: bold;
-        }
-
-        .user-name {
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin-bottom: 0.2rem;
-        }
-
-        .user-email {
-            font-size: 0.8rem;
-            color: var(--text-light);
-            margin-bottom: 0.4rem;
-        }
-
-        /* BOTONES */
-        .btn {
-            background: var(--gradient-primary);
-            color: var(--text-color);
-            border: none;
-            border-radius: 6px;
-            padding: 0.5rem 0.7rem;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: var(--smooth-transition);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 500;
-            font-family: 'Poppins', sans-serif;
-            min-height: 32px;
-            touch-action: manipulation;
-        }
-
-        .btn-warning {
-            background: linear-gradient(135deg, var(--warning-color), #e67e22);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administrar Usuarios</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
+  :root {
+    --primary: #15a086;
+    --secondary: #12876f;
+    --dark: #2c3e50;
+    --light: #ecf0f1;
+    --accent: #e74c3c;
+    --glass: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-highlight: rgba(255, 255, 255, 0.2);
+  }
+  
+  body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--dark);
+    color: var(--light);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    flex-direction: column;
+    background-image: 
+      radial-gradient(circle at 20% 30%, rgba(21, 160, 134, 0.05) 0%, transparent 30%),
+      radial-gradient(circle at 80% 70%, rgba(231, 76, 60, 0.05) 0%, transparent 30%);
+  }
+  
+  .users-container {
+    background-color: rgba(52, 73, 94, 0.8);
+    border-radius: 15px;
+    box-shadow: 
+      0 10px 25px rgba(0, 0, 0, 0.3),
+      0 0 30px rgba(21, 160, 134, 0.1);
+    padding: 25px;
+    width: 90%;
+    max-width: 1200px;
+    margin: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .users-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, 
+      transparent 0%, 
+      var(--glass-highlight) 50%, 
+      transparent 100%);
+    transform: translateX(-100%);
+    transition: transform 0.6s;
+  }
+  
+  .users-container:hover::before {
+    transform: translateX(100%);
+  }
+  
+  h1 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 2.2rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: white;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    position: relative;
+  }
+  
+  h1::after {
+    content: '';
+    display: block;
+    width: 100px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), transparent);
+    margin: 10px auto 0;
+    border-radius: 3px;
+  }
+  
+  .search-container {
+    margin-bottom: 25px;
+    position: relative;
+  }
+  
+  .search-container input {
+    width: 93%;
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+    background-color: rgba(44, 62, 80, 0.7);
+    color: var(--light);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .search-container input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(21, 160, 134, 0.3);
+  }
+  
+  .search-container::after {
+    content: '\f002';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    right: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--primary);
+  }
+  
+  .user-card {
+    background-color: rgba(31, 43, 56, 0.8);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 15px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    backdrop-filter: blur(5px);
+    border: 1px solid var(--glass-border);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .user-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 
+      0 15px 30px rgba(0, 0, 0, 0.3),
+      0 0 20px rgba(21, 160, 134, 0.2);
+  }
+  
+  .user-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(to bottom, var(--primary), transparent);
+    transition: all 0.3s ease;
+  }
+  
+  .user-card:hover::before {
+    width: 5px;
+    background: linear-gradient(to bottom, var(--primary), var(--secondary));
+  }
+  
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .user-photo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary);
+    box-shadow: 0 0 15px rgba(21, 160, 134, 0.3);
+    transition: all 0.3s ease;
+  }
+  
+  .user-card:hover .user-photo {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(21, 160, 134, 0.5);
+  }
+  
+  .user-details {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+  
+  .user-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: white;
+  }
+  
+  .user-position, .user-type {
+    font-size: 0.9rem;
+    color: #bdc3c7;
+  }
+  
+  .user-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 15px;
+  }
+  
+  .btn {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .btn i {
+    font-size: 1rem;
+    color: white;
+  }
+  
+  .btn-edit {
+    background-color: var(--primary);
+    color: white;
+  }
+  
+  .btn-edit:hover {
+    background-color: var(--secondary);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(21, 160, 134, 0.3);
+  }
+  
+  .btn-delete {
+    background-color: var(--accent);
+    color: white;
+  }
+  
+  .btn-delete:hover {
+    background-color: #c0392b;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(231, 76, 60, 0.3);
+  }
+  
+  .accordion {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-top: 0;
+  }
+  
+  .accordion.open {
+    max-height: 2000px;
+    margin-top: 15px;
+    animation: fadeIn 0.5s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .edit-form {
+    padding: 20px;
+    background-color: rgba(44, 62, 80, 0.5);
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+  }
+  
+  /* ESTILOS PARA CAMPOS HORIZONTALES */
+  .form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 18px;
+  }
+  
+  .form-group {
+    flex: 1;
+    min-width: calc(50% - 10px);
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    color: #bdc3c7;
+    font-weight: 400;
+  }
+  
+  .form-group input, 
+  .form-group select {
+    width: 80%;
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+    background-color: rgba(31, 43, 56, 0.7);
+    color: var(--light);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+  
+  .form-group input:focus, 
+  .form-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(21, 160, 134, 0.3);
+  }
+  
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 25px;
+  }
+  
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+    animation: fadeIn 0.3s;
+  }
+  
+  .modal-content {
+    background-color: rgba(52, 73, 94, 0.95);
+    padding: 30px;
+    border-radius: 15px;
+    width: 450px;
+    max-width: 90%;
+    animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  @keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  
+  .modal-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+  }
+  
+  .modal-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: white;
+  }
+  
+  .modal-close {
+    background: none;
+    border: none;
+    color: #bdc3c7;
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    line-height: 1;
+  }
+  
+  .modal-close:hover {
+    color: var(--primary);
+    transform: rotate(90deg);
+  }
+  
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 30px;
+  }
+  
+  .btn-save {
+    background-color: var(--primary);
+    color: white;
+    padding: 12px 25px;
+  }
+  
+  .btn-save:hover {
+    background-color: var(--secondary);
+    transform: translateY(-2px);
+  }
+  
+  .btn-cancel {
+    background-color: #7f8c8d;
+    color: white;
+    padding: 12px 25px;
+  }
+  
+  .btn-cancel:hover {
+    background-color: #6c7a7d;
+    transform: translateY(-2px);
+  }
+  
+  /* Efectos futuristas adicionales */
+  .circuit-pattern {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      linear-gradient(90deg, rgba(21, 160, 134, 0.05) 1px, transparent 1px),
+      linear-gradient(rgba(21, 160, 134, 0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: -1;
+  }
+  
+  .glow-effect {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+    opacity: 0.1;
+    z-index: -1;
+    animation: float 8s ease-in-out infinite;
+  }
+  
+  .glow-1 {
+    top: -50px;
+    left: -50px;
+  }
+  
+  .glow-2 {
+    bottom: -50px;
+    right: -50px;
+    animation-delay: 2s;
+  }
+  
+  @keyframes float {
+    0%, 100% {
+      transform: translate(0, 0);
+    }
+    50% {
+      transform: translate(20px, 20px);
+    }
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .users-container {
+      width: 95%;
+      padding: 15px;
+    }
+    
+    .user-info {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 15px;
+    }
+    
+    .user-actions {
+      width: 100%;
+      justify-content: space-between;
+    }
+    
+    .btn {
+      width: 48%;
+      justify-content: center;
+    }
+    
+    .modal-content {
+      width: 90%;
+      padding: 20px;
+    }
+    
+    /* Ajustes para formulario horizontal en móviles */
+    .form-row {
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    .form-group {
+      min-width: 100%;
+    }
+  }
+</style>
 </head>
 <body>
-    <!-- HEADER -->
-    <header class="app-header">
-        <button class="btn" onclick="window.location.href='index.html'" style="background: rgba(255,255,255,0.1); padding: 0.4rem; width: 36px; height: 36px;">
-            <i class="fas fa-arrow-left"></i>
-        </button>
-        <div class="header-content">
-            <img src="logo.png" alt="Logo" class="logo" onerror="this.style.display='none'">
-            <h1 class="header-title">Mis Solicitudes</h1>
-        </div>
-        <div style="width: 36px;"></div>
-    </header>
-
-    <!-- CONTENEDOR PRINCIPAL -->
-    <div class="container">
-        <div class="content" id="mainContent">
-            <!-- CONTENIDO DINÁMICO -->
-        </div>
+  <div class="users-container">
+    <h1>Administrar Usuarios</h1>
+    <div class="search-container">
+      <input type="text" id="searchInput" placeholder="Buscar por nombre...">
     </div>
+    <div id="usersList"></div>
+  </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-        import { 
-            getFirestore, 
-            collection, 
-            query, 
-            where, 
-            onSnapshot,
-            doc,
-            getDoc
-        } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+  <!-- Modal para confirmar eliminación -->
+  <div class="modal" id="deleteModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Confirmar Eliminación</div>
+        <button class="modal-close" id="closeDeleteModal">&times;</button>
+      </div>
+      <p>¿Estás seguro de que deseas eliminar este usuario?</p>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-cancel" id="cancelDeleteModal">Cancelar</button>
+        <button type="button" class="btn btn-delete" id="confirmDeleteModal">Eliminar</button>
+      </div>
+    </div>
+  </div>
 
-    // Configuración de Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
-      authDomain: "inventario-35d6b.firebaseapp.com",
-      databaseURL: "https://inventario-35d6b-default-rtdb.firebaseio.com",
-      projectId: "inventario-35d6b",
-      storageBucket: "inventario-35d6b.appspot.com",
-      messagingSenderId: "266100399659",
-      appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+  <!-- Modal para alertas -->
+  <div class="modal" id="alertModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title" id="alertTitle"></div>
+        <button class="modal-close" id="closeAlertModal">&times;</button>
+      </div>
+      <p id="alertMessage"></p>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-save" id="closeAlertModalBtn">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import { getFirestore, collection, getDocs, doc, updateDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+    authDomain: "inventario-35d6b.firebaseapp.com",
+    databaseURL: "https://inventario-35d6b-default-rtdb.firebaseio.com",
+    projectId: "inventario-35d6b",
+    storageBucket: "inventario-35d6b.appspot.com",
+    messagingSenderId: "266100399659",
+    appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let currentUserId = null; // Almacena el ID del usuario seleccionado
+
+  // Cargar usuarios
+  async function loadUsers() {
+    const usersList = document.getElementById('usersList');
+    usersList.innerHTML = ''; // Limpiar lista
+
+    const querySnapshot = await getDocs(collection(db, "users"));
+    querySnapshot.forEach((doc) => {
+      const user = doc.data();
+      const userCard = `
+        <div class="user-card" data-id="${doc.id}">
+          <div class="user-info">
+            <img src="${user.photoURL || 'https://via.placeholder.com/50'}" class="user-photo" alt="Foto de perfil">
+            <div class="user-details">
+              <div class="user-name">${user.name}</div>
+              <div class="user-position">${user.posicion}</div>
+              <div class="user-type">${user.tipoUsuario}</div>
+            </div>
+          </div>
+          <div class="user-actions">
+            <button class="btn btn-edit" onclick="toggleAccordion('${doc.id}')">Editar</button>
+            <button class="btn btn-delete" onclick="openDeleteModal('${doc.id}')">Eliminar</button>
+          </div>
+          <div class="accordion" id="accordion-${doc.id}">
+            <form id="editForm-${doc.id}" class="edit-form">
+              <!-- Fila 1 -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="editName-${doc.id}">Nombre y Apellido</label>
+                  <input type="text" id="editName-${doc.id}" value="${user.name}" required>
+                </div>
+                <div class="form-group">
+                  <label for="editCedula-${doc.id}">Cédula de Identidad</label>
+                  <input type="text" id="editCedula-${doc.id}" value="${user.cedula}" required>
+                </div>
+              </div>
+              
+              <!-- Fila 2 -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="editCodigoLaboral-${doc.id}">Código Laboral (ID)</label>
+                  <input type="text" id="editCodigoLaboral-${doc.id}" value="${user.codigoLaboral}" required>
+                </div>
+                <div class="form-group">
+                  <label for="editEmpresa-${doc.id}">Empresa</label>
+                  <input type="text" id="editEmpresa-${doc.id}" value="${user.empresa}" required>
+                </div>
+              </div>
+              
+              <!-- Fila 3 -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="editUbicacion-${doc.id}">Ubicación</label>
+                  <input type="text" id="editUbicacion-${doc.id}" value="${user.ubicacion}" required>
+                </div>
+                <div class="form-group">
+                  <label for="editSexo-${doc.id}">Sexo</label>
+                  <select id="editSexo-${doc.id}" required>
+                    <option value="masculino" ${user.sexo === 'masculino' ? 'selected' : ''}>Masculino</option>
+                    <option value="femenino" ${user.sexo === 'femenino' ? 'selected' : ''}>Femenino</option>
+                  </select>
+                </div>
+              </div>
+              
+              <!-- Fila 4 -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="editEmail-${doc.id}">Correo Electrónico</label>
+                  <input type="email" id="editEmail-${doc.id}" value="${user.email}" required>
+                </div>
+                <div class="form-group">
+                  <label for="editPhone-${doc.id}">Teléfono</label>
+                  <input type="tel" id="editPhone-${doc.id}" value="${user.phone}" required>
+                </div>
+              </div>
+              
+              <!-- Fila 5 -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="editDepartamento-${doc.id}">Departamento</label>
+                  <input type="text" id="editDepartamento-${doc.id}" value="${user.departamento}" required>
+                </div>
+                <div class="form-group">
+                  <label for="editAreaTrabajo-${doc.id}">Área de Trabajo</label>
+                  <input type="text" id="editAreaTrabajo-${doc.id}" value="${user.areaTrabajo}" required>
+                </div>
+              </div>
+              
+              <!-- Fila 6 -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="editPosicion-${doc.id}">Posición</label>
+                  <input type="text" id="editPosicion-${doc.id}" value="${user.posicion}" required>
+                </div>
+                <div class="form-group">
+                  <label for="editFechaNacimiento-${doc.id}">Fecha de Nacimiento</label>
+                  <input type="date" id="editFechaNacimiento-${doc.id}" value="${user.fechaNacimiento}" required>
+                </div>
+              </div>
+              
+              <!-- Fila 7 -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="editTipoUsuario-${doc.id}">Tipo de Usuario</label>
+                  <select id="editTipoUsuario-${doc.id}" required>
+                    <option value="admin" ${user.tipoUsuario === 'admin' ? 'selected' : ''}>Admin</option>
+                    <option value="estandar" ${user.tipoUsuario === 'estandar' ? 'selected' : ''}>Estándar</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <!-- Espacio vacío para mantener el diseño -->
+                  <label style="visibility: hidden;">Espacio</label>
+                  <div style="height: 42px;"></div>
+                </div>
+              </div>
+              
+              <div class="form-actions">
+                <button type="button" class="btn btn-cancel" onclick="toggleAccordion('${doc.id}')">Cancelar</button>
+                <button type="submit" class="btn btn-save">Guardar Cambios</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+      usersList.innerHTML += userCard;
+    });
+
+    // Asignar eventos a los formularios de edición
+    querySnapshot.forEach((doc) => {
+      const form = document.getElementById(`editForm-${doc.id}`);
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await saveUserChanges(doc.id);
+      });
+    });
+  }
+
+  // Alternar acordeón
+  window.toggleAccordion = (userId) => {
+    const accordion = document.getElementById(`accordion-${userId}`);
+    accordion.classList.toggle('open');
+  };
+
+  // Guardar cambios en la edición
+  async function saveUserChanges(userId) {
+    const updatedData = {
+      name: document.getElementById(`editName-${userId}`).value,
+      cedula: document.getElementById(`editCedula-${userId}`).value,
+      codigoLaboral: document.getElementById(`editCodigoLaboral-${userId}`).value,
+      empresa: document.getElementById(`editEmpresa-${userId}`).value,
+      ubicacion: document.getElementById(`editUbicacion-${userId}`).value,
+      sexo: document.getElementById(`editSexo-${userId}`).value,
+      email: document.getElementById(`editEmail-${userId}`).value,
+      phone: document.getElementById(`editPhone-${userId}`).value,
+      departamento: document.getElementById(`editDepartamento-${userId}`).value,
+      areaTrabajo: document.getElementById(`editAreaTrabajo-${userId}`).value,
+      posicion: document.getElementById(`editPosicion-${userId}`).value,
+      fechaNacimiento: document.getElementById(`editFechaNacimiento-${userId}`).value,
+      tipoUsuario: document.getElementById(`editTipoUsuario-${userId}`).value
     };
 
-        // Inicializar Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+    try {
+      await updateDoc(doc(db, "users", userId), updatedData);
+      showAlert("Usuario actualizado exitosamente.", true);
+      loadUsers(); // Recargar la lista de usuarios
+    } catch (error) {
+      showAlert("Error al actualizar el usuario: " + error.message);
+    }
+  }
 
-        // Variable global para el usuario
-        let currentUser = null;
+  // Abrir modal de eliminación
+  window.openDeleteModal = (userId) => {
+    currentUserId = userId;
+    document.getElementById('deleteModal').style.display = 'flex';
+  };
 
-        // Inicializar - Verificar usuario logueado
-        document.addEventListener('DOMContentLoaded', async () => {
-            console.log("=== VERIFICANDO SESIÓN DEL USUARIO ===");
-            
-            // Mostrar mensaje de carga
-            showLoadingMessage();
-            
-            // Primero, intentar varias formas de obtener el usuario
-            await checkUserSession();
-        });
+  // Confirmar eliminación
+  document.getElementById('confirmDeleteModal').addEventListener('click', async () => {
+    try {
+      await deleteDoc(doc(db, "users", currentUserId));
+      showAlert("Usuario eliminado exitosamente.", true);
+      loadUsers(); // Recargar la lista de usuarios
+      closeModal('deleteModal');
+    } catch (error) {
+      showAlert("Error al eliminar el usuario: " + error.message);
+    }
+  });
 
-        // Función para verificar la sesión del usuario
-        async function checkUserSession() {
-            try {
-                console.log("🔍 Buscando usuario en localStorage...");
-                
-                // PRIMERO: Intentar con la clave estándar
-                let savedUser = localStorage.getItem('loanSystemUser');
-                
-                // SEGUNDO: Si no existe, intentar con otras claves posibles
-                if (!savedUser) {
-                    console.log("🔄 Probando otras claves de almacenamiento...");
-                    savedUser = localStorage.getItem('currentUser') || 
-                               localStorage.getItem('userData') || 
-                               localStorage.getItem('loggedInUser');
-                }
-                
-                if (!savedUser) {
-                    console.log("❌ No se encontró usuario en localStorage");
-                    showNoUserSection();
-                    return;
-                }
-                
-                console.log("✅ Usuario encontrado en localStorage");
-                
-                try {
-                    currentUser = JSON.parse(savedUser);
-                    console.log("📋 Datos del usuario:", currentUser);
-                    
-                    // Verificar que el usuario tenga datos mínimos
-                    if (!currentUser || (!currentUser.id && !currentUser.email)) {
-                        console.log("⚠️ Datos de usuario incompletos");
-                        localStorage.removeItem('loanSystemUser');
-                        localStorage.removeItem('currentUser');
-                        localStorage.removeItem('userData');
-                        localStorage.removeItem('loggedInUser');
-                        showNoUserSection();
-                        return;
-                    }
-                    
-                    // Si no tiene ID pero tiene email, intentar buscar por email
-                    if (!currentUser.id && currentUser.email) {
-                        console.log("🔍 Buscando usuario por email:", currentUser.email);
-                        await findUserByEmail(currentUser.email);
-                        return;
-                    }
-                    
-                    // Si tiene ID, verificar en Firebase
-                    if (currentUser.id) {
-                        await verifyUserInFirebase(currentUser.id);
-                    }
-                    
-                } catch (parseError) {
-                    console.error("❌ Error al parsear datos del usuario:", parseError);
-                    localStorage.clear();
-                    showNoUserSection();
-                }
-                
-            } catch (error) {
-                console.error("❌ Error en checkUserSession:", error);
-                showNoUserSection();
-            }
-        }
+  // Mostrar alertas
+  function showAlert(message, isSuccess = false) {
+    const alertTitle = document.getElementById('alertTitle');
+    const alertMessage = document.getElementById('alertMessage');
+    alertTitle.textContent = isSuccess ? "Éxito" : "Error";
+    alertMessage.textContent = message;
+    document.getElementById('alertModal').style.display = 'flex';
 
-        // Buscar usuario por email en Firebase
-        async function findUserByEmail(email) {
-            try {
-                console.log("🔍 Buscando usuario en Firebase por email:", email);
-                
-                const usersRef = collection(db, "users");
-                const q = query(usersRef, where("email", "==", email));
-                
-                // Necesitaríamos getDocs aquí, pero por simplicidad, vamos a asumir
-                // Si el usuario no tiene ID, mostramos la sección de solicitudes de todos modos
-                console.log("⚠️ Usuario sin ID, usando datos de localStorage");
-                
-                // Crear un usuario temporal con datos básicos
-                currentUser = {
-                    id: 'temp_' + Date.now(),
-                    email: email,
-                    name: currentUser.name || email.split('@')[0] || 'Usuario',
-                    username: currentUser.username || '',
-                    phone: currentUser.phone || ''
-                };
-                
-                startSession();
-                
-            } catch (error) {
-                console.error("❌ Error buscando usuario por email:", error);
-                showNoUserSection();
-            }
-        }
+    if (isSuccess) {
+      setTimeout(() => {
+        closeModal('alertModal');
+      }, 2000);
+    }
+  }
 
-        // Verificar usuario en Firebase
-        async function verifyUserInFirebase(userId) {
-            try {
-                console.log("🔍 Verificando usuario en Firebase, ID:", userId);
-                
-                const userDocRef = doc(db, "users", userId);
-                const userDocSnap = await getDoc(userDocRef);
-                
-                if (userDocSnap.exists()) {
-                    console.log("✅ Usuario verificado en Firebase");
-                    const userData = userDocSnap.data();
-                    
-                    // Actualizar datos del usuario desde Firebase
-                    currentUser = {
-                        id: userId,
-                        email: userData.email || currentUser.email,
-                        name: userData.name || userData.username || currentUser.name || 'Usuario',
-                        username: userData.username || currentUser.username || '',
-                        phone: userData.phone || currentUser.phone || '',
-                        pin: userData.pin || currentUser.pin || ''
-                    };
-                    
-                    // Actualizar localStorage
-                    localStorage.setItem('loanSystemUser', JSON.stringify(currentUser));
-                    
-                    startSession();
-                    
-                } else {
-                    console.log("❌ Usuario no encontrado en Firebase");
-                    // Aún así, intentar con los datos de localStorage
-                    if (currentUser && currentUser.email) {
-                        console.log("⚠️ Usando datos de localStorage aunque no esté en Firebase");
-                        startSession();
-                    } else {
-                        localStorage.removeItem('loanSystemUser');
-                        showNoUserSection();
-                    }
-                }
-                
-            } catch (firebaseError) {
-                console.error("❌ Error verificando usuario en Firebase:", firebaseError);
-                
-                // Si hay error en Firebase, usar los datos de localStorage
-                if (currentUser && currentUser.email) {
-                    console.log("⚠️ Usando datos de localStorage por error en Firebase");
-                    startSession();
-                } else {
-                    localStorage.removeItem('loanSystemUser');
-                    showNoUserSection();
-                }
-            }
-        }
+  // Cerrar modales
+  function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+  }
 
-        // Mostrar mensaje de carga
-        function showLoadingMessage() {
-            const content = document.getElementById('mainContent');
-            if (content) {
-                content.innerHTML = `
-                    <div style="text-align: center; padding: 3rem 1rem;">
-                        <div style="width: 50px; height: 50px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: var(--primary-color); animation: spin 1s linear infinite; margin: 0 auto 1.5rem;"></div>
-                        <h3 style="color: var(--primary-color); margin-bottom: 1rem;">Verificando sesión...</h3>
-                        <p style="color: var(--text-light); font-size: 0.9rem;">Cargando información del usuario</p>
-                    </div>
-                `;
-            }
-        }
+  // Eventos para cerrar modales
+  document.getElementById('closeDeleteModal').addEventListener('click', () => closeModal('deleteModal'));
+  document.getElementById('cancelDeleteModal').addEventListener('click', () => closeModal('deleteModal'));
+  document.getElementById('closeAlertModal').addEventListener('click', () => closeModal('alertModal'));
+  document.getElementById('closeAlertModalBtn').addEventListener('click', () => closeModal('alertModal'));
 
-        // Mostrar sección cuando NO hay usuario
-        function showNoUserSection() {
-            console.log("👁️ Mostrando sección 'no hay usuario'");
-            
-            const content = document.getElementById('mainContent');
-            content.innerHTML = `
-                <div class="card" style="background: linear-gradient(135deg, rgba(243, 156, 18, 0.1), rgba(231, 76, 60, 0.1)); border: 1px solid var(--warning-color);">
-                    <div style="text-align: center; padding: 2rem 0.8rem;">
-                        <div style="font-size: 2.5rem; color: var(--warning-color); margin-bottom: 1rem;">
-                            <i class="fas fa-exclamation-triangle"></i>
-                        </div>
-                        <h2 style="color: var(--warning-color); margin-bottom: 1rem; font-size: 1.1rem;">Usuario no identificado</h2>
-                        <p style="color: var(--text-light); margin-bottom: 1rem; font-size: 0.9rem; line-height: 1.5;">
-                            No hay un usuario identificado en el sistema. Para ver tus solicitudes, 
-                            necesitas iniciar sesión en la página principal.
-                        </p>
-                        <p style="color: var(--text-color); font-size: 0.85rem; margin-bottom: 1.5rem; padding: 0.8rem; background: rgba(255,255,255,0.05); border-radius: 8px;">
-                            <i class="fas fa-info-circle"></i> 
-                            Solo puedes ver las solicitudes cuando has iniciado sesión en el sistema.
-                        </p>
-                        
-                        <div style="margin-top: 1.5rem;">
-                            <button class="btn btn-warning" onclick="redirectToIndex()" style="padding: 0.7rem 1.5rem; font-size: 0.9rem;">
-                                <i class="fas fa-sign-in-alt"></i> Ir a Iniciar Sesión
-                            </button>
-                        </div>
-                        
-                        <div style="margin-top: 1.5rem; font-size: 0.8rem; color: var(--text-light);">
-                            <p><i class="fas fa-question-circle"></i> Si ya iniciaste sesión, intenta:</p>
-                            <ul style="text-align: left; margin-top: 0.5rem; padding-left: 1.5rem;">
-                                <li style="margin-bottom: 0.3rem;">Volver a la página principal e iniciar sesión nuevamente</li>
-                                <li style="margin-bottom: 0.3rem;">Limpiar caché del navegador</li>
-                                <li>Contactar al administrador del sistema</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
+  // Buscar usuarios por nombre
+  document.getElementById('searchInput').addEventListener('input', (e) => {
+    const searchTerm = e.target.value.toLowerCase();
+    const userCards = document.querySelectorAll('.user-card');
+    userCards.forEach((card) => {
+      const userName = card.querySelector('.user-name').textContent.toLowerCase();
+      if (userName.includes(searchTerm)) {
+        card.style.display = 'block';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  });
 
-        // Mostrar sección cuando SÍ hay usuario
-        function showRequestsSection() {
-            console.log("👁️ Mostrando sección de solicitudes para:", currentUser.email);
-            
-            const content = document.getElementById('mainContent');
-            content.innerHTML = `
-                <!-- PANEL DE USUARIO -->
-                <div class="user-panel" id="userPanel">
-                    <div class="user-avatar" id="userAvatar">U</div>
-                    <h2 class="user-name" id="userName">Usuario</h2>
-                    <p class="user-email" id="userEmail">usuario@ejemplo.com</p>
-                    <div style="font-size: 0.7rem; color: var(--text-light); margin-top: 0.4rem;">
-                        <i class="fas fa-history"></i> Última actualización: <span id="lastUpdate">--:--:--</span>
-                    </div>
-                    <button class="btn" onclick="logout()" style="margin-top: 0.8rem; background: rgba(255,255,255,0.1);">
-                        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-                    </button>
-                </div>
-
-                <!-- CARD PRINCIPAL -->
-                <div class="card">
-                    <div class="card-title">
-                        <span><i class="fas fa-file-invoice-dollar"></i> Mis Solicitudes Recibidas</span>
-                        <span id="applicationCount" style="font-size: 0.8rem;">0 solicitudes</span>
-                    </div>
-
-                    <!-- CONTROLES DE FILTRO -->
-                    <div style="display: flex; gap: 0.4rem; margin-bottom: 0.8rem; flex-wrap: wrap;">
-                        <button class="filter-btn active" data-filter="all" style="background: var(--gradient-primary); border: 1px solid var(--primary-color); color: white; border-radius: 6px; padding: 0.4rem 0.6rem; cursor: pointer; font-size: 0.8rem; transition: all 0.3s; flex: 1; min-width: 70px; text-align: center;">Todas</button>
-                        <button class="filter-btn" data-filter="pending" style="background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 6px; padding: 0.4rem 0.6rem; cursor: pointer; font-size: 0.8rem; transition: all 0.3s; flex: 1; min-width: 70px; text-align: center;">Pendientes</button>
-                        <button class="filter-btn" data-filter="approved" style="background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 6px; padding: 0.4rem 0.6rem; cursor: pointer; font-size: 0.8rem; transition: all 0.3s; flex: 1; min-width: 70px; text-align: center;">Aprobadas</button>
-                        <button class="filter-btn" data-filter="rejected" style="background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 6px; padding: 0.4rem 0.6rem; cursor: pointer; font-size: 0.8rem; transition: all 0.3s; flex: 1; min-width: 70px; text-align: center;">Rechazadas</button>
-                    </div>
-
-                    <!-- LISTA DE SOLICITUDES -->
-                    <div class="application-list" id="applicationList">
-                        <div style="text-align: center; padding: 2rem 0.8rem; color: var(--text-light);">
-                            <div style="width: 30px; height: 30px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: var(--primary-color); animation: spin 1s ease-in-out infinite; margin: 0 auto 1rem;"></div>
-                            <p style="font-size: 0.85rem;">Cargando solicitudes...</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- INFORMACIÓN -->
-                <div class="card" style="background: rgba(26, 188, 156, 0.1); border: 1px solid var(--primary-color);">
-                    <h4 style="color: var(--primary-color); margin-bottom: 0.8rem; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem;">
-                        <i class="fas fa-info-circle"></i> Información importante
-                    </h4>
-                    <ul style="padding-left: 1.2rem; color: var(--text-light); font-size: 0.8rem;">
-                        <li style="margin-bottom: 0.4rem;">Solo ves las solicitudes dirigidas a <strong id="currentUserName">TU usuario</strong></li>
-                        <li style="margin-bottom: 0.4rem;">Las solicitudes se actualizan automáticamente</li>
-                        <li>Los números RTM son únicos e irrepetibles</li>
-                    </ul>
-                </div>
-            `;
-            
-            // Inicializar componentes después de mostrar la sección
-            initializeRequestsSection();
-        }
-
-        // Inicializar sección de solicitudes
-        function initializeRequestsSection() {
-            // Actualizar información del usuario
-            updateUserPanel();
-            
-            // Configurar filtros
-            setupFilters();
-            
-            // Cargar aplicaciones
-            loadApplications();
-            
-            // Configurar actualización de tiempo
-            updateLastUpdateTime();
-            setInterval(updateLastUpdateTime, 1000);
-            
-            // Mostrar mensaje de bienvenida
-            showWelcomeNotification();
-        }
-
-        // Iniciar sesión (cuando hay usuario verificado)
-        function startSession() {
-            if (!currentUser) {
-                console.error("❌ No hay usuario para iniciar sesión");
-                showNoUserSection();
-                return;
-            }
-            
-            console.log("🚀 Iniciando sesión para:", currentUser.email);
-            showRequestsSection();
-        }
-
-        // Redirigir a index.html
-        function redirectToIndex() {
-            console.log("🔗 Redirigiendo a página principal");
-            window.location.href = 'index.html';
-        }
-
-        // Cerrar sesión
-        function logout() {
-            console.log("👋 Cerrando sesión...");
-            
-            // Limpiar localStorage
-            localStorage.removeItem('loanSystemUser');
-            localStorage.removeItem('currentUser');
-            localStorage.removeItem('userData');
-            localStorage.removeItem('loggedInUser');
-            
-            currentUser = null;
-            
-            // Mostrar notificación
-            showNotification("Sesión cerrada correctamente", "info");
-            
-            // Redirigir a index.html
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 1000);
-        }
-
-        // Mostrar notificación de bienvenida
-        function showWelcomeNotification() {
-            const userName = currentUser.name || currentUser.email.split('@')[0] || 'Usuario';
-            
-            const notification = document.createElement('div');
-            notification.innerHTML = `
-                <div style="position: fixed; top: 60px; left: 50%; transform: translateX(-50%); background: var(--primary-color); color: white; padding: 0.8rem 1.2rem; border-radius: 8px; font-weight: 500; z-index: 2000; box-shadow: 0 4px 15px rgba(26, 188, 156, 0.3); animation: slideDown 0.5s ease; max-width: 90%;">
-                    <i class="fas fa-check-circle"></i> ¡Bienvenido, ${userName}!
-                </div>
-            `;
-            
-            document.body.appendChild(notification.firstElementChild);
-            
-            setTimeout(() => {
-                if (notification.firstElementChild && notification.firstElementChild.parentNode) {
-                    notification.firstElementChild.parentNode.removeChild(notification.firstElementChild);
-                }
-            }, 3000);
-        }
-
-        // Mostrar notificación
-        function showNotification(message, type = 'info') {
-            const notification = document.createElement('div');
-            
-            let bgColor = 'var(--primary-color)';
-            if (type === 'warning') bgColor = 'var(--warning-color)';
-            if (type === 'danger') bgColor = 'var(--danger-color)';
-            if (type === 'success') bgColor = 'var(--success-color)';
-            if (type === 'info') bgColor = 'var(--info-color)';
-            
-            notification.innerHTML = `
-                <div style="position: fixed; top: 60px; left: 50%; transform: translateX(-50%); background: ${bgColor}; color: white; padding: 0.8rem 1.2rem; border-radius: 8px; font-weight: 500; z-index: 2000; box-shadow: 0 4px 15px rgba(0,0,0,0.3); animation: slideDown 0.5s ease; max-width: 90%;">
-                    <i class="fas fa-info-circle"></i> ${message}
-                </div>
-            `;
-            
-            document.body.appendChild(notification.firstElementChild);
-            
-            setTimeout(() => {
-                if (notification.firstElementChild && notification.firstElementChild.parentNode) {
-                    notification.firstElementChild.parentNode.removeChild(notification.firstElementChild);
-                }
-            }, 3000);
-        }
-
-        // Actualizar panel de usuario
-        function updateUserPanel() {
-            if (!currentUser) return;
-            
-            const userName = currentUser.name || currentUser.email.split('@')[0] || 'Usuario';
-            const userEmail = currentUser.email || 'Sin email';
-            
-            document.getElementById('userName').textContent = userName;
-            document.getElementById('userEmail').textContent = userEmail;
-            document.getElementById('currentUserName').textContent = userName;
-            
-            const avatar = document.getElementById('userAvatar');
-            const initials = getInitials(userName);
-            avatar.textContent = initials;
-            
-            const colors = ['#1abc9c', '#3498db', '#9b59b6', '#e74c3c', '#f39c12', '#2ecc71'];
-            const colorIndex = Math.abs(hashCode(userEmail || currentUser.id)) % colors.length;
-            avatar.style.background = `linear-gradient(135deg, ${colors[colorIndex]}, ${darkenColor(colors[colorIndex], 20)})`;
-            
-            // Actualizar título de la página
-            document.title = `Mis Solicitudes - ${userName}`;
-        }
-
-        // Configurar filtros
-        function setupFilters() {
-            const filterButtons = document.querySelectorAll('.filter-btn');
-            filterButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    filterButtons.forEach(btn => {
-                        btn.style.background = 'rgba(255,255,255,0.1)';
-                        btn.style.borderColor = 'var(--border-color)';
-                    });
-                    button.style.background = 'var(--gradient-primary)';
-                    button.style.borderColor = 'var(--primary-color)';
-                    
-                    const filter = button.getAttribute('data-filter');
-                    console.log("Filtrando por:", filter);
-                    // Aquí iría la lógica de filtrado real
-                });
-            });
-        }
-
-        // Cargar aplicaciones (simulado por ahora)
-        function loadApplications() {
-            setTimeout(() => {
-                const applicationList = document.getElementById('applicationList');
-                if (applicationList) {
-                    applicationList.innerHTML = `
-                        <div style="text-align: center; padding: 2rem 0.8rem; color: var(--text-light);">
-                            <div style="font-size: 2rem; color: var(--border-color); margin-bottom: 0.8rem;">
-                                <i class="fas fa-inbox"></i>
-                            </div>
-                            <h3 style="color: var(--text-color); margin-bottom: 0.4rem; font-size: 0.95rem;">No hay solicitudes aún</h3>
-                            <p style="font-size: 0.85rem;">No has recibido solicitudes de préstamo todavía.</p>
-                            <p style="font-size: 0.8rem; margin-top: 0.8rem; color: var(--primary-color);">
-                                <i class="fas fa-info-circle"></i> Las solicitudes aparecerán aquí cuando alguien te envíe una.
-                            </p>
-                        </div>
-                    `;
-                    
-                    document.getElementById('applicationCount').textContent = '0 solicitudes';
-                }
-            }, 1500);
-        }
-
-        // Actualizar tiempo de última actualización
-        function updateLastUpdateTime() {
-            try {
-                const element = document.getElementById('lastUpdate');
-                if (element) {
-                    const now = new Date();
-                    const timeString = now.toLocaleTimeString('es-ES', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit'
-                    });
-                    element.textContent = timeString;
-                }
-            } catch (error) {
-                console.error("Error actualizando tiempo:", error);
-            }
-        }
-
-        // Funciones auxiliares
-        function getInitials(name) {
-            if (!name) return 'U';
-            return name
-                .split(' ')
-                .map(part => part.charAt(0))
-                .join('')
-                .toUpperCase()
-                .substring(0, 2);
-        }
-
-        function hashCode(str) {
-            if (!str) return 0;
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                hash = str.charCodeAt(i) + ((hash << 5) - hash);
-            }
-            return hash;
-        }
-
-        function darkenColor(color, percent) {
-            if (!color) return '#1abc9c';
-            const num = parseInt(color.replace("#", ""), 16);
-            const amt = Math.round(2.55 * percent);
-            const R = (num >> 16) - amt;
-            const G = (num >> 8 & 0x00FF) - amt;
-            const B = (num & 0x0000FF) - amt;
-            return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
-                (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
-                (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
-        }
-
-        // Hacer funciones globales
-        window.redirectToIndex = redirectToIndex;
-        window.logout = logout;
-
-        // Agregar animación CSS
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes spin {
-                to { transform: rotate(360deg); }
-            }
-            @keyframes slideDown {
-                from { top: 0; opacity: 0; }
-                to { top: 60px; opacity: 1; }
-            }
-        `;
-        document.head.appendChild(style);
-    </script>
+  // Cargar usuarios al iniciar - AHORA CUALQUIER USUARIO AUTENTICADO PUEDE ACCEDER
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      // CARGAR USUARIOS PARA CUALQUIER USUARIO AUTENTICADO
+      // Se eliminó la verificación de tipo de usuario (admin)
+      loadUsers();
+    } else {
+      // Si no está autenticado, redirigir a la página de inicio de sesión
+      window.location.href = "index.html";
+    }
+  });
+</script>
 </body>
 </html>
