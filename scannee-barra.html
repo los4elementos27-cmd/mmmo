@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Scanner Pro Elite</title>
+    <title>Scanner Pro Desktop-Force</title>
     
     <script src="https://unpkg.com/html5-qrcode"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -13,9 +13,18 @@
         :root { --accent: #27ae60; }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000; font-family: 'Poppins', sans-serif; }
         
-        /* Ajuste de cámara para evitar deformación en móviles */
-        #reader { width: 100vw; height: 100vh; }
-        #reader video { width: 100% !important; height: 100% !important; object-fit: cover !important; }
+        /* Contenedor forzado para mantener proporciones de PC */
+        #reader { 
+            width: 100vw; 
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #reader video { 
+            object-fit: cover !important; /* Mantiene la proporción sin deformar */
+        }
 
         .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; display: flex; flex-direction: column; justify-content: space-between; }
         .header { padding: 30px 20px; text-align: center; color: white; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); }
@@ -27,7 +36,6 @@
         #result-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 20px; text-align: center; width: 80%; max-width: 300px; display: none; z-index: 100; pointer-events: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
         #scanned-text { display: block; font-size: 1.4rem; font-weight: 600; margin: 10px 0; color: var(--accent); }
         
-        /* Ocultar elementos innecesarios */
         #reader__dashboard, #reader__header_message, img[alt="Camera Menu"] { display: none !important; }
     </style>
 </head>
@@ -37,8 +45,8 @@
 
     <div class="ui-layer">
         <div class="header">
-            <h2 style="margin:0"><i class="fas fa-barcode"></i> SCANNER LIVE</h2>
-            <p style="margin:5px 0; font-size: 0.8rem; opacity: 0.9;">Optimizado para Móvil</p>
+            <h2 style="margin:0"><i class="fas fa-barcode"></i> SCANNER PRO</h2>
+            <p style="margin:5px 0; font-size: 0.8rem; opacity: 0.9;">Modo Alta Precisión</p>
         </div>
 
         <div id="result-popup">
@@ -58,28 +66,31 @@
     <div id="file-processor" style="display:none;"></div>
 
     <script>
-        // Configuración mejorada para móviles
-        const getScannerConfig = () => {
-            const isMobile = window.innerWidth < 600;
-            return {
-                fps: 20,
-                // En móvil el área de escaneo debe ser más flexible
-                qrbox: isMobile ? { width: 280, height: 200 } : { width: 400, height: 250 },
-                aspectRatio: isMobile ? (window.innerHeight / window.innerWidth) : (window.innerWidth / window.innerHeight),
-                disableFlip: false
-            };
-        };
-
         let html5QrCode = new Html5Qrcode("reader");
         const fileScanner = new Html5Qrcode("file-processor");
         let currentFacingMode = "environment";
 
         function startScanner(mode) {
-            html5QrCode.start(
-                { facingMode: mode }, 
-                getScannerConfig(),
-                onSuccess
-            ).catch(err => {
+            // CONFIGURACIÓN MODO PC PARA MÓVILES
+            const config = {
+                fps: 30, // Más frames para capturar códigos rápidos
+                qrbox: { width: 300, height: 200 }, // Área rectangular estilo código de barras
+                aspectRatio: 1.777778, // Fuerza relación 16:9 (estilo PC) aunque el móvil sea vertical
+                experimentalFeatures: {
+                    useBarCodeDetectorIfSupported: true // Usa el motor nativo del móvil si existe
+                },
+                videoConstraints: {
+                    facingMode: mode,
+                    focusMode: "continuous",
+                    // Forzamos una resolución que el algoritmo reconozca bien
+                    width: { min: 640, ideal: 1280, max: 1920 },
+                    height: { min: 480, ideal: 720, max: 1080 }
+                }
+            };
+
+            html5QrCode.start({ facingMode: mode }, config, onSuccess)
+            .catch(err => {
+                console.error(err);
                 if(mode === "environment") startScanner("user");
             });
         }
@@ -99,13 +110,13 @@
             html5QrCode.stop().then(() => startScanner(currentFacingMode));
         }
 
-        // CORRECCIÓN SELECTOR: Forzar procesamiento de imagen 1D
+        // Selector de imágenes con alta intensidad
         document.getElementById('file-input').addEventListener('change', e => {
             if (e.target.files.length === 0) return;
             fileScanner.scanFile(e.target.files[0], true)
                 .then(onSuccess)
                 .catch(err => {
-                    alert("No se detectó el código. Intenta con una foto más cercana.");
+                    alert("No se detectó el código en la imagen.");
                     e.target.value = "";
                 });
         });
@@ -114,4 +125,3 @@
     </script>
 </body>
 </html>
-
