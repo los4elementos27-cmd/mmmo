@@ -10,106 +10,25 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
     <style>
-        :root {
-            --accent: #27ae60;
-            --danger: #e74c3c;
-        }
+        :root { --accent: #27ae60; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000; font-family: 'Poppins', sans-serif; }
+        
+        /* Ajuste de cámara para evitar deformación en móviles */
+        #reader { width: 100vw; height: 100vh; }
+        #reader video { width: 100% !important; height: 100% !important; object-fit: cover !important; }
 
-        body, html {
-            margin: 0; padding: 0;
-            width: 100%; height: 100%;
-            overflow: hidden;
-            background-color: #000;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        /* Cámara Full Screen - Mantenemos como estaba */
-        #reader {
-            width: 100vw;
-            height: 100vh;
-        }
-
-        #reader video {
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: cover !important;
-        }
-
-        .ui-layer {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .header {
-            padding: 30px 20px;
-            text-align: center;
-            color: white;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);
-        }
-
-        .fab-container {
-            position: absolute;
-            bottom: 40px;
-            right: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            pointer-events: auto;
-        }
-
-        .fab {
-            width: 65px;
-            height: 65px;
-            background: var(--accent);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 26px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-            cursor: pointer;
-            border: none;
-            transition: all 0.3s ease;
-        }
-
+        .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; display: flex; flex-direction: column; justify-content: space-between; }
+        .header { padding: 30px 20px; text-align: center; color: white; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); }
+        
+        .fab-container { position: absolute; bottom: 40px; right: 20px; display: flex; flex-direction: column; gap: 20px; pointer-events: auto; }
+        .fab { width: 65px; height: 65px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 26px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); cursor: pointer; border: none; }
         .fab.gallery { background: #ffffff; color: #333; }
 
-        #result-popup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 25px;
-            border-radius: 20px;
-            text-align: center;
-            width: 80%;
-            max-width: 300px;
-            display: none;
-            z-index: 100;
-            pointer-events: auto;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-        }
-
-        #scanned-text {
-            display: block;
-            font-size: 1.4rem;
-            font-weight: 600;
-            margin: 10px 0;
-            word-break: break-all;
-            color: var(--accent);
-        }
-
-        #reader__dashboard, #reader__header_message, img[alt="Camera Menu"] { 
-            display: none !important; 
-        }
+        #result-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 20px; text-align: center; width: 80%; max-width: 300px; display: none; z-index: 100; pointer-events: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        #scanned-text { display: block; font-size: 1.4rem; font-weight: 600; margin: 10px 0; color: var(--accent); }
+        
+        /* Ocultar elementos innecesarios */
+        #reader__dashboard, #reader__header_message, img[alt="Camera Menu"] { display: none !important; }
     </style>
 </head>
 <body>
@@ -119,61 +38,56 @@
     <div class="ui-layer">
         <div class="header">
             <h2 style="margin:0"><i class="fas fa-barcode"></i> SCANNER LIVE</h2>
-            <p style="margin:5px 0; font-size: 0.8rem; opacity: 0.8;">Escaneo de cámara y archivos</p>
+            <p style="margin:5px 0; font-size: 0.8rem; opacity: 0.9;">Optimizado para Móvil</p>
         </div>
 
         <div id="result-popup">
             <i class="fas fa-check-circle" style="color: var(--accent); font-size: 3rem;"></i>
             <p style="color: #666; margin-bottom: 5px;">Código Detectado:</p>
             <span id="scanned-text"></span>
-            <button onclick="hideResult()" style="background: #333; color: white; border: none; padding: 10px 20px; border-radius: 10px; width: 100%; font-weight: bold; margin-top: 15px;">ACEPTAR</button>
+            <button onclick="hideResult()" style="background: #333; color: white; border: none; padding: 12px 20px; border-radius: 10px; width: 100%; font-weight: bold; margin-top: 15px;">ACEPTAR</button>
         </div>
 
         <div class="fab-container">
-            <label for="file-input" class="fab gallery">
-                <i class="fas fa-image"></i>
-            </label>
+            <label for="file-input" class="fab gallery"><i class="fas fa-image"></i></label>
             <input type="file" id="file-input" accept="image/*" style="display:none">
-
-            <button class="fab" onclick="switchCamera()">
-                <i class="fas fa-camera-rotate"></i>
-            </button>
+            <button class="fab" onclick="switchCamera()"><i class="fas fa-camera-rotate"></i></button>
         </div>
     </div>
 
     <div id="file-processor" style="display:none;"></div>
 
     <script>
-        const html5QrCode = new Html5Qrcode("reader");
-        // Nueva instancia dedicada solo para archivos para evitar conflictos
-        const fileScanner = new Html5Qrcode("file-processor");
-        
-        let currentFacingMode = "environment";
-
-        const config = { 
-            fps: 25, 
-            qrbox: (viewWidth, viewHeight) => {
-                return { width: viewWidth * 0.8, height: 250 };
-            },
-            aspectRatio: window.innerWidth / window.innerHeight
+        // Configuración mejorada para móviles
+        const getScannerConfig = () => {
+            const isMobile = window.innerWidth < 600;
+            return {
+                fps: 20,
+                // En móvil el área de escaneo debe ser más flexible
+                qrbox: isMobile ? { width: 280, height: 200 } : { width: 400, height: 250 },
+                aspectRatio: isMobile ? (window.innerHeight / window.innerWidth) : (window.innerWidth / window.innerHeight),
+                disableFlip: false
+            };
         };
 
+        let html5QrCode = new Html5Qrcode("reader");
+        const fileScanner = new Html5Qrcode("file-processor");
+        let currentFacingMode = "environment";
+
         function startScanner(mode) {
-            html5QrCode.start({ facingMode: mode }, config, onSuccess)
-            .catch(err => {
+            html5QrCode.start(
+                { facingMode: mode }, 
+                getScannerConfig(),
+                onSuccess
+            ).catch(err => {
                 if(mode === "environment") startScanner("user");
             });
         }
 
         function onSuccess(decodedText) {
-            showResult(decodedText);
-            if (navigator.vibrate) navigator.vibrate(150);
-        }
-
-        function showResult(text) {
-            const popup = document.getElementById('result-popup');
-            document.getElementById('scanned-text').innerText = text;
-            popup.style.display = 'block';
+            document.getElementById('scanned-text').innerText = decodedText;
+            document.getElementById('result-popup').style.display = 'block';
+            if (navigator.vibrate) navigator.vibrate(100);
         }
 
         function hideResult() {
@@ -182,26 +96,16 @@
 
         function switchCamera() {
             currentFacingMode = (currentFacingMode === "environment") ? "user" : "environment";
-            html5QrCode.stop().then(() => {
-                startScanner(currentFacingMode);
-            });
+            html5QrCode.stop().then(() => startScanner(currentFacingMode));
         }
 
-        // --- CORRECCIÓN DEFINITIVA DEL SELECTOR ---
+        // CORRECCIÓN SELECTOR: Forzar procesamiento de imagen 1D
         document.getElementById('file-input').addEventListener('change', e => {
             if (e.target.files.length === 0) return;
-            
-            const imageFile = e.target.files[0];
-            
-            // Usamos la instancia dedicada para no interrumpir el flujo del video
-            fileScanner.scanFile(imageFile, true)
-                .then(decodedText => {
-                    onSuccess(decodedText);
-                    e.target.value = ""; // Limpiar el input
-                })
+            fileScanner.scanFile(e.target.files[0], true)
+                .then(onSuccess)
                 .catch(err => {
-                    alert("No se detectó código. Asegúrate que la foto sea de buena calidad.");
-                    console.error(err);
+                    alert("No se detectó el código. Intenta con una foto más cercana.");
                     e.target.value = "";
                 });
         });
@@ -210,3 +114,4 @@
     </script>
 </body>
 </html>
+
