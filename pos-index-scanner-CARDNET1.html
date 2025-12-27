@@ -1,3 +1,3213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <title>Punto de Ventas</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <!-- AGREGADO: Librería para escáner de códigos -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <style>
+    /* Estilo general */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-user-drag: none;
+      -moz-user-drag: none;
+      user-drag: none;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #2c3e50, #34495e);
+      color: #ecf0f1;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+      font-size: 14px;
+    }
+
+    /* Login Styles */
+    .login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #2c3e50, #34495e);
+      position: relative;
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .login-logo {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 10px;
+      background: url('logo.png') center/contain no-repeat;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-logo.fallback {
+      background: none;
+      font-size: 48px;
+      color: #16e086;
+    }
+
+    .login-title {
+      font-size: 20px;
+      color: #16e086;
+      font-weight: bold;
+    }
+
+    .login-loading {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      display: none;
+    }
+
+    .custom-loader {
+      width: 60px;
+      height: 60px;
+      background: url('logo.png') center/contain no-repeat;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    .custom-loader.fallback {
+      background: none;
+      border: 4px solid #16e086;
+      border-bottom-color: transparent;
+      border-radius: 50%;
+      display: inline-block;
+      box-sizing: border-box;
+      animation: rotation 1s linear infinite;
+    }
+
+    @keyframes rotation {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .login-form {
+      background: rgba(44, 62, 80, 0.9);
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+      width: 100%;
+      max-width: 350px;
+      text-align: center;
+      position: relative;
+      z-index: 10;
+    }
+
+    .login-form h2 {
+      margin-bottom: 15px;
+      color: #16e086;
+      font-size: 18px;
+    }
+
+    .login-form input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #ecf0f1;
+      font-size: 14px;
+    }
+
+    .login-form button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 15px;
+      border: none;
+      border-radius: 5px;
+      background: #16e086;
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .login-form button:hover {
+      background: #15a086;
+    }
+
+    .login-error {
+      color: #ff7675;
+      margin-top: 8px;
+      display: none;
+      font-size: 13px;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #47627d;
+      padding: 8px 15px;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 1000;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .system-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-img {
+      width: 40px;
+      height: 40px;
+      background: url('logo.png') center/contain no-repeat;
+    }
+
+    .logo-img.fallback {
+      background: none;
+      font-size: 24px;
+      color: #16e086;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .system-name {
+      font-size: 18px;
+      font-weight: bold;
+      color: #16e086;
+    }
+
+    .header-icons {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .user-avatar {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #16e086;
+      margin-right: 5px;
+    }
+
+    .icon {
+      color: #15a086;
+      font-size: 1.5em;
+      transition: transform 0.3s ease, color 0.3s ease;
+      cursor: pointer;
+    }
+
+    .icon:hover {
+      transform: scale(1.2);
+      color: #16e086;
+    }
+
+    .icon.clock-animated {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    .icon.locked {
+      opacity: 0.5;
+      pointer-events: none;
+      position: relative;
+    }
+
+    .icon.locked::after {
+      content: "\f023";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 0.8rem;
+      color: #e74c3c;
+      z-index: 1;
+    }
+
+    #invoiceUser {
+      font-size: 1em;
+      font-weight: bold;
+    }
+
+    /* Main Layout */
+    .main-container {
+      display: flex;
+      margin-top: 50px;
+      flex-grow: 1;
+      min-height: calc(100vh - 100px);
+    }
+
+    /* Left: Product List */
+    .product-list-container {
+      flex: 3;
+      padding: 15px;
+      overflow-y: auto;
+      background: #34495e;
+      border-radius: 10px;
+      margin: 8px;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+      height: calc(100vh - 150px);
+      position: relative;
+    }
+
+    .product-list-container h1 {
+      font-size: 1.5em;
+      margin-bottom: 15px;
+      color: #16e086;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: #34495e;
+      padding: 8px 0;
+      z-index: 10;
+    }
+
+    .view-toggle {
+      display: flex;
+      gap: 8px;
+    }
+
+    .view-toggle-btn {
+      background: none;
+      border: none;
+      color: #15a086;
+      font-size: 1em;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .view-toggle-btn:hover, .view-toggle-btn.active {
+      color: #16e086;
+      transform: scale(1.2);
+    }
+
+    .search-container {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 15px;
+      width: 100%;
+      position: sticky;
+      top: 60px;
+      background: #34495e;
+      padding: 8px 0;
+      z-index: 10;
+    }
+
+    .search-container input {
+      flex-grow: 1;
+      padding: 10px;
+      font-size: 14px;
+      border: none;
+      border-radius: 20px;
+      outline: none;
+      background: rgba(255, 255, 255, 0.1);
+      color: #dfe6e9;
+      transition: background 0.3s ease;
+      width: 100%;
+    }
+
+    .search-container input:focus {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* NUEVO: Estilos para el botón de escáner en el buscador */
+    .search-with-scanner {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      width: 100%;
+    }
+
+    .search-with-scanner input {
+      flex: 1;
+    }
+
+    .scanner-btn {
+      background: #16e086;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .scanner-btn:hover {
+      background: #15a086;
+      transform: scale(1.1);
+    }
+
+    .scanner-btn i {
+      font-size: 18px;
+    }
+
+    .products-list {
+      height: calc(100% - 100px);
+      overflow-y: auto;
+      overflow-x: hidden;
+      margin-top: 8px;
+    }
+
+    .products-list.grid-view {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+
+    .products-list.grid-view .product-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      transition: all 0.3s;
+      cursor: pointer;
+      height: 220px;
+      position: relative;
+    }
+
+    .products-list.grid-view .product-item:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-5px);
+    }
+
+    .products-list.grid-view .product-item img {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      margin-bottom: 8px;
+      border-radius: 5px;
+    }
+
+    .products-list.grid-view .product-item .product-name {
+      font-weight: bold;
+      margin-bottom: 4px;
+      font-size: 0.8em;
+    }
+
+    .products-list.grid-view .product-item .product-price {
+      color: #16e086;
+      font-weight: bold;
+      font-size: 0.9em;
+    }
+
+    .product-ean {
+      font-size: 0.6em;
+      color: #95a5a6;
+      margin-top: 3px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 2px 6px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .product-ean:hover {
+      background: rgba(22, 224, 134, 0.2);
+      color: #16e086;
+    }
+
+    .product-ean .copy-icon {
+      font-size: 0.8em;
+      opacity: 0.7;
+    }
+
+    .product-ean:hover .copy-icon {
+      opacity: 1;
+    }
+
+    .copy-toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(22, 224, 134, 0.9);
+      color: white;
+      padding: 10px 15px;
+      border-radius: 5px;
+      z-index: 9999;
+      animation: fadeInOut 2s ease-in-out;
+      display: none;
+      font-size: 12px;
+    }
+
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translateY(10px); }
+      10% { opacity: 1; transform: translateY(0); }
+      90% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(10px); }
+    }
+
+    .products-list.list-view {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .products-list.list-view .product-item {
+      display: flex;
+      align-items: center;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      transition: all 0.3s;
+      cursor: pointer;
+      height: auto;
+      position: relative;
+    }
+
+    .products-list.list-view .product-item:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .products-list.list-view .product-item img {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+      margin-right: 12px;
+      border-radius: 5px;
+    }
+
+    .products-list.list-view .product-item .product-details {
+      flex-grow: 1;
+    }
+
+    .products-list.list-view .product-item .product-name {
+      font-weight: bold;
+      font-size: 0.8em;
+    }
+
+    .products-list.list-view .product-item .product-price {
+      color: #16e086;
+      font-weight: bold;
+      font-size: 0.9em;
+    }
+
+    /* Right: Current Invoice */
+    .products-container {
+      flex: 3;
+      padding: 15px;
+      overflow-y: auto;
+      background: #2c3e50;
+      border-radius: 10px;
+      margin: 8px;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+      height: calc(100vh - 150px);
+    }
+
+    .products-container h1 {
+      font-size: 1.5em;
+      margin-bottom: 15px;
+      color: #16e086;
+    }
+
+    .product-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      margin-bottom: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      transition: transform 0.3s ease, background 0.3s ease;
+      cursor: pointer;
+    }
+
+    .product-item:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-5px);
+    }
+
+    .invoice-item {
+      padding: 8px;
+      border-bottom: 1px solid #95a5a6;
+      margin-bottom: 8px;
+      background: #2c3e50;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform 0.3s ease;
+      font-size: 13px;
+    }
+
+    .invoice-item:hover {
+      transform: translateX(5px);
+    }
+
+    .remove-btn {
+      background-color: #d63031;
+      color: #fff;
+      padding: 4px 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      margin-left: auto;
+      font-size: 12px;
+    }
+
+    .remove-btn:hover {
+      background-color: #ff7675;
+    }
+
+    /* Bottom Totals Bar */
+    .totals-bar {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: #2c3e50;
+      padding: 8px 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+    }
+
+    .totals-bar .total-container {
+      background: #47627d;
+      padding: 8px 15px;
+      border-radius: 5px;
+      font-size: 0.9em;
+      color: #ecf0f1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .totals-bar .total-container i {
+      font-size: 1em;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .button {
+      padding: 10px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 0.9em;
+      color: #ecf0f1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.3s, transform 0.3s;
+      text-decoration: none;
+    }
+
+    .button:hover {
+      transform: scale(1.05);
+    }
+
+    .button i {
+      font-size: 1em;
+    }
+
+    .button-efectivo {
+      background-color: #27ae60;
+    }
+
+    .button-efectivo:hover {
+      background-color: #2ecc71;
+    }
+
+    .button-tarjeta {
+      background-color: #2980b9;
+    }
+
+    .button-tarjeta:hover {
+      background-color: #3498db;
+    }
+
+    .button-descuento {
+      background-color: #e67e22;
+    }
+
+    .button-descuento:hover {
+      background-color: #d35400;
+    }
+
+    .button-home {
+      background-color: #8e44ad;
+    }
+
+    .button-home:hover {
+      background-color: #9b59b6;
+    }
+
+    .button-pay {
+      background: linear-gradient(135deg, #16e086, #15a086);
+      color: #fff;
+      font-size: 16px;
+      padding: 10px 20px;
+      border-radius: 40px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .button-pay:hover {
+      background: linear-gradient(135deg, #15a086, #16e086);
+    }
+
+    /* Modals */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: #2c3e50;
+      padding: 15px;
+      border: 1px solid #888;
+      width: 70mm;
+      max-width: 85%;
+      border-radius: 10px;
+      color: #ecf0f1;
+      text-align: center;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 13px;
+    }
+
+    @keyframes slideIn {
+      from { transform: translate(-50%, -100px); opacity: 0; }
+      to { transform: translate(-50%, -50%); opacity: 1; }
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: #fff;
+    }
+
+    /* Payment Modals */
+    .payment-modal-content {
+      background-color: #2c3e50;
+      padding: 15px;
+      border: 1px solid #888;
+      width: 280px;
+      max-width: 85%;
+      border-radius: 10px;
+      color: #ecf0f1;
+      text-align: center;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .payment-modal-content input {
+      width: 90%;
+      padding: 8px;
+      margin: 8px 0;
+      border-radius: 5px;
+      border: 1px solid #888;
+      background-color: #34495e;
+      color: #ecf0f1;
+      font-size: 0.9em;
+    }
+
+    .payment-modal-content button {
+      padding: 8px 15px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 0.9em;
+      background-color: #27ae60;
+      color: #ecf0f1;
+      transition: background 0.3s, transform 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 8px auto;
+    }
+
+    .payment-modal-content button:hover {
+      background-color: #2ecc71;
+      transform: scale(1.05);
+    }
+
+    .rates-modal-content {
+      background-color: #2c3e50;
+      padding: 25px;
+      border: 1px solid #888;
+      width: 320px;
+      max-width: 85%;
+      border-radius: 15px;
+      color: #ecf0f1;
+      text-align: center;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    .rates-modal-content h2 {
+      margin-bottom: 15px;
+      color: #16e086;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 18px;
+    }
+
+    .rates-modal-content .current-rates {
+      margin: 15px 0;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+
+    .rates-modal-content .current-rates h3 {
+      margin-bottom: 8px;
+      color: #16e086;
+      font-size: 16px;
+    }
+
+    .rates-modal-content .current-rates p {
+      margin: 4px 0;
+      font-size: 1em;
+    }
+
+    .rates-modal-content .current-rates .rate-value {
+      font-weight: bold;
+      color: #16e086;
+    }
+
+    .password-modal-content {
+      background-color: #2c3e50;
+      padding: 15px;
+      border: 1px solid #888;
+      width: 280px;
+      max-width: 85%;
+      border-radius: 10px;
+      color: #ecf0f1;
+      text-align: center;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .password-modal-content input {
+      width: 90%;
+      padding: 8px;
+      margin: 8px 0;
+      border-radius: 5px;
+      border: 1px solid #888;
+      background-color: #34495e;
+      color: #ecf0f1;
+      font-size: 14px;
+    }
+
+    .password-modal-content button {
+      padding: 8px 15px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 0.9em;
+      background-color: #27ae60;
+      color: #ecf0f1;
+      transition: background 0.3s, transform 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .password-modal-content button:hover {
+      background-color: #2ecc71;
+      transform: scale(1.05);
+    }
+
+    .discount-applied-modal {
+      background-color: #2c3e50;
+      padding: 15px;
+      border: 1px solid #888;
+      width: 280px;
+      max-width: 85%;
+      border-radius: 10px;
+    }
+
+    .virtual-keyboard {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      background: rgba(0, 0, 0, 0.9);
+      border-radius: 10px;
+      box-shadow: 0 0 12px rgba(0, 255, 255, 0.6);
+      backdrop-filter: blur(10px);
+      padding: 12px;
+      cursor: move;
+    }
+
+    .virtual-keyboard .keyboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #16e086;
+    }
+
+    .virtual-keyboard .keyboard-title {
+      color: #16e086;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .virtual-keyboard .keyboard-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .virtual-keyboard .keyboard-action-btn {
+      background: #2c3e50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 4px 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+      font-size: 12px;
+    }
+
+    .virtual-keyboard .keyboard-action-btn:hover {
+      background: #16e086;
+    }
+
+    .numeric-keyboard {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-top: 12px;
+      text-align: center;
+      width: 220px;
+    }
+
+    .numeric-keyboard-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .numeric-btn {
+      padding: 10px;
+      font-size: 14px;
+      font-weight: bold;
+      color: #fff;
+      background: linear-gradient(145deg, #2c3e50, #222);
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: center;
+      box-shadow: 0 0 6px rgba(22, 224, 136);
+      transition: all 0.3s ease-in-out;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .numeric-btn:hover {
+      background: #16e086;
+      color: #000;
+      box-shadow: 0 0 12px rgba(22, 224, 134);
+      transform: scale(1.05);
+    }
+
+    #backspaceBtn {
+      background: #ff004c;
+      color: white;
+      box-shadow: 0 0 8px rgba(255, 0, 76, 0.6);
+    }
+
+    #backspaceBtn:hover {
+      background: #ff3366;
+      box-shadow: 0 0 15px rgba(255, 0, 76, 1);
+      transform: scale(1.05);
+    }
+
+    #acceptBtn {
+      background: #15a086;
+      color: #fff;
+      font-size: 14px;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(21, 160, 135);
+      grid-column: span 1;
+      min-height: 40px;
+    }
+
+    #acceptBtn:hover {
+      background: #16e086;
+      box-shadow: 0 0 15px rgba(22, 224, 134);
+      transform: scale(1.05);
+    }
+
+    .text-keyboard {
+      grid-template-columns: repeat(10, 1fr);
+      gap: 6px;
+      margin-top: 12px;
+      width: 680px;
+      max-width: 95vw;
+    }
+
+    .text-keyboard-grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 6px;
+    }
+
+    .text-keyboard button {
+      padding: 10px;
+      font-size: 14px;
+      background: #2c3e50;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.2s;
+      min-height: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .text-keyboard button:hover {
+      background: #16e086;
+      transform: scale(1.05);
+    }
+
+    .text-keyboard .space {
+      grid-column: span 4;
+    }
+
+    .text-keyboard .enter {
+      grid-column: span 3;
+      background: #27ae60;
+    }
+
+    .text-keyboard .shift {
+      grid-column: span 2;
+      background: #e67e22;
+    }
+
+    .text-keyboard .shift.active {
+      background: #f39c12;
+      box-shadow: 0 0 8px rgba(243, 156, 18, 0.8);
+    }
+
+    .text-keyboard .backspace {
+      grid-column: span 2;
+      background: #d63031;
+    }
+
+    .text-keyboard .number-toggle {
+      grid-column: span 2;
+      background: #8e44ad;
+    }
+
+    .invoice-container {
+      width: 100%;
+      max-width: 70mm;
+      margin: 0 auto;
+      padding: 8px;
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+    }
+
+    .invoice-header {
+      text-align: center;
+      margin-bottom: 8px;
+      border-bottom: 1px dashed #000;
+      padding-bottom: 8px;
+    }
+
+    .invoice-header h2 {
+      margin: 4px 0;
+      font-size: 16px;
+    }
+
+    .invoice-header p {
+      margin: 2px 0;
+      font-size: 12px;
+    }
+
+    .invoice-user {
+      margin: 8px 0;
+      padding-bottom: 4px;
+      border-bottom: 1px dashed #000;
+    }
+
+    .invoice-products {
+      margin: 8px 0;
+    }
+
+    .product-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+      font-size: 12px;
+    }
+
+    .product-name {
+      flex: 3;
+    }
+
+    .product-quantity, .product-price, .product-total {
+      flex: 1;
+      text-align: right;
+      margin-left: 4px;
+    }
+
+    .invoice-totals {
+      margin-top: 12px;
+      border-top: 1px dashed #000;
+      padding-top: 8px;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .barcode {
+      text-align: center;
+      margin-top: 12px;
+      padding: 4px 0;
+      background: #2c3e50;
+    }
+
+    .barcode-print {
+      background: white !important;
+    }
+
+    .barcode img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .thank-you {
+      text-align: center;
+      margin-top: 8px;
+      font-style: italic;
+      padding: 4px 0;
+    }
+
+    #btnPrint {
+      background: linear-gradient(135deg, #16e086, #15a086);
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 40px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: all 0.3s ease;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    #btnPrint:hover {
+      background: linear-gradient(135deg, #15a086, #16e086);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    #btnPrint i {
+      font-size: 16px;
+    }
+
+    .user-info-modal {
+      background-color: #2c3e50;
+      padding: 15px;
+      border: 1px solid #888;
+      width: 280px;
+      max-width: 85%;
+      border-radius: 10px;
+      color: #ecf0f1;
+      text-align: center;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .user-info-modal h2 {
+      margin-bottom: 12px;
+      color: #16e086;
+      font-size: 18px;
+    }
+
+    .user-info-modal p {
+      margin: 8px 0;
+      font-size: 14px;
+    }
+
+    .logout-btn {
+      background: #d63031;
+      color: #fff;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: background 0.3s;
+      font-size: 14px;
+    }
+
+    .logout-btn:hover {
+      background: #ff7675;
+    }
+
+    .alert-modal {
+      background-color: #2c3e50;
+      padding: 15px;
+      border: 1px solid #888;
+      width: 280px;
+      max-width: 85%;
+      border-radius: 10px;
+      color: #ecf0f1;
+      text-align: center;
+      animation: slideIn 0.3s ease;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .alert-modal h2 {
+      margin-bottom: 12px;
+      font-size: 18px;
+    }
+
+    .alert-success h2 {
+      color: #16e086;
+    }
+
+    .alert-error h2 {
+      color: #ff7675;
+    }
+
+    .alert-warning h2 {
+      color: #fdcb6e;
+    }
+
+    .alert-modal button {
+      background: #16e086;
+      color: #fff;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: background 0.3s;
+      font-size: 14px;
+    }
+
+    .alert-modal button:hover {
+      background: #15a086;
+    }
+
+    @media (max-width: 768px) {
+      .main-container {
+        flex-direction: column;
+        margin-top: 45px;
+      }
+
+      .products-container, .product-list-container {
+        margin: 4px;
+        padding: 8px;
+        height: auto;
+        min-height: 45vh;
+      }
+
+      .totals-bar {
+        flex-direction: column;
+        gap: 8px;
+        padding: 8px;
+        position: relative;
+      }
+
+      .action-buttons {
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%;
+      }
+
+      .button {
+        flex: 1 1 45%;
+        min-width: 110px;
+        font-size: 0.8em;
+        padding: 8px;
+      }
+
+      .text-keyboard {
+        grid-template-columns: repeat(8, 1fr);
+        width: 95%;
+      }
+
+      .text-keyboard .space {
+        grid-column: span 3;
+      }
+
+      .text-keyboard .enter {
+        grid-column: span 2;
+      }
+
+      .numeric-keyboard {
+        width: 95%;
+      }
+
+      .header-icons {
+        gap: 6px;
+      }
+
+      .icon {
+        font-size: 1.2em;
+      }
+
+      #invoiceUser {
+        font-size: 0.9em;
+      }
+
+      .product-list-container h1 {
+        font-size: 1.3em;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .search-container {
+        flex-direction: column;
+      }
+
+      .products-list.grid-view {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      }
+
+      .modal-content, .payment-modal-content, .password-modal-content {
+        width: 95%;
+        padding: 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .products-list.grid-view {
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      }
+
+      .button {
+        flex: 1 1 100%;
+      }
+
+      .header-icons {
+        gap: 4px;
+      }
+
+      .icon {
+        font-size: 1em;
+      }
+
+      .text-keyboard {
+        width: 95%;
+      }
+
+      .numeric-keyboard {
+        width: 95%;
+      }
+    }
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      .modal-content, .modal-content * {
+        visibility: visible;
+      }
+      .modal-content {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+        color: #000;
+        background: white;
+      }
+      .modal-content button {
+        display: none;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .barcode {
+        background: white !important;
+      }
+      .barcode-print {
+        background: white !important;
+      }
+    }
+
+    .currency-totals {
+      display: flex;
+      gap: 8px;
+      margin-left: 8px;
+    }
+
+    .currency-total {
+      background: #47627d;
+      padding: 8px;
+      border-radius: 5px;
+      font-size: 0.8em;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .currency-total i {
+      font-size: 0.9em;
+    }
+
+    .print-btn {
+      background: linear-gradient(135deg, #16e086, #15a086);
+      color: white;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 8px 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.3s;
+    }
+
+    .print-btn:hover {
+      background: linear-gradient(135deg, #15a086, #16e086);
+      transform: translateY(-2px);
+    }
+
+    .print-btn i {
+      font-size: 14px;
+    }
+
+    .report-print-container {
+      display: none;
+    }
+
+    .products-list.grid-view .product-item img,
+    .products-list.grid-overlay .product-item img {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      margin-bottom: 8px;
+      border-radius: 5px;
+    }
+
+    .quick-access-modal {
+      background-color: #2c3e50;
+      padding: 15px;
+      border: 1px solid #888;
+      width: 280px;
+      max-width: 85%;
+      border-radius: 10px;
+      color: #ecf0f1;
+      text-align: center;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2000;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    .quick-access-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    .quick-access-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      border-radius: 5px;
+      color: #ecf0f1;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .quick-access-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .quick-access-btn i {
+      font-size: 1.1em;
+    }
+
+    ::-webkit-scrollbar-track {
+      background-color: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: transparent;
+      border-radius: 8px;
+      height: 8px;
+      transition: background-color 0.3s ease;
+    }
+
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background-color: #15a086;
+    }
+
+    ::-webkit-scrollbar-thumb:active {
+      background-color: #0d705c;
+    }
+
+    .taxes-modal-content {
+      background-color: #2c3e50;
+      padding: 25px;
+      border: 1px solid #888;
+      width: 380px;
+      max-width: 85%;
+      border-radius: 15px;
+      color: #ecf0f1;
+      text-align: center;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    .taxes-status {
+      margin: 15px 0;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+
+    .tax-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 12px 0;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+    }
+
+    .tax-name {
+      font-weight: bold;
+      color: #16e086;
+      font-size: 14px;
+    }
+
+    .tax-value {
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .tax-status {
+      padding: 4px 8px;
+      border-radius: 5px;
+      font-size: 0.8em;
+      font-weight: bold;
+    }
+
+    .tax-active {
+      background: rgba(22, 224, 134, 0.2);
+      color: #16e086;
+    }
+
+    .tax-inactive {
+      background: rgba(231, 76, 60, 0.2);
+      color: #e74c3c;
+    }
+
+    .fade-in {
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .slide-up {
+      animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(15px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .scale-in {
+      animation: scaleIn 0.2s ease-out;
+    }
+
+    @keyframes scaleIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .enhanced-hover {
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .enhanced-hover:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .global-loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      display: none;
+    }
+
+    .global-loading .custom-loader {
+      width: 60px;
+      height: 60px;
+      background: url('logo.png') center/contain no-repeat;
+      animation: spin 1s linear infinite;
+    }
+
+    .global-loading .custom-loader.fallback {
+      background: none;
+      border: 4px solid #16e086;
+      border-bottom-color: transparent;
+      border-radius: 50%;
+    }
+
+    .qr-code {
+      text-align: center;
+      margin: 12px 0;
+    }
+
+    .qr-code img {
+      width: 1.8cm;
+      height: 1.8cm;
+      border: 1px solid #ddd;
+      padding: 4px;
+      background: white;
+    }
+
+    .advanced-menu {
+      position: fixed;
+      top: 55px;
+      right: 15px;
+      background: #2c3e50;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      padding: 12px;
+      z-index: 1500;
+      display: none;
+      min-width: 180px;
+    }
+
+    .advanced-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      color: #ecf0f1;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background 0.3s;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+
+    .advanced-menu-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .advanced-menu-item i {
+      width: 18px;
+      text-align: center;
+    }
+
+    .product-loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(44, 62, 80, 0.9);
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+      z-index: 100;
+      display: none;
+    }
+
+    .product-loading .custom-loader {
+      width: 40px;
+      height: 40px;
+      margin: 0 auto 8px;
+    }
+
+    .shift-end-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #2c3e50, #34495e);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      color: white;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .shift-end-content {
+      max-width: 500px;
+      background: rgba(44, 62, 80, 0.95);
+      padding: 3rem;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      border: 2px solid #e74c3c;
+    }
+
+    .shift-end-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 2rem;
+    }
+
+    .shift-end-btn {
+      background: linear-gradient(135deg, #16e086, #15a086);
+      color: white;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s;
+      box-shadow: 0 5px 15px rgba(22, 224, 134, 0.3);
+      cursor: pointer;
+    }
+
+    .shift-end-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(22, 224, 134, 0.4);
+    }
+
+    .shift-end-btn.secondary {
+      background: linear-gradient(135deg, #3498db, #2980b9);
+      box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+    }
+
+    .shift-end-btn.secondary:hover {
+      box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
+    }
+
+    .shift-info {
+      position: fixed;
+      top: 60px;
+      right: 15px;
+      background: rgba(44, 62, 80, 0.95);
+      border: 2px solid #16e086;
+      border-radius: 10px;
+      padding: 10px 15px;
+      color: white;
+      font-size: 14px;
+      z-index: 999;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      min-width: 250px;
+      display: none;
+    }
+
+    .shift-countdown {
+      font-weight: bold;
+      color: #16e086;
+    }
+
+    .shift-countdown.warning {
+      color: #f39c12;
+    }
+
+    .shift-countdown.danger {
+      color: #e74c3c;
+    }
+
+    .efectivo-modal-content {
+      background-color: #2c3e50;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 500px;
+      max-width: 90%;
+      border-radius: 15px;
+      color: #ecf0f1;
+      text-align: center;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+      z-index: 1001;
+    }
+
+    .efectivo-modal-content h2 {
+      margin-bottom: 20px;
+      color: #16e086;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 22px;
+    }
+
+    .efectivo-main-container {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    .efectivo-info-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .efectivo-total-display {
+      background: rgba(22, 224, 134, 0.1);
+      border: 2px solid #16e086;
+      border-radius: 10px;
+      padding: 15px;
+    }
+
+    .efectivo-total-display p {
+      margin: 5px 0;
+      font-size: 16px;
+    }
+
+    .efectivo-total-display .total-amount {
+      font-size: 24px;
+      font-weight: bold;
+      color: #16e086;
+    }
+
+    .efectivo-input-container {
+      text-align: left;
+    }
+
+    .efectivo-input-container label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #16e086;
+    }
+
+    .efectivo-received-input {
+      width: 100%;
+      padding: 12px 15px;
+      font-size: 18px;
+      border: 2px solid #16e086;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #ecf0f1;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .efectivo-received-input:focus {
+      outline: none;
+      box-shadow: 0 0 10px rgba(22, 224, 134, 0.5);
+    }
+
+    .efectivo-calculations {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 15px;
+    }
+
+    .efectivo-calculation-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 10px 0;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .efectivo-calculation-row:last-child {
+      border-bottom: none;
+    }
+
+    .efectivo-calculation-label {
+      font-weight: bold;
+    }
+
+    .efectivo-calculation-value {
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .efectivo-calculation-value.received {
+      color: #fdcb6e;
+    }
+
+    .efectivo-calculation-value.change {
+      color: #00b894;
+    }
+
+    .efectivo-keyboard-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #34495e;
+      border-radius: 10px;
+      padding: 15px;
+      border: 1px solid #16e086;
+    }
+
+    .efectivo-keyboard-title {
+      font-size: 14px;
+      color: #95a5a6;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .efectivo-keyboard {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    .efectivo-keyboard-btn {
+      padding: 12px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #fff;
+      background: linear-gradient(145deg, #2c3e50, #34495e);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
+
+    .efectivo-keyboard-btn:hover {
+      background: #16e086;
+      color: #000;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(22, 224, 134, 0.4);
+    }
+
+    .efectivo-keyboard-btn.clear {
+      background: #e74c3c;
+    }
+
+    .efectivo-keyboard-btn.clear:hover {
+      background: #c0392b;
+    }
+
+    .efectivo-keyboard-btn.enter {
+      background: #27ae60;
+      grid-column: span 2;
+    }
+
+    .efectivo-keyboard-btn.enter:hover {
+      background: #2ecc71;
+    }
+
+    .efectivo-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .efectivo-action-btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .efectivo-action-btn.confirm {
+      background: linear-gradient(135deg, #16e086, #15a086);
+      color: white;
+    }
+
+    .efectivo-action-btn.confirm:hover {
+      background: linear-gradient(135deg, #15a086, #16e086);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(22, 224, 134, 0.4);
+    }
+
+    .efectivo-action-btn.cancel {
+      background: #e74c3c;
+      color: white;
+    }
+
+    .efectivo-action-btn.cancel:hover {
+      background: #c0392b;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4);
+    }
+
+    .shift-details-modal {
+      background-color: #2c3e50;
+      padding: 25px;
+      border: 1px solid #888;
+      width: 400px;
+      max-width: 85%;
+      border-radius: 15px;
+      color: #ecf0f1;
+      text-align: center;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+      z-index: 1001;
+    }
+
+    .shift-details-modal h2 {
+      margin-bottom: 20px;
+      color: #16e086;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 22px;
+    }
+
+    .shift-details-content {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 20px;
+      margin: 15px 0;
+      text-align: left;
+    }
+
+    .shift-detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 12px 0;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .shift-detail-row:last-child {
+      border-bottom: none;
+    }
+
+    .shift-detail-label {
+      font-weight: bold;
+      color: #16e086;
+    }
+
+    .shift-detail-value {
+      font-weight: bold;
+    }
+
+    .shift-timer {
+      font-size: 28px;
+      font-weight: bold;
+      text-align: center;
+      margin: 15px 0;
+      padding: 15px;
+      background: rgba(22, 224, 134, 0.1);
+      border-radius: 10px;
+      border: 2px solid #16e086;
+    }
+
+    .shift-timer.warning {
+      color: #f39c12;
+      border-color: #f39c12;
+      background: rgba(243, 156, 18, 0.1);
+    }
+
+    .shift-timer.danger {
+      color: #e74c3c;
+      border-color: #e74c3c;
+      background: rgba(231, 76, 60, 0.1);
+    }
+
+    .password-input-container {
+      position: relative;
+      width: 100%;
+      margin-bottom: 15px;
+    }
+
+    .password-input-container input {
+      width: 100%;
+      padding-right: 40px;
+    }
+
+    .keyboard-icon {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #16e086;
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.3s;
+      padding: 5px;
+    }
+
+    .keyboard-icon:hover {
+      color: #15a086;
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    .tax-password-keyboard {
+      display: none;
+      position: fixed;
+      z-index: 2001;
+      background: rgba(0, 0, 0, 0.95);
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(22, 224, 134, 0.7);
+      backdrop-filter: blur(10px);
+      padding: 15px;
+      cursor: move;
+      width: 500px;
+      max-width: 95vw;
+    }
+
+    .tax-password-keyboard .keyboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #16e086;
+    }
+
+    .tax-password-keyboard .keyboard-title {
+      color: #16e086;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .tax-password-keyboard .keyboard-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .tax-password-keyboard .keyboard-action-btn {
+      background: #2c3e50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: background 0.3s;
+      font-size: 12px;
+    }
+
+    .tax-password-keyboard .keyboard-action-btn:hover {
+      background: #16e086;
+    }
+
+    .tax-password-keyboard-grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 5px;
+      margin-top: 10px;
+    }
+
+    .tax-password-keyboard button {
+      padding: 10px;
+      font-size: 14px;
+      background: #2c3e50;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.2s;
+      min-height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tax-password-keyboard button:hover {
+      background: #16e086;
+      transform: scale(1.05);
+    }
+
+    .tax-password-keyboard .space {
+      grid-column: span 4;
+    }
+
+    .tax-password-keyboard .enter {
+      grid-column: span 3;
+      background: #27ae60;
+    }
+
+    .tax-password-keyboard .shift {
+      grid-column: span 2;
+      background: #e67e22;
+    }
+
+    .tax-password-keyboard .shift.active {
+      background: #f39c12;
+      box-shadow: 0 0 8px rgba(243, 156, 18, 0.8);
+    }
+
+    .tax-password-keyboard .backspace {
+      grid-column: span 2;
+      background: #d63031;
+    }
+
+    .tax-password-keyboard .symbol-toggle {
+      grid-column: span 2;
+      background: #8e44ad;
+    }
+
+    .tax-password-keyboard .symbol-toggle.active {
+      background: #9b59b6;
+      box-shadow: 0 0 8px rgba(155, 89, 182, 0.8);
+    }
+
+    .symbols-keyboard {
+      display: none;
+    }
+
+    .virtual-keyboard.dragging {
+      opacity: 0.9;
+      box-shadow: 0 0 20px rgba(22, 224, 134, 0.8) !important;
+    }
+
+    .virtual-keyboard .keyboard-header {
+      cursor: move;
+      user-select: none;
+    }
+
+    .virtual-keyboard {
+      position: fixed !important;
+      z-index: 2000;
+      transition: opacity 0.2s ease;
+    }
+    
+    /* CORRECCIÓN: Eliminado el estilo del stock */
+    .product-stock {
+      display: none !important;
+    }
+
+    /* NUEVO: Estilos para el modal del escáner */
+    .scanner-modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .scanner-modal-content {
+      background-color: #000;
+      width: 90%;
+      max-width: 500px;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .scanner-header {
+      background: #2c3e50;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+    }
+
+    .scanner-header h2 {
+      margin: 0;
+      color: #16e086;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .scanner-close {
+      color: white;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+
+    .scanner-close:hover {
+      color: #16e086;
+    }
+
+    #scanner-container {
+      width: 100%;
+      height: 300px;
+      position: relative;
+      background: #000;
+    }
+
+    .scanner-controls {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      padding: 15px;
+      background: #2c3e50;
+    }
+
+    .scanner-control-btn {
+      background: #16e086;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 20px;
+    }
+
+    .scanner-control-btn:hover {
+      background: #15a086;
+      transform: scale(1.1);
+    }
+
+    .scanner-control-btn.switch {
+      background: #3498db;
+    }
+
+    .scanner-control-btn.switch:hover {
+      background: #2980b9;
+    }
+
+    .scanner-control-btn.gallery {
+      background: #9b59b6;
+    }
+
+    .scanner-control-btn.gallery:hover {
+      background: #8e44ad;
+    }
+
+    .scanner-instructions {
+      background: #2c3e50;
+      padding: 10px;
+      text-align: center;
+      color: #95a5a6;
+      font-size: 12px;
+      border-top: 1px solid #34495e;
+    }
+
+    /* NUEVO: Estilo para el campo de búsqueda con escáner */
+    .search-with-scanner {
+      position: relative;
+      width: 100%;
+    }
+
+    .search-with-scanner input {
+      padding-right: 45px !important;
+    }
+
+    .scanner-btn-inside {
+      position: absolute;
+      right: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #16e086;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .scanner-btn-inside:hover {
+      background: #15a086;
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    .scanner-btn-inside i {
+      font-size: 16px;
+    }
+
+    /* NUEVO: Estilo para el resultado del escáner */
+    .scanner-result {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      z-index: 2001;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      animation: fadeIn 0.3s;
+    }
+
+    .scanner-result h3 {
+      color: #16e086;
+      margin-bottom: 10px;
+    }
+
+    .scanner-result p {
+      color: #333;
+      margin: 10px 0;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .scanner-result button {
+      background: #16e086;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    .scanner-result button:hover {
+      background: #15a086;
+    }
+  </style>
+</head>
+<body>
+  <!-- Toast de copiado -->
+  <div id="copyToast" class="copy-toast">
+    <i class="fas fa-check-circle"></i> Código copiado al portapapeles
+  </div>
+
+  <!-- Loading Global -->
+  <div id="globalLoading" class="global-loading">
+    <div class="custom-loader" id="globalCustomLoader"></div>
+    <p style="margin-top: 15px; font-size: 1em; color: white;">Cargando...</p>
+  </div>
+
+  <!-- Login Section -->
+  <div id="loginSection" class="login-container">
+    <div class="login-loading" id="loginLoading">
+      <div class="custom-loader" id="loginCustomLoader"></div>
+      <p style="margin-top: 15px; font-size: 1em;">Iniciando sesión...</p>
+    </div>
+    <div class="login-form">
+      <div class="login-header">
+        <div class="login-logo" id="loginLogo">
+          <i class="fas fa-carrot"></i>
+        </div>
+        <div class="login-title">ZANARA</div>
+      </div>
+      <h2>Iniciar Sesión</h2>
+      <input type="text" id="loginUsername" placeholder="Nombre de usuario">
+      <input type="password" id="loginPin" placeholder="PIN">
+      <button id="loginButton">Iniciar Sesión</button>
+      <p id="loginError" class="login-error">Credenciales incorrectas</p>
+    </div>
+  </div>
+
+  <!-- POS Section (hidden by default) -->
+  <div id="posSection" style="display: none;">
+    <header>
+      <!-- CORRECCIÓN: Agregado logo y nombre del sistema -->
+      <div class="header-left">
+        <div class="system-logo">
+          <div class="logo-img" id="headerLogo">
+            <i class="fas fa-carrot"></i>
+          </div>
+          <div class="system-name">ZANARA POS</div>
+        </div>
+      </div>
+      
+      <div class="header-icons"> 
+        <!-- CORRECCIÓN: Agregada foto de perfil del colaborador -->
+        <img id="userAvatar" class="user-avatar" src="" alt="Foto de perfil" onerror="this.style.display='none'">
+        
+        <a href="#" id="homeBtn" title="Inicio"><i class="fa-solid fa-house icon"></i></a>
+        <a href="inventario-home-index.html" id="inventoryBtn" title="Inventario"><i class="fa-solid fa-box icon"></i></a>
+        <a href="venta-del-dia.html" id="reportsBtn" title="Reportes"><i class="fa-solid fa-chart-line icon"></i></a>
+        <a href="facturas-del-dia.html" id="invoicesBtn" title="Facturas"><i class="fa-solid fa-receipt icon"></i></a>
+        <a href="analisis-de-venta-con-comparacion.html" id="salesAnalysisBtn" title="Análisis de Ventas"><i class="fa-solid fa-chart-pie icon"></i></a>
+        <a href="audotoria-por-colaborador.html" id="auditBtn" title="Auditorías"><i class="fa-solid fa-ear-listen icon"></i></a>
+        <a href="Perla-chatbot-Pos.html" id="auditBtn" title="Perla - Asistente Virtual"><i class="fa-solid fas fa-robot icon"></i></a>
+        <a href="#" id="userBtn" title="Usuario"><i class="fa-solid fa-user icon"></i></a>
+        <a href="#" id="clockBtn" title="Tiempo de Turno"><i class="fa-solid fa-clock icon clock-animated"></i></a>
+        <a href="#" id="ratesBtn" title="Tasas de Cambio"><i class="fa-solid fa-money-bill-transfer icon"></i></a>
+        <a href="#" id="taxesBtn" title="Impuestos" class="taxes-icon">
+          <i class="fa-solid fa-percent icon"></i>
+          <span id="taxBadge" class="tax-badge">!</span>
+        </a>
+        <a href="devolucion-de-faturacion.html" id="returnsBtn" title="Devoluciones"><i class="fa-solid fa-arrow-rotate-left icon"></i></a>
+        <a href="#" id="refreshBtn" title="Recargar"><i class="fa-solid fa-rotate icon"></i></a>
+        <a href="#" id="advancedMenuBtn" title="Menú Avanzado"><i class="fa-solid fa-bars icon"></i></a>
+        <a href="novedad.html" id="newsBtn" title="Novedad"><i class="fa-solid fa-bell icon"></i></a>
+      </div>
+      <span id="invoiceUser"></span>
+    </header>
+
+    <!-- Menú Avanzado -->
+    <div id="advancedMenu" class="advanced-menu">
+      <a href="estadistica-rapida-colaboradores.html" class="advanced-menu-item" id="quickStatsBtn">
+        <i class="fa-solid fa-chart-line"></i>
+        <span>Estadísticas Rápidas</span>
+      </a>
+      <a href="#" class="advanced-menu-item" id="backupBtn">
+        <i class="fa-solid fa-bell"></i>
+        <span>Novedad</span>
+      </a>
+      <a href="venta-a-credito.html" class="advanced-menu-item" id="exportBtn">
+        <i class="fa-solid fa-tag"></i>
+        <span>Vender a crédito</span>
+      </a>
+      <a href="#" class="advanced-menu-item" id="importBtn">
+        <i class="fa-solid fa-file-import"></i>
+        <span>Importar Productos</span>
+      </a>
+      <a href="#" class="advanced-menu-item" id="bulkDiscountBtn">
+        <i class="fa-solid fa-tags"></i>
+        <span>Descuentos Masivos</span>
+      </a>
+      <a href="#" class="advanced-menu-item" id="priceUpdateBtn">
+        <i class="fa-solid fa-dollar-sign"></i>
+        <span>Actualizar Precios</span>
+      </a>
+      <a href="#" class="advanced-menu-item" id="stockAlertBtn">
+        <i class="fa-solid fa-exclamation-triangle"></i>
+        <span>Alertas de Stock</span>
+      </a>
+      <a href="venta-a-credito.html" class="advanced-menu-item" id="customerManagementBtn">
+        <i class="fa-solid fa-users"></i>
+        <span>Gestión de Clientes</span>
+      </a>
+      <a href="#" class="advanced-menu-item" id="supplierManagementBtn">
+        <i class="fa-solid fa-truck"></i>
+        <span>Gestión de Proveedores</span>
+      </a>
+    </div>
+
+    <div class="main-container">
+      <!-- Left: Product List -->
+      <div class="product-list-container" id="productListSection">
+        <div id="productLoading" class="product-loading">
+          <div class="custom-loader"></div>
+          <p style="color: white; margin-top: 8px;">Cargando productos...</p>
+        </div>
+        
+        <h1>Todos los Productos
+          <div class="view-toggle">
+            <button class="view-toggle-btn" id="viewGrid" title="Vista de cuadrícula"><i class="fa-solid fa-grip"></i></button>
+            <button class="view-toggle-btn" id="viewList" title="Vista de lista"><i class="fa-solid fa-list"></i></button>
+          </div>
+        </h1>
+        <div class="search-container">
+          <!-- MODIFICADO: Campo de búsqueda EAN/UPC con botón de escáner -->
+          <div class="search-with-scanner">
+            <input type="number" id="searchInput" placeholder="Buscar por EAN o UPC" autofocus>
+            <button class="scanner-btn-inside" id="scannerBtnInside" title="Escanear código">
+              <i class="fas fa-barcode"></i>
+            </button>
+          </div>
+          <input type="text" id="searchByNameInput" placeholder="Buscar por nombre">
+        </div>
+        
+        <div id="numericKeyboard" class="virtual-keyboard numeric-keyboard">
+          <div class="keyboard-header">
+            <div class="keyboard-title">Teclado Numérico</div>
+            <div class="keyboard-actions">
+              <button class="keyboard-action-btn" id="switchToTextKeyboard"><i class="fa-solid fa-keyboard"></i></button>
+              <button class="keyboard-action-btn" id="closeNumericKeyboard"><i class="fa-solid fa-times"></i></button>
+            </div>
+          </div>
+          <div class="numeric-keyboard-grid">
+            <button class="numeric-btn" data-value="1">1</button>
+            <button class="numeric-btn" data-value="2">2</button>
+            <button class="numeric-btn" data-value="3">3</button>
+            <button class="numeric-btn" data-value="4">4</button>
+            <button class="numeric-btn" data-value="5">5</button>
+            <button class="numeric-btn" data-value="6">6</button>
+            <button class="numeric-btn" data-value="7">7</button>
+            <button class="numeric-btn" data-value="8">8</button>
+            <button class="numeric-btn" data-value="9">9</button>
+            <button class="numeric-btn" data-value="0">0</button>
+            <button class="numeric-btn" id="backspaceBtn">⌫</button>
+            <button class="numeric-btn" id="acceptBtn">✔</button>
+          </div>
+        </div>
+        
+        <div id="textKeyboard" class="virtual-keyboard text-keyboard">
+          <div class="keyboard-header">
+            <div class="keyboard-title">Teclado de Texto</div>
+            <div class="keyboard-actions">
+              <button class="keyboard-action-btn" id="switchToNumericKeyboard"><i class="fa-solid fa-calculator"></i></button>
+            </div>
+          </div>
+          <div class="text-keyboard-grid">
+            <button data-value="1">1</button>
+            <button data-value="2">2</button>
+            <button data-value="3">3</button>
+            <button data-value="4">4</button>
+            <button data-value="5">5</button>
+            <button data-value="6">6</button>
+            <button data-value="7">7</button>
+            <button data-value="8">8</button>
+            <button data-value="9">9</button>
+            <button data-value="0">0</button>
+            
+            <button data-value="q">q</button>
+            <button data-value="w">w</button>
+            <button data-value="e">e</button>
+            <button data-value="r">r</button>
+            <button data-value="t">t</button>
+            <button data-value="y">y</button>
+            <button data-value="u">u</button>
+            <button data-value="i">i</button>
+            <button data-value="o">o</button>
+            <button data-value="p">p</button>
+            
+            <button data-value="a">a</button>
+            <button data-value="s">s</button>
+            <button data-value="d">d</button>
+            <button data-value="f">f</button>
+            <button data-value="g">g</button>
+            <button data-value="h">h</button>
+            <button data-value="j">j</button>
+            <button data-value="k">k</button>
+            <button data-value="l">l</button>
+            <button data-value="ñ">ñ</button>
+            
+            <button class="shift" id="shiftBtn">Shift</button>
+            <button data-value="z">z</button>
+            <button data-value="x">x</button>
+            <button data-value="c">c</button>
+            <button data-value="v">v</button>
+            <button data-value="b">b</button>
+            <button data-value="n">n</button>
+            <button data-value="m">m</button>
+            <button data-value=",">,</button>
+            <button data-value=".">.</button>
+            
+            <button class="space">Espacio</button>
+            <button class="enter">Enter</button>
+            <button class="backspace">⌫</button>
+          </div>
+        </div>
+        <div id="productList" class="products-list grid-view"></div>
+      </div>
+
+      <!-- Right: Current Invoice -->
+      <div class="products-container" id="invoiceSection">
+        <h1>Factura Actual</h1>
+        <div id="invoiceItems"></div>
+      </div>
+    </div>
+
+    <!-- Bottom Totals Bar -->
+    <div class="totals-bar">
+      <div style="display: flex; align-items: center;">
+        <div class="total-container" id="invoiceTotal"><i class="fa-solid fa-calculator"></i> Total: DOP $0.00</div>
+        <div class="currency-totals">
+          <div class="currency-total" id="usdTotal"><i class="fa-solid fa-dollar-sign"></i> USD $0.00</div>
+          <div class="currency-total" id="eurTotal"><i class="fa-solid fa-euro-sign"></i> EUR €0.00</div>
+        </div>
+      </div>
+      <div class="action-buttons">
+        <button class="button button-descuento" id="btnApplyDiscount"><i class="fa-solid fa-percent"></i> Descuento</button>
+        <button class="button button-efectivo" id="btnEfectivo"><i class="fa-solid fa-money-bill"></i> Efectivo</button>
+        <button class="button button-tarjeta" id="btnTarjeta"><i class="fa-solid fa-credit-card"></i> Tarjeta</button>
+        <button class="button button-pay" id="payButton"><i class="fa-solid fa-credit-card"></i> Facturar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pantalla de fin de turno -->
+  <div id="shiftEndScreen" class="shift-end-screen" style="display: none;">
+    <div class="shift-end-content">
+      <i class="fas fa-hourglass-end" style="font-size: 4rem; color: #e74c3c; margin-bottom: 1.5rem;"></i>
+      <h1 style="color: #e74c3c; margin-bottom: 1rem; font-size: 2rem;">Turno Finalizado</h1>
+      <p id="shiftEndMessage" style="font-size: 1.2rem; margin-bottom: 0.5rem; line-height: 1.5;">
+        Tu turno ha terminado.
+      </p>
+      <p id="shiftEndDetails" style="font-size: 1.1rem; margin-bottom: 2rem; color: #ecf0f1;">
+        Hola <strong id="shiftEndUserName">Colaborador</strong>, ya es hora de revisar tus ventas realizadas el día de hoy.
+      </p>
+      <div class="shift-end-buttons">
+        <a href="venta-del-dia.html" class="shift-end-btn">
+          <i class="fas fa-chart-bar"></i>
+          Revisar Ventas del Día
+        </a>
+        <button id="changeAccountBtn" class="shift-end-btn secondary">
+          <i class="fas fa-user"></i>
+          Cambiar de Cuenta
+        </button>
+        <button id="reloadBtn" class="shift-end-btn secondary">
+          <i class="fas fa-redo"></i>
+          Recargar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor de información del turno -->
+  <div id="shiftInfo" class="shift-info" style="display: none;">
+    <div style="display: flex; align-items: center; margin-bottom: 8px;">
+      <i class="fas fa-clock" style="color: #16e086; margin-right: 8px;"></i>
+      <strong style="color: #16e086;" id="shiftNameDisplay">Turno Activo</strong>
+    </div>
+    <div style="font-size: 12px; margin-bottom: 5px;">
+      <div>Inicio: <span id="shiftStartTime">--:--</span></div>
+      <div>Fin: <span id="shiftEndTime">--:--</span></div>
+    </div>
+    <div style="font-size: 13px; font-weight: bold;">
+      Tiempo restante: <span id="shiftCountdown" class="shift-countdown">--:--:--</span>
+    </div>
+  </div>
+
+  <!-- Print Modal -->
+  <div id="printModal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="closeModal">×</span>
+      <div id="invoicePrintContent"></div>
+      <button id="btnPrint"><i class="fa-solid fa-print"></i> Imprimir</button>
+    </div>
+  </div>
+
+  <!-- Payment Modal (Efectivo) -->
+  <div id="efectivoModal" class="modal">
+    <div class="efectivo-modal-content">
+      <span class="close" id="closeEfectivoModal">×</span>
+      <h2><i class="fa-solid fa-money-bill"></i> Pago en Efectivo</h2>
+      
+      <div class="efectivo-main-container">
+        <div class="efectivo-info-section">
+          <div class="efectivo-total-display">
+            <p>Total a Pagar:</p>
+            <p class="total-amount" id="efectivoTotal">DOP $0.00</p>
+          </div>
+          
+          <div class="efectivo-input-container">
+            <label for="efectivoReceived">Monto Recibido (DOP):</label>
+            <input type="text" id="efectivoReceived" class="efectivo-received-input" placeholder="0.00" autocomplete="off">
+          </div>
+          
+          <div class="efectivo-calculations">
+            <div class="efectivo-calculation-row">
+              <span class="efectivo-calculation-label">Monto Recibido:</span>
+              <span class="efectivo-calculation-value received" id="efectivoReceivedDisplay">DOP $0.00</span>
+            </div>
+            <div class="efectivo-calculation-row">
+              <span class="efectivo-calculation-label">Cambio:</span>
+              <span class="efectivo-calculation-value change" id="efectivoChange">DOP $0.00</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="efectivo-keyboard-section">
+          <div class="efectivo-keyboard-title">Teclado Numérico</div>
+          <div class="efectivo-keyboard">
+            <button class="efectivo-keyboard-btn" data-value="1">1</button>
+            <button class="efectivo-keyboard-btn" data-value="2">2</button>
+            <button class="efectivo-keyboard-btn" data-value="3">3</button>
+            <button class="efectivo-keyboard-btn" data-value="4">4</button>
+            <button class="efectivo-keyboard-btn" data-value="5">5</button>
+            <button class="efectivo-keyboard-btn" data-value="6">6</button>
+            <button class="efectivo-keyboard-btn" data-value="7">7</button>
+            <button class="efectivo-keyboard-btn" data-value="8">8</button>
+            <button class="efectivo-keyboard-btn" data-value="9">9</button>
+            <button class="efectivo-keyboard-btn clear" id="efectivoClearBtn">C</button>
+            <button class="efectivo-keyboard-btn" data-value="0">0</button>
+            <button class="efectivo-keyboard-btn" id="efectivoBackspaceBtn">⌫</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="efectivo-actions">
+        <button class="efectivo-action-btn cancel" id="cancelEfectivo">
+          <i class="fa-solid fa-times"></i> Cancelar
+        </button>
+        <button class="efectivo-action-btn confirm" id="confirmEfectivo">
+          <i class="fa-solid fa-check"></i> Confirmar Pago
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Modal (Tarjeta) -->
+  <div id="tarjetaModal" class="modal">
+    <div class="payment-modal-content">
+      <span class="close" id="closeTarjetaModal">×</span>
+      <h2>Pago con Tarjeta</h2>
+      <p>Total a Pagar: <span id="tarjetaTotal"></span></p>
+      <button id="confirmTarjeta"><i class="fa-solid fa-check"></i> Confirmar Pago</button>
+    </div>
+  </div>
+
+  <!-- Password Modal -->
+  <div id="passwordModal" class="modal">
+    <div class="password-modal-content">
+      <span class="close" id="closePasswordModal">×</span>
+      <h2>Introduce la Contraseña</h2>
+      <div class="password-input-container">
+        <input type="password" id="passwordInput" placeholder="Contraseña de 6 dígitos">
+        <button class="keyboard-icon" id="passwordKeyboardIcon">
+          <i class="fa-solid fa-keyboard"></i>
+        </button>
+      </div>
+      <button id="submitPassword"><i class="fa-solid fa-lock"></i> Aceptar</button>
+      <p id="passwordError" style="color: #e74c3c; display: none;">Contraseña incorrecta</p>
+    </div>
+  </div>
+
+  <!-- Discount Applied Modal -->
+  <div id="discountAppliedModal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="closeDiscountModal">×</span>
+      <h2>Descuento Aplicado</h2>
+      <p id="discountMessage"></p>
+    </div>
+  </div>
+
+  <!-- User Info Modal -->
+  <div id="userInfoModal" class="modal">
+    <div class="user-info-modal">
+      <span class="close" id="closeUserModal">×</span>
+      <h2>Información del Usuario</h2>
+      <p id="userName"></p>
+      <p id="userEmail"></p>
+      <button id="logoutBtn" class="logout-btn">Cerrar Sesión</button>
+    </div>
+  </div>
+
+  <!-- Rates Modal -->
+  <div id="ratesModal" class="modal">
+    <div class="rates-modal-content">
+      <span class="close" id="closeRatesModal">×</span>
+      <h2><i class="fa-solid fa-money-bill-transfer"></i> Tasas de Cambio</h2>
+      
+      <div class="current-rates">
+        <h3>Tasas Actuales</h3>
+        <p>Dólar (USD): <span class="rate-value" id="currentUsdRate">$56.50</span></p>
+        <p>Euro (EUR): <span class="rate-value" id="currentEurRate">€61.20</span></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Impuestos -->
+  <div id="taxesModal" class="modal">
+    <div class="taxes-modal-content">
+      <span class="close" id="closeTaxesModal">×</span>
+      <h2><i class="fa-solid fa-percent"></i> Configuración de Impuestos</h2>
+      
+      <div class="taxes-status">
+        <h3>Estado Actual de Impuestos</h3>
+        <div class="tax-item">
+          <span class="tax-name">ITBIS:</span>
+          <span class="tax-value" id="itbisValue">Sin ITBIS asignado</span>
+          <span class="tax-status tax-inactive" id="itbisStatus">No aplicado</span>
+        </div>
+        <div class="tax-item">
+          <span class="tax-name">IVA:</span>
+          <span class="tax-value" id="ivaValue">Sin IVA asignado</span>
+          <span class="tax-status tax-inactive" id="ivaStatus">No aplicado</span>
+        </div>
+      </div>
+      
+      <p style="margin-top: 12px; font-size: 0.8em; color: #95a5a6;">
+        <i class="fa-solid fa-info-circle"></i> Los impuestos se aplicarán automáticamente a los productos cuando estén activados
+      </p>
+    </div>
+  </div>
+
+  <!-- Modal de detalles del turno -->
+  <div id="shiftDetailsModal" class="modal">
+    <div class="shift-details-modal">
+      <span class="close" id="closeShiftDetails">×</span>
+      <h2><i class="fa-solid fa-clock"></i> Detalles del Turno</h2>
+      
+      <div class="shift-details-content">
+        <div class="shift-detail-row">
+          <span class="shift-detail-label">Nombre del Turno:</span>
+          <span class="shift-detail-value" id="shiftDetailName">--</span>
+        </div>
+        <div class="shift-detail-row">
+          <span class="shift-detail-label">Colaborador:</span>
+          <span class="shift-detail-value" id="shiftDetailCollaborator">--</span>
+        </div>
+        <div class="shift-detail-row">
+          <span class="shift-detail-label">Hora de Inicio:</span>
+          <span class="shift-detail-value" id="shiftDetailStart">--:--</span>
+        </div>
+        <div class="shift-detail-row">
+          <span class="shift-detail-label">Hora de Fin:</span>
+          <span class="shift-detail-value" id="shiftDetailEnd">--:--</span>
+        </div>
+        <div class="shift-detail-row">
+          <span class="shift-detail-label">Duración:</span>
+          <span class="shift-detail-value" id="shiftDetailDuration">-- horas</span>
+        </div>
+      </div>
+      
+      <div class="shift-timer" id="shiftDetailTimer">
+        --:--:--
+      </div>
+      
+      <button id="closeShiftDetailsBtn" style="padding: 10px 20px; background: #16e086; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">
+        <i class="fa-solid fa-check"></i> Aceptar
+      </button>
+    </div>
+  </div>
+
+  <!-- Alert Modals -->
+  <div id="successAlert" class="modal">
+    <div class="alert-modal alert-success">
+      <span class="close" id="closeSuccessAlert">×</span>
+      <h2>Éxito</h2>
+      <p id="successMessage"></p>
+      <button id="successOkBtn">Aceptar</button>
+    </div>
+  </div>
+
+  <div id="errorAlert" class="modal">
+    <div class="alert-modal alert-error">
+      <span class="close" id="closeErrorAlert">×</span>  
+      <h2>Error</h2> 
+      <p id="errorMessage"></p>
+      <button id="errorOkBtn">Aceptar</button>
+    </div>
+  </div>
+
+  <div id="warningAlert" class="modal">
+    <div class="alert-modal alert-warning">
+      <span class="close" id="closeWarningAlert">×</span>
+      <h2>Advertencia</h2>
+      <p id="warningMessage"></p>
+      <button id="warningOkBtn">Aceptar</button>
+    </div>
+  </div>
+
+  <!-- Modal de confirmación para productos próximos a vencer -->
+  <div id="expiryWarningModal" class="modal">
+    <div class="alert-modal alert-warning">
+      <span class="close" id="closeExpiryWarning">×</span>
+      <h2>Producto Próximo a Vencer</h2>
+      <p id="expiryWarningMessage"></p>
+      <div style="display: flex; gap: 8px; justify-content: center; margin-top: 15px;">
+        <button id="confirmExpirySale" style="background: #16e086;">Sí, Vender</button>
+        <button id="cancelExpirySale" style="background: #e74c3c;">No, Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de acceso rápido con Ctrl+Alt+P -->
+  <div id="quickAccessModal" class="modal">
+    <div class="quick-access-modal">
+      <span class="close" id="closeQuickAccess">×</span>
+      <h2><i class="fa-solid fa-keyboard"></i> Panel De Control</h2>
+      <div class="quick-access-buttons">
+        <a href="index.html" class="quick-access-btn" id="quickAccessPermissions">
+          <i class="fa-solid fa-lock"></i>
+          <span>Administrador</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor para imprimir reportes (oculto) -->
+  <div id="reportPrintContainer" class="report-print-container"></div>
+
+  <!-- Teclado virtual para contraseña de impuestos -->
+  <div id="taxPasswordKeyboard" class="tax-password-keyboard">
+    <div class="keyboard-header">
+      <div class="keyboard-title">Teclado para Contraseña de Impuestos</div>
+      <div class="keyboard-actions">
+        <button class="keyboard-action-btn" id="closeTaxPasswordKeyboard"><i class="fa-solid fa-times"></i></button>
+      </div>
+    </div>
+    
+    <!-- Teclado de letras -->
+    <div id="lettersKeyboard" class="tax-password-keyboard-grid">
+      <!-- Primera fila - Números -->
+      <button data-value="1">1</button>
+      <button data-value="2">2</button>
+      <button data-value="3">3</button>
+      <button data-value="4">4</button>
+      <button data-value="5">5</button>
+      <button data-value="6">6</button>
+      <button data-value="7">7</button>
+      <button data-value="8">8</button>
+      <button data-value="9">9</button>
+      <button data-value="0">0</button>
+      <!-- Segunda fila - Primera fila de letras QWERTY -->
+      <button data-value="q">q</button>
+      <button data-value="w">w</button>
+      <button data-value="e">e</button>
+      <button data-value="r">r</button>
+      <button data-value="t">t</button>
+      <button data-value="y">y</button>
+      <button data-value="u">u</button>
+      <button data-value="i">i</button>
+      <button data-value="o">o</button>
+      <button data-value="p">p</button>
+      <!-- Tercera fila - Segunda fila de letras QWERTY -->
+      <button data-value="a">a</button>
+      <button data-value="s">s</button>
+      <button data-value="d">d</button>
+      <button data-value="f">f</button>
+      <button data-value="g">g</button>
+      <button data-value="h">h</button>
+      <button data-value="j">j</button>
+      <button data-value="k">k</button>
+      <button data-value="l">l</button>
+      <button data-value="ñ">ñ</button>
+      <!-- Cuarta fila - Tercera fila de letras QWERTY -->
+      <button class="shift" id="taxPasswordShiftBtn">Shift</button>
+      <button data-value="z">z</button>
+      <button data-value="x">x</button>
+      <button data-value="c">c</button>
+      <button data-value="v">v</button>
+      <button data-value="b">b</button>
+      <button data-value="n">n</button>
+      <button data-value="m">m</button>
+      <button data-value="-">-</button>
+      <button data-value="_">_</button>
+      <!-- Quinta fila - Teclas especiales -->
+      <button class="symbol-toggle" id="taxPasswordSymbolToggle">Símbolos</button>
+      <button class="space">Espacio</button>
+      <button class="enter">Enter</button>
+      <button class="backspace">⌫</button>
+    </div>
+    
+    <!-- Teclado de símbolos -->
+    <div id="symbolsKeyboard" class="tax-password-keyboard-grid symbols-keyboard">
+      <!-- Primera fila - Símbolos -->
+      <button data-value="!">!</button>
+      <button data-value="@">@</button>
+      <button data-value="#">#</button>
+      <button data-value="$">$</button>
+      <button data-value="%">%</button>
+      <button data-value="&">&</button>
+      <button data-value="*">*</button>
+      <button data-value="(">(</button>
+      <button data-value=")">)</button>
+      <button data-value="=">=</button>
+      <!-- Segunda fila - Más símbolos -->
+      <button data-value="+">+</button>
+      <button data-value="-">-</button>
+      <button data-value="_">_</button>
+      <button data-value=".">.</button>
+      <button data-value=",">,</button>
+      <button data-value="?">?</button>
+      <button data-value="¡">¡</button>
+      <button data-value="¿">¿</button>
+      <button data-value="/">/</button>
+      <button data-value="\">\</button>
+      <!-- Tercera fila - Símbolos adicionales -->
+      <button data-value="[">[</button>
+      <button data-value="]">]</button>
+      <button data-value="{">{</button>
+      <button data-value="}">}</button>
+      <button data-value="<"><</button>
+      <button data-value=">">></button>
+      <button data-value="|">|</button>
+      <button data-value="~">~</button>
+      <button data-value="`">`</button>
+      <button data-value="^">^</button>
+      <!-- Cuarta fila - Símbolos especiales -->
+      <button data-value='"'>"</button>
+      <button data-value="'">'</button>
+      <button data-value=":">:</button>
+      <button data-value=";">;</button>
+      <button data-value="ñ">ñ</button>
+      <button data-value="Ñ">Ñ</button>
+      <button data-value="€">€</button>
+      <button data-value="£">£</button>
+      <button data-value="¥">¥</button>
+      <button data-value="¢">¢</button>
+      <!-- Quinta fila - Teclas especiales -->
+      <button class="symbol-toggle active" id="taxPasswordSymbolToggle2">Letras</button>
+      <button class="space">Espacio</button>
+      <button class="enter">Enter</button>
+      <button class="backspace">⌫</button>
+    </div>
+  </div>
+
+  <!-- NUEVO: Modal del escáner de códigos de barras -->
+  <div id="scannerModal" class="modal scanner-modal">
+    <div class="scanner-modal-content">
+      <div class="scanner-header">
+        <h2><i class="fas fa-barcode"></i> Escáner de Códigos</h2>
+        <button class="scanner-close" id="closeScanner">&times;</button>
+      </div>
+      <div id="scanner-container"></div>
+      <div class="scanner-controls">
+        <button class="scanner-control-btn switch" id="switchCameraBtn" title="Cambiar cámara">
+          <i class="fas fa-camera-rotate"></i>
+        </button>
+       <!-- <button class="scanner-control-btn gallery" id="uploadImageBtn" title="Seleccionar imagen">
+          <i class="fas fa-image"></i>
+        </button>-->
+      </div>
+      <div class="scanner-instructions">
+        <p>Coloca el código de barras frente a la cámara o selecciona una imagen</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- NUEVO: Input oculto para seleccionar imagen desde galería -->
+  <input type="file" id="imageUploadInput" accept="image/*" style="display:none">
+
+  <!-- NUEVO: Resultado del escáner (ya no se usa, mantenido por compatibilidad) -->
+  <div id="scannerResult" class="scanner-result" style="display:none;">
+    <h3>Código detectado</h3>
+    <p id="scannedCode"></p>
+    <button id="scannerResultOk">Aceptar</button>
+  </div>
+
+<link href="https://fonts.googleapis.com/css2?family=Libre+Barcode+39+Text&display=swap" rel="stylesheet">
+    
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
 import {
@@ -5231,3 +8441,5 @@ if (posSection) {
   observer.observe(posSection, { attributes: true });
 }
 </script>
+</body>
+</html>
