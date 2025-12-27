@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-  <!-- Agregar la biblioteca html5-qrcode para el scanner -->
+  <!-- AGREGADO: Librería para escáner de códigos -->
   <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
     /* Estilo general */
@@ -343,53 +343,6 @@
       z-index: 10;
     }
 
-    /* Estilo para el contenedor de búsqueda con scanner */
-    .search-with-scanner {
-      display: flex;
-      flex-grow: 1;
-      position: relative;
-    }
-
-    .search-with-scanner input {
-      flex-grow: 1;
-      padding: 10px 40px 10px 10px;
-      font-size: 14px;
-      border: none;
-      border-radius: 20px;
-      outline: none;
-      background: rgba(255, 255, 255, 0.1);
-      color: #dfe6e9;
-      transition: background 0.3s ease;
-      width: 100%;
-    }
-
-    .search-with-scanner input:focus {
-      background: rgba(255, 255, 255, 0.2);
-      box-shadow: 0 0 0 2px rgba(22, 224, 134, 0.5);
-    }
-
-    .search-with-scanner .scanner-icon {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: transparent;
-      border: none;
-      color: #16e086;
-      font-size: 1.2em;
-      cursor: pointer;
-      padding: 5px;
-      border-radius: 50%;
-      transition: all 0.3s;
-      z-index: 5;
-    }
-
-    .search-with-scanner .scanner-icon:hover {
-      color: #15a086;
-      background: rgba(22, 224, 134, 0.1);
-      transform: translateY(-50%) scale(1.1);
-    }
-
     .search-container input {
       flex-grow: 1;
       padding: 10px;
@@ -405,6 +358,41 @@
 
     .search-container input:focus {
       background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* NUEVO: Estilos para el botón de escáner en el buscador */
+    .search-with-scanner {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      width: 100%;
+    }
+
+    .search-with-scanner input {
+      flex: 1;
+    }
+
+    .scanner-btn {
+      background: #16e086;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .scanner-btn:hover {
+      background: #15a086;
+      transform: scale(1.1);
+    }
+
+    .scanner-btn i {
+      font-size: 18px;
     }
 
     .products-list {
@@ -2334,11 +2322,11 @@
       display: none !important;
     }
 
-    /* Estilos para el modal del scanner */
+    /* NUEVO: Estilos para el modal del escáner */
     .scanner-modal {
       display: none;
       position: fixed;
-      z-index: 1000;
+      z-index: 2000;
       left: 0;
       top: 0;
       width: 100%;
@@ -2349,121 +2337,183 @@
     }
 
     .scanner-modal-content {
-      background-color: #2c3e50;
-      padding: 15px;
-      border: 1px solid #888;
+      background-color: #000;
       width: 90%;
       max-width: 500px;
       border-radius: 10px;
-      color: #ecf0f1;
-      text-align: center;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      overflow: hidden;
+      position: relative;
     }
 
-    .scanner-modal-content h2 {
-      margin-bottom: 15px;
+    .scanner-header {
+      background: #2c3e50;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+    }
+
+    .scanner-header h2 {
+      margin: 0;
       color: #16e086;
+      font-size: 18px;
       display: flex;
       align-items: center;
-      justify-content: center;
       gap: 10px;
-      font-size: 22px;
+    }
+
+    .scanner-close {
+      color: white;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+
+    .scanner-close:hover {
+      color: #16e086;
     }
 
     #scanner-container {
       width: 100%;
       height: 300px;
-      background-color: #000;
-      border-radius: 8px;
-      overflow: hidden;
-      margin-bottom: 15px;
       position: relative;
-    }
-
-    #scanner-container video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+      background: #000;
     }
 
     .scanner-controls {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
+      justify-content: center;
+      gap: 20px;
+      padding: 15px;
+      background: #2c3e50;
     }
 
-    .scanner-btn {
+    .scanner-control-btn {
+      background: #16e086;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 20px;
+    }
+
+    .scanner-control-btn:hover {
+      background: #15a086;
+      transform: scale(1.1);
+    }
+
+    .scanner-control-btn.switch {
+      background: #3498db;
+    }
+
+    .scanner-control-btn.switch:hover {
+      background: #2980b9;
+    }
+
+    .scanner-control-btn.gallery {
+      background: #9b59b6;
+    }
+
+    .scanner-control-btn.gallery:hover {
+      background: #8e44ad;
+    }
+
+    .scanner-instructions {
+      background: #2c3e50;
+      padding: 10px;
+      text-align: center;
+      color: #95a5a6;
+      font-size: 12px;
+      border-top: 1px solid #34495e;
+    }
+
+    /* NUEVO: Estilo para el campo de búsqueda con escáner */
+    .search-with-scanner {
+      position: relative;
+      width: 100%;
+    }
+
+    .search-with-scanner input {
+      padding-right: 45px !important;
+    }
+
+    .scanner-btn-inside {
+      position: absolute;
+      right: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #16e086;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .scanner-btn-inside:hover {
+      background: #15a086;
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    .scanner-btn-inside i {
+      font-size: 16px;
+    }
+
+    /* NUEVO: Estilo para el resultado del escáner */
+    .scanner-result {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      z-index: 2001;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      animation: fadeIn 0.3s;
+    }
+
+    .scanner-result h3 {
+      color: #16e086;
+      margin-bottom: 10px;
+    }
+
+    .scanner-result p {
+      color: #333;
+      margin: 10px 0;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .scanner-result button {
       background: #16e086;
       color: white;
       border: none;
       padding: 10px 20px;
       border-radius: 5px;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.3s;
-    }
-
-    .scanner-btn:hover {
-      background: #15a086;
-      transform: scale(1.05);
-    }
-
-    .scanner-btn.secondary {
-      background: #e67e22;
-    }
-
-    .scanner-btn.secondary:hover {
-      background: #d35400;
-    }
-
-    .scanner-btn.danger {
-      background: #e74c3c;
-    }
-
-    .scanner-btn.danger:hover {
-      background: #c0392b;
-    }
-
-    .file-input-container {
-      margin-top: 15px;
-      padding: 15px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-    }
-
-    .file-input-label {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      background: #16e086;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .file-input-label:hover {
-      background: #15a086;
-    }
-
-    .file-input-label input {
-      display: none;
-    }
-
-    .scanner-status {
       margin-top: 10px;
-      padding: 8px;
-      background: rgba(22, 224, 134, 0.1);
-      border-radius: 5px;
-      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .scanner-result button:hover {
+      background: #15a086;
     }
   </style>
 </head>
@@ -2594,9 +2644,10 @@
           </div>
         </h1>
         <div class="search-container">
+          <!-- MODIFICADO: Campo de búsqueda EAN/UPC con botón de escáner -->
           <div class="search-with-scanner">
             <input type="number" id="searchInput" placeholder="Buscar por EAN o UPC" autofocus>
-            <button class="scanner-icon" id="scannerBtn" title="Escanear código de barras">
+            <button class="scanner-btn-inside" id="scannerBtnInside" title="Escanear código">
               <i class="fas fa-barcode"></i>
             </button>
           </div>
@@ -2752,37 +2803,6 @@
     </div>
     <div style="font-size: 13px; font-weight: bold;">
       Tiempo restante: <span id="shiftCountdown" class="shift-countdown">--:--:--</span>
-    </div>
-  </div>
-
-  <!-- Modal del Scanner -->
-  <div id="scannerModal" class="scanner-modal">
-    <div class="scanner-modal-content">
-      <span class="close" id="closeScannerModal">×</span>
-      <h2><i class="fas fa-barcode"></i> Scanner de Código de Barras</h2>
-      
-      <div id="scanner-container"></div>
-      
-      <div class="scanner-controls">
-        <button class="scanner-btn secondary" id="switchCameraBtn">
-          <i class="fas fa-camera-rotate"></i> Cambiar Cámara
-        </button>
-        <button class="scanner-btn danger" id="stopScannerBtn">
-          <i class="fas fa-stop"></i> Detener Scanner
-        </button>
-      </div>
-      
-      <div class="scanner-status" id="scannerStatus">
-        <i class="fas fa-info-circle"></i> Buscando código de barras...
-      </div>
-      
-      <div class="file-input-container">
-        <p>O selecciona una imagen del dispositivo:</p>
-        <label class="file-input-label">
-          <i class="fas fa-image"></i> Seleccionar Imagen
-          <input type="file" id="fileInputScanner" accept="image/*">
-        </label>
-      </div>
     </div>
   </div>
 
@@ -3154,6 +3174,38 @@
     </div>
   </div>
 
+  <!-- NUEVO: Modal del escáner de códigos de barras -->
+  <div id="scannerModal" class="modal scanner-modal">
+    <div class="scanner-modal-content">
+      <div class="scanner-header">
+        <h2><i class="fas fa-barcode"></i> Escáner de Códigos</h2>
+        <button class="scanner-close" id="closeScanner">&times;</button>
+      </div>
+      <div id="scanner-container"></div>
+      <div class="scanner-controls">
+        <button class="scanner-control-btn switch" id="switchCameraBtn" title="Cambiar cámara">
+          <i class="fas fa-camera-rotate"></i>
+        </button>
+        <button class="scanner-control-btn gallery" id="uploadImageBtn" title="Seleccionar imagen">
+          <i class="fas fa-image"></i>
+        </button>
+      </div>
+      <div class="scanner-instructions">
+        <p>Coloca el código de barras frente a la cámara o selecciona una imagen</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- NUEVO: Input oculto para seleccionar imagen desde galería -->
+  <input type="file" id="imageUploadInput" accept="image/*" style="display:none">
+
+  <!-- NUEVO: Resultado del escáner (ya no se usa, mantenido por compatibilidad) -->
+  <div id="scannerResult" class="scanner-result" style="display:none;">
+    <h3>Código detectado</h3>
+    <p id="scannedCode"></p>
+    <button id="scannerResultOk">Aceptar</button>
+  </div>
+
 <link href="https://fonts.googleapis.com/css2?family=Libre+Barcode+39+Text&display=swap" rel="stylesheet">
     
 <script type="module">
@@ -3202,6 +3254,282 @@ const auth = getAuth(app);
 const storage = getStorage(app);
 
 // =============================================
+// CORRECCIONES PARA EL ESCÁNER - VERSIÓN MODIFICADA
+// =============================================
+
+// Variables para el escáner
+let html5QrCode = null;
+let fileScanner = null;
+let currentCameraFacingMode = "environment";
+let isScannerActive = false;
+let productNotFoundTimeout = null; // Para el mensaje de "producto no existe"
+
+// Función para inicializar el escáner
+function initializeScanner() {
+  try {
+    // Inicializar el escáner para la cámara
+    html5QrCode = new Html5Qrcode("scanner-container");
+    
+    // Inicializar el escáner para archivos
+    fileScanner = new Html5Qrcode("scanner-container");
+    
+    console.log("✅ Escáner inicializado correctamente");
+  } catch (error) {
+    console.error("❌ Error al inicializar el escáner:", error);
+    showAlert('error', 'Error al inicializar el escáner: ' + error.message);
+  }
+}
+
+// Función para iniciar el escáner de cámara
+async function startCameraScanner(cameraFacingMode = "environment") {
+  try {
+    if (!html5QrCode) {
+      console.error("Escáner no inicializado");
+      return false;
+    }
+
+    // Detener el escáner si ya está activo
+    if (isScannerActive) {
+      await stopScanner();
+    }
+
+    const config = {
+      fps: 30,
+      qrbox: { width: 250, height: 250 },
+      aspectRatio: 1.0,
+      experimentalFeatures: {
+        useBarCodeDetectorIfSupported: true
+      },
+      videoConstraints: {
+        facingMode: cameraFacingMode,
+        focusMode: "continuous",
+        width: { min: 640, ideal: 1280, max: 1920 },
+        height: { min: 480, ideal: 720, max: 1080 }
+      }
+    };
+
+    await html5QrCode.start(
+      { facingMode: cameraFacingMode },
+      config,
+      onScanSuccess,
+      onScanError
+    );
+    
+    isScannerActive = true;
+    currentCameraFacingMode = cameraFacingMode;
+    console.log("✅ Escáner de cámara iniciado con modo:", cameraFacingMode);
+    return true;
+    
+  } catch (error) {
+    console.error("❌ Error al iniciar el escáner de cámara:", error);
+    
+    // Si falla con la cámara trasera, intentar con la frontal
+    if (cameraFacingMode === "environment") {
+      console.log("⚠️ Intentando con cámara frontal...");
+      return await startCameraScanner("user");
+    }
+    
+    showAlert('error', 'Error al acceder a la cámara: ' + error.message);
+    return false;
+  }
+}
+
+// Función para detener el escáner
+async function stopScanner() {
+  try {
+    if (html5QrCode && isScannerActive) {
+      await html5QrCode.stop();
+      isScannerActive = false;
+      console.log("✅ Escáner detenido");
+    }
+  } catch (error) {
+    console.error("❌ Error al detener el escáner:", error);
+  }
+}
+
+// Función para cambiar entre cámaras
+async function switchCamera() {
+  try {
+    if (!isScannerActive) return;
+    
+    const newFacingMode = currentCameraFacingMode === "environment" ? "user" : "environment";
+    
+    // Detener el escáner actual
+    await stopScanner();
+    
+    // Iniciar con la nueva cámara
+    await startCameraScanner(newFacingMode);
+    
+    console.log("🔄 Cámara cambiada a:", newFacingMode);
+    
+  } catch (error) {
+    console.error("❌ Error al cambiar la cámara:", error);
+  }
+}
+
+// Función para escanear desde una imagen
+async function scanFromImage(file) {
+  try {
+    if (!fileScanner) {
+      console.error("Escáner de archivos no inicializado");
+      return;
+    }
+
+    const result = await fileScanner.scanFile(file, true);
+    onScanSuccess(result);
+    
+  } catch (error) {
+    console.error("❌ Error al escanear imagen:", error);
+    showAlert('warning', 'No se detectó un código válido en la imagen');
+  }
+}
+
+// =============================================
+// FUNCIÓN MODIFICADA: Cuando se detecta un código exitosamente
+// =============================================
+async function onScanSuccess(decodedText) {
+  console.log("✅ Código detectado:", decodedText);
+  
+  // Detener el escáner
+  await stopScanner();
+  
+  // Cerrar el modal del escáner
+  closeScannerModal();
+  
+  // Procesar el código escaneado automáticamente
+  await processScannedCode(decodedText);
+}
+
+// =============================================
+// FUNCIÓN MODIFICADA: Procesar el código escaneado
+// =============================================
+async function processScannedCode(code) {
+  console.log("🔍 Procesando código escaneado:", code);
+  
+  if (!searchInput) {
+    console.error("❌ Campo de búsqueda no encontrado");
+    return;
+  }
+  
+  // Limpiar timeout anterior si existe
+  if (productNotFoundTimeout) {
+    clearTimeout(productNotFoundTimeout);
+  }
+  
+  // Poner el código escaneado en el campo de búsqueda
+  searchInput.value = code;
+  
+  // Enfocar el campo de búsqueda
+  searchInput.focus();
+  
+  // Mostrar mensaje de procesamiento
+  showAlert('info', `Buscando producto con código: ${code}`);
+  
+  try {
+    // Buscar el producto automáticamente
+    await renderProducts(code, "");
+    
+    // Verificar si se encontró algún producto
+    await checkIfProductExists(code);
+    
+  } catch (error) {
+    console.error("❌ Error al procesar código escaneado:", error);
+    showAlert('error', 'Error al buscar el producto');
+  }
+}
+
+// =============================================
+// NUEVA FUNCIÓN: Verificar si el producto existe
+// =============================================
+async function checkIfProductExists(scannedCode) {
+  try {
+    // Esperar un momento para que se complete la renderización
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Obtener todos los productos renderizados
+    const productItems = document.querySelectorAll('.product-item');
+    const productEans = Array.from(productItems).map(item => {
+      const eanElement = item.querySelector('.product-ean');
+      return eanElement ? eanElement.textContent.trim().replace('', '').trim() : '';
+    });
+    
+    // Verificar si el código escaneado coincide con algún producto
+    const productExists = productEans.some(ean => ean === scannedCode);
+    
+    if (!productExists) {
+      // Programar el mensaje de "producto no existe" después de 3 segundos
+      productNotFoundTimeout = setTimeout(() => {
+        // Verificar nuevamente que el código siga en el buscador
+        if (searchInput.value === scannedCode) {
+          showAlert('warning', `No existe ningún producto con el código: ${scannedCode}`);
+          
+          // Limpiar el campo después de mostrar el mensaje
+          setTimeout(() => {
+            if (searchInput.value === scannedCode) {
+              searchInput.value = '';
+              console.log("🧹 Campo de búsqueda limpiado - Producto no existe");
+            }
+          }, 3000);
+        }
+      }, 3000);
+    } else {
+      console.log("✅ Producto encontrado:", scannedCode);
+    }
+    
+  } catch (error) {
+    console.error("❌ Error al verificar existencia del producto:", error);
+  }
+}
+
+// Función cuando hay error en el escáner
+function onScanError(error) {
+  // Solo mostrar errores si no es "NotFoundException" (que es normal cuando no hay código)
+  if (!error.includes("NotFoundException")) {
+    console.warn("⚠️ Error en el escáner:", error);
+  }
+}
+
+// Función para abrir el modal del escáner
+function openScannerModal() {
+  const scannerModal = document.getElementById('scannerModal');
+  if (scannerModal) {
+    scannerModal.style.display = 'flex';
+    
+    // Inicializar el escáner si no está inicializado
+    if (!html5QrCode) {
+      initializeScanner();
+    }
+    
+    // Iniciar el escáner después de un breve delay para asegurar que el modal esté visible
+    setTimeout(async () => {
+      const started = await startCameraScanner();
+      if (!started) {
+        // Si no se pudo iniciar la cámara, cerrar el modal
+        scannerModal.style.display = 'none';
+        showAlert('warning', 'No se pudo acceder a la cámara. Verifica los permisos.');
+      }
+    }, 500);
+  }
+}
+
+// Función para cerrar el modal del escáner
+function closeScannerModal() {
+  const scannerModal = document.getElementById('scannerModal');
+  if (scannerModal) {
+    scannerModal.style.display = 'none';
+    
+    // Detener el escáner
+    stopScanner();
+    
+    // Limpiar timeout de "producto no existe"
+    if (productNotFoundTimeout) {
+      clearTimeout(productNotFoundTimeout);
+      productNotFoundTimeout = null;
+    }
+  }
+}
+
+// =============================================
 // CONFIGURACIÓN DE IMPUESTOS POR PRODUCTO
 // =============================================
 
@@ -3211,220 +3539,6 @@ let taxConfig = {
   iva: 0,
   activo: false
 };
-
-// =============================================
-// VARIABLES GLOBALES PARA EL SCANNER
-// =============================================
-let html5QrCode = null;
-let fileScanner = null;
-let currentCameraFacingMode = "environment";
-let isScannerActive = false;
-let scanCleanupTimer = null;
-
-// Función para inicializar el scanner
-function initializeScanner() {
-  // Inicializar el scanner de cámara
-  html5QrCode = new Html5Qrcode("scanner-container");
-  
-  // Inicializar el scanner de archivos
-  fileScanner = new Html5Qrcode("scanner-container");
-  
-  console.log("Scanner inicializado correctamente");
-}
-
-// Función para abrir el modal del scanner
-function openScannerModal() {
-  const scannerModal = document.getElementById('scannerModal');
-  const scannerStatus = document.getElementById('scannerStatus');
-  
-  if (!scannerModal) {
-    console.error("Modal del scanner no encontrado");
-    return;
-  }
-  
-  scannerModal.style.display = 'flex';
-  scannerStatus.innerHTML = '<i class="fas fa-info-circle"></i> Iniciando scanner...';
-  
-  // Inicializar el scanner si no está inicializado
-  if (!html5QrCode) {
-    initializeScanner();
-  }
-  
-  // Iniciar el scanner después de un breve delay para que el modal se muestre
-  setTimeout(() => {
-    startCameraScanner();
-  }, 500);
-}
-
-// Función para iniciar el scanner de cámara
-async function startCameraScanner() {
-  try {
-    const scannerStatus = document.getElementById('scannerStatus');
-    scannerStatus.innerHTML = '<i class="fas fa-info-circle"></i> Iniciando cámara...';
-    
-    if (!html5QrCode) {
-      initializeScanner();
-    }
-    
-    // Configuración del scanner
-    const config = {
-      fps: 30,
-      qrbox: { width: 250, height: 250 },
-      aspectRatio: 1.0,
-      experimentalFeatures: {
-        useBarCodeDetectorIfSupported: true
-      },
-      videoConstraints: {
-        facingMode: currentCameraFacingMode,
-        focusMode: "continuous",
-        width: { min: 640, ideal: 1280, max: 1920 },
-        height: { min: 480, ideal: 720, max: 1080 }
-      }
-    };
-    
-    // Iniciar el scanner
-    await html5QrCode.start(
-      { facingMode: currentCameraFacingMode },
-      config,
-      onScanSuccess,
-      onScanFailure
-    ).then(() => {
-      isScannerActive = true;
-      scannerStatus.innerHTML = '<i class="fas fa-check-circle" style="color: #16e086;"></i> Scanner activo. Escaneando códigos...';
-      console.log("Scanner iniciado correctamente");
-    }).catch(err => {
-      console.error("Error al iniciar scanner:", err);
-      scannerStatus.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i> Error al iniciar la cámara: ' + err.message;
-      
-      // Si falla la cámara trasera, intentar con la frontal
-      if (currentCameraFacingMode === "environment") {
-        currentCameraFacingMode = "user";
-        scannerStatus.innerHTML = '<i class="fas fa-info-circle"></i> Intentando con cámara frontal...';
-        setTimeout(() => startCameraScanner(), 1000);
-      } else {
-        scannerStatus.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i> No se pudo acceder a ninguna cámara.';
-      }
-    });
-    
-  } catch (error) {
-    console.error("Error en startCameraScanner:", error);
-    const scannerStatus = document.getElementById('scannerStatus');
-    scannerStatus.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i> Error: ' + error.message;
-  }
-}
-
-// Función para cambiar de cámara
-function switchCamera() {
-  if (!isScannerActive || !html5QrCode) return;
-  
-  const scannerStatus = document.getElementById('scannerStatus');
-  scannerStatus.innerHTML = '<i class="fas fa-info-circle"></i> Cambiando cámara...';
-  
-  // Detener el scanner actual
-  html5QrCode.stop().then(() => {
-    isScannerActive = false;
-    
-    // Cambiar el modo de la cámara
-    currentCameraFacingMode = currentCameraFacingMode === "environment" ? "user" : "environment";
-    
-    // Reiniciar el scanner con la nueva cámara
-    setTimeout(() => {
-      startCameraScanner();
-    }, 500);
-  }).catch(err => {
-    console.error("Error al detener scanner:", err);
-    scannerStatus.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i> Error al cambiar cámara';
-  });
-}
-
-// Función para detener el scanner
-function stopScanner() {
-  if (html5QrCode && isScannerActive) {
-    html5QrCode.stop().then(() => {
-      isScannerActive = false;
-      console.log("Scanner detenido");
-    }).catch(err => {
-      console.error("Error al detener scanner:", err);
-    });
-  }
-}
-
-// Función de éxito al escanear
-function onScanSuccess(decodedText) {
-  console.log("Código escaneado:", decodedText);
-  
-  const scannerStatus = document.getElementById('scannerStatus');
-  scannerStatus.innerHTML = `<i class="fas fa-check-circle" style="color: #16e086;"></i> Código detectado: ${decodedText}`;
-  
-  // Vibrar si está disponible
-  if (navigator.vibrate) {
-    navigator.vibrate(100);
-  }
-  
-  // Detener el scanner
-  stopScanner();
-  
-  // Cerrar el modal del scanner
-  const scannerModal = document.getElementById('scannerModal');
-  scannerModal.style.display = 'none';
-  
-  // Poner el código en el buscador y realizar la búsqueda
-  processScannedCode(decodedText);
-}
-
-// Función para procesar el código escaneado
-function processScannedCode(code) {
-  // Poner el código en el campo de búsqueda
-  const searchInput = document.getElementById('searchInput');
-  if (searchInput) {
-    searchInput.value = code;
-    
-    // Realizar la búsqueda automática
-    if (typeof renderProducts !== 'undefined') {
-      renderProducts(code, "");
-    }
-    
-    // Enfocar el campo de búsqueda
-    searchInput.focus();
-    
-    // Limpiar el campo después de 3 segundos
-    clearTimeout(scanCleanupTimer);
-    scanCleanupTimer = setTimeout(() => {
-      searchInput.value = '';
-      // Si estaba en la vista de productos, cargar todos los productos
-      if (typeof loadCollaboratorProducts !== 'undefined') {
-        loadCollaboratorProducts();
-      }
-    }, 3000);
-  }
-}
-
-// Función de fallo al escanear
-function onScanFailure(error) {
-  // Solo loguear errores si el scanner está activo
-  if (isScannerActive) {
-    console.debug("Error de escaneo:", error);
-  }
-}
-
-// Función para escanear desde archivo
-function scanFromFile(file) {
-  const scannerStatus = document.getElementById('scannerStatus');
-  scannerStatus.innerHTML = '<i class="fas fa-info-circle"></i> Procesando imagen...';
-  
-  if (!fileScanner) {
-    initializeScanner();
-  }
-  
-  fileScanner.scanFile(file, true)
-    .then(decodedText => {
-      onScanSuccess(decodedText);
-    })
-    .catch(err => {
-      console.error("Error al escanear archivo:", err);
-      scannerStatus.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i> No se detectó código en la imagen';
-    });
-}
 
 // Función para cargar la configuración de impuestos del usuario
 async function loadTaxConfig() {
@@ -4219,13 +4333,16 @@ const taxPasswordSymbolToggle2 = document.getElementById("taxPasswordSymbolToggl
 const lettersKeyboard = document.getElementById("lettersKeyboard");
 const symbolsKeyboard = document.getElementById("symbolsKeyboard");
 
-// Elementos del scanner
-const scannerBtn = document.getElementById("scannerBtn");
+// NUEVO: Elementos del escáner (modificados)
+const scannerBtnInside = document.getElementById("scannerBtnInside");
 const scannerModal = document.getElementById("scannerModal");
-const closeScannerModal = document.getElementById("closeScannerModal");
+const closeScanner = document.getElementById("closeScanner");
 const switchCameraBtn = document.getElementById("switchCameraBtn");
-const stopScannerBtn = document.getElementById("stopScannerBtn");
-const fileInputScanner = document.getElementById("fileInputScanner");
+const uploadImageBtn = document.getElementById("uploadImageBtn");
+const imageUploadInput = document.getElementById("imageUploadInput");
+const scannerResult = document.getElementById("scannerResult"); // Ya no se usa, pero se mantiene por compatibilidad
+const scannedCode = document.getElementById("scannedCode"); // Ya no se usa, pero se mantiene por compatibilidad
+const scannerResultOk = document.getElementById("scannerResultOk"); // Ya no se usa, pero se mantiene por compatibilidad
 
 // Variables globales
 let invoice = [];
@@ -5229,6 +5346,15 @@ function logoutCollaborator() {
   
   // Limpiar todos los listeners
   cleanupAllListeners();
+  
+  // Detener el escáner si está activo
+  stopScanner();
+  
+  // Limpiar timeout de "producto no existe"
+  if (productNotFoundTimeout) {
+    clearTimeout(productNotFoundTimeout);
+    productNotFoundTimeout = null;
+  }
 }
 
 // Observador de autenticación MODIFICADO para colaboradores
@@ -5274,6 +5400,9 @@ document.addEventListener('DOMContentLoaded', () => {
       // Iniciar listeners para actualización en tiempo real
       setupRealTimeListeners();
       
+      // Inicializar el escáner
+      initializeScanner();
+      
       // Enfocar automáticamente el buscador EAN/UPC
       setTimeout(() => {
         searchInput.focus();
@@ -5309,6 +5438,12 @@ function cleanupAllListeners() {
     if (unsubscribe) unsubscribe();
   });
   realTimeListeners = [];
+  
+  // Limpiar timeout de "producto no existe"
+  if (productNotFoundTimeout) {
+    clearTimeout(productNotFoundTimeout);
+    productNotFoundTimeout = null;
+  }
 }
 
 // Función para actualizar la UI según los permisos del usuario
@@ -5708,6 +5843,9 @@ loginButton.addEventListener('click', async () => {
       
       // Iniciar listeners para actualización en tiempo real
       setupRealTimeListeners();
+      
+      // Inicializar el escáner
+      initializeScanner();
       
       // Enfocar automáticamente el buscador EAN/UPC
       setTimeout(() => {
@@ -6208,33 +6346,6 @@ window.removeProduct = (productId) => {
     renderInvoice();
   }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // Funciones de pago y facturación con impuestos por producto
 const generateInvoice = async (paymentTypeValue, change = 0) => {
@@ -7085,6 +7196,83 @@ function setupVirtualKeyboards() {
   });
 } 
 
+// =============================================
+// EVENT LISTENERS PARA EL ESCÁNER MODIFICADOS
+// =============================================
+
+// Botón de escáner dentro del buscador
+scannerBtnInside.addEventListener('click', () => {
+  openScannerModal();
+});
+
+// Cerrar modal del escáner
+closeScanner.addEventListener('click', () => {
+  closeScannerModal();
+});
+
+// Cambiar cámara
+switchCameraBtn.addEventListener('click', () => {
+  switchCamera();
+});
+
+// Subir imagen desde galería
+uploadImageBtn.addEventListener('click', () => {
+  imageUploadInput.click();
+});
+
+// Procesar imagen seleccionada
+imageUploadInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    scanFromImage(file);
+  }
+});
+
+// =============================================
+// MODIFICACIÓN: Función para limpiar automáticamente el campo de búsqueda
+// =============================================
+
+// Función para limpiar el campo de búsqueda después de 6 segundos
+function setupAutoClearSearch() {
+  let searchTimeout = null;
+  
+  // Función para manejar la búsqueda con limpieza automática
+  function handleSearchWithAutoClear(searchFunction, searchTerm) {
+    // Limpiar timeout anterior
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    
+    // Ejecutar la búsqueda
+    searchFunction(searchTerm, "");
+    
+    // Configurar limpieza automática después de 6 segundos
+    searchTimeout = setTimeout(() => {
+      if (searchInput && searchInput.value === searchTerm) {
+        searchInput.value = '';
+        console.log("🧹 Campo de búsqueda limpiado automáticamente después de 6 segundos");
+      }
+    }, 6000);
+  }
+  
+  // Modificar el event listener del campo de búsqueda EAN/UPC
+  searchInput.addEventListener("input", (e) => {
+    const currentTerm = e.target.value.trim();
+    
+    // Solo buscar si el término cambió significativamente
+    if (currentTerm === "" && lastSearchTerm !== "") {
+      loadCollaboratorProducts();
+      lastSearchTerm = "";
+    } else if (currentTerm !== "" && currentTerm !== lastSearchTerm) {
+      handleSearchWithAutoClear(renderProducts, currentTerm);
+      lastSearchTerm = currentTerm;
+    }
+  });
+}
+
+// Inicializar la limpieza automática
+setupAutoClearSearch();
+
 // CORRECCIÓN: Event listener para Ctrl+Alt+P - VERSIÓN MEJORADA
 document.addEventListener('keydown', (e) => {
   // Ctrl+Alt+P para modo especial
@@ -7378,7 +7566,8 @@ document.addEventListener("click", (e) => {
   if (!searchInput.contains(e.target) && !numericKeyboard.contains(e.target) &&
       !searchByNameInput.contains(e.target) && !textKeyboard.contains(e.target) &&
       !passwordInput.contains(e.target) && !taxPasswordKeyboard.contains(e.target) &&
-      !passwordKeyboardIcon.contains(e.target)) {
+      !passwordKeyboardIcon.contains(e.target) && !scannerModal.contains(e.target) &&
+      !scannerBtnInside.contains(e.target)) {
     numericKeyboard.style.display = "none";
     textKeyboard.style.display = "none";
     taxPasswordKeyboard.style.display = "none";
@@ -7387,18 +7576,7 @@ document.addEventListener("click", (e) => {
 });
 
 // Búsqueda corregida para evitar duplicación - MEJORADO
-searchInput.addEventListener("input", (e) => {
-  const currentTerm = e.target.value.trim();
-  
-  // Solo buscar si el término cambió significativamente
-  if (currentTerm === "" && lastSearchTerm !== "") {
-    loadCollaboratorProducts();
-    lastSearchTerm = "";
-  } else if (currentTerm !== "" && currentTerm !== lastSearchTerm) {
-    renderProducts(currentTerm, searchByNameInput.value);
-    lastSearchTerm = currentTerm;
-  }
-});
+// (Ya manejado por setupAutoClearSearch)
 
 searchByNameInput.addEventListener("input", (e) => {
   const currentTerm = e.target.value.trim();
@@ -7586,61 +7764,6 @@ reloadBtn.addEventListener('click', () => {
   location.reload();
 });
 
-// =============================================
-// EVENT LISTENERS PARA EL SCANNER
-// =============================================
-
-// Evento para el botón del scanner en el buscador
-if (scannerBtn) {
-  scannerBtn.addEventListener('click', () => {
-    openScannerModal();
-  });
-}
-
-// Evento para cerrar el modal del scanner
-if (closeScannerModal) {
-  closeScannerModal.addEventListener('click', () => {
-    stopScanner();
-    scannerModal.style.display = 'none';
-  });
-}
-
-// Evento para cambiar cámara
-if (switchCameraBtn) {
-  switchCameraBtn.addEventListener('click', () => {
-    switchCamera();
-  });
-}
-
-// Evento para detener el scanner
-if (stopScannerBtn) {
-  stopScannerBtn.addEventListener('click', () => {
-    stopScanner();
-    scannerModal.style.display = 'none';
-  });
-}
-
-// Evento para seleccionar archivo
-if (fileInputScanner) {
-  fileInputScanner.addEventListener('change', (e) => {
-    if (e.target.files.length === 0) return;
-    
-    const file = e.target.files[0];
-    scanFromFile(file);
-    
-    // Limpiar el input
-    e.target.value = '';
-  });
-}
-
-// Evento para cerrar el modal del scanner al hacer clic fuera
-scannerModal.addEventListener('click', (e) => {
-  if (e.target === scannerModal) {
-    stopScanner();
-    scannerModal.style.display = 'none';
-  }
-});
-
 // Inicializar teclados virtuales
 setupVirtualKeyboards();
 
@@ -7674,8 +7797,8 @@ const observer = new MutationObserver(function(mutations) {
   });
 });
 
-// Observar cambios en el atributo style de la sección POS
+// Observar cambios en el atributo style de la sección POS  
 observer.observe(posSection, { attributes: true });
-</script>
+</script> 
 </body>
 </html>
