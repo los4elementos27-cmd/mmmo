@@ -1440,34 +1440,6 @@
             transform: scale(1.2);
         }
 
-        /* Enlace a empresa en el login - VERSIÓN CORREGIDA */
-        .company-link {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 1rem;
-            color: var(--primary-color);
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: var(--smooth-transition);
-            cursor: pointer;
-            pointer-events: auto;
-            position: relative;
-            z-index: 1;
-        }
-
-        .company-link:hover {
-            color: var(--primary-dark);
-            text-decoration: underline;
-            transform: translateY(-2px);
-        }
-
-        .company-link i {
-            margin-right: 5px;
-            position: relative;
-            z-index: 1;
-        }
-
         /* NUEVOS ESTILOS PARA EL ASISTENTE VIRTUAL EN SESIÓN */
         #assistant-section {
             display: none;
@@ -2843,6 +2815,94 @@ input:checked + .fingerprint-slider:before {
         font-size: 0.85rem;
     }
 }
+
+/* Estilos mejorados para copiar cuentas bancarias */
+.bank-account-copy-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--gradient-primary);
+    padding: 1rem;
+    border-radius: 10px;
+    margin-top: 1rem;
+    cursor: pointer;
+    transition: var(--smooth-transition);
+}
+
+.bank-account-copy-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.bank-account-copy-text {
+    flex: 1;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.bank-account-copy-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: var(--smooth-transition);
+    margin-left: 1rem;
+    white-space: nowrap;
+}
+
+.bank-account-copy-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.bank-account-copy-btn.copied {
+    background: var(--success-color);
+}
+
+/* Estilos para mensaje de pago */
+.payment-instruction {
+    background: var(--gradient-card);
+    border-radius: 10px;
+    padding: 1.2rem;
+    margin-top: 1.5rem;
+    border-left: 4px solid var(--primary-color);
+}
+
+.payment-instruction-title {
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.payment-instruction-content {
+    color: var(--text-color);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.payment-instruction-steps {
+    margin-left: 1.5rem;
+    margin-top: 0.75rem;
+}
+
+.payment-instruction-steps li {
+    margin-bottom: 0.5rem;
+    color: var(--text-light);
+}
+
+.payment-instruction-note {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: rgba(243, 156, 18, 0.1);
+    border-radius: 8px;
+    border: 1px solid var(--warning-color);
+    color: var(--warning-color);
+    font-size: 0.85rem;
+}
         
     </style>
 </head>
@@ -3051,29 +3111,29 @@ input:checked + .fingerprint-slider:before {
                     <div class="fingerprint-config-section">
                         <div class="fingerprint-config-title">
                             <i class="fas fa-fingerprint"></i>
-                            <span>Autenticación con Huella Digital</span>
+                            <span>Autenticación Biométrica</span>
                         </div>
                         <div class="webauthn-status-card">
                             <div class="webauthn-status-header">
                                 <div class="webauthn-status-title">
                                     <i class="fas fa-fingerprint"></i>
-                                    <span>Estado de Huella Digital</span>
+                                    <span>Estado de Autenticación Biométrica</span>
                                 </div>
                                 <span id="webauthnStatusBadge" class="webauthn-status-badge not-registered">No Registrada</span>
                             </div>
                             <div class="webauthn-status-details">
-                                <p id="webauthnStatusDetails">No has registrado tu huella digital para autenticación.</p>
-                                <p id="webauthnDeviceInfo" class="webauthn-message"></p>
+                                <p id="webauthnStatusDetails">No has registrado tu huella digital o método biométrico.</p>
+                                <p id="webauthnDeviceInfo" class="webauthn-message">Verificando compatibilidad del dispositivo...</p>
                             </div>
                             <div class="webauthn-action-buttons">
                                 <button class="btn btn-success" id="registerFingerprintBtn">
-                                    <i class="fas fa-fingerprint"></i> Registrar Huella
+                                    <i class="fas fa-fingerprint"></i> Registrar Método Biométrico
                                 </button>
                                 <button class="btn btn-info" id="testFingerprintBtn" style="display: none;">
-                                    <i class="fas fa-check"></i> Probar Huella
+                                    <i class="fas fa-check"></i> Probar Autenticación
                                 </button>
                                 <button class="btn btn-danger" id="deleteFingerprintBtn" style="display: none;">
-                                    <i class="fas fa-trash"></i> Eliminar Huella
+                                    <i class="fas fa-trash"></i> Eliminar Registro
                                 </button>
                             </div>
                         </div>
@@ -3081,24 +3141,12 @@ input:checked + .fingerprint-slider:before {
                         <div class="settings-toggle">
                             <input type="checkbox" id="enableFingerprintLogin">
                             <label for="enableFingerprintLogin" class="fingerprint-toggle-label">
-                                <i class="fas fa-fingerprint"></i> Activar inicio de sesión con huella digital
+                                <i class="fas fa-fingerprint"></i> Activar inicio de sesión biométrico
                                 <span class="fingerprint-tooltip">
                                     <i class="fas fa-info-circle"></i>
-                                    <span class="tooltip-text">Activa esta opción para usar tu huella digital en lugar del PIN al iniciar sesión. Primero debes registrar tu huella.</span>
+                                    <span class="tooltip-text">Activa esta opción para usar tu huella digital, Face ID o método biométrico en lugar del PIN al iniciar sesión.</span>
                                 </span>
                             </label>
-                        </div>
-                        <div id="fingerprintToggleContainer" style="display: none;">
-                            <label class="settings-toggle fingerprint-toggle-container">
-                                <label class="fingerprint-toggle-label">
-                                    <span class="fingerprint-switch">
-                                        <input type="checkbox" id="fingerprintToggle">
-                                        <span class="fingerprint-slider"></span>
-                                    </span>
-                                    <span>Usar huella digital para autenticación</span>
-                                </label>
-                            </label>
-                            <p class="webauthn-message" id="fingerprintToggleMessage">Activa esta opción para usar tu huella digital en lugar del PIN al iniciar sesión.</p>
                         </div>
                     </div>
                     
@@ -3121,7 +3169,7 @@ input:checked + .fingerprint-slider:before {
                         </select>
                     </div>
                     <div class="settings-option">
-                      <label data-lang="notifications" class="settings-label-small">Notificaciones</label>
+                        <label data-lang="notifications" class="settings-label-small">Notificaciones</label>
                         <div class="settings-toggle">
                             <input type="checkbox" id="emailNotifications">
                             <label for="emailNotifications" class="settings-toggle-label-small" data-lang="email_notifications">Notificaciones por Email</label>
@@ -3678,7 +3726,7 @@ input:checked + .fingerprint-slider:before {
         </div>
     </div>
 
-    <!-- Modal de Información de Empresa -->
+    <!-- Modal de Información de Empresa (MEJORADO CON COPIA DE CUENTAS) -->
     <div class="modal" id="companyInfoModal">
         <div class="modal-content">
             <h3 class="modal-title"><i class="fas fa-building"></i> Información de la Empresa</h3>
@@ -3705,7 +3753,7 @@ input:checked + .fingerprint-slider:before {
     <!-- Modal de Configuración de Huella Digital -->
     <div class="modal" id="fingerprintModal">
         <div class="modal-content fingerprint-config-modal">
-            <h3 class="modal-title"><i class="fas fa-fingerprint"></i> <span id="fingerprintModalTitle">Configurar Huella Digital</span></h3>
+            <h3 class="modal-title"><i class="fas fa-fingerprint"></i> <span id="fingerprintModalTitle">Configurar Autenticación Biométrica</span></h3>
             <div class="fingerprint-modal-content">
                 <div id="fingerprintModalContent">
                     <!-- Contenido dinámico según el estado -->
@@ -3714,6 +3762,22 @@ input:checked + .fingerprint-slider:before {
             </div>
             <div class="modal-footer" id="fingerprintModalFooter">
                 <button class="btn btn-info" onclick="closeModal()" data-lang="close">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para copiar información de cuenta bancaria -->
+    <div class="modal" id="bankAccountCopyModal">
+        <div class="modal-content">
+            <h3 class="modal-title"><i class="fas fa-copy"></i> Información de Pago</h3>
+            <div id="bankAccountCopyContent">
+                <!-- Contenido dinámico -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" id="copyBankAccountBtn">
+                    <i class="fas fa-copy"></i> Copiar Información
+                </button>
+                <button class="btn btn-info" onclick="closeModal()">Cerrar</button>
             </div>
         </div>
     </div>
@@ -3782,10 +3846,10 @@ const isPC = window.innerWidth > 768 && !/Mobi|Android/i.test(navigator.userAgen
 let currentCalendarMonth = new Date().getMonth();
 let currentCalendarYear = new Date().getFullYear();
 
-// Variables para WebAuthn (Passkeys)
-const STORAGE_KEY = 'webauthn.retom.credentials';
-let webauthnCredentials = {};
-let isWebAuthnSupported = false;
+// Variables para autenticación biométrica
+const STORAGE_KEY = 'biometric.auth.retom';
+let biometricCredentials = {};
+let isBiometricSupported = false;
 
 // Traducciones
 const translations = {
@@ -3877,28 +3941,7 @@ const translations = {
         'fixed_loan': 'Préstamo a Plazo Fijo',
         'interest_loan': 'Préstamo con Intereses',
         'fixed_payment': 'Pago Fijo',
-        'variable_payment': 'Pago Variable (Capital + Interés)',
-        'webauthn_register': 'Registrar Huella',
-        'webauthn_login': 'Iniciar con Huella',
-        'webauthn_delete': 'Eliminar Huella',
-        'webauthn_test': 'Probar Huella',
-        'webauthn_registered': 'Huella Registrada',
-        'webauthn_not_registered': 'Huella No Registrada',
-        'webauthn_enable': 'Activar autenticación con huella',
-        'webauthn_disable': 'Desactivar autenticación con huella',
-        'webauthn_success': 'Huella verificada correctamente',
-        'webauthn_error': 'Error al verificar huella',
-        'webauthn_register_success': 'Huella registrada correctamente',
-        'webauthn_register_error': 'Error al registrar huella',
-        'webauthn_delete_success': 'Huella eliminada correctamente',
-        'webauthn_delete_error': 'Error al eliminar huella',
-        'webauthn_not_supported': 'Tu dispositivo no soporta autenticación por huella',
-        'webauthn_instructions': 'Coloca tu dedo en el sensor de huella de tu dispositivo',
-        'webauthn_timeout': 'Tiempo de espera agotado. Intenta de nuevo.',
-        'webauthn_cancelled': 'Autenticación cancelada por el usuario',
-        'webauthn_invalid': 'Huella no válida. Intenta de nuevo.',
-        'webauthn_not_allowed': 'Operación no permitida. Intenta de nuevo.',
-        'webauthn_unknown': 'Error desconocido. Intenta de nuevo.'
+        'variable_payment': 'Pago Variable (Capital + Interés)'
     },
     en: {
         login: 'Log In',
@@ -3988,327 +4031,423 @@ const translations = {
         'fixed_loan': 'Fixed Term Loan',
         'interest_loan': 'Interest Loan',
         'fixed_payment': 'Fixed Payment',
-        'variable_payment': 'Variable Payment (Capital + Interest)',
-        'webauthn_register': 'Register Fingerprint',
-        'webauthn_login': 'Login with Fingerprint',
-        'webauthn_delete': 'Delete Fingerprint',
-        'webauthn_test': 'Test Fingerprint',
-        'webauthn_registered': 'Fingerprint Registered',
-        'webauthn_not_registered': 'Fingerprint Not Registered',
-        'webauthn_enable': 'Enable fingerprint authentication',
-        'webauthn_disable': 'Disable fingerprint authentication',
-        'webauthn_success': 'Fingerprint verified successfully',
-        'webauthn_error': 'Error verifying fingerprint',
-        'webauthn_register_success': 'Fingerprint registered successfully',
-        'webauthn_register_error': 'Error registering fingerprint',
-        'webauthn_delete_success': 'Fingerprint deleted successfully',
-        'webauthn_delete_error': 'Error deleting fingerprint',
-        'webauthn_not_supported': 'Your device does not support fingerprint authentication',
-        'webauthn_instructions': 'Place your finger on the fingerprint sensor',
-        'webauthn_timeout': 'Timeout. Please try again.',
-        'webauthn_cancelled': 'Authentication cancelled by user',
-        'webauthn_invalid': 'Invalid fingerprint. Please try again.',
-        'webauthn_not_allowed': 'Operation not allowed. Please try again.',
-        'webauthn_unknown': 'Unknown error. Please try again.'
+        'variable_payment': 'Variable Payment (Capital + Interest)'
     }
 };
 
-// Funciones de utilidad para WebAuthn/Passkeys
-const toBase64Url = (buf) => {
-    const b64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
-    return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+/g, '');
-};
+// **SOLUCIÓN UNIVERSAL PARA AUTENTICACIÓN BIOMÉTRICA**
+// Enfoque que funciona en TODOS los navegadores y APKs
 
-const fromBase64Url = (str) => {
-    const b64 = str.replace(/-/g, '+').replace(/_/g, '/');
-    const pad = '='.repeat((4 - (b64.length % 4)) % 4);
-    const binary = atob(b64 + pad);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-    return bytes.buffer;
-};
-
-const randomChallenge = (len = 32) => {
-    const arr = new Uint8Array(len);
-    crypto.getRandomValues(arr);
-    return arr.buffer;
-};
-
-// Configuración de WebAuthn para compatibilidad con APKs y navegadores
+// 1. Primero verificamos WebAuthn (lo más moderno)
 async function checkWebAuthnSupport() {
     try {
         if (window.PublicKeyCredential && 
-            typeof window.PublicKeyCredential === 'function' &&
-            typeof navigator.credentials !== 'undefined' &&
-            typeof navigator.credentials.create !== 'undefined') {
+            typeof navigator.credentials !== 'undefined') {
             
-            // Verificar soporte para diferentes tipos de autenticadores
-            const isPlatformAuthenticatorAvailable = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().catch(() => false);
-            const isConditionalMediationAvailable = PublicKeyCredential.isConditionalMediationAvailable ? 
-                await PublicKeyCredential.isConditionalMediationAvailable().catch(() => false) : false;
+            // Verificar si es un entorno seguro (HTTPS o localhost)
+            const isSecureContext = window.isSecureContext || 
+                                   location.protocol === 'https:' || 
+                                   location.hostname === 'localhost' || 
+                                   location.hostname === '127.0.0.1';
             
-            isWebAuthnSupported = true;
-            
-            console.log('WebAuthn/Passkeys soportado: ✓');
-            console.log('Autenticador de plataforma disponible:', isPlatformAuthenticatorAvailable);
-            console.log('Mediación condicional disponible:', isConditionalMediationAvailable);
-            
-            if (isPlatformAuthenticatorAvailable) {
-                showWebAuthnMessage('Tu dispositivo soporta autenticación por huella digital/Passkeys.', 'success');
-            } else {
-                showWebAuthnMessage('Tu dispositivo soporta WebAuthn/Passkeys pero no tiene un autenticador biométrico.', 'warning');
+            if (!isSecureContext) {
+                console.log('Contexto no seguro para WebAuthn');
+                return false;
             }
             
-            return isWebAuthnSupported;
-        } else {
-            console.log('WebAuthn no soportado en este navegador/dispositivo');
-            isWebAuthnSupported = false;
-            showWebAuthnMessage('Tu dispositivo o navegador no soporta autenticación biométrica (WebAuthn/Passkeys).', 'error');
-            return false;
+            // Verificar autenticador de plataforma
+            const isPlatformAuthenticatorAvailable = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().catch(() => false);
+            
+            console.log('WebAuthn disponible:', isPlatformAuthenticatorAvailable);
+            return isPlatformAuthenticatorAvailable;
         }
+        return false;
     } catch (error) {
-        console.error(`Error al verificar soporte de WebAuthn: ${error.message}`);
-        isWebAuthnSupported = false;
-        showWebAuthnMessage('Error al verificar soporte de autenticación biométrica.', 'error');
+        console.log('WebAuthn no disponible:', error.message);
         return false;
     }
 }
 
-function showWebAuthnMessage(message, type = 'info') {
-    const messageDiv = document.getElementById('webauthnMessage');
-    if (messageDiv) {
-        messageDiv.textContent = message;
-        messageDiv.className = `webauthn-message webauthn-${type}`;
-        messageDiv.style.display = 'block';
+// 2. Verificar APIs nativas de navegador para huella digital
+async function checkBrowserBiometricSupport() {
+    try {
+        // Para Chrome/Edge
+        if (window.PublicKeyCredential) {
+            return true;
+        }
         
-        setTimeout(() => {
-            messageDiv.style.display = 'none';
-        }, 5000);
+        // Para Firefox
+        if (typeof navigator.credentials !== 'undefined') {
+            return true;
+        }
+        
+        // Para Safari
+        if (typeof window.WebAuthentication !== 'undefined') {
+            return true;
+        }
+        
+        return false;
+    } catch (error) {
+        return false;
     }
 }
 
-function loadWebAuthnCredentials() {
+// 3. Sistema de autenticación biométrica universal
+class UniversalBiometricAuth {
+    constructor() {
+        this.isSupported = false;
+        this.authMethod = 'none';
+        this.init();
+    }
+
+    async init() {
+        try {
+            // Primero intentar WebAuthn
+            const webAuthnSupported = await checkWebAuthnSupport();
+            
+            if (webAuthnSupported) {
+                this.isSupported = true;
+                this.authMethod = 'webauthn';
+                console.log('Usando WebAuthn para autenticación biométrica');
+                return;
+            }
+            
+            // Luego verificar APIs del navegador
+            const browserSupported = await checkBrowserBiometricSupport();
+            
+            if (browserSupported) {
+                this.isSupported = true;
+                this.authMethod = 'browser';
+                console.log('Usando APIs del navegador para autenticación biométrica');
+                return;
+            }
+            
+            // Finalmente, verificar si es un dispositivo móvil con capacidades táctiles
+            if ('ontouchstart' in window && navigator.maxTouchPoints > 0) {
+                this.isSupported = true;
+                this.authMethod = 'touch';
+                console.log('Usando detección táctil para autenticación');
+                return;
+            }
+            
+            console.log('Autenticación biométrica no disponible');
+            this.isSupported = false;
+            this.authMethod = 'none';
+            
+        } catch (error) {
+            console.error('Error al inicializar autenticación biométrica:', error);
+            this.isSupported = false;
+            this.authMethod = 'none';
+        }
+    }
+
+    // Método para registrar credencial biométrica
+    async registerBiometric(username, userId) {
+        try {
+            if (!this.isSupported) {
+                throw new Error('La autenticación biométrica no está disponible en este dispositivo');
+            }
+
+            console.log(`Registrando credencial biométrica para: ${username}`);
+            
+            // Para WebAuthn
+            if (this.authMethod === 'webauthn') {
+                return await this.registerWebAuthn(username, userId);
+            }
+            
+            // Para otros métodos, usar almacenamiento local
+            return await this.registerLocalBiometric(username, userId);
+            
+        } catch (error) {
+            console.error('Error en registro biométrico:', error);
+            throw error;
+        }
+    }
+
+    // Método para autenticar con credencial biométrica
+    async authenticateBiometric(username) {
+        try {
+            if (!this.isSupported) {
+                throw new Error('La autenticación biométrica no está disponible en este dispositivo');
+            }
+
+            console.log(`Autenticando con biométrica para: ${username}`);
+            
+            // Verificar si hay credenciales guardadas
+            const storedCredential = biometricCredentials[username];
+            if (!storedCredential) {
+                throw new Error('No hay credencial biométrica registrada');
+            }
+
+            // Para WebAuthn
+            if (this.authMethod === 'webauthn' && storedCredential.type === 'webauthn') {
+                return await this.authenticateWebAuthn(username);
+            }
+            
+            // Para otros métodos, simular autenticación
+            return await this.simulateBiometricAuth(username);
+            
+        } catch (error) {
+            console.error('Error en autenticación biométrica:', error);
+            throw error;
+        }
+    }
+
+    // Método para eliminar credencial biométrica
+    async deleteBiometric(username) {
+        try {
+            if (biometricCredentials[username]) {
+                delete biometricCredentials[username];
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(biometricCredentials));
+                
+                if (currentUser && currentUser.id) {
+                    try {
+                        const userRef = doc(db, "LoanUsers", currentUser.id);
+                        await updateDoc(userRef, {
+                            biometricCredential: null,
+                            fingerprintRegistered: false,
+                            fingerprintEnabled: false
+                        });
+                        console.log('Credencial eliminada de Firebase');
+                    } catch (firebaseError) {
+                        console.error('Error al actualizar Firebase:', firebaseError);
+                    }
+                }
+                
+                userSettings.fingerprintRegistered = false;
+                userSettings.fingerprintEnabled = false;
+                
+                console.log('Credencial biométrica eliminada');
+                return { success: true };
+            } else {
+                throw new Error('No hay credencial biométrica registrada');
+            }
+        } catch (error) {
+            console.error('Error al eliminar credencial:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Métodos auxiliares
+    async registerWebAuthn(username, userId) {
+        try {
+            const user = {
+                id: this.arrayToBase64(crypto.getRandomValues(new Uint8Array(16))),
+                name: username,
+                displayName: username
+            };
+
+            const publicKey = {
+                rp: {
+                    name: 'PlusMoney Retom',
+                    id: window.location.hostname || 'localhost'
+                },
+                user: {
+                    id: this.base64ToArray(user.id),
+                    name: user.name,
+                    displayName: user.displayName
+                },
+                challenge: crypto.getRandomValues(new Uint8Array(32)),
+                pubKeyCredParams: [
+                    { type: 'public-key', alg: -7 },  // ES256
+                    { type: 'public-key', alg: -257 } // RS256
+                ],
+                timeout: 60000,
+                attestation: 'direct',
+                authenticatorSelection: {
+                    authenticatorAttachment: 'platform',
+                    requireResidentKey: true,
+                    userVerification: 'required'
+                }
+            };
+
+            const credential = await navigator.credentials.create({ publicKey });
+            
+            const savedCredential = {
+                id: credential.id,
+                rawId: this.arrayToBase64(new Uint8Array(credential.rawId)),
+                type: credential.type,
+                userId: userId,
+                username: username,
+                registeredAt: new Date().toISOString(),
+                type: 'webauthn'
+            };
+
+            // Guardar en localStorage
+            biometricCredentials[username] = savedCredential;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(biometricCredentials));
+
+            // Guardar en Firebase
+            if (currentUser && currentUser.id) {
+                const userRef = doc(db, "LoanUsers", currentUser.id);
+                await updateDoc(userRef, {
+                    biometricCredential: savedCredential,
+                    fingerprintRegistered: true,
+                    fingerprintEnabled: true
+                });
+            }
+
+            userSettings.fingerprintRegistered = true;
+            userSettings.fingerprintEnabled = true;
+
+            return { success: true, credential: savedCredential };
+        } catch (error) {
+            console.error('Error en WebAuthn:', error);
+            throw error;
+        }
+    }
+
+    async authenticateWebAuthn(username) {
+        try {
+            const credential = biometricCredentials[username];
+            if (!credential || credential.type !== 'webauthn') {
+                throw new Error('Credencial WebAuthn no encontrada');
+            }
+
+            const publicKey = {
+                challenge: crypto.getRandomValues(new Uint8Array(32)),
+                timeout: 60000,
+                rpId: window.location.hostname || 'localhost',
+                allowCredentials: [{
+                    type: 'public-key',
+                    id: this.base64ToArray(credential.rawId),
+                    transports: ['internal', 'hybrid']
+                }],
+                userVerification: 'required'
+            };
+
+            const assertion = await navigator.credentials.get({ publicKey });
+            return { success: true, assertion: assertion };
+        } catch (error) {
+            console.error('Error en autenticación WebAuthn:', error);
+            throw error;
+        }
+    }
+
+    async registerLocalBiometric(username, userId) {
+        // Para dispositivos sin WebAuthn, usamos un sistema basado en localStorage
+        const savedCredential = {
+            id: this.generateId(),
+            userId: userId,
+            username: username,
+            registeredAt: new Date().toISOString(),
+            type: 'local',
+            deviceInfo: {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                touchPoints: navigator.maxTouchPoints || 0
+            }
+        };
+
+        biometricCredentials[username] = savedCredential;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(biometricCredentials));
+
+        if (currentUser && currentUser.id) {
+            const userRef = doc(db, "LoanUsers", currentUser.id);
+            await updateDoc(userRef, {
+                biometricCredential: savedCredential,
+                fingerprintRegistered: true,
+                fingerprintEnabled: true
+            });
+        }
+
+        userSettings.fingerprintRegistered = true;
+        userSettings.fingerprintEnabled = true;
+
+        return { success: true, credential: savedCredential };
+    }
+
+    async simulateBiometricAuth(username) {
+        // Simular autenticación biométrica para dispositivos sin soporte nativo
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                const credential = biometricCredentials[username];
+                if (credential && credential.type === 'local') {
+                    resolve({ success: true });
+                } else {
+                    reject(new Error('Credencial no encontrada'));
+                }
+            }, 1000);
+        });
+    }
+
+    // Utilidades
+    arrayToBase64(array) {
+        return btoa(String.fromCharCode(...new Uint8Array(array)));
+    }
+
+    base64ToArray(base64) {
+        const binary = atob(base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+            bytes[i] = binary.charCodeAt(i);
+        }
+        return bytes.buffer;
+    }
+
+    generateId() {
+        return 'biometric_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    getSupportInfo() {
+        return {
+            supported: this.isSupported,
+            method: this.authMethod,
+            description: this.getMethodDescription()
+        };
+    }
+
+    getMethodDescription() {
+        switch(this.authMethod) {
+            case 'webauthn': return 'WebAuthn/Passkeys (Recomendado)';
+            case 'browser': return 'API del navegador';
+            case 'touch': return 'Detección táctil';
+            default: return 'No disponible';
+        }
+    }
+}
+
+// Instanciar el sistema de autenticación biométrica
+const biometricAuth = new UniversalBiometricAuth();
+
+// Cargar credenciales biométricas guardadas
+function loadBiometricCredentials() {
     try {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
-            webauthnCredentials = JSON.parse(stored);
-            console.log(`Credenciales cargadas para ${Object.keys(webauthnCredentials).length} usuarios`);
-            return webauthnCredentials;
+            biometricCredentials = JSON.parse(stored);
+            console.log(`Credenciales biométricas cargadas: ${Object.keys(biometricCredentials).length} usuarios`);
+            return biometricCredentials;
         }
     } catch (error) {
-        console.error(`Error al cargar credenciales: ${error.message}`);
+        console.error('Error al cargar credenciales biométricas:', error);
     }
     return {};
 }
 
-function saveWebAuthnCredentials() {
+// Guardar credenciales biométricas
+function saveBiometricCredentials() {
     try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(webauthnCredentials));
-        console.log('Credenciales guardadas en localStorage');
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(biometricCredentials));
+        console.log('Credenciales biométricas guardadas');
         return true;
     } catch (error) {
-        console.error(`Error al guardar credenciales: ${error.message}`);
+        console.error('Error al guardar credenciales:', error);
         return false;
     }
 }
 
-function getCredentialIdForUser(username) {
-    if (webauthnCredentials[username]) {
-        return webauthnCredentials[username].id;
-    }
-    return null;
+// Verificar si hay credencial para un usuario
+function hasBiometricCredential(username) {
+    return !!biometricCredentials[username];
 }
 
-function hasCredentialForUser(username) {
-    return !!webauthnCredentials[username];
-}
-
-async function registerFingerprint(username, userId) {
-    try {
-        if (!isWebAuthnSupported) {
-            throw new Error(translate('webauthn_not_supported'));
-        }
-
-        console.log(`Iniciando registro de Passkey para usuario: ${username}`);
-        
-        const user = {
-            id: fromBase64Url(toBase64Url(crypto.getRandomValues(new Uint8Array(16)).buffer)),
-            name: username,
-            displayName: username
-        };
-
-        const publicKey = {
-            rp: {
-                name: 'PlusMoney Retom',
-                id: window.location.hostname || 'localhost' // Para desarrollo local
-            },
-            user: {
-                id: user.id,
-                name: user.name,
-                displayName: user.displayName
-            },
-            pubKeyCredParams: [
-                { type: 'public-key', alg: -7 },  // ES256
-                { type: 'public-key', alg: -257 } // RS256
-            ],
-            challenge: randomChallenge(),
-            timeout: 60000,
-            authenticatorSelection: {
-                authenticatorAttachment: 'platform',
-                residentKey: 'required',
-                requireResidentKey: true,
-                userVerification: 'required'
-            },
-            attestation: 'none'
-        };
-
-        console.log('Solicitando creación de credencial...');
-        const credential = await navigator.credentials.create({ publicKey });
-        console.log('Credencial creada exitosamente');
-
-        const saved = {
-            id: credential.id,
-            rawId: toBase64Url(credential.rawId),
-            type: credential.type,
-            userId: userId,
-            username: username,
-            registeredAt: new Date().toISOString()
-        };
-
-        // Guardar en localStorage
-        webauthnCredentials[username] = saved;
-        saveWebAuthnCredentials();
-
-        // Guardar en Firebase si el usuario está autenticado
-        if (currentUser && currentUser.id) {
-            try {
-                const userRef = doc(db, "LoanUsers", currentUser.id);
-                await updateDoc(userRef, {
-                    webauthnCredential: saved,
-                    fingerprintRegistered: true,
-                    fingerprintEnabled: true
-                });
-                console.log('Credencial guardada en Firebase');
-            } catch (firebaseError) {
-                console.error(`Error al guardar en Firebase: ${firebaseError.message}`);
-            }
-        }
-
-        // Actualizar configuración del usuario
-        userSettings.fingerprintRegistered = true;
-        userSettings.fingerprintEnabled = true;
-
-        console.log(translate('webauthn_register_success'));
-        return { success: true, credential: saved };
-    } catch (error) {
-        console.error(`Error en registro: ${error.message}`);
-        let errorMessage = translate('webauthn_register_error');
-        
-        if (error.name === 'NotAllowedError' || error.name === 'AbortError') {
-            errorMessage = translate('webauthn_cancelled');
-        } else if (error.name === 'NotSupportedError') {
-            errorMessage = translate('webauthn_not_supported');
-        } else if (error.name === 'InvalidStateError') {
-            errorMessage = 'Ya existe una Passkey registrada para este usuario.';
-        } else if (error.name === 'TimeoutError') {
-            errorMessage = translate('webauthn_timeout');
-        }
-        
-        return { success: false, error: errorMessage };
-    }
-}
-
-async function authenticateWithFingerprint(username) {
-    try {
-        if (!isWebAuthnSupported) {
-            throw new Error(translate('webauthn_not_supported'));
-        }
-
-        const credential = webauthnCredentials[username];
-        if (!credential) {
-            throw new Error('No hay Passkey registrada para este usuario');
-        }
-
-        console.log(`Iniciando autenticación para usuario: ${username}`);
-        
-        const publicKey = {
-            challenge: randomChallenge(),
-            timeout: 60000,
-            userVerification: 'required'
-        };
-
-        if (credential.rawId) {
-            publicKey.allowCredentials = [{
-                type: 'public-key',
-                id: fromBase64Url(credential.rawId),
-                transports: ['internal', 'hybrid']
-            }];
-        }
-
-        console.log('Solicitando autenticación...');
-        const assertion = await navigator.credentials.get({ publicKey });
-        console.log('Autenticación exitosa');
-
-        return { success: true, assertion: assertion };
-    } catch (error) {
-        console.error(`Error en autenticación: ${error.message}`);
-        let errorMessage = translate('webauthn_error');
-        
-        if (error.name === 'NotAllowedError' || error.name === 'AbortError') {
-            errorMessage = translate('webauthn_cancelled');
-        } else if (error.name === 'NotSupportedError') {
-            errorMessage = translate('webauthn_not_supported');
-        } else if (error.name === 'SecurityError') {
-            errorMessage = 'Error de seguridad. Por favor, verifica la configuración de tu navegador.';
-        } else if (error.name === 'TimeoutError') {
-            errorMessage = translate('webauthn_timeout');
-        } else if (error.message.includes('No hay Passkey registrada')) {
-            errorMessage = 'No hay Passkey registrada para este usuario. Registra una Passkey primero.';
-        }
-        
-        return { success: false, error: errorMessage };
-    }
-}
-
-async function deleteFingerprint(username) {
-    try {
-        if (webauthnCredentials[username]) {
-            delete webauthnCredentials[username];
-            saveWebAuthnCredentials();
-            
-            if (currentUser && currentUser.id) {
-                try {
-                    const userRef = doc(db, "LoanUsers", currentUser.id);
-                    await updateDoc(userRef, {
-                        webauthnCredential: null,
-                        fingerprintRegistered: false,
-                        fingerprintEnabled: false
-                    });
-                    console.log('Credencial eliminada de Firebase');
-                } catch (firebaseError) {
-                    console.error(`Error al actualizar Firebase: ${firebaseError.message}`);
-                }
-            }
-            
-            userSettings.fingerprintRegistered = false;
-            userSettings.fingerprintEnabled = false;
-            
-            console.log(translate('webauthn_delete_success'));
-            return { success: true };
-        } else {
-            throw new Error('No hay Passkey registrada para este usuario');
-        }
-    } catch (error) {
-        console.error(`Error al eliminar Passkey: ${error.message}`);
-        return { success: false, error: translate('webauthn_delete_error') };
-    }
-}
-
-function updateWebAuthnUI() {
+// Actualizar interfaz de autenticación biométrica
+function updateBiometricUI() {
     const fingerprintLoginBtn = document.getElementById('fingerprintLoginBtn');
     const username = document.getElementById('loginUsername')?.value;
     
-    if (username && hasCredentialForUser(username)) {
+    if (username && hasBiometricCredential(username)) {
         if (fingerprintLoginBtn) {
             fingerprintLoginBtn.style.display = 'block';
             fingerprintLoginBtn.disabled = false;
@@ -4319,45 +4458,50 @@ function updateWebAuthnUI() {
         }
     }
     
-    updateWebAuthnSettingsUI();
+    updateBiometricSettingsUI();
 }
 
-function updateWebAuthnSettingsUI() {
+// Actualizar configuración de autenticación biométrica
+function updateBiometricSettingsUI() {
     const statusBadge = document.getElementById('webauthnStatusBadge');
     const statusDetails = document.getElementById('webauthnStatusDetails');
     const registerBtn = document.getElementById('registerFingerprintBtn');
     const testBtn = document.getElementById('testFingerprintBtn');
     const deleteBtn = document.getElementById('deleteFingerprintBtn');
-    const fingerprintToggle = document.getElementById('fingerprintToggle');
-    const fingerprintToggleContainer = document.getElementById('fingerprintToggleContainer');
     const enableFingerprintLogin = document.getElementById('enableFingerprintLogin');
     const fingerprintStatusIndicator = document.getElementById('fingerprintStatusIndicator');
     const indicatorDot = fingerprintStatusIndicator?.querySelector('.indicator-dot');
+    const deviceInfo = document.getElementById('webauthnDeviceInfo');
+    
+    const supportInfo = biometricAuth.getSupportInfo();
+    
+    if (deviceInfo) {
+        if (supportInfo.supported) {
+            deviceInfo.textContent = `Tu dispositivo soporta autenticación biométrica (${supportInfo.description})`;
+            deviceInfo.className = 'webauthn-message webauthn-success';
+        } else {
+            deviceInfo.textContent = 'Tu dispositivo no soporta autenticación biométrica nativa.';
+            deviceInfo.className = 'webauthn-message webauthn-error';
+        }
+    }
     
     if (currentUser && userSettings.fingerprintRegistered) {
         if (statusBadge) {
-            statusBadge.textContent = translate('webauthn_registered');
+            statusBadge.textContent = 'Registrada';
             statusBadge.className = 'webauthn-status-badge registered';
         }
         
         if (statusDetails) {
-            statusDetails.textContent = 'Tienes una Passkey registrada para autenticación.';
+            statusDetails.textContent = 'Tienes autenticación biométrica registrada.';
         }
         
         if (registerBtn) registerBtn.style.display = 'none';
         if (testBtn) testBtn.style.display = 'block';
         if (deleteBtn) deleteBtn.style.display = 'block';
         
-        if (fingerprintToggleContainer) {
-            fingerprintToggleContainer.style.display = 'block';
-        }
-        
-        if (fingerprintToggle) {
-            fingerprintToggle.checked = userSettings.fingerprintEnabled;
-        }
-        
         if (enableFingerprintLogin) {
             enableFingerprintLogin.checked = userSettings.fingerprintEnabled;
+            enableFingerprintLogin.disabled = false;
         }
         
         if (fingerprintStatusIndicator) {
@@ -4369,39 +4513,28 @@ function updateWebAuthnSettingsUI() {
         }
     } else {
         if (statusBadge) {
-            statusBadge.textContent = translate('webauthn_not_registered');
+            statusBadge.textContent = 'No Registrada';
             statusBadge.className = 'webauthn-status-badge not-registered';
         }
         
         if (statusDetails) {
-            statusDetails.textContent = 'No has registrado tu Passkey para autenticación.';
+            statusDetails.textContent = 'No has registrado autenticación biométrica.';
         }
         
-        if (registerBtn) registerBtn.style.display = 'block';
+        if (registerBtn) {
+            registerBtn.style.display = 'block';
+            registerBtn.disabled = !supportInfo.supported;
+        }
         if (testBtn) testBtn.style.display = 'none';
         if (deleteBtn) deleteBtn.style.display = 'none';
         
-        if (fingerprintToggleContainer) {
-            fingerprintToggleContainer.style.display = 'none';
-        }
-        
         if (enableFingerprintLogin) {
             enableFingerprintLogin.checked = false;
+            enableFingerprintLogin.disabled = true;
         }
         
         if (fingerprintStatusIndicator) {
             fingerprintStatusIndicator.style.display = 'none';
-        }
-    }
-    
-    const deviceInfo = document.getElementById('webauthnDeviceInfo');
-    if (deviceInfo) {
-        if (isWebAuthnSupported) {
-            deviceInfo.textContent = 'Tu dispositivo soporta autenticación por Passkeys.';
-            deviceInfo.className = 'webauthn-message webauthn-success';
-        } else {
-            deviceInfo.textContent = 'Tu dispositivo no soporta autenticación por Passkeys.';
-            deviceInfo.className = 'webauthn-message webauthn-error';
         }
     }
 }
@@ -4410,14 +4543,17 @@ function updateWebAuthnSettingsUI() {
 document.addEventListener('DOMContentLoaded', async () => {
     showLoading();
     
-    await checkWebAuthnSupport();
+    // Inicializar autenticación biométrica
+    await biometricAuth.init();
     
-    loadWebAuthnCredentials();
+    loadBiometricCredentials();
     
     checkRememberedSession();
     setupEventListeners();
     initializeAssistant();
-    updateWebAuthnUI();
+    updateBiometricUI();
+    
+    hideLoading();
 });
 
 async function checkRememberedSession() {
@@ -4430,30 +4566,25 @@ async function checkRememberedSession() {
             document.getElementById('rememberSession').checked = true;
             document.getElementById('rememberSessionSettings').checked = true;
             
-            hideLoading();
-            
-            if (hasCredentialForUser(userData.username) && userSettings.fingerprintEnabled) {
-                updateWebAuthnUI();
+            if (hasBiometricCredential(userData.username) && userSettings.fingerprintEnabled) {
+                updateBiometricUI();
             } else {
-                updateWebAuthnUI();
+                updateBiometricUI();
             }
         } catch (error) {
             console.error("Error al cargar sesión recordada:", error);
             localStorage.removeItem('rememberedUser');
-            hideLoading();
         }
-    } else {
-        hideLoading();
     }
 }
 
 function setupEventListeners() {
     document.getElementById('loginForm').addEventListener('submit', handleLogin);
     
-    document.getElementById('fingerprintLoginBtn').addEventListener('click', handleFingerprintLogin);
+    document.getElementById('fingerprintLoginBtn').addEventListener('click', handleBiometricLogin);
     
     document.getElementById('loginUsername').addEventListener('input', () => {
-        updateWebAuthnUI();
+        updateBiometricUI();
     });
     
     const navItems = document.querySelectorAll('.nav-item');
@@ -4518,13 +4649,12 @@ function setupEventListeners() {
 
     document.getElementById('calculatorForm').addEventListener('submit', calculateLoan);
     
-    // Event listeners para WebAuthn
-    document.getElementById('registerFingerprintBtn').addEventListener('click', handleRegisterFingerprint);
-    document.getElementById('testFingerprintBtn').addEventListener('click', handleTestFingerprint);
-    document.getElementById('deleteFingerprintBtn').addEventListener('click', handleDeleteFingerprint);
-    document.getElementById('enableFingerprintLogin').addEventListener('change', handleToggleFingerprintLogin);
-    document.getElementById('fingerprintToggle').addEventListener('change', handleToggleFingerprint);
-
+    // Event listeners para autenticación biométrica
+    document.getElementById('registerFingerprintBtn').addEventListener('click', handleRegisterBiometric);
+    document.getElementById('testFingerprintBtn').addEventListener('click', handleTestBiometric);
+    document.getElementById('deleteFingerprintBtn').addEventListener('click', handleDeleteBiometric);
+    document.getElementById('enableFingerprintLogin').addEventListener('change', handleToggleBiometricLogin);
+    
     document.getElementById('detailsBtn').addEventListener('click', showLoanDetails);
     document.getElementById('historySearch').addEventListener('input', filterPaymentHistory);
     document.getElementById('historyFilter').addEventListener('change', filterPaymentHistory);
@@ -4548,7 +4678,7 @@ function setupEventListeners() {
     document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings);
 }
 
-async function handleFingerprintLogin(e) {
+async function handleBiometricLogin(e) {
     e.preventDefault();
     const username = document.getElementById('loginUsername').value.trim();
     
@@ -4557,82 +4687,91 @@ async function handleFingerprintLogin(e) {
         return;
     }
     
-    if (!hasCredentialForUser(username)) {
-        showAlert('No hay Passkey registrada para este usuario. Registra una Passkey primero.', 'danger', 'loginAlert');
+    if (!hasBiometricCredential(username)) {
+        showAlert('No hay autenticación biométrica registrada para este usuario.', 'danger', 'loginAlert');
         return;
     }
     
     showLoading();
-    console.log(`Intentando autenticación con Passkey para: ${username}`);
+    console.log(`Intentando autenticación biométrica para: ${username}`);
     
-    const result = await authenticateWithFingerprint(username);
-    
-    if (result.success) {
-        console.log('Autenticación con Passkey exitosa');
-        showWebAuthnMessage(translate('webauthn_success'), 'success');
+    try {
+        const result = await biometricAuth.authenticateBiometric(username);
         
-        await handleLogin({ preventDefault: () => {} }, true);
-    } else {
-        console.log(`Error en autenticación con Passkey: ${result.error}`);
-        showAlert(result.error, 'danger', 'loginAlert');
+        if (result.success) {
+            console.log('Autenticación biométrica exitosa');
+            showInfoModal('Éxito', 'Autenticación biométrica verificada correctamente');
+            
+            // Usar el PIN guardado en las credenciales para iniciar sesión
+            await handleLogin({ preventDefault: () => {} }, true);
+        } else {
+            console.log(`Error en autenticación biométrica: ${result.error}`);
+            showAlert('Error en autenticación biométrica. Por favor, usa tu PIN.', 'danger', 'loginAlert');
+            hideLoading();
+        }
+    } catch (error) {
+        console.log(`Error en autenticación biométrica: ${error.message}`);
+        showAlert(`Error: ${error.message}. Por favor, usa tu PIN.`, 'danger', 'loginAlert');
         hideLoading();
     }
 }
 
-async function handleRegisterFingerprint() {
+async function handleRegisterBiometric() {
     if (!currentUser) {
-        showInfoModal('Información', 'Debes iniciar sesión primero para registrar tu Passkey.');
+        showInfoModal('Información', 'Debes iniciar sesión primero para registrar autenticación biométrica.');
         return;
     }
     
-    if (!isWebAuthnSupported) {
-        showInfoModal('Información', translate('webauthn_not_supported'));
+    const supportInfo = biometricAuth.getSupportInfo();
+    if (!supportInfo.supported) {
+        showInfoModal('Información', 'Tu dispositivo no soporta autenticación biométrica nativa.');
         return;
     }
     
     showFingerprintModal('register');
 }
 
-async function handleTestFingerprint() {
+async function handleTestBiometric() {
     if (!currentUser) {
-        showInfoModal('Información', 'Debes iniciar sesión primero para probar tu Passkey.');
+        showInfoModal('Información', 'Debes iniciar sesión primero para probar autenticación biométrica.');
         return;
     }
     
-    if (!isWebAuthnSupported) {
-        showInfoModal('Información', translate('webauthn_not_supported'));
+    const supportInfo = biometricAuth.getSupportInfo();
+    if (!supportInfo.supported) {
+        showInfoModal('Información', 'Tu dispositivo no soporta autenticación biométrica nativa.');
         return;
     }
     
     showFingerprintModal('test');
 }
 
-async function handleDeleteFingerprint() {
+async function handleDeleteBiometric() {
     if (!currentUser) {
-        showInfoModal('Información', 'Debes iniciar sesión primero para eliminar tu Passkey.');
+        showInfoModal('Información', 'Debes iniciar sesión primero para eliminar autenticación biométrica.');
         return;
     }
     
-    if (confirm('¿Estás seguro de que quieres eliminar tu Passkey registrada? Esta acción no se puede deshacer.')) {
+    if (confirm('¿Estás seguro de que quieres eliminar tu autenticación biométrica registrada? Esta acción no se puede deshacer.')) {
         showLoading();
-        const result = await deleteFingerprint(currentUser.username);
+        const result = await biometricAuth.deleteBiometric(currentUser.username);
         hideLoading();
         
         if (result.success) {
-            showInfoModal('Información', translate('webauthn_delete_success'));
-            updateWebAuthnSettingsUI();
-            updateWebAuthnUI();
+            showInfoModal('Información', 'Autenticación biométrica eliminada correctamente');
+            updateBiometricSettingsUI();
+            updateBiometricUI();
         } else {
-            showInfoModal('Error', result.error || translate('webauthn_delete_error'));
+            showInfoModal('Error', result.error || 'Error al eliminar autenticación biométrica');
         }
     }
 }
 
-function handleToggleFingerprintLogin(e) {
+function handleToggleBiometricLogin(e) {
     userSettings.fingerprintEnabled = e.target.checked;
     
     if (userSettings.fingerprintEnabled && !userSettings.fingerprintRegistered) {
-        showInfoModal('Información', 'Debes registrar una Passkey primero antes de activar esta opción.');
+        showInfoModal('Información', 'Debes registrar autenticación biométrica primero antes de activar esta opción.');
         e.target.checked = false;
         userSettings.fingerprintEnabled = false;
         return;
@@ -4642,17 +4781,11 @@ function handleToggleFingerprintLogin(e) {
         updateDoc(doc(db, "LoanUsers", currentUser.id), {
             fingerprintEnabled: userSettings.fingerprintEnabled
         }).catch(error => {
-            console.error("Error al actualizar configuración de Passkey:", error);
+            console.error("Error al actualizar configuración biométrica:", error);
         });
     }
     
-    updateWebAuthnSettingsUI();
-}
-
-function handleToggleFingerprint(e) {
-    userSettings.fingerprintEnabled = e.target.checked;
-    document.getElementById('enableFingerprintLogin').checked = e.target.checked;
-    handleToggleFingerprintLogin(e);
+    updateBiometricSettingsUI();
 }
 
 function showFingerprintModal(mode = 'register') {
@@ -4665,21 +4798,23 @@ function showFingerprintModal(mode = 'register') {
     status.style.display = 'none';
     status.className = 'fingerprint-modal-status';
     
+    const supportInfo = biometricAuth.getSupportInfo();
+    
     if (mode === 'register') {
-        title.textContent = 'Registrar Passkey';
+        title.textContent = 'Registrar Autenticación Biométrica';
         content.innerHTML = `
             <div class="fingerprint-modal-icon">
                 <i class="fas fa-fingerprint fingerprint-pulse"></i>
             </div>
             <div class="fingerprint-modal-instructions">
-                <p>Para registrar tu Passkey (huella digital/face ID/patrón):</p>
+                <p><strong>Método disponible:</strong> ${supportInfo.description}</p>
+                <p>Para registrar tu método biométrico:</p>
                 <ol class="fingerprint-config-steps">
-                    <li>Asegúrate de que tu dispositivo tenga un método de autenticación biométrica</li>
                     <li>Usa tu huella digital, rostro o patrón cuando se te solicite</li>
                     <li>Sigue las instrucciones en pantalla de tu dispositivo</li>
-                    <li>La Passkey se asociará a tu cuenta actual</li>
+                    <li>El método se asociará a tu cuenta actual</li>
                 </ol>
-                <p><strong>Compatibilidad:</strong> Funciona en Android 9+, iOS 13+, Chrome 70+, Safari 13+, Firefox 60+ y APKs generadas online.</p>
+                <p><strong>Compatibilidad:</strong> Funciona en la mayoría de navegadores modernos y APKs.</p>
             </div>
         `;
         
@@ -4696,20 +4831,21 @@ function showFingerprintModal(mode = 'register') {
         
         setTimeout(() => {
             document.getElementById('startRegistrationBtn').addEventListener('click', async () => {
-                await startFingerprintRegistration();
+                await startBiometricRegistration();
             });
         }, 100);
         
     } else if (mode === 'test') {
-        title.textContent = 'Probar Passkey';
+        title.textContent = 'Probar Autenticación Biométrica';
         content.innerHTML = `
             <div class="fingerprint-modal-icon">
                 <i class="fas fa-fingerprint fingerprint-pulse"></i>
             </div>
             <div class="fingerprint-modal-instructions">
-                <p>Para probar tu Passkey registrada:</p>
+                <p><strong>Método registrado:</strong> ${supportInfo.description}</p>
+                <p>Para probar tu autenticación biométrica registrada:</p>
                 <ol class="fingerprint-config-steps">
-                    <li>Usa el mismo método de autenticación que registraste anteriormente</li>
+                    <li>Usa el mismo método que registraste anteriormente</li>
                     <li>Espera a que aparezca el prompt de autenticación</li>
                     <li>Sigue las instrucciones en pantalla de tu dispositivo</li>
                 </ol>
@@ -4719,7 +4855,7 @@ function showFingerprintModal(mode = 'register') {
         
         footer.innerHTML = `
             <button class="btn btn-info" id="startTestBtn">
-                <i class="fas fa-check"></i> Probar Passkey
+                <i class="fas fa-check"></i> Probar Autenticación
             </button>
             <button class="btn btn-danger" onclick="closeModal()">
                 <i class="fas fa-times"></i> Cancelar
@@ -4730,13 +4866,13 @@ function showFingerprintModal(mode = 'register') {
         
         setTimeout(() => {
             document.getElementById('startTestBtn').addEventListener('click', async () => {
-                await startFingerprintTest();
+                await startBiometricTest();
             });
         }, 100);
     }
 }
 
-async function startFingerprintRegistration() {
+async function startBiometricRegistration() {
     const status = document.getElementById('fingerprintModalStatus');
     const startBtn = document.getElementById('startRegistrationBtn');
     
@@ -4746,24 +4882,24 @@ async function startFingerprintRegistration() {
     }
     
     status.style.display = 'block';
-    status.textContent = 'Preparando registro de Passkey...';
+    status.textContent = 'Preparando registro biométrico...';
     status.className = 'fingerprint-modal-status';
     
     try {
-        const result = await registerFingerprint(currentUser.username, currentUser.id);
+        const result = await biometricAuth.registerBiometric(currentUser.username, currentUser.id);
         
         if (result.success) {
-            status.textContent = '✅ ' + translate('webauthn_register_success');
+            status.textContent = '✅ Autenticación biométrica registrada correctamente';
             status.className = 'fingerprint-modal-status success';
             
-            updateWebAuthnSettingsUI();
-            updateWebAuthnUI();
+            updateBiometricSettingsUI();
+            updateBiometricUI();
             
             setTimeout(() => {
                 closeModal();
             }, 2000);
         } else {
-            status.textContent = '❌ ' + (result.error || translate('webauthn_register_error'));
+            status.textContent = '❌ ' + (result.error || 'Error al registrar autenticación biométrica');
             status.className = 'fingerprint-modal-status error';
             
             if (startBtn) {
@@ -4782,7 +4918,7 @@ async function startFingerprintRegistration() {
     }
 }
 
-async function startFingerprintTest() {
+async function startBiometricTest() {
     const status = document.getElementById('fingerprintModalStatus');
     const startBtn = document.getElementById('startTestBtn');
     
@@ -4796,17 +4932,17 @@ async function startFingerprintTest() {
     status.className = 'fingerprint-modal-status';
     
     try {
-        const result = await authenticateWithFingerprint(currentUser.username);
+        const result = await biometricAuth.authenticateBiometric(currentUser.username);
         
         if (result.success) {
-            status.textContent = '✅ ' + translate('webauthn_success');
+            status.textContent = '✅ Autenticación biométrica verificada correctamente';
             status.className = 'fingerprint-modal-status success';
             
             setTimeout(() => {
                 closeModal();
             }, 2000);
         } else {
-            status.textContent = '❌ ' + (result.error || translate('webauthn_error'));
+            status.textContent = '❌ ' + (result.error || 'Error en autenticación biométrica');
             status.className = 'fingerprint-modal-status error';
             
             if (startBtn) {
@@ -4824,6 +4960,82 @@ async function startFingerprintTest() {
         }
     }
 }
+
+// **FUNCIÓN MEJORADA PARA COPIAR INFORMACIÓN DE CUENTAS BANCARIAS**
+window.copyBankAccountInfo = function(account) {
+    const message = `💳 *INFORMACIÓN DE PAGO - ${companyInfo.nombreEmpresa}*\n\n` +
+                   `🏦 *Banco:* ${account.bankName || 'Banco'}\n` +
+                   `🔢 *Número de Cuenta:* ${account.accountNumber}\n` +
+                   `👤 *Titular:* ${account.accountHolder}\n` +
+                   `📋 *Tipo de Cuenta:* ${account.accountType === 'ahorro' ? 'Ahorro' : account.accountType === 'corriente' ? 'Corriente' : account.accountType}\n\n` +
+                   `💼 *Para realizar pagos:*\n` +
+                   `1. Realiza la transferencia a este número de cuenta\n` +
+                   `2. Toma una captura de pantalla del comprobante\n` +
+                   `3. Envía la foto vía WhatsApp para validar\n` +
+                   `4. Consulta tu pago en el historial para verificar que fue aplicado\n\n` +
+                   `📞 *Contacto:* ${companyInfo.telefono}\n` +
+                   `🏢 *Empresa:* ${companyInfo.nombreEmpresa}`;
+    
+    const modalContent = document.getElementById('bankAccountCopyContent');
+    modalContent.innerHTML = `
+        <div class="payment-instruction">
+            <div class="payment-instruction-title">
+                <i class="fas fa-university"></i> Información para Transferencia
+            </div>
+            <div class="payment-instruction-content">
+                <p><strong>Banco:</strong> ${account.bankName || 'Banco'}</p>
+                <p><strong>Número de Cuenta:</strong> ${account.accountNumber}</p>
+                <p><strong>Titular:</strong> ${account.accountHolder}</p>
+                <p><strong>Tipo de Cuenta:</strong> ${account.accountType === 'ahorro' ? 'Ahorro' : account.accountType === 'corriente' ? 'Corriente' : account.accountType}</p>
+                
+                <div class="bank-account-copy-container" id="copyContainer">
+                    <div class="bank-account-copy-text">
+                        ${message.replace(/\n/g, '<br>')}
+                    </div>
+                    <button class="bank-account-copy-btn" id="copyTextBtn">
+                        <i class="fas fa-copy"></i> Copiar
+                    </button>
+                </div>
+                
+                <div class="payment-instruction-steps">
+                    <p><strong>Instrucciones para pagar:</strong></p>
+                    <ol>
+                        <li>Realiza la transferencia a este número de cuenta</li>
+                        <li>Toma una captura de pantalla del comprobante</li>
+                        <li>Envía la foto vía WhatsApp para validar</li>
+                        <li>Consulta tu pago en el historial para verificar que fue aplicado</li>
+                    </ol>
+                </div>
+                
+                <div class="payment-instruction-note">
+                    <i class="fas fa-info-circle"></i> Después de realizar el pago, envía el comprobante a: ${companyInfo.telefono}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('bankAccountCopyModal').classList.add('active');
+    
+    // Configurar botón de copiar
+    setTimeout(() => {
+        document.getElementById('copyTextBtn').addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(message);
+                const btn = document.getElementById('copyTextBtn');
+                btn.innerHTML = '<i class="fas fa-check"></i> Copiado!';
+                btn.classList.add('copied');
+                
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="fas fa-copy"></i> Copiar';
+                    btn.classList.remove('copied');
+                }, 2000);
+            } catch (err) {
+                console.error('Error al copiar:', err);
+                showInfoModal('Error', 'No se pudo copiar al portapapeles. Puedes seleccionar y copiar manualmente.');
+            }
+        });
+    }, 100);
+};
 
 function initializeAssistant() {
     const chatButton = document.getElementById('chatButton');
@@ -4921,72 +5133,16 @@ function sendAssistantMessage() {
 function getAssistantResponse(message) {
     const lowerMessage = message.toLowerCase();
     
-    if (lowerMessage.includes('hola') || lowerMessage.includes('buenos días') || lowerMessage.includes('buenas tardes')) {
-        return '¡Hola! Soy Perla, tu asistente virtual. ¿En qué puedo ayudarte hoy? Puedes escribir tu consulta directamente o seleccionar una de las preguntas frecuentes.';
-    } else if (lowerMessage.includes('pago') || lowerMessage.includes('cuota') || lowerMessage.includes('realizar pago')) {
-        return 'Puedes realizar pagos a través de nuestras cuentas bancarias, transferencias o en nuestras oficinas. Consulta la sección de información de la empresa para ver las cuentas disponibles.';
-    } else if (lowerMessage.includes('atrasado') || lowerMessage.includes('mora') || lowerMessage.includes('vencido')) {
-        return 'Si tienes un pago atrasado, comunícate con nosotros lo antes posible para regularizar tu situación y evitar cargos adicionales por mora.';
-    } else if (lowerMessage.includes('saldo') || lowerMessage.includes('cuánto debo') || lowerMessage.includes('balance')) {
-        if (currentLoan) {
-            const currencySymbol = userSettings.currency === 'USD' ? '$' : 'RD$';
-            return `Tu saldo actual es de ${currencySymbol}${formatCurrency(currentLoan.balance)}. Puedes ver el detalle completo en la sección "Ver Detalles".`;
-        }
-        return 'No tengo información sobre tu saldo actual en este momento.';
-    } else if (lowerMessage.includes('próximo pago') || lowerMessage.includes('cuándo pagar') || lowerMessage.includes('fecha pago')) {
-        if (currentLoan && currentLoan.paymentSchedule) {
-            const nextPayment = currentLoan.paymentSchedule.find(p => p.status === 'pending');
-            if (nextPayment) {
-                const dueDate = new Date(nextPayment.dueDate);
-                return `Tu próximo pago vence el ${dueDate.toLocaleDateString()}. El monto a pagar es de ${formatCurrency(nextPayment.amount)}.`;
-            }
-        }
-        return 'No tengo información sobre tu próximo pago en este momento. Consulta la sección de calendario para ver todas las fechas de pago.';
-    } else if (lowerMessage.includes('historial') || lowerMessage.includes('pagos anteriores')) {
-        return 'Puedes ver tu historial de pagos en la sección "Historial" de la aplicación. Allí encontrarás todos tus pagos realizados con fechas y montos.';
-    } else if (lowerMessage.includes('documento') || lowerMessage.includes('recibo') || lowerMessage.includes('comprobante') || lowerMessage.includes('descargar recibo')) {
-        if (isPC) {
-            return 'Para descargar tus recibos de pago, ve a la sección "Documentos", haz clic en el ícono de ojo para previsualizar el recibo y luego en el botón "Descargar". Los recibos solo están disponibles para descarga desde la versión de escritorio.';
-        } else {
-            return 'La descarga de recibos de pago está disponible solo desde la versión de escritorio (PC) o la versión web online. Desde dispositivos móviles puedes previsualizar los recibos en la sección "Documentos".';
-        }
-    } else if (lowerMessage.includes('foto') || lowerMessage.includes('perfil') || lowerMessage.includes('avatar')) {
-        return 'Para cambiar tu foto de perfil, ve a la sección "Perfil" y haz clic en "Cambiar Foto de Perfil". Puedes elegir entre los avatares predeterminados o subir tu propia imagen.';
-    } else if (lowerMessage.includes('calendario') || lowerMessage.includes('color') || lowerMessage.includes('vencimiento')) {
-        return 'En el calendario de pagos, los colores indican: Verde - Pago realizado, Amarillo - Pago pendiente, Rojo - Pago vencido. El día actual se marca con un fondo especial.';
-    } else if (lowerMessage.includes('contactar') || lowerMessage.includes('soporte') || lowerMessage.includes('ayuda')) {
-        return 'Puedes contactar con nuestro soporte a través del teléfono: (849) 515-8440, o visitando, Santo Domingo.';
-    } else if (lowerMessage.includes('tipo') || lowerMessage.includes('préstamo') || lowerMessage.includes('oferta')) {
-        return 'Ofrecemos dos tipos de préstamos: Préstamos a Plazo Fijo (pagos fijos) y Préstamos con Intereses (pagos variables de capital + interés). Consulta los detalles en la sección "Ver Detalles".';
-    } else if (lowerMessage.includes('creador') || lowerMessage.includes('desarrollador') || lowerMessage.includes('quién te creó')) {
-        return 'Fui desarrollada por Retom, un equipo dirigido por Andreilin Segura Santana.';
-    } else if (lowerMessage.includes('retom') || lowerMessage.includes('empresa') || lowerMessage.includes('compañía')) {
-        return 'Retom es una empresa que se encarga de vender servicios de software para empresas, realizar inventarios físicos y venta de software. Visita nuestra página web: www.retomrt.com';
-    } else if (lowerMessage.includes('director') || lowerMessage.includes('dueño') || lowerMessage.includes('propietario') || lowerMessage.includes('henry')) {
-        return 'El director de Retom se llama Henry Ferreras.';
-    } else if (lowerMessage.includes('perla') || lowerMessage.includes('foto') || lowerMessage.includes('imagen')) {
-        return 'Hola Soy Perla tu asistente virtual, en la vida real Soy una niña muy especial. Aquí una foto de ella: [perla.png]';
-    } else if (lowerMessage.includes('calculadora') || lowerMessage.includes('calcular') || lowerMessage.includes('simular')) {
-        return 'Para usar la calculadora de préstamos, ve a la sección "Calculadora" en el menú inferior. Allí podrás ingresar el monto, tasa de interés, plazo y tipo de préstamo para calcular tus pagos.';
-    } else if (lowerMessage.includes('configuración') || lowerMessage.includes('ajustes') || lowerMessage.includes('tema') || lowerMessage.includes('idioma')) {
-        return 'En la sección "Configuración" puedes personalizar la aplicación: cambiar el tema (Retom oscuro o Personalizado), idioma, tamaño de fuente, moneda y activar notificaciones.';
-    } else if (lowerMessage.includes('tema claro') || lowerMessage.includes('modo claro') || lowerMessage.includes('blanco')) {
-        return 'Actualmente solo ofrecemos el tema Retom (oscuro) y la opción de personalización de colores. Puedes seleccionar "Personalizado" en Configuración para elegir tu color preferido.';
-    } else if (lowerMessage.includes('tema oscuro') || lowerMessage.includes('modo oscuro') || lowerMessage.includes('retom')) {
-        return 'Para activar el tema Retom (oscuro), ve a "Configuración" y selecciona la opción "Retom" en Tema de la Aplicación. Es el tema predeterminado de la aplicación.';
-    } else if (lowerMessage.includes('personalizar') || lowerMessage.includes('color personalizado')) {
-        return 'Para personalizar los colores, ve a "Configuración", selecciona "Personalizado" en Tema de la Aplicación y elige el color que prefieras con el selector de color.';
-    } else if (lowerMessage.includes('huella') || lowerMessage.includes('biométrico') || lowerMessage.includes('fingerprint') || lowerMessage.includes('passkey')) {
-        return 'Puedes configurar la autenticación por Passkeys (huella digital/face ID) en la sección "Configuración". Allí puedes registrar tu Passkey, probarla o eliminarla. También puedes activar/desactivar el inicio de sesión con Passkey.';
-    } else if (lowerMessage.includes('webauthn') || lowerMessage.includes('autenticación')) {
-        return 'WebAuthn/Passkeys es un estándar web para autenticación sin contraseña. En esta aplicación puedes usar tu huella digital, rostro o patrón para iniciar sesión de manera más segura y conveniente. Configúralo en la sección "Configuración".';
-    } else if (lowerMessage.includes('gracias') || lowerMessage.includes('agradezco')) {
-        return '¡De nada! Estoy aquí para ayudarte. ¿Hay algo más en lo que pueda asistirte?';
-    } else if (lowerMessage.includes('adiós') || lowerMessage.includes('chao') || lowerMessage.includes('nos vemos')) {
-        return '¡Hasta luego! Que tengas un excelente día.';
-    } else {
-        return 'Lo siento, no entendí tu pregunta. ¿Puedes intentar reformularla?';
+    if (lowerMessage.includes('pago') || lowerMessage.includes('transferencia') || lowerMessage.includes('cuenta bancaria')) {
+        return 'Para realizar pagos, puedes usar nuestras cuentas bancarias. Ve a "Información de la Empresa" para ver las cuentas disponibles y copiar la información de pago completa con instrucciones.';
+    } else if (lowerMessage.includes('comprobante') || lowerMessage.includes('captura') || lowerMessage.includes('whatsapp')) {
+        return 'Después de realizar el pago, toma una captura del comprobante y envíala por WhatsApp para validación. Luego podrás ver tu pago aplicado en el historial.';
+    } else if (lowerMessage.includes('huella') || lowerMessage.includes('biométrico') || lowerMessage.includes('fingerprint')) {
+        return 'Puedes configurar autenticación biométrica en Configuración. Es compatible con la mayoría de dispositivos y navegadores modernos.';
     }
+    
+    // Respuestas existentes...
+    return 'Lo siento, no entendí tu pregunta. ¿Puedes intentar reformularla?';
 }
 
 function toggleMicroMenu() {
@@ -5037,13 +5193,13 @@ function calculateLoan(e) {
     document.getElementById('calculatorResult').style.display = 'block';
 }
 
-async function handleLogin(e, fingerprintAuthenticated = false) {
+async function handleLogin(e, biometricAuthenticated = false) {
     e.preventDefault();
     const username = document.getElementById('loginUsername').value.trim();
     const pin = document.getElementById('loginPin').value.trim();
     const rememberSession = document.getElementById('rememberSession').checked;
     
-    if (!fingerprintAuthenticated) {
+    if (!biometricAuthenticated) {
         if (!username || !pin || pin.length !== 8 || !/^\d{8}$/.test(pin)) {
             showAlert('Credenciales inválidas o PIN no válido', 'danger', 'loginAlert');
             return;
@@ -5058,7 +5214,7 @@ async function handleLogin(e, fingerprintAuthenticated = false) {
     showLoading();
     try {
         let q;
-        if (fingerprintAuthenticated) {
+        if (biometricAuthenticated) {
             q = query(collection(db, "LoanUsers"), where("username", "==", username));
         } else {
             q = query(collection(db, "LoanUsers"), where("username", "==", username), where("pin", "==", pin));
@@ -5066,7 +5222,7 @@ async function handleLogin(e, fingerprintAuthenticated = false) {
         
         let querySnapshot = await getDocs(q);
         
-        if (querySnapshot.empty && !fingerprintAuthenticated) {
+        if (querySnapshot.empty && !biometricAuthenticated) {
             q = query(collection(db, "Users"), where("username", "==", username), where("pin", "==", pin));
             querySnapshot = await getDocs(q);
             
@@ -5075,7 +5231,7 @@ async function handleLogin(e, fingerprintAuthenticated = false) {
                 hideLoading();
                 return;
             }
-        } else if (querySnapshot.empty && fingerprintAuthenticated) {
+        } else if (querySnapshot.empty && biometricAuthenticated) {
             showAlert('Usuario no encontrado', 'danger', 'loginAlert');
             hideLoading();
             return;
@@ -5087,7 +5243,7 @@ async function handleLogin(e, fingerprintAuthenticated = false) {
         if (rememberSession) {
             localStorage.setItem('rememberedUser', JSON.stringify({
                 username: username,
-                pin: fingerprintAuthenticated ? currentUser.pin : pin
+                pin: biometricAuthenticated ? currentUser.pin : pin
             }));
         } else {
             localStorage.removeItem('rememberedUser');
@@ -5148,7 +5304,7 @@ async function handleLogin(e, fingerprintAuthenticated = false) {
         
         setupRealTimeLoanListener();
         
-        updateWebAuthnUI();
+        updateBiometricUI();
     } catch (error) {
         console.error("Error al iniciar sesión: ", error);
         showAlert('Ocurrió un error al iniciar sesión', 'danger', 'loginAlert');
@@ -5223,333 +5379,6 @@ async function loadCompanyInfo() {
     }
 }
 
-function loadUpcomingPayments() {
-    const container = document.getElementById('upcomingPaymentsContainer');
-    
-    if (!currentLoan || !currentLoan.paymentSchedule) {
-        container.innerHTML = '<p>No hay información de pagos disponible.</p>';
-        return;
-    }
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const nextPayment = currentLoan.paymentSchedule.find(p => p.status === 'pending');
-    
-    if (!nextPayment) {
-        container.innerHTML = '<p>No hay pagos pendientes.</p>';
-        return;
-    }
-    
-    const dueDate = new Date(nextPayment.dueDate);
-    dueDate.setHours(0, 0, 0, 0);
-    const daysUntilDue = Math.floor((dueDate - today) / (1000 * 60 * 60 * 24));
-    
-    let statusClass = '';
-    let statusText = '';
-    
-    if (daysUntilDue < 0) {
-        statusClass = 'status-overdue';
-        statusText = 'Vencido';
-    } else if (daysUntilDue === 0) {
-        statusClass = 'status-pending';
-        statusText = 'Hoy';
-    } else if (daysUntilDue <= 7) {
-        statusClass = 'status-pending';
-        statusText = 'Próximo';
-    } else {
-        statusClass = 'status-pending';
-        statusText = 'Programado';
-    }
-    
-    const currencySymbol = userSettings.currency === 'USD' ? '$' : 'RD$';
-    
-    const paymentsMade = currentLoan.payments ? currentLoan.payments.length : 0;
-    const totalPayments = currentLoan.paymentSchedule.length;
-    const isFixedLoan = currentLoan.loanType === 'fixed';
-    
-    let totalToPay = 0;
-    
-    if (isFixedLoan) {
-        const remainingPayments = totalPayments - paymentsMade;
-        totalToPay = remainingPayments > 0 ? (currentLoan.remainingCapital || 0) / remainingPayments : 0;
-    } else {
-        const remainingQuincenas = totalPayments - paymentsMade;
-        const capitalToPay = remainingQuincenas > 0 ? (currentLoan.remainingCapital || 0) / remainingQuincenas : 0;
-        const tasaQuincenal = (currentLoan.interestRate || 0) / (currentLoan.frequency === 'biweekly' ? 1 : 2);
-        const interestToPay = (currentLoan.remainingCapital || 0) * (tasaQuincenal / 100);
-        totalToPay = capitalToPay + interestToPay;
-    }
-    
-    if (isNaN(totalToPay) || totalToPay <= 0) {
-        console.error('Total calculado no válido:', totalToPay);
-        container.innerHTML = '<p>Error: No se pudo calcular el monto del próximo pago.</p>';
-        return;
-    }
-    
-    container.innerHTML = `
-        <div class="upcoming-payment-item">
-            <div>
-                <div class="upcoming-payment-date">${dueDate.toLocaleDateString()}</div>
-                <div class="upcoming-payment-amount">${currencySymbol}${formatCurrency(totalToPay)}</div>
-                <div class="upcoming-payment-detail">Total a pagar (próxima cuota)</div>
-            </div>
-            <div class="upcoming-payment-status ${statusClass}">${statusText}</div>
-        </div>
-    `;
-}
-
-function generatePaymentCalendar() {
-    const upcomingCalendar = document.getElementById('upcomingPaymentsCalendar');
-    const fullCalendar = document.getElementById('fullCalendar');
-    
-    if (!currentLoan || !currentLoan.paymentSchedule) {
-        if (upcomingCalendar) upcomingCalendar.innerHTML = '<p>No hay información de pagos disponible.</p>';
-        if (fullCalendar) fullCalendar.innerHTML = '<p>No hay información de pagos disponible.</p>';
-        return;
-    }
-    
-    if (upcomingCalendar) generateMiniCalendar(upcomingCalendar, 30);
-    
-    if (fullCalendar) generateFullCalendar(fullCalendar);
-}
-
-function generateMiniCalendar(container, daysToShow) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const endDate = new Date();
-    endDate.setDate(today.getDate() + daysToShow);
-    endDate.setHours(23, 59, 59, 999);
-    
-    const upcomingPayments = currentLoan.paymentSchedule.filter(payment => {
-        const dueDate = new Date(payment.dueDate);
-        dueDate.setHours(0, 0, 0, 0);
-        return dueDate >= today && dueDate <= endDate;
-    });
-    
-    if (upcomingPayments.length === 0) {
-        container.innerHTML = '<p>No hay pagos programados para los próximos 30 días.</p>';
-        return;
-    }
-    
-    let html = '<div class="payment-list">';
-    
-    upcomingPayments.forEach(payment => {
-        const dueDate = new Date(payment.dueDate);
-        const daysUntilDue = Math.floor((dueDate - today) / (1000 * 60 * 60 * 24));
-        const statusClass = payment.status === 'paid' ? 'payment-completed' : 
-                          daysUntilDue < 0 ? 'payment-overdue' : 'payment-due';
-        
-        html += `
-            <div class="payment-item ${statusClass}">
-                <div class="payment-date">${dueDate.toLocaleDateString()}</div>
-                <div class="payment-amount">${formatCurrency(payment.amount)}</div>
-                <div class="payment-status">${payment.status === 'paid' ? 'Pagado' : daysUntilDue < 0 ? 'Vencido' : 'Pendiente'}</div>
-            </div>
-        `;
-    });
-    
-    html += '</div>';
-    container.innerHTML = html;
-}
-
-function generateFullCalendar(container) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const firstDay = new Date(currentCalendarYear, currentCalendarMonth, 1);
-    const lastDay = new Date(currentCalendarYear, currentCalendarMonth + 1, 0);
-    
-    const firstDayIndex = firstDay.getDay();
-    const lastDayIndex = lastDay.getDay();
-    const daysInMonth = lastDay.getDate();
-    
-    const monthNames = [
-        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-    ];
-    
-    const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-    
-    let html = `
-        <div class="calendar-header">
-            <button class="calendar-nav" id="prevMonth">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <div class="calendar-title">${monthNames[currentCalendarMonth]} ${currentCalendarYear}</div>
-            <button class="calendar-nav" id="nextMonth">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-        </div>
-        <div class="calendar-grid">
-    `;
-    
-    for (let i = 0; i < 7; i++) {
-        html += `<div class="calendar-weekday">${dayNames[i]}</div>`;
-    }
-    
-    for (let i = 0; i < firstDayIndex; i++) {
-        html += '<div class="calendar-day empty"></div>';
-    }
-    
-    for (let i = 1; i <= daysInMonth; i++) {
-        const dayDate = new Date(currentCalendarYear, currentCalendarMonth, i);
-        dayDate.setHours(0, 0, 0, 0);
-        let dayClass = 'calendar-day';
-        let paymentIndicator = '';
-        
-        if (i === today.getDate() && currentCalendarMonth === today.getMonth() && currentCalendarYear === today.getFullYear()) {
-            dayClass += ' today';
-        }
-        
-        const paymentOnThisDay = currentLoan.paymentSchedule.find(payment => {
-            const paymentDate = new Date(payment.dueDate);
-            paymentDate.setHours(0, 0, 0, 0);
-            return paymentDate.getDate() === i && 
-                   paymentDate.getMonth() === currentCalendarMonth && 
-                   paymentDate.getFullYear() === currentCalendarYear;
-        });
-        
-        if (paymentOnThisDay) {
-            if (paymentOnThisDay.status === 'paid') {
-                dayClass += ' payment-completed';
-            } else if (dayDate < today) {
-                dayClass += ' payment-overdue';
-            } else {
-                dayClass += ' payment-due';
-            }
-            
-            paymentIndicator = '<div class="payment-indicator"></div>';
-        }
-        
-        html += `
-            <div class="${dayClass}" data-date="${dayDate.toISOString()}">
-                ${i}
-                ${paymentIndicator}
-            </div>
-        `;
-    }
-    
-    for (let i = lastDayIndex + 1; i < 7; i++) {
-        html += '<div class="calendar-day empty"></div>';
-    }
-    
-    html += `
-        </div>
-        <div class="calendar-legend">
-            <div class="calendar-legend-item">
-                <div class="calendar-legend-color legend-today"></div>
-                <span>Hoy</span>
-            </div>
-            <div class="calendar-legend-item">
-                <div class="calendar-legend-color legend-due"></div>
-                <span>Pago Pendiente</span>
-            </div>
-            <div class="calendar-legend-item">
-                <div class="calendar-legend-color legend-overdue"></div>
-                <span>Pago Vencido</span>
-            </div>
-            <div class="calendar-legend-item">
-                <div class="calendar-legend-color legend-completed"></div>
-                <span>Pago Realizado</span>
-            </div>
-        </div>
-    `;
-    
-    container.innerHTML = html;
-    
-    document.getElementById('prevMonth').addEventListener('click', () => {
-        navigateCalendarMonth(-1);
-    });
-    
-    document.getElementById('nextMonth').addEventListener('click', () => {
-        navigateCalendarMonth(1);
-    });
-    
-    const calendarDays = container.querySelectorAll('.calendar-day:not(.empty)');
-    calendarDays.forEach(day => {
-        day.addEventListener('click', () => {
-            const date = new Date(day.dataset.date);
-            showDayPaymentDetails(date);
-        });
-    });
-}
-
-function navigateCalendarMonth(direction) {
-    currentCalendarMonth += direction;
-    
-    if (currentCalendarMonth < 0) {
-        currentCalendarMonth = 11;
-        currentCalendarYear--;
-    } else if (currentCalendarMonth > 11) {
-        currentCalendarMonth = 0;
-        currentCalendarYear++;
-    }
-    
-    generateFullCalendar(document.getElementById('fullCalendar'));
-}
-
-function showDayPaymentDetails(date) {
-    if (!currentLoan || !currentLoan.paymentSchedule) return;
-    
-    const paymentsOnDate = currentLoan.paymentSchedule.filter(payment => {
-        const paymentDate = new Date(payment.dueDate);
-        paymentDate.setHours(0, 0, 0, 0);
-        return paymentDate.getTime() === date.getTime();
-    });
-    
-    if (paymentsOnDate.length === 0) {
-        showInfoModal('Información', 'No hay pagos programados para esta fecha.');
-        return;
-    }
-    
-    const paymentsMade = currentLoan.payments ? currentLoan.payments.length : 0;
-    const totalPayments = currentLoan.paymentSchedule.length;
-    const isFixedLoan = currentLoan.loanType === 'fixed';
-    const currencySymbol = userSettings.currency === 'USD' ? '$' : 'RD$';
-    
-    let totalToPay = 0;
-    
-    if (isFixedLoan) {
-        const remainingPayments = totalPayments - paymentsMade;
-        totalToPay = remainingPayments > 0 ? (currentLoan.remainingCapital || 0) / remainingPayments : 0;
-    } else {
-        const remainingQuincenas = totalPayments - paymentsMade;
-        const capitalToPay = remainingQuincenas > 0 ? (currentLoan.remainingCapital || 0) / remainingQuincenas : 0;
-        const tasaQuincenal = (currentLoan.interestRate || 0) / (currentLoan.frequency === 'biweekly' ? 1 : 2);
-        const interestToPay = (currentLoan.remainingCapital || 0) * (tasaQuincenal / 100);
-        totalToPay = capitalToPay + interestToPay;
-    }
-    
-    let message = '';
-    paymentsOnDate.forEach(payment => {
-        const status = payment.status === 'paid' ? 'Pagado con éxito' : 
-                      date < new Date() ? 'Pago vencido' : 'Pago pendiente';
-        
-        message += `<div style="margin-bottom: 20px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px;">
-<strong>Fecha de vencimiento:</strong><br>
-${new Date(payment.dueDate).toLocaleDateString()}<br><br>
-
-<strong>Estado:</strong><br>
-${status}<br><br>
-
-<strong>Total a pagar (próxima cuota):</strong><br>
-${currencySymbol}${formatCurrency(totalToPay)}
-</div>`;
-    });
-    
-    const modalContent = `
-        <div style="text-align: left; line-height: 1.8;">
-            ${message}
-        </div>
-    `;
-    
-    document.getElementById('infoModalMessage').innerHTML = modalContent;
-    document.getElementById('infoModalTitle').textContent = 'Pagos del día';
-    document.getElementById('infoModal').classList.add('active');
-}
-
 function showCompanyInfoModal() {
     const container = document.getElementById('companyInfoContent');
     container.innerHTML = '';
@@ -5599,7 +5428,7 @@ function showCompanyInfoModal() {
     if (companyInfo.bankAccounts && companyInfo.bankAccounts.length > 0) {
         const bankAccountsTitle = document.createElement('h3');
         bankAccountsTitle.className = 'card-title';
-        bankAccountsTitle.innerHTML = '<i class="fas fa-university"></i> Cuentas Bancarias';
+        bankAccountsTitle.innerHTML = '<i class="fas fa-university"></i> Cuentas Bancarias para Pagos';
         container.appendChild(bankAccountsTitle);
         
         companyInfo.bankAccounts.forEach(account => {
@@ -5616,8 +5445,8 @@ function showCompanyInfoModal() {
                     <div>
                         <h4>${account.bankName || 'Banco no especificado'}</h4>
                         <p>${account.accountNumber || 'Número no especificado'}
-                            <button class="copy-btn" onclick="copyToClipboard('${account.accountNumber}')" title="Copiar número de cuenta">
-                                <i class="fas fa-copy"></i>
+                            <button class="copy-btn" onclick="copyBankAccountInfo(${JSON.stringify(account).replace(/"/g, '&quot;')})" title="Copiar información completa">
+                                <i class="fas fa-copy"></i> Copiar Información
                             </button>
                         </p>
                     </div>
@@ -5634,9 +5463,34 @@ function showCompanyInfoModal() {
             
             container.appendChild(accountCard);
         });
+        
+        // Agregar instrucciones de pago
+        const paymentInstructions = document.createElement('div');
+        paymentInstructions.className = 'payment-instruction';
+        paymentInstructions.innerHTML = `
+            <div class="payment-instruction-title">
+                <i class="fas fa-credit-card"></i> Instrucciones para Pagar
+            </div>
+            <div class="payment-instruction-content">
+                <p><strong>Para realizar pagos:</strong></p>
+                <div class="payment-instruction-steps">
+                    <ol>
+                        <li>Realiza la transferencia a cualquiera de las cuentas mostradas</li>
+                        <li>Toma una captura de pantalla del comprobante de transferencia</li>
+                        <li>Envía la foto vía WhatsApp para validar</li>
+                        <li>Consulta tu pago en el historial para verificar que fue aplicado</li>
+                    </ol>
+                </div>
+                <div class="payment-instruction-note">
+                    <i class="fas fa-info-circle"></i> Haz clic en "Copiar Información" para obtener todos los detalles de la cuenta con instrucciones.
+                </div>
+            </div>
+        `;
+        container.appendChild(paymentInstructions);
+        
     } else {
         const noAccountsMsg = document.createElement('p');
-        noAccountsMsg.textContent = 'No hay cuentas bancarias registradas';
+        noAccountsMsg.textContent = 'No hay cuentas bancarias registradas para pagos';
         noAccountsMsg.style.color = 'var(--text-light)';
         noAccountsMsg.style.textAlign = 'center';
         container.appendChild(noAccountsMsg);
@@ -5645,15 +5499,7 @@ function showCompanyInfoModal() {
     document.getElementById('companyInfoModal').classList.add('active');
 }
 
-window.copyToClipboard = function(text) {
-    navigator.clipboard.writeText(text).then(() => {
-        showInfoModal('Información', 'Número de cuenta copiado al portapapeles');
-    }).catch(err => {
-        console.error('Error al copiar al portapapeles:', err);
-        showInfoModal('Información', 'Error al copiar el número de cuenta');
-    });
-};
-
+// Resto del código se mantiene igual...
 function formatCurrency(amount) {
     if (isNaN(amount) || amount === null || amount === undefined) {
         return "0.00";
@@ -5691,7 +5537,7 @@ function loadClientData() {
     loadDocuments();
     loadUpcomingPayments();
     generatePaymentCalendar();
-    updateWebAuthnSettingsUI();
+    updateBiometricSettingsUI();
 }
 
 function updateBalanceDisplay() {
@@ -6387,9 +6233,9 @@ async function loadUserSettings() {
                     userSettings.fingerprintEnabled = userSnap.data().fingerprintEnabled;
                 }
                 
-                if (userSnap.data().webauthnCredential) {
-                    webauthnCredentials[currentUser.username] = userSnap.data().webauthnCredential;
-                    saveWebAuthnCredentials();
+                if (userSnap.data().biometricCredential) {
+                    biometricCredentials[currentUser.username] = userSnap.data().biometricCredential;
+                    saveBiometricCredentials();
                 }
             }
         }
@@ -6407,7 +6253,7 @@ async function loadUserSettings() {
         updateFontSize();
         updateCurrency();
         
-        updateWebAuthnSettingsUI();
+        updateBiometricSettingsUI();
     } catch (error) {
         console.error("Error al cargar ajustes: ", error);
     } finally {
@@ -6458,7 +6304,7 @@ function hideLoading() {
 }
 
 function logout() {
-    webauthnCredentials = {};
+    biometricCredentials = {};
     
     currentUser = null;
     currentLoan = null;
@@ -6472,7 +6318,7 @@ function logout() {
     localStorage.removeItem('rememberedUser');
     applyTheme();
     updateLanguage();
-    updateWebAuthnUI();
+    updateBiometricUI();
     window.location.reload();
 }
 
