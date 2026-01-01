@@ -4539,38 +4539,104 @@ function updateBiometricSettingsUI() {
     }
 }
 
+// **CORRECCIÓN CRÍTICA: Función mejorada para inicializar la verificación biométrica**
+async function initializeBiometricAuth() {
+    console.log("Inicializando autenticación biométrica...");
+    
+    // Inicializar el sistema de autenticación biométrica
+    await biometricAuth.init();
+    
+    // Cargar credenciales almacenadas
+    loadBiometricCredentials();
+    
+    // Verificar compatibilidad y mostrar mensaje apropiado
+    const supportInfo = biometricAuth.getSupportInfo();
+    const deviceInfo = document.getElementById('webauthnDeviceInfo');
+    const webauthnMessage = document.getElementById('webauthnMessage');
+    
+    if (deviceInfo) {
+        if (supportInfo.supported) {
+            deviceInfo.textContent = `Tu dispositivo soporta autenticación biométrica (${supportInfo.description})`;
+            deviceInfo.className = 'webauthn-message webauthn-success';
+        } else {
+            deviceInfo.textContent = 'Tu dispositivo no soporta autenticación biométrica nativa. Usa tu PIN para iniciar sesión.';
+            deviceInfo.className = 'webauthn-message webauthn-warning';
+        }
+    }
+    
+    if (webauthnMessage) {
+        if (supportInfo.supported) {
+            webauthnMessage.textContent = 'Tu dispositivo soporta autenticación biométrica.';
+            webauthnMessage.className = 'webauthn-message webauthn-success';
+            webauthnMessage.style.display = 'block';
+        } else {
+            webauthnMessage.textContent = 'Para usar autenticación biométrica, necesitas un dispositivo compatible.';
+            webauthnMessage.className = 'webauthn-message webauthn-warning';
+            webauthnMessage.style.display = 'block';
+        }
+    }
+    
+    // Actualizar UI de autenticación biométrica
+    updateBiometricUI();
+    
+    console.log("Autenticación biométrica inicializada:", supportInfo);
+}
+
 // Inicialización
 document.addEventListener('DOMContentLoaded', async () => {
     showLoading();
     
-    // Inicializar autenticación biométrica
-    await biometricAuth.init();
+    // **CORRECCIÓN: Inicializar autenticación biométrica al cargar la página**
+    await initializeBiometricAuth();
     
-    loadBiometricCredentials();
+    // Cargar sesión recordada
+    await checkRememberedSession();
     
-    checkRememberedSession();
+    // Configurar event listeners
     setupEventListeners();
+    
+    // Inicializar asistente virtual
     initializeAssistant();
-    updateBiometricUI();
     
     hideLoading();
 });
 
+// **CORRECCIÓN: Función mejorada para verificar sesión recordada**
 async function checkRememberedSession() {
     const rememberedUser = localStorage.getItem('rememberedUser');
     if (rememberedUser) {
         try {
             const userData = JSON.parse(rememberedUser);
-            document.getElementById('loginUsername').value = userData.username;
-            document.getElementById('loginPin').value = userData.pin;
-            document.getElementById('rememberSession').checked = true;
-            document.getElementById('rememberSessionSettings').checked = true;
+            const usernameInput = document.getElementById('loginUsername');
+            const pinInput = document.getElementById('loginPin');
+            const rememberCheckbox = document.getElementById('rememberSession');
+            const rememberSettingsCheckbox = document.getElementById('rememberSessionSettings');
             
-            if (hasBiometricCredential(userData.username) && userSettings.fingerprintEnabled) {
+            if (usernameInput) usernameInput.value = userData.username;
+            if (pinInput) pinInput.value = userData.pin;
+            if (rememberCheckbox) rememberCheckbox.checked = true;
+            if (rememberSettingsCheckbox) rememberSettingsCheckbox.checked = true;
+            
+            // Actualizar configuración de usuario
+            userSettings.rememberSession = true;
+            
+            // **CORRECCIÓN: Verificar si hay credencial biométrica para este usuario**
+            if (hasBiometricCredential(userData.username)) {
+                // **CORRECCIÓN IMPORTANTE: Siempre mostrar el botón de huella cuando hay credencial**
                 updateBiometricUI();
-            } else {
-                updateBiometricUI();
+                
+                // **CORRECCIÓN: Si el usuario tiene huella registrada Y activada, ofrecer opción biométrica**
+                if (userSettings.fingerprintEnabled) {
+                    // Mostrar mensaje informativo
+                    const webauthnMessage = document.getElementById('webauthnMessage');
+                    if (webauthnMessage) {
+                        webauthnMessage.textContent = 'Tienes autenticación biométrica disponible. Puedes usar huella digital o PIN.';
+                        webauthnMessage.className = 'webauthn-message webauthn-success';
+                        webauthnMessage.style.display = 'block';
+                    }
+                }
             }
+            
         } catch (error) {
             console.error("Error al cargar sesión recordada:", error);
             localStorage.removeItem('rememberedUser');
@@ -4579,10 +4645,13 @@ async function checkRememberedSession() {
 }
 
 function setupEventListeners() {
+    // Event listener para el formulario de login
     document.getElementById('loginForm').addEventListener('submit', handleLogin);
     
+    // Event listener para el botón de huella digital
     document.getElementById('fingerprintLoginBtn').addEventListener('click', handleBiometricLogin);
     
+    // Event listener para actualizar UI de huella cuando se escribe el usuario
     document.getElementById('loginUsername').addEventListener('input', () => {
         updateBiometricUI();
     });
