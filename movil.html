@@ -1,0 +1,1645 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ZANARA POS Móvil</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <style>
+    /* RESET Y BASE PARA MÓVIL */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #ecf0f1;
+    }
+
+    /* LAYOUT PRINCIPAL EN HORIZONTAL */
+    .mobile-container {
+      display: flex;
+      height: 100vh;
+      width: 100vw;
+      flex-direction: row;
+    }
+
+    /* PANEL IZQUIERDO - PRODUCTOS */
+    .left-panel {
+      flex: 1.2;
+      background: #1e2a47;
+      border-right: 2px solid #16e086;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    /* PANEL DERECHO - FACTURA */
+    .right-panel {
+      flex: 0.8;
+      background: #16213e;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    /* HEADER COMPACTO PARA MÓVIL */
+    .mobile-header {
+      background: linear-gradient(90deg, #16e086 0%, #15a086 100%);
+      padding: 12px 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      min-height: 60px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+      flex-shrink: 0;
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mobile-logo {
+      width: 36px;
+      height: 36px;
+      background: white;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mobile-logo i {
+      color: #16e086;
+      font-size: 20px;
+    }
+
+    .header-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: white;
+    }
+
+    .user-info-compact {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .user-avatar-small {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid white;
+      object-fit: cover;
+    }
+
+    /* BARRA DE BÚSQUEDA MEJORADA */
+    .mobile-search-container {
+      padding: 12px;
+      background: rgba(255,255,255,0.05);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      flex-shrink: 0;
+    }
+
+    .search-with-scanner {
+      display: flex;
+      gap: 8px;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 12px 15px;
+      border: none;
+      border-radius: 25px;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      font-size: 14px;
+    }
+
+    .scanner-button {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #16e086, #15a086);
+      border: none;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    /* LISTA DE PRODUCTOS OPTIMIZADA */
+    .products-scroll-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px;
+      align-content: start;
+    }
+
+    .mobile-product-card {
+      background: rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: all 0.3s;
+      border: 1px solid transparent;
+      min-height: 160px;
+    }
+
+    .mobile-product-card:hover {
+      background: rgba(255,255,255,0.12);
+      border-color: #16e086;
+      transform: translateY(-3px);
+    }
+
+    .product-image {
+      width: 60px;
+      height: 60px;
+      object-fit: contain;
+      margin-bottom: 8px;
+    }
+
+    .product-name {
+      font-size: 12px;
+      text-align: center;
+      margin-bottom: 5px;
+      line-height: 1.2;
+      height: 30px;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .product-price {
+      color: #16e086;
+      font-weight: bold;
+      font-size: 14px;
+      margin-bottom: 3px;
+    }
+
+    .product-tax-badge {
+      font-size: 9px;
+      background: rgba(22, 224, 134, 0.2);
+      color: #16e086;
+      padding: 2px 6px;
+      border-radius: 10px;
+      margin: 2px 0;
+    }
+
+    /* FACTURA MÓVIL */
+    .invoice-header {
+      padding: 15px;
+      background: rgba(255,255,255,0.05);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      flex-shrink: 0;
+    }
+
+    .invoice-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #16e086;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .invoice-scroll-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+    }
+
+    .invoice-item-mobile {
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 3px solid #16e086;
+    }
+
+    .item-details {
+      flex: 1;
+    }
+
+    .item-name {
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 3px;
+    }
+
+    .item-quantity-price {
+      font-size: 11px;
+      color: #95a5a6;
+    }
+
+    .item-total {
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .remove-item-btn {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+
+    /* BARRA INFERIOR DE ACCIONES */
+    .mobile-actions-bar {
+      background: #1e2a47;
+      padding: 12px 15px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      border-top: 2px solid #16e086;
+      flex-shrink: 0;
+    }
+
+    .action-button {
+      flex: 1;
+      min-width: 70px;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-pay {
+      background: linear-gradient(135deg, #27ae60, #2ecc71);
+    }
+
+    .btn-cash {
+      background: linear-gradient(135deg, #2980b9, #3498db);
+    }
+
+    .btn-card {
+      background: linear-gradient(135deg, #8e44ad, #9b59b6);
+    }
+
+    .btn-discount {
+      background: linear-gradient(135deg, #e67e22, #d35400);
+    }
+
+    .action-button i {
+      font-size: 16px;
+    }
+
+    .action-button:active {
+      transform: scale(0.95);
+    }
+
+    /* BARRA DE TOTALES FLOTANTE */
+    .totals-floating-bar {
+      position: absolute;
+      bottom: 80px;
+      right: 15px;
+      background: rgba(22, 224, 134, 0.95);
+      padding: 12px 18px;
+      border-radius: 15px;
+      color: white;
+      font-weight: bold;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      z-index: 100;
+    }
+
+    /* MODALES OPTIMIZADOS PARA MÓVIL */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content-mobile {
+      background: #1e2a47;
+      width: 90%;
+      max-width: 400px;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+    }
+
+    .modal-header {
+      background: #16e086;
+      padding: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: white;
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .modal-body {
+      padding: 20px;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+
+    /* MENÚ DE NAVEGACIÓN INFERIOR */
+    .mobile-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: #1a1a2e;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #95a5a6;
+      text-decoration: none;
+      font-size: 11px;
+      transition: color 0.3s;
+      padding: 5px;
+    }
+
+    .nav-item i {
+      font-size: 18px;
+      margin-bottom: 3px;
+    }
+
+    .nav-item.active {
+      color: #16e086;
+    }
+
+    /* ESTILOS PARA PANTALLA HORIZONTAL */
+    @media (orientation: landscape) {
+      .mobile-container {
+        flex-direction: row;
+      }
+      
+      .products-scroll-area {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      }
+    }
+
+    /* ESTILOS PARA TABLET */
+    @media (min-width: 768px) and (max-width: 1024px) {
+      .mobile-container {
+        flex-direction: row;
+      }
+      
+      .products-scroll-area {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      }
+      
+      .mobile-product-card {
+        min-height: 170px;
+      }
+    }
+
+    /* SCROLLBAR PERSONALIZADO */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.05);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #16e086;
+      border-radius: 3px;
+    }
+
+    /* ESTADOS DE LOADING */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(26, 26, 46, 0.9);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(255,255,255,0.1);
+      border-radius: 50%;
+      border-top-color: #16e086;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* BADGES Y ETIQUETAS */
+    .badge {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: #e74c3c;
+      color: white;
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-weight: bold;
+    }
+
+    .expired-badge {
+      background: #e74c3c;
+    }
+
+    .near-expiry-badge {
+      background: #f39c12;
+    }
+
+    /* NOTIFICACIONES TOAST */
+    .toast {
+      position: fixed;
+      bottom: 100px;
+      right: 20px;
+      background: rgba(22, 224, 134, 0.95);
+      color: white;
+      padding: 12px 18px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      display: none;
+      z-index: 1001;
+      animation: slideInRight 0.3s ease;
+    }
+
+    @keyframes slideInRight {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* ICONOS DE ACCIÓN RÁPIDA */
+    .quick-actions {
+      position: fixed;
+      top: 70px;
+      right: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 99;
+    }
+
+    .quick-action-btn {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: rgba(22, 224, 134, 0.9);
+      border: none;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+    }
+  </style>
+</head>
+<body>
+  <!-- OVERLAY DE LOADING -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="spinner"></div>
+    <div style="margin-top: 15px; color: #16e086;">Cargando...</div>
+  </div>
+
+  <!-- TOAST DE NOTIFICACIÓN -->
+  <div id="toastNotification" class="toast">
+    <i class="fas fa-check-circle"></i> <span id="toastMessage">Operación exitosa</span>
+  </div>
+
+  <!-- CONTENEDOR PRINCIPAL -->
+  <div class="mobile-container">
+    
+    <!-- PANEL IZQUIERDO - PRODUCTOS -->
+    <div class="left-panel">
+      <!-- HEADER -->
+      <div class="mobile-header">
+        <div class="logo-section">
+          <div class="mobile-logo">
+            <i class="fas fa-shopping-cart"></i>
+          </div>
+          <div>
+            <div class="header-title">ZANARA POS</div>
+            <div style="font-size: 11px; opacity: 0.8;" id="userGreeting">Usuario</div>
+          </div>
+        </div>
+        
+        <div class="user-info-compact">
+          <img id="userAvatarMobile" class="user-avatar-small" src="" alt="Avatar">
+          <div>
+            <div style="font-size: 12px; font-weight: bold;" id="shiftInfoMobile">Turno Activo</div>
+            <div style="font-size: 10px; opacity: 0.7;" id="timerMobile">--:--:--</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BARRA DE BÚSQUEDA -->
+      <div class="mobile-search-container">
+        <div class="search-with-scanner">
+          <input type="text" id="mobileSearchInput" class="search-input" placeholder="🔍 Buscar producto o EAN">
+          <button id="mobileScannerBtn" class="scanner-button" title="Escanear código">
+            <i class="fas fa-barcode"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- LISTA DE PRODUCTOS -->
+      <div id="mobileProductsList" class="products-scroll-area">
+        <!-- Los productos se cargarán aquí dinámicamente -->
+      </div>
+    </div>
+
+    <!-- PANEL DERECHO - FACTURA -->
+    <div class="right-panel">
+      <!-- HEADER DE FACTURA -->
+      <div class="invoice-header">
+        <div class="invoice-title">
+          <i class="fas fa-receipt"></i> Factura Actual
+          <span id="itemCountBadge" style="background: #e74c3c; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px;">0</span>
+        </div>
+        <div style="font-size: 12px; margin-top: 5px; opacity: 0.8;">
+          <i class="fas fa-user"></i> <span id="invoiceUserMobile">Usuario</span>
+        </div>
+      </div>
+
+      <!-- ITEMS DE LA FACTURA -->
+      <div id="mobileInvoiceItems" class="invoice-scroll-area">
+        <!-- Los items de la factura aparecerán aquí -->
+        <div style="text-align: center; padding: 40px 20px; color: #95a5a6;">
+          <i class="fas fa-cart-plus" style="font-size: 40px; margin-bottom: 15px; opacity: 0.5;"></i>
+          <p>No hay productos en la factura</p>
+          <p style="font-size: 12px; margin-top: 10px;">Agrega productos desde el panel izquierdo</p>
+        </div>
+      </div>
+
+      <!-- BARRA DE TOTALES -->
+      <div style="background: rgba(22, 224, 134, 0.1); padding: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 12px; opacity: 0.8;">Total Factura</div>
+            <div id="mobileTotalDisplay" style="font-size: 24px; font-weight: bold; color: #16e086;">$0.00</div>
+          </div>
+          <div id="currencyTotalsMobile" style="text-align: right; font-size: 11px;">
+            <div>USD: <span id="usdTotalMobile">$0.00</span></div>
+            <div>EUR: <span id="eurTotalMobile">€0.00</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BARRA DE ACCIONES INFERIOR -->
+  <div class="mobile-actions-bar">
+    <button class="action-button btn-discount" id="mobileDiscountBtn">
+      <i class="fas fa-percent"></i>
+      <span>Descuento</span>
+    </button>
+    <button class="action-button btn-cash" id="mobileCashBtn">
+      <i class="fas fa-money-bill"></i>
+      <span>Efectivo</span>
+    </button>
+    <button class="action-button btn-card" id="mobileCardBtn">
+      <i class="fas fa-credit-card"></i>
+      <span>Tarjeta</span>
+    </button>
+    <button class="action-button btn-pay" id="mobilePayBtn">
+      <i class="fas fa-check-circle"></i>
+      <span>Facturar</span>
+    </button>
+  </div>
+
+  <!-- NAVEGACIÓN INFERIOR -->
+  <nav class="mobile-nav">
+    <a href="#" class="nav-item active" id="navHome">
+      <i class="fas fa-home"></i>
+      <span>Inicio</span>
+    </a>
+    <a href="inventario-home-index.html" class="nav-item" id="navInventory">
+      <i class="fas fa-box"></i>
+      <span>Inventario</span>
+    </a>
+    <a href="venta-del-dia.html" class="nav-item" id="navReports">
+      <i class="fas fa-chart-line"></i>
+      <span>Reportes</span>
+    </a>
+    <a href="facturas-del-dia.html" class="nav-item" id="navInvoices">
+      <i class="fas fa-receipt"></i>
+      <span>Facturas</span>
+    </a>
+    <a href="#" class="nav-item" id="navUser">
+      <i class="fas fa-user"></i>
+      <span>Usuario</span>
+    </a>
+  </nav>
+
+  <!-- MODAL DE ESCÁNER -->
+  <div id="scannerModalMobile" class="modal-overlay">
+    <div class="modal-content-mobile">
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="fas fa-barcode"></i> Escáner de Códigos
+        </div>
+        <button class="close-modal" id="closeScannerModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="scannerContainerMobile" style="width: 100%; height: 300px; background: black; border-radius: 10px; overflow: hidden;"></div>
+        <div style="text-align: center; margin-top: 20px; color: #95a5a6; font-size: 13px;">
+          <p>Coloca el código de barras dentro del área de escaneo</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE PAGO EN EFECTIVO -->
+  <div id="cashModalMobile" class="modal-overlay">
+    <div class="modal-content-mobile">
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="fas fa-money-bill-wave"></i> Pago en Efectivo
+        </div>
+        <button class="close-modal" id="closeCashModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <div style="font-size: 14px; opacity: 0.8;">Total a Pagar</div>
+          <div id="cashTotalAmount" style="font-size: 36px; font-weight: bold; color: #16e086;">$0.00</div>
+        </div>
+        
+        <div style="margin: 20px 0;">
+          <label style="display: block; margin-bottom: 8px; font-size: 14px;">Monto Recibido</label>
+          <input type="text" id="cashReceivedInput" style="width: 100%; padding: 15px; font-size: 18px; text-align: center; border: 2px solid #16e086; border-radius: 10px; background: rgba(255,255,255,0.1); color: white;" placeholder="0.00" autocomplete="off">
+        </div>
+        
+        <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin: 20px 0;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <span>Cambio:</span>
+            <span id="cashChangeAmount" style="font-weight: bold; color: #16e086;">$0.00</span>
+          </div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;">
+          <button class="cash-num-btn" data-value="1">1</button>
+          <button class="cash-num-btn" data-value="2">2</button>
+          <button class="cash-num-btn" data-value="3">3</button>
+          <button class="cash-num-btn" data-value="4">4</button>
+          <button class="cash-num-btn" data-value="5">5</button>
+          <button class="cash-num-btn" data-value="6">6</button>
+          <button class="cash-num-btn" data-value="7">7</button>
+          <button class="cash-num-btn" data-value="8">8</button>
+          <button class="cash-num-btn" data-value="9">9</button>
+          <button class="cash-num-btn" data-value=".">.</button>
+          <button class="cash-num-btn" data-value="0">0</button>
+          <button id="cashBackspaceBtn" style="background: #e74c3c;">⌫</button>
+        </div>
+        
+        <div style="display: flex; gap: 10px;">
+          <button id="cancelCashBtn" style="flex: 1; padding: 15px; background: #e74c3c; color: white; border: none; border-radius: 10px; font-weight: bold;">Cancelar</button>
+          <button id="confirmCashBtn" style="flex: 1; padding: 15px; background: #16e086; color: white; border: none; border-radius: 10px; font-weight: bold;">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE CONFIRMACIÓN DE FACTURA -->
+  <div id="invoiceModalMobile" class="modal-overlay">
+    <div class="modal-content-mobile">
+      <div class="modal-header" style="background: #27ae60;">
+        <div class="modal-title">
+          <i class="fas fa-check-circle"></i> Factura Generada
+        </div>
+        <button class="close-modal" id="closeInvoiceModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <i class="fas fa-check-circle" style="font-size: 60px; color: #27ae60; margin-bottom: 15px;"></i>
+          <h3 style="margin-bottom: 10px;">¡Facturación Exitosa!</h3>
+          <p style="color: #95a5a6; margin-bottom: 5px;">ID: <span id="invoiceIdDisplay">Rtm-0001</span></p>
+          <p style="color: #95a5a6;">Fecha: <span id="invoiceDateDisplay">--/--/----</span></p>
+        </div>
+        
+        <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin: 20px 0;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <span>Total Factura:</span>
+            <span id="invoiceModalTotal" style="font-weight: bold; color: #16e086;">$0.00</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <span>Método de Pago:</span>
+            <span id="invoicePaymentMethod" style="font-weight: bold;">Efectivo</span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span>Cambio:</span>
+            <span id="invoiceModalChange" style="font-weight: bold;">$0.00</span>
+          </div>
+        </div>
+        
+        <div id="invoicePrintContentMobile" style="display: none;"></div>
+        
+        <div style="display: flex; gap: 10px;">
+          <button id="printInvoiceBtn" style="flex: 1; padding: 15px; background: #3498db; color: white; border: none; border-radius: 10px; font-weight: bold;">
+            <i class="fas fa-print"></i> Imprimir
+          </button>
+          <button id="closeInvoiceBtn" style="flex: 1; padding: 15px; background: #16e086; color: white; border: none; border-radius: 10px; font-weight: bold;">
+            <i class="fas fa-check"></i> Aceptar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE DESCUENTO -->
+  <div id="discountModalMobile" class="modal-overlay">
+    <div class="modal-content-mobile">
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="fas fa-tag"></i> Aplicar Descuento
+        </div>
+        <button class="close-modal" id="closeDiscountModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <div style="font-size: 14px; opacity: 0.8;">Total Actual</div>
+          <div style="font-size: 32px; font-weight: bold; color: #16e086;" id="discountCurrentTotal">$0.00</div>
+        </div>
+        
+        <div style="margin: 20px 0;">
+          <label style="display: block; margin-bottom: 8px; font-size: 14px;">Porcentaje de Descuento (%)</label>
+          <input type="number" id="discountPercentageInput" min="0" max="100" style="width: 100%; padding: 15px; font-size: 18px; text-align: center; border: 2px solid #16e086; border-radius: 10px; background: rgba(255,255,255,0.1); color: white;" placeholder="0" autocomplete="off">
+        </div>
+        
+        <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin: 20px 0;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <span>Descuento:</span>
+            <span id="discountAmountPreview" style="font-weight: bold; color: #e74c3c;">$0.00</span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span>Nuevo Total:</span>
+            <span id="discountedTotalPreview" style="font-weight: bold; color: #16e086;">$0.00</span>
+          </div>
+        </div>
+        
+        <div style="display: flex; gap: 10px;">
+          <button id="cancelDiscountBtn" style="flex: 1; padding: 15px; background: #e74c3c; color: white; border: none; border-radius: 10px; font-weight: bold;">Cancelar</button>
+          <button id="applyDiscountBtn" style="flex: 1; padding: 15px; background: #16e086; color: white; border: none; border-radius: 10px; font-weight: bold;">Aplicar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT PRINCIPAL -->
+  <script type="module">
+    // Importaciones de Firebase (las mismas que en el código original)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      query,
+      orderBy,
+      limit,
+      getDocs,
+      doc,
+      getDoc,
+      updateDoc,
+      addDoc,
+      deleteDoc,
+      Timestamp,
+      where,
+      setDoc,
+      arrayUnion,
+      onSnapshot
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+    import { 
+      getAuth, 
+      onAuthStateChanged, 
+      signInWithEmailAndPassword,
+      signOut 
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+    import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-storage.js";
+
+    // Configuración de Firebase (la misma del código original)
+    const firebaseConfig = {
+      apiKey: "AIzaSyAMTWJr3mISmNiP-e_KjCO9BdBPi7Uuug4",
+      authDomain: "formulario-2-8929a.firebaseapp.com",
+      databaseURL: "https://formulario-2-8929a-default-rtdb.firebaseio.com",
+      projectId: "formulario-2-8929a",
+      storageBucket: "formulario-2-8929a.appspot.com",
+      messagingSenderId: "136908102526",
+      appId: "1:136908102526:web:d0a3bc1e3cb91a3fcab12f",
+      measurementId: "G-HJNZXRENE9"
+    };
+
+    // Inicialización de Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const storage = getStorage(app);
+
+    // Variables globales
+    let currentCollaborator = null;
+    let invoice = [];
+    let totalPrice = 0;
+    let discountPercentage = 0;
+    let discountedTotal = 0;
+    let html5QrCode = null;
+    let currentShift = null;
+    let exchangeRates = { usd: 56.50, eur: 61.20 };
+    let taxConfig = { itbis: 18, iva: 0, activo: false };
+    let productsMap = new Map();
+
+    // Elementos del DOM
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const toastNotification = document.getElementById('toastNotification');
+    const toastMessage = document.getElementById('toastMessage');
+    const mobileSearchInput = document.getElementById('mobileSearchInput');
+    const mobileScannerBtn = document.getElementById('mobileScannerBtn');
+    const mobileProductsList = document.getElementById('mobileProductsList');
+    const mobileInvoiceItems = document.getElementById('mobileInvoiceItems');
+    const mobileTotalDisplay = document.getElementById('mobileTotalDisplay');
+    const itemCountBadge = document.getElementById('itemCountBadge');
+    const userGreeting = document.getElementById('userGreeting');
+    const invoiceUserMobile = document.getElementById('invoiceUserMobile');
+    const userAvatarMobile = document.getElementById('userAvatarMobile');
+    const shiftInfoMobile = document.getElementById('shiftInfoMobile');
+    const timerMobile = document.getElementById('timerMobile');
+    const usdTotalMobile = document.getElementById('usdTotalMobile');
+    const eurTotalMobile = document.getElementById('eurTotalMobile');
+    const mobileDiscountBtn = document.getElementById('mobileDiscountBtn');
+    const mobileCashBtn = document.getElementById('mobileCashBtn');
+    const mobileCardBtn = document.getElementById('mobileCardBtn');
+    const mobilePayBtn = document.getElementById('mobilePayBtn');
+    const scannerModalMobile = document.getElementById('scannerModalMobile');
+    const closeScannerModal = document.getElementById('closeScannerModal');
+    const scannerContainerMobile = document.getElementById('scannerContainerMobile');
+    const cashModalMobile = document.getElementById('cashModalMobile');
+    const closeCashModal = document.getElementById('closeCashModal');
+    const cashTotalAmount = document.getElementById('cashTotalAmount');
+    const cashReceivedInput = document.getElementById('cashReceivedInput');
+    const cashChangeAmount = document.getElementById('cashChangeAmount');
+    const cashBackspaceBtn = document.getElementById('cashBackspaceBtn');
+    const cancelCashBtn = document.getElementById('cancelCashBtn');
+    const confirmCashBtn = document.getElementById('confirmCashBtn');
+    const invoiceModalMobile = document.getElementById('invoiceModalMobile');
+    const closeInvoiceModal = document.getElementById('closeInvoiceModal');
+    const invoiceIdDisplay = document.getElementById('invoiceIdDisplay');
+    const invoiceDateDisplay = document.getElementById('invoiceDateDisplay');
+    const invoiceModalTotal = document.getElementById('invoiceModalTotal');
+    const invoicePaymentMethod = document.getElementById('invoicePaymentMethod');
+    const invoiceModalChange = document.getElementById('invoiceModalChange');
+    const printInvoiceBtn = document.getElementById('printInvoiceBtn');
+    const closeInvoiceBtn = document.getElementById('closeInvoiceBtn');
+    const discountModalMobile = document.getElementById('discountModalMobile');
+    const closeDiscountModal = document.getElementById('closeDiscountModal');
+    const discountCurrentTotal = document.getElementById('discountCurrentTotal');
+    const discountPercentageInput = document.getElementById('discountPercentageInput');
+    const discountAmountPreview = document.getElementById('discountAmountPreview');
+    const discountedTotalPreview = document.getElementById('discountedTotalPreview');
+    const cancelDiscountBtn = document.getElementById('cancelDiscountBtn');
+    const applyDiscountBtn = document.getElementById('applyDiscountBtn');
+
+    // Funciones de utilidad
+    function showLoading() {
+      loadingOverlay.style.display = 'flex';
+    }
+
+    function hideLoading() {
+      loadingOverlay.style.display = 'none';
+    }
+
+    function showToast(message, type = 'success') {
+      toastMessage.textContent = message;
+      toastNotification.style.display = 'block';
+      toastNotification.style.background = type === 'error' ? 'rgba(231, 76, 60, 0.95)' : 
+                                         type === 'warning' ? 'rgba(243, 156, 18, 0.95)' : 
+                                         'rgba(22, 224, 134, 0.95)';
+      
+      setTimeout(() => {
+        toastNotification.style.display = 'none';
+      }, 3000);
+    }
+
+    function formatNumberWithCommas(number) {
+      if (typeof number === 'string') {
+        number = number.replace(/,/g, '');
+      }
+      const num = parseFloat(number);
+      if (isNaN(num)) return '0';
+      if (num % 1 === 0) {
+        return num.toLocaleString('en-US');
+      } else {
+        return num.toLocaleString('en-US', {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 2
+        });
+      }
+    }
+
+    // Función para cargar productos del colaborador
+    async function loadCollaboratorProducts(searchTerm = '') {
+      if (!currentCollaborator) return;
+      
+      try {
+        showLoading();
+        
+        const businessesRef = collection(db, "businesses");
+        const businessesSnapshot = await getDocs(businessesRef);
+        
+        productsMap.clear();
+        mobileProductsList.innerHTML = '';
+        
+        if (businessesSnapshot.empty) {
+          mobileProductsList.innerHTML = '<div style="text-align: center; padding: 40px; color: #95a5a6;">No hay productos disponibles</div>';
+          hideLoading();
+          return;
+        }
+        
+        let productsCount = 0;
+        
+        for (const businessDoc of businessesSnapshot.docs) {
+          const productsRef = collection(db, "businesses", businessDoc.id, "products");
+          let productsQuery = query(productsRef, where("userId", "==", currentCollaborator.userId));
+          
+          if (searchTerm) {
+            const searchTermLower = searchTerm.toLowerCase();
+            const productsSnapshot = await getDocs(productsQuery);
+            
+            for (const doc of productsSnapshot.docs) {
+              const product = doc.data();
+              const productNameLower = product.name.toLowerCase();
+              const productEAN = product.eanUpcCode || '';
+              
+              if ((productNameLower.includes(searchTermLower) || productEAN.includes(searchTerm)) && 
+                  product.userId === currentCollaborator.userId) {
+                const productKey = `${businessDoc.id}-${doc.id}`;
+                
+                if (!productsMap.has(productKey)) {
+                  productsMap.set(productKey, { product, businessDoc, doc });
+                  productsCount++;
+                }
+              }
+            }
+            continue;
+          }
+          
+          const querySnapshot = await getDocs(productsQuery);
+          
+          for (const doc of querySnapshot.docs) {
+            const product = doc.data();
+            const productKey = `${businessDoc.id}-${doc.id}`;
+            
+            if (!productsMap.has(productKey)) {
+              productsMap.set(productKey, { product, businessDoc, doc });
+              productsCount++;
+            }
+          }
+        }
+        
+        // Renderizar productos
+        for (const [key, { product, businessDoc, doc }] of productsMap) {
+          const productCard = document.createElement('div');
+          productCard.className = 'mobile-product-card';
+          productCard.setAttribute('data-product-id', doc.id);
+          productCard.setAttribute('data-business-name', businessDoc.id);
+          
+          const productImage = product.imageUrl || 'https://via.placeholder.com/60x60?text=Producto';
+          
+          let taxBadge = '';
+          if (taxConfig.activo && (product.applyItbis || product.applyIva)) {
+            taxBadge = `<div class="product-tax-badge">`;
+            if (product.applyItbis) taxBadge += 'ITBIS';
+            if (product.applyItbis && product.applyIva) taxBadge += '+';
+            if (product.applyIva) taxBadge += 'IVA';
+            taxBadge += `</div>`;
+          }
+          
+          productCard.innerHTML = `
+            ${product.quantity === 0 ? '<div class="badge expired-badge">AGOTADO</div>' : ''}
+            <img src="${productImage}" alt="${product.name}" class="product-image" onerror="this.src='https://via.placeholder.com/60x60?text=Producto'">
+            <div class="product-name">${product.name}</div>
+            ${taxBadge}
+            <div class="product-price">$${formatNumberWithCommas(product.pricePerUnit)}</div>
+            ${product.eanUpcCode ? `<div style="font-size: 9px; color: #95a5a6; margin-top: 3px;">${product.eanUpcCode}</div>` : ''}
+          `;
+          
+          if (product.quantity > 0) {
+            productCard.addEventListener('click', () => addProductToInvoice(product, businessDoc.id, doc.id));
+          }
+          
+          mobileProductsList.appendChild(productCard);
+        }
+        
+        hideLoading();
+        
+        if (productsCount === 0) {
+          mobileProductsList.innerHTML = '<div style="text-align: center; padding: 40px; color: #95a5a6;">No se encontraron productos</div>';
+        }
+        
+      } catch (error) {
+        console.error("Error al cargar productos:", error);
+        hideLoading();
+        showToast('Error al cargar productos', 'error');
+      }
+    }
+
+    // Función para agregar producto a la factura
+    function addProductToInvoice(product, businessName, productId) {
+      if (product.quantity === 0) {
+        showToast('Producto agotado', 'warning');
+        return;
+      }
+      
+      const existingProduct = invoice.find(item => item.productId === productId);
+      
+      if (existingProduct) {
+        if (existingProduct.quantity >= product.quantity) {
+          showToast('No hay suficiente stock', 'warning');
+          return;
+        }
+        existingProduct.quantity += 1;
+      } else {
+        invoice.push({ 
+          ...product, 
+          businessName, 
+          productId, 
+          quantity: 1 
+        });
+      }
+      
+      updateInvoiceDisplay();
+      showToast(`${product.name} agregado`, 'success');
+    }
+
+    // Función para actualizar la visualización de la factura
+    function updateInvoiceDisplay() {
+      mobileInvoiceItems.innerHTML = '';
+      totalPrice = 0;
+      
+      if (invoice.length === 0) {
+        mobileInvoiceItems.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px; color: #95a5a6;">
+            <i class="fas fa-cart-plus" style="font-size: 40px; margin-bottom: 15px; opacity: 0.5;"></i>
+            <p>No hay productos en la factura</p>
+            <p style="font-size: 12px; margin-top: 10px;">Agrega productos desde el panel izquierdo</p>
+          </div>
+        `;
+        mobileTotalDisplay.textContent = '$0.00';
+        itemCountBadge.textContent = '0';
+        return;
+      }
+      
+      invoice.forEach((item, index) => {
+        const priceWithTaxes = applyTaxesToProduct(item.pricePerUnit, item);
+        const totalItemPrice = priceWithTaxes * item.quantity;
+        totalPrice += totalItemPrice;
+        
+        const itemElement = document.createElement('div');
+        itemElement.className = 'invoice-item-mobile';
+        itemElement.innerHTML = `
+          <div class="item-details">
+            <div class="item-name">${item.name}</div>
+            <div class="item-quantity-price">
+              ${item.quantity} x $${formatNumberWithCommas(item.pricePerUnit)}
+              ${getTaxInfoForProduct(item)}
+            </div>
+          </div>
+          <div class="item-total">$${formatNumberWithCommas(totalItemPrice)}</div>
+          <button class="remove-item-btn" data-index="${index}">
+            <i class="fas fa-times"></i>
+          </button>
+        `;
+        
+        mobileInvoiceItems.appendChild(itemElement);
+      });
+      
+      discountedTotal = discountPercentage > 0 ? totalPrice - (totalPrice * discountPercentage / 100) : totalPrice;
+      
+      mobileTotalDisplay.textContent = `$${formatNumberWithCommas(discountedTotal)}`;
+      itemCountBadge.textContent = invoice.length.toString();
+      
+      updateCurrencyTotals();
+      
+      // Agregar event listeners a los botones de eliminar
+      document.querySelectorAll('.remove-item-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const index = parseInt(e.currentTarget.getAttribute('data-index'));
+          removeItemFromInvoice(index);
+        });
+      });
+    }
+
+    // Función para eliminar item de la factura
+    function removeItemFromInvoice(index) {
+      if (index >= 0 && index < invoice.length) {
+        invoice.splice(index, 1);
+        updateInvoiceDisplay();
+        showToast('Producto eliminado', 'success');
+      }
+    }
+
+    // Función para aplicar impuestos
+    function applyTaxesToProduct(price, productData) {
+      let finalPrice = price;
+      
+      if (taxConfig.activo) {
+        if (productData.applyItbis) {
+          finalPrice = finalPrice + (finalPrice * (taxConfig.itbis / 100));
+        }
+        if (productData.applyIva) {
+          finalPrice = finalPrice + (finalPrice * (taxConfig.iva / 100));
+        }
+      }
+      
+      return finalPrice;
+    }
+
+    function getTaxInfoForProduct(productData) {
+      let taxInfo = '';
+      
+      if (taxConfig.activo) {
+        const basePrice = productData.pricePerUnit;
+        const itbisAmount = productData.applyItbis ? basePrice * (taxConfig.itbis / 100) : 0;
+        const ivaAmount = productData.applyIva ? basePrice * (taxConfig.iva / 100) : 0;
+        
+        if (productData.applyItbis || productData.applyIva) {
+          taxInfo = ' (';
+          if (productData.applyItbis) taxInfo += `+ITBIS`;
+          if (productData.applyItbis && productData.applyIva) taxInfo += '/';
+          if (productData.applyIva) taxInfo += `+IVA`;
+          taxInfo += ')';
+        }
+      }
+      
+      return taxInfo;
+    }
+
+    // Función para actualizar totales en otras monedas
+    function updateCurrencyTotals() {
+      if (!exchangeRates) return;
+      
+      const usdAmount = (discountedTotal / exchangeRates.usd).toFixed(2);
+      const eurAmount = (discountedTotal / exchangeRates.eur).toFixed(2);
+      
+      usdTotalMobile.textContent = `$${formatNumberWithCommas(usdAmount)}`;
+      eurTotalMobile.textContent = `€${formatNumberWithCommas(eurAmount)}`;
+    }
+
+    // Función para inicializar el escáner
+    function initializeScanner() {
+      try {
+        html5QrCode = new Html5Qrcode("scannerContainerMobile");
+        console.log("✅ Escáner inicializado");
+      } catch (error) {
+        console.error("❌ Error al inicializar escáner:", error);
+        showToast('Error al inicializar escáner', 'error');
+      }
+    }
+
+    // Función para abrir modal de escáner
+    async function openScannerModal() {
+      scannerModalMobile.style.display = 'flex';
+      
+      if (!html5QrCode) {
+        initializeScanner();
+      }
+      
+      setTimeout(async () => {
+        try {
+          await html5QrCode.start(
+            { facingMode: "environment" },
+            {
+              fps: 30,
+              qrbox: { width: 250, height: 250 },
+              aspectRatio: 1.0
+            },
+            (decodedText) => {
+              console.log("Código escaneado:", decodedText);
+              html5QrCode.stop();
+              closeScannerModal.click();
+              
+              mobileSearchInput.value = decodedText;
+              loadCollaboratorProducts(decodedText);
+              showToast(`Código escaneado: ${decodedText}`);
+            },
+            (error) => {
+              console.warn("Error de escaneo:", error);
+            }
+          );
+        } catch (error) {
+          console.error("Error al iniciar escáner:", error);
+          showToast('Error al acceder a la cámara', 'error');
+        }
+      }, 300);
+    }
+
+    // Función para procesar pago en efectivo
+    function openCashModal() {
+      if (invoice.length === 0) {
+        showToast('No hay productos en la factura', 'warning');
+        return;
+      }
+      
+      cashTotalAmount.textContent = `$${formatNumberWithCommas(discountedTotal)}`;
+      cashReceivedInput.value = '';
+      cashChangeAmount.textContent = '$0.00';
+      cashModalMobile.style.display = 'flex';
+      
+      setTimeout(() => {
+        cashReceivedInput.focus();
+      }, 100);
+    }
+
+    // Función para calcular cambio
+    function calculateChange() {
+      const received = parseFloat(cashReceivedInput.value.replace(/,/g, '')) || 0;
+      const change = received - discountedTotal;
+      
+      cashChangeAmount.textContent = `$${formatNumberWithCommas(change)}`;
+      cashChangeAmount.style.color = change >= 0 ? '#16e086' : '#e74c3c';
+    }
+
+    // Función para confirmar pago en efectivo
+    async function confirmCashPayment() {
+      const received = parseFloat(cashReceivedInput.value.replace(/,/g, '')) || 0;
+      
+      if (received <= 0) {
+        showToast('Ingrese un monto válido', 'warning');
+        return;
+      }
+      
+      if (received < discountedTotal) {
+        showToast('Monto insuficiente', 'warning');
+        return;
+      }
+      
+      showLoading();
+      
+      try {
+        // Aquí iría la lógica para guardar la factura en Firebase
+        // Similar a la función saveInvoiceToFirebase del código original
+        
+        const invoiceId = generateInvoiceId();
+        const change = received - discountedTotal;
+        
+        // Mostrar modal de confirmación
+        invoiceIdDisplay.textContent = invoiceId;
+        invoiceDateDisplay.textContent = new Date().toLocaleDateString();
+        invoiceModalTotal.textContent = `$${formatNumberWithCommas(discountedTotal)}`;
+        invoicePaymentMethod.textContent = 'Efectivo';
+        invoiceModalChange.textContent = `$${formatNumberWithCommas(change)}`;
+        
+        cashModalMobile.style.display = 'none';
+        invoiceModalMobile.style.display = 'flex';
+        
+        // Limpiar factura
+        invoice = [];
+        discountPercentage = 0;
+        updateInvoiceDisplay();
+        
+        showToast('Pago procesado exitosamente', 'success');
+        
+      } catch (error) {
+        console.error("Error al procesar pago:", error);
+        showToast('Error al procesar pago', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Función para generar ID de factura
+    function generateInvoiceId() {
+      const randomNumber = Math.floor(1000 + Math.random() * 9000);
+      return `Rtm-${randomNumber}`;
+    }
+
+    // Función para abrir modal de descuento
+    function openDiscountModal() {
+      if (invoice.length === 0) {
+        showToast('No hay productos en la factura', 'warning');
+        return;
+      }
+      
+      discountCurrentTotal.textContent = `$${formatNumberWithCommas(totalPrice)}`;
+      discountPercentageInput.value = discountPercentage;
+      updateDiscountPreview();
+      discountModalMobile.style.display = 'flex';
+    }
+
+    // Función para actualizar vista previa del descuento
+    function updateDiscountPreview() {
+      const percentage = parseFloat(discountPercentageInput.value) || 0;
+      const discountAmount = totalPrice * (percentage / 100);
+      const newTotal = totalPrice - discountAmount;
+      
+      discountAmountPreview.textContent = `$${formatNumberWithCommas(discountAmount)}`;
+      discountedTotalPreview.textContent = `$${formatNumberWithCommas(newTotal)}`;
+    }
+
+    // Función para aplicar descuento
+    function applyDiscount() {
+      const percentage = parseFloat(discountPercentageInput.value) || 0;
+      
+      if (percentage < 0 || percentage > 100) {
+        showToast('Porcentaje inválido (0-100)', 'warning');
+        return;
+      }
+      
+      discountPercentage = percentage;
+      updateInvoiceDisplay();
+      discountModalMobile.style.display = 'none';
+      showToast(`Descuento del ${percentage}% aplicado`, 'success');
+    }
+
+    // Función para cargar información del colaborador
+    async function loadCollaboratorInfo() {
+      if (!currentCollaborator) return;
+      
+      try {
+        // Cargar información básica
+        userGreeting.textContent = `${currentCollaborator.firstName} ${currentCollaborator.lastName}`;
+        invoiceUserMobile.textContent = `${currentCollaborator.firstName} ${currentCollaborator.lastName}`;
+        
+        if (currentCollaborator.profileImage) {
+          userAvatarMobile.src = currentCollaborator.profileImage;
+        }
+        
+        // Cargar turno activo
+        await checkCollaboratorShift();
+        
+        // Cargar tasas de cambio
+        await loadExchangeRates();
+        
+        // Cargar configuración de impuestos
+        await loadTaxConfig();
+        
+      } catch (error) {
+        console.error("Error al cargar información del colaborador:", error);
+      }
+    }
+
+    // Función para verificar turno del colaborador
+    async function checkCollaboratorShift() {
+      if (!currentCollaborator) return;
+      
+      try {
+        const shiftsQuery = query(
+          collection(db, "Shifts"),
+          where("collaboratorId", "==", currentCollaborator.id),
+          where("active", "==", true)
+        );
+        
+        const shiftsSnapshot = await getDocs(shiftsQuery);
+        
+        if (!shiftsSnapshot.empty) {
+          const shiftDoc = shiftsSnapshot.docs[0];
+          currentShift = {
+            id: shiftDoc.id,
+            ...shiftDoc.data()
+          };
+          
+          shiftInfoMobile.textContent = currentShift.shiftName || 'Turno Activo';
+          startShiftTimer();
+        } else {
+          shiftInfoMobile.textContent = 'Sin turno activo';
+        }
+      } catch (error) {
+        console.error("Error al verificar turno:", error);
+      }
+    }
+
+    // Función para el temporizador del turno
+    function startShiftTimer() {
+      if (!currentShift) return;
+      
+      const updateTimer = () => {
+        if (!currentShift || !currentShift.endTime) return;
+        
+        const now = new Date();
+        const endTime = currentShift.endTime.toDate();
+        const diff = endTime - now;
+        
+        if (diff <= 0) {
+          timerMobile.textContent = '00:00:00';
+          timerMobile.style.color = '#e74c3c';
+          return;
+        }
+        
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        
+        const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        timerMobile.textContent = timeString;
+        
+        if (hours === 0 && minutes < 30) {
+          timerMobile.style.color = '#f39c12';
+        } else {
+          timerMobile.style.color = '#16e086';
+        }
+      };
+      
+      updateTimer();
+      setInterval(updateTimer, 1000);
+    }
+
+    // Función para cargar tasas de cambio
+    async function loadExchangeRates() {
+      try {
+        if (!currentCollaborator) return;
+        
+        const ratesRef = doc(db, "exchangeRates", currentCollaborator.userId);
+        const ratesDoc = await getDoc(ratesRef);
+        
+        if (ratesDoc.exists()) {
+          const ratesData = ratesDoc.data();
+          exchangeRates = {
+            usd: ratesData.usd || 56.50,
+            eur: ratesData.eur || 61.20
+          };
+        }
+      } catch (error) {
+        console.error("Error al cargar tasas:", error);
+      }
+    }
+
+    // Función para cargar configuración de impuestos
+    async function loadTaxConfig() {
+      try {
+        if (!currentCollaborator) return;
+        
+        const taxRef = doc(db, "impuesto", currentCollaborator.userId);
+        const taxDoc = await getDoc(taxRef);
+        
+        if (taxDoc.exists()) {
+          const taxData = taxDoc.data();
+          taxConfig = {
+            itbis: taxData.itbis || 18,
+            iva: taxData.iva || 0,
+            activo: taxData.activo || false
+          };
+        }
+      } catch (error) {
+        console.error("Error al cargar impuestos:", error);
+      }
+    }
+
+    // Event Listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      // Verificar si hay sesión activa
+      if (localStorage.getItem('collaboratorLoggedIn') === 'true') {
+        const collaboratorData = localStorage.getItem('collaboratorData');
+        if (collaboratorData) {
+          currentCollaborator = JSON.parse(collaboratorData);
+          loadCollaboratorInfo();
+          loadCollaboratorProducts();
+        }
+      }
+      
+      // Búsqueda de productos
+      mobileSearchInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.trim();
+        loadCollaboratorProducts(searchTerm);
+      });
+      
+      // Botón de escáner
+      mobileScannerBtn.addEventListener('click', openScannerModal);
+      
+      // Cerrar modal de escáner
+      closeScannerModal.addEventListener('click', () => {
+        scannerModalMobile.style.display = 'none';
+        if (html5QrCode) {
+          html5QrCode.stop();
+        }
+      });
+      
+      // Modal de efectivo - botones numéricos
+      document.querySelectorAll('.cash-num-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const value = btn.getAttribute('data-value');
+          cashReceivedInput.value += value;
+          calculateChange();
+        });
+      });
+      
+      // Backspace en modal de efectivo
+      cashBackspaceBtn.addEventListener('click', () => {
+        cashReceivedInput.value = cashReceivedInput.value.slice(0, -1);
+        calculateChange();
+      });
+      
+      // Calcular cambio en tiempo real
+      cashReceivedInput.addEventListener('input', calculateChange);
+      
+      // Cancelar pago en efectivo
+      cancelCashBtn.addEventListener('click', () => {
+        cashModalMobile.style.display = 'none';
+      });
+      
+      // Confirmar pago en efectivo
+      confirmCashBtn.addEventListener('click', confirmCashPayment);
+      
+      // Botones de acción
+      mobileDiscountBtn.addEventListener('click', openDiscountModal);
+      mobileCashBtn.addEventListener('click', openCashModal);
+      mobilePayBtn.addEventListener('click', openCashModal); // Por ahora usa el mismo modal
+      
+      // Modal de descuento - vista previa
+      discountPercentageInput.addEventListener('input', updateDiscountPreview);
+      
+      // Cancelar descuento
+      cancelDiscountBtn.addEventListener('click', () => {
+        discountModalMobile.style.display = 'none';
+      });
+      
+      // Aplicar descuento
+      applyDiscountBtn.addEventListener('click', applyDiscount);
+      
+      // Cerrar modal de descuento
+      closeDiscountModal.addEventListener('click', () => {
+        discountModalMobile.style.display = 'none';
+      });
+      
+      // Cerrar modal de factura
+      closeInvoiceModal.addEventListener('click', () => {
+        invoiceModalMobile.style.display = 'none';
+      });
+      
+      closeInvoiceBtn.addEventListener('click', () => {
+        invoiceModalMobile.style.display = 'none';
+      });
+      
+      // Imprimir factura 
+      printInvoiceBtn.addEventListener('click', () => {
+        window.print(); 
+      });
+    });
+  </script>
+</body>
+</html>
