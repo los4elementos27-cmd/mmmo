@@ -3,461 +3,899 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ZANARA POS Móvil</title>
+  <title>Punto de Venta Móvil</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
-    /* RESET Y BASE PARA MÓVIL */
+    /* Reset y estilos base */
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      -webkit-tap-highlight-color: transparent;
       -webkit-user-select: none;
       -moz-user-select: none;
       -ms-user-select: none;
       user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    html, body {
-      height: 100%;
-      width: 100%;
-      overflow: hidden;
-      font-family: 'Roboto', sans-serif;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      color: #ecf0f1;
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a2b3c, #2c3e50);
+      color: #ffffff;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+      font-size: 15px;
+      line-height: 1.4;
     }
 
-    /* LAYOUT PRINCIPAL EN HORIZONTAL */
+    /* Contenedor principal móvil */
     .mobile-container {
-      display: flex;
+      width: 100%;
+      max-width: 768px;
+      margin: 0 auto;
       height: 100vh;
-      width: 100vw;
-      flex-direction: row;
-    }
-
-    /* PANEL IZQUIERDO - PRODUCTOS */
-    .left-panel {
-      flex: 1.2;
-      background: #1e2a47;
-      border-right: 2px solid #16e086;
       display: flex;
       flex-direction: column;
+      background: #1a2b3c;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      position: relative;
       overflow: hidden;
-      min-width: 0;
     }
 
-    /* PANEL DERECHO - FACTURA */
-    .right-panel {
-      flex: 0.8;
-      background: #16213e;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      min-width: 0;
-    }
-
-    /* HEADER COMPACTO PARA MÓVIL */
+    /* Header móvil */
     .mobile-header {
-      background: linear-gradient(90deg, #16e086 0%, #15a086 100%);
-      padding: 12px 15px;
+      background: linear-gradient(135deg, #16e086, #15a086);
+      padding: 15px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      min-height: 60px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.3);
-      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
     }
 
-    .logo-section {
+    .header-left {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
 
-    .mobile-logo {
-      width: 36px;
-      height: 36px;
-      background: white;
-      border-radius: 8px;
+    .logo-mobile {
+      width: 40px;
+      height: 40px;
+      background: #ffffff;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-
-    .mobile-logo i {
-      color: #16e086;
       font-size: 20px;
+      color: #16e086;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
 
-    .header-title {
-      font-size: 16px;
+    .system-name-mobile {
+      font-size: 18px;
       font-weight: bold;
-      color: white;
+      color: #ffffff;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
     }
 
-    .user-info-compact {
+    .header-actions {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .header-icon {
+      color: #ffffff;
+      font-size: 1.3em;
+      background: rgba(255,255,255,0.2);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
-      gap: 8px;
+      justify-content: center;
+      transition: all 0.3s ease;
+      position: relative;
     }
 
-    .user-avatar-small {
-      width: 32px;
-      height: 32px;
+    .header-icon:hover {
+      background: rgba(255,255,255,0.3);
+      transform: scale(1.1);
+    }
+
+    .user-avatar-mobile {
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
-      border: 2px solid white;
       object-fit: cover;
+      border: 2px solid #ffffff;
     }
 
-    /* BARRA DE BÚSQUEDA MEJORADA */
-    .mobile-search-container {
-      padding: 12px;
-      background: rgba(255,255,255,0.05);
+    /* Sección de búsqueda */
+    .search-section {
+      padding: 15px;
+      background: #233445;
       border-bottom: 1px solid rgba(255,255,255,0.1);
-      flex-shrink: 0;
     }
 
-    .search-with-scanner {
+    .search-container-mobile {
       display: flex;
-      gap: 8px;
+      gap: 10px;
+      width: 100%;
     }
 
-    .search-input {
+    .search-box {
       flex: 1;
-      padding: 12px 15px;
+      background: rgba(255,255,255,0.1);
       border: none;
       border-radius: 25px;
-      background: rgba(255,255,255,0.1);
-      color: white;
-      font-size: 14px;
+      padding: 12px 20px;
+      color: #ffffff;
+      font-size: 15px;
+      outline: none;
     }
 
-    .scanner-button {
-      width: 45px;
-      height: 45px;
-      border-radius: 50%;
+    .search-box::placeholder {
+      color: rgba(255,255,255,0.6);
+    }
+
+    .scanner-btn-mobile {
       background: linear-gradient(135deg, #16e086, #15a086);
-      border: none;
       color: white;
+      border: none;
+      border-radius: 25px;
+      width: 50px;
+      height: 50px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 3px 8px rgba(22,224,134,0.3);
     }
 
-    /* LISTA DE PRODUCTOS OPTIMIZADA */
-    .products-scroll-area {
+    .scanner-btn-mobile:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 12px rgba(22,224,134,0.4);
+    }
+
+    /* Vista principal de productos */
+    .main-content {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .products-section {
       flex: 1;
       overflow-y: auto;
-      padding: 10px;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 10px;
-      align-content: start;
+      padding: 15px;
+      background: #1a2b3c;
     }
 
-    .mobile-product-card {
-      background: rgba(255,255,255,0.08);
+    .products-section h2 {
+      font-size: 18px;
+      margin-bottom: 15px;
+      color: #16e086;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .view-toggle-mobile {
+      display: flex;
+      gap: 8px;
+    }
+
+    .view-btn {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: #16e086;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .view-btn.active {
+      background: #16e086;
+      color: white;
+    }
+
+    /* Lista de productos */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    @media (min-width: 768px) {
+      .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      }
+    }
+
+    .product-card {
+      background: rgba(255,255,255,0.05);
       border-radius: 12px;
       padding: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255,255,255,0.1);
       display: flex;
       flex-direction: column;
       align-items: center;
-      transition: all 0.3s;
-      border: 1px solid transparent;
-      min-height: 160px;
+      text-align: center;
+      position: relative;
     }
 
-    .mobile-product-card:hover {
-      background: rgba(255,255,255,0.12);
-      border-color: #16e086;
+    .product-card:hover {
+      background: rgba(255,255,255,0.1);
       transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
     }
 
     .product-image {
-      width: 60px;
-      height: 60px;
+      width: 70px;
+      height: 70px;
       object-fit: contain;
       margin-bottom: 8px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.05);
     }
 
     .product-name {
-      font-size: 12px;
-      text-align: center;
-      margin-bottom: 5px;
+      font-weight: 600;
+      font-size: 13px;
+      margin-bottom: 4px;
       line-height: 1.2;
-      height: 30px;
-      overflow: hidden;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
+      color: #ffffff;
     }
 
     .product-price {
       color: #16e086;
       font-weight: bold;
       font-size: 14px;
-      margin-bottom: 3px;
+      margin-bottom: 5px;
     }
 
-    .product-tax-badge {
-      font-size: 9px;
-      background: rgba(22, 224, 134, 0.2);
-      color: #16e086;
-      padding: 2px 6px;
+    .product-ean-mobile {
+      font-size: 10px;
+      color: rgba(255,255,255,0.6);
+      background: rgba(0,0,0,0.2);
+      padding: 3px 8px;
       border-radius: 10px;
-      margin: 2px 0;
-    }
-
-    /* FACTURA MÓVIL */
-    .invoice-header {
-      padding: 15px;
-      background: rgba(255,255,255,0.05);
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      flex-shrink: 0;
-    }
-
-    .invoice-title {
-      font-size: 16px;
-      font-weight: bold;
-      color: #16e086;
+      margin-top: 4px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 4px;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .invoice-scroll-area {
+    .product-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-weight: bold;
+    }
+
+    .badge-expired {
+      background: rgba(231, 76, 60, 0.2);
+      color: #e74c3c;
+    }
+
+    .badge-warning {
+      background: rgba(243, 156, 18, 0.2);
+      color: #f39c12;
+    }
+
+    .badge-tax {
+      background: rgba(22, 224, 134, 0.2);
+      color: #16e086;
+      font-size: 9px;
+    }
+
+    /* Sección de factura */
+    .invoice-section {
+      width: 100%;
+      background: #233445;
+      border-left: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .invoice-header {
+      padding: 15px;
+      background: rgba(0,0,0,0.2);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .invoice-header h2 {
+      color: #16e086;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .invoice-items {
       flex: 1;
       overflow-y: auto;
-      padding: 10px;
+      padding: 15px;
     }
 
-    .invoice-item-mobile {
-      background: rgba(255,255,255,0.05);
-      border-radius: 10px;
-      padding: 12px;
-      margin-bottom: 8px;
+    .invoice-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-left: 3px solid #16e086;
+      padding: 12px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      border-left: 4px solid #16e086;
     }
 
-    .item-details {
+    .item-info {
       flex: 1;
     }
 
     .item-name {
-      font-size: 13px;
-      font-weight: bold;
+      font-weight: 600;
+      font-size: 14px;
       margin-bottom: 3px;
     }
 
-    .item-quantity-price {
-      font-size: 11px;
-      color: #95a5a6;
+    .item-details {
+      font-size: 12px;
+      color: rgba(255,255,255,0.7);
+      display: flex;
+      gap: 10px;
     }
 
-    .item-total {
+    .item-price {
       font-weight: bold;
-      font-size: 14px;
+      color: #16e086;
+      font-size: 15px;
     }
 
-    .remove-item-btn {
-      background: #e74c3c;
-      color: white;
+    .remove-btn-mobile {
+      background: rgba(231, 76, 60, 0.2);
+      color: #e74c3c;
       border: none;
-      width: 30px;
-      height: 30px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      margin-left: 10px;
+      transition: all 0.3s;
     }
 
-    /* BARRA INFERIOR DE ACCIONES */
-    .mobile-actions-bar {
-      background: #1e2a47;
+    .remove-btn-mobile:hover {
+      background: rgba(231, 76, 60, 0.3);
+      transform: scale(1.1);
+    }
+
+    /* Barra de totales móvil */
+    .totals-bar-mobile {
+      background: #233445;
+      padding: 15px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: sticky;
+      bottom: 0;
+      box-shadow: 0 -3px 10px rgba(0,0,0,0.2);
+    }
+
+    .total-display {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(22, 224, 134, 0.1);
       padding: 12px 15px;
+      border-radius: 10px;
+      border: 1px solid rgba(22, 224, 134, 0.3);
+    }
+
+    .total-label {
+      font-size: 14px;
+      color: rgba(255,255,255,0.9);
+    }
+
+    .total-amount {
+      font-size: 22px;
+      font-weight: bold;
+      color: #16e086;
+    }
+
+    .currency-totals-mobile {
       display: flex;
       gap: 10px;
-      flex-wrap: wrap;
-      justify-content: center;
-      border-top: 2px solid #16e086;
-      flex-shrink: 0;
+      overflow-x: auto;
+      padding-bottom: 5px;
     }
 
-    .action-button {
-      flex: 1;
-      min-width: 70px;
-      padding: 12px;
+    .currency-total {
+      background: rgba(255,255,255,0.05);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .currency-total i {
+      color: #16e086;
+    }
+
+    /* Botones de acción móvil */
+    .action-buttons-mobile {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .action-btn {
+      background: rgba(255,255,255,0.1);
       border: none;
       border-radius: 10px;
+      padding: 12px 8px;
       color: white;
-      font-size: 12px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.3s ease;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 5px;
-      cursor: pointer;
-      transition: all 0.3s;
+      min-height: 70px;
+      justify-content: center;
     }
 
-    .btn-pay {
-      background: linear-gradient(135deg, #27ae60, #2ecc71);
+    .action-btn i {
+      font-size: 18px;
+      margin-bottom: 3px;
     }
 
-    .btn-cash {
-      background: linear-gradient(135deg, #2980b9, #3498db);
-    }
-
-    .btn-card {
-      background: linear-gradient(135deg, #8e44ad, #9b59b6);
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
 
     .btn-discount {
       background: linear-gradient(135deg, #e67e22, #d35400);
     }
 
-    .action-button i {
-      font-size: 16px;
+    .btn-cash {
+      background: linear-gradient(135deg, #27ae60, #2ecc71);
     }
 
-    .action-button:active {
-      transform: scale(0.95);
+    .btn-card {
+      background: linear-gradient(135deg, #2980b9, #3498db);
     }
 
-    /* BARRA DE TOTALES FLOTANTE */
-    .totals-floating-bar {
-      position: absolute;
-      bottom: 80px;
-      right: 15px;
-      background: rgba(22, 224, 134, 0.95);
-      padding: 12px 18px;
-      border-radius: 15px;
-      color: white;
+    .btn-invoice {
+      background: linear-gradient(135deg, #16e086, #15a086);
       font-weight: bold;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-      z-index: 100;
     }
 
-    /* MODALES OPTIMIZADOS PARA MÓVIL */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.8);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-
-    .modal-content-mobile {
-      background: #1e2a47;
-      width: 90%;
-      max-width: 400px;
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 15px 30px rgba(0,0,0,0.4);
-    }
-
-    .modal-header {
-      background: #16e086;
-      padding: 18px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .modal-title {
-      font-size: 18px;
-      font-weight: bold;
-      color: white;
-    }
-
-    .close-modal {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 24px;
-      cursor: pointer;
-    }
-
-    .modal-body {
-      padding: 20px;
-      max-height: 60vh;
-      overflow-y: auto;
-    }
-
-    /* MENÚ DE NAVEGACIÓN INFERIOR */
+    /* Menú de navegación móvil */
     .mobile-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background: #1a1a2e;
-      display: flex;
-      justify-content: space-around;
-      padding: 10px 0;
+      display: none;
+      background: #233445;
       border-top: 1px solid rgba(255,255,255,0.1);
-      z-index: 100;
+      padding: 10px;
+    }
+
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 5px;
     }
 
     .nav-item {
       display: flex;
       flex-direction: column;
       align-items: center;
-      color: #95a5a6;
+      gap: 5px;
+      padding: 10px 5px;
+      color: rgba(255,255,255,0.7);
       text-decoration: none;
       font-size: 11px;
-      transition: color 0.3s;
-      padding: 5px;
+      border-radius: 8px;
+      transition: all 0.3s;
     }
 
-    .nav-item i {
-      font-size: 18px;
-      margin-bottom: 3px;
-    }
-
-    .nav-item.active {
+    .nav-item:hover, .nav-item.active {
+      background: rgba(255,255,255,0.1);
       color: #16e086;
     }
 
-    /* ESTILOS PARA PANTALLA HORIZONTAL */
-    @media (orientation: landscape) {
-      .mobile-container {
-        flex-direction: row;
+    .nav-item i {
+      font-size: 16px;
+    }
+
+    /* Modales móviles */
+    .modal-mobile {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .modal-content-mobile {
+      background: #233445;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 400px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(50px);
+        opacity: 0;
       }
-      
-      .products-scroll-area {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      to {
+        transform: translateY(0);
+        opacity: 1;
       }
     }
 
-    /* ESTILOS PARA TABLET */
-    @media (min-width: 768px) and (max-width: 1024px) {
+    .modal-header {
+      padding: 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h2 {
+      color: #16e086;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .close-modal {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .close-modal:hover {
+      background: rgba(255,255,255,0.2);
+      transform: rotate(90deg);
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    /* Modal de pago en efectivo */
+    .payment-input-group {
+      margin-bottom: 20px;
+    }
+
+    .payment-label {
+      display: block;
+      margin-bottom: 8px;
+      color: rgba(255,255,255,0.9);
+      font-weight: 500;
+    }
+
+    .payment-input {
+      width: 100%;
+      background: rgba(255,255,255,0.1);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
+      padding: 15px;
+      font-size: 18px;
+      color: white;
+      text-align: center;
+      font-weight: bold;
+      outline: none;
+    }
+
+    .payment-input:focus {
+      border-color: #16e086;
+    }
+
+    .payment-display {
+      background: rgba(22, 224, 134, 0.1);
+      border: 2px solid rgba(22, 224, 134, 0.3);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+
+    .payment-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .payment-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .payment-row.total {
+      font-weight: bold;
+      font-size: 18px;
+      color: #16e086;
+    }
+
+    .numeric-keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .num-btn {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      border-radius: 12px;
+      padding: 20px;
+      font-size: 24px;
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: bold;
+    }
+
+    .num-btn:hover {
+      background: rgba(255,255,255,0.2);
+      transform: scale(1.05);
+    }
+
+    .num-btn.clear {
+      background: rgba(231, 76, 60, 0.2);
+      color: #e74c3c;
+    }
+
+    .num-btn.enter {
+      background: rgba(22, 224, 134, 0.2);
+      color: #16e086;
+      grid-column: span 2;
+    }
+
+    /* Modal de login */
+    .login-container-mobile {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a2b3c, #2c3e50);
+      padding: 20px;
+    }
+
+    .login-card {
+      background: #233445;
+      border-radius: 20px;
+      padding: 30px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      text-align: center;
+    }
+
+    .login-logo {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #16e086, #15a086);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 36px;
+      color: white;
+    }
+
+    .login-title {
+      font-size: 24px;
+      color: #16e086;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    .login-input {
+      width: 100%;
+      background: rgba(255,255,255,0.1);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
+      padding: 15px;
+      color: white;
+      font-size: 16px;
+      margin-bottom: 15px;
+      outline: none;
+    }
+
+    .login-input:focus {
+      border-color: #16e086;
+    }
+
+    .login-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #16e086, #15a086);
+      border: none;
+      border-radius: 12px;
+      padding: 15px;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 10px;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(22,224,134,0.4);
+    }
+
+    /* Scanner modal */
+    .scanner-modal-mobile {
+      background: #000;
+    }
+
+    .scanner-content {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .scanner-viewport {
+      flex: 1;
+      position: relative;
+      background: #000;
+    }
+
+    .scanner-controls {
+      padding: 20px;
+      background: #233445;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .scanner-btn {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .scanner-btn.primary {
+      background: linear-gradient(135deg, #16e086, #15a086);
+    }
+
+    .scanner-btn:hover {
+      transform: scale(1.1);
+    }
+
+    /* Estilos para tablet horizontal */
+    @media (min-width: 768px) and (orientation: landscape) {
       .mobile-container {
+        max-width: 100%;
+        height: 100vh;
+      }
+
+      .main-content {
         flex-direction: row;
       }
-      
-      .products-scroll-area {
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+
+      .products-section {
+        flex: 2;
       }
-      
-      .mobile-product-card {
-        min-height: 170px;
+
+      .invoice-section {
+        flex: 1;
+        display: flex !important;
+      }
+
+      .mobile-nav {
+        display: none;
+      }
+
+      .action-buttons-mobile {
+        grid-template-columns: repeat(2, 1fr);
       }
     }
 
-    /* SCROLLBAR PERSONALIZADO */
+    /* Estilos para pantallas pequeñas */
+    @media (max-width: 767px) {
+      .mobile-container {
+        height: 100vh;
+      }
+
+      .invoice-section {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 100%;
+        height: 100vh;
+        z-index: 200;
+        transition: right 0.3s ease;
+      }
+
+      .invoice-section.active {
+        right: 0;
+      }
+
+      .mobile-nav {
+        display: block;
+      }
+
+      .action-buttons-mobile {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      }
+
+      .header-actions {
+        gap: 10px;
+      }
+    }
+
+    /* Scrollbar personalizada */
     ::-webkit-scrollbar {
       width: 6px;
     }
@@ -471,23 +909,56 @@
       border-radius: 3px;
     }
 
-    /* ESTADOS DE LOADING */
+    ::-webkit-scrollbar-thumb:hover {
+      background: #15a086;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(22, 224, 134, 0.9);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 10px;
+      z-index: 1000;
+      animation: slideInUp 0.3s ease;
+      display: none;
+      font-weight: 500;
+    }
+
+    @keyframes slideInUp {
+      from {
+        transform: translateX(-50%) translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* Loading */
     .loading-overlay {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(26, 26, 46, 0.9);
+      background: rgba(0,0,0,0.8);
+      z-index: 9999;
       display: none;
       justify-content: center;
       align-items: center;
-      z-index: 9999;
+      flex-direction: column;
+      gap: 20px;
     }
 
     .spinner {
-      width: 50px;
-      height: 50px;
+      width: 60px;
+      height: 60px;
       border: 4px solid rgba(255,255,255,0.1);
       border-radius: 50%;
       border-top-color: #16e086;
@@ -495,397 +966,447 @@
     }
 
     @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    /* BADGES Y ETIQUETAS */
-    .badge {
-      position: absolute;
-      top: 5px;
-      right: 5px;
-      background: #e74c3c;
-      color: white;
-      font-size: 9px;
-      padding: 2px 6px;
-      border-radius: 10px;
-      font-weight: bold;
-    }
-
-    .expired-badge {
-      background: #e74c3c;
-    }
-
-    .near-expiry-badge {
-      background: #f39c12;
-    }
-
-    /* NOTIFICACIONES TOAST */
-    .toast {
-      position: fixed;
-      bottom: 100px;
-      right: 20px;
-      background: rgba(22, 224, 134, 0.95);
-      color: white;
-      padding: 12px 18px;
-      border-radius: 10px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-      display: none;
-      z-index: 1001;
-      animation: slideInRight 0.3s ease;
-    }
-
-    @keyframes slideInRight {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-
-    /* ICONOS DE ACCIÓN RÁPIDA */
-    .quick-actions {
-      position: fixed;
-      top: 70px;
-      right: 15px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      z-index: 99;
-    }
-
-    .quick-action-btn {
-      width: 45px;
-      height: 45px;
-      border-radius: 50%;
-      background: rgba(22, 224, 134, 0.9);
-      border: none;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+      to {
+        transform: rotate(360deg);
+      }
     }
   </style>
 </head>
 <body>
-  <!-- OVERLAY DE LOADING -->
-  <div id="loadingOverlay" class="loading-overlay">
-    <div class="spinner"></div>
-    <div style="margin-top: 15px; color: #16e086;">Cargando...</div>
+  <!-- Login Screen -->
+  <div id="loginScreen" class="login-container-mobile">
+    <div class="login-card">
+      <div class="login-logo">
+        <i class="fas fa-shopping-cart"></i>
+      </div>
+      <h1 class="login-title">ZANARA POS</h1>
+      <p style="color: rgba(255,255,255,0.7); margin-bottom: 30px;">Inicia sesión para comenzar</p>
+      
+      <input type="text" id="mobileUsername" class="login-input" placeholder="Usuario" autocomplete="off">
+      <input type="password" id="mobilePin" class="login-input" placeholder="PIN" autocomplete="off">
+      <button id="mobileLoginBtn" class="login-btn">Iniciar Sesión</button>
+      
+      <p id="loginError" style="color: #e74c3c; margin-top: 15px; display: none;">
+        <i class="fas fa-exclamation-circle"></i> Credenciales incorrectas
+      </p>
+    </div>
   </div>
 
-  <!-- TOAST DE NOTIFICACIÓN -->
-  <div id="toastNotification" class="toast">
-    <i class="fas fa-check-circle"></i> <span id="toastMessage">Operación exitosa</span>
-  </div>
+  <!-- POS Mobile Interface -->
+  <div id="posScreen" class="mobile-container" style="display: none;">
+    <!-- Header -->
+    <header class="mobile-header">
+      <div class="header-left">
+        <div class="logo-mobile">
+          <i class="fas fa-shopping-cart"></i>
+        </div>
+        <div class="system-name-mobile">ZANARA POS</div>
+      </div>
+      
+      <div class="header-actions">
+        <button class="header-icon" id="userBtnMobile" title="Usuario">
+          <i class="fas fa-user"></i>
+        </button>
+        <button class="header-icon" id="shiftBtnMobile" title="Turno">
+          <i class="fas fa-clock"></i>
+        </button>
+        <button class="header-icon" id="taxBtnMobile" title="Impuestos">
+          <i class="fas fa-percent"></i>
+        </button>
+        <img id="userAvatarMobile" class="user-avatar-mobile" src="" alt="" style="display: none;">
+      </div>
+    </header>
 
-  <!-- CONTENEDOR PRINCIPAL -->
-  <div class="mobile-container">
-    
-    <!-- PANEL IZQUIERDO - PRODUCTOS -->
-    <div class="left-panel">
-      <!-- HEADER -->
-      <div class="mobile-header">
-        <div class="logo-section">
-          <div class="mobile-logo">
-            <i class="fas fa-shopping-cart"></i>
+    <!-- Search Section -->
+    <section class="search-section">
+      <div class="search-container-mobile">
+        <input type="text" id="mobileSearch" class="search-box" placeholder="Buscar producto..." autocomplete="off">
+        <button class="scanner-btn-mobile" id="scannerBtnMobile">
+          <i class="fas fa-barcode"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Products Section -->
+      <section class="products-section" id="productsSection">
+        <h2>
+          Productos
+          <div class="view-toggle-mobile">
+            <button class="view-btn active" id="viewGridMobile" title="Vista cuadrícula">
+              <i class="fas fa-th"></i>
+            </button>
+            <button class="view-btn" id="viewListMobile" title="Vista lista">
+              <i class="fas fa-list"></i>
+            </button>
           </div>
-          <div>
-            <div class="header-title">ZANARA POS</div>
-            <div style="font-size: 11px; opacity: 0.8;" id="userGreeting">Usuario</div>
+        </h2>
+        
+        <div class="products-grid" id="productsGrid">
+          <!-- Products will be loaded here -->
+        </div>
+      </section>
+
+      <!-- Invoice Section -->
+      <section class="invoice-section" id="invoiceSection">
+        <div class="invoice-header">
+          <h2><i class="fas fa-receipt"></i> Factura Actual</h2>
+          <button class="close-modal" id="closeInvoiceBtn">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        
+        <div class="invoice-items" id="invoiceItemsMobile">
+          <!-- Invoice items will be loaded here -->
+        </div>
+        
+        <div class="totals-bar-mobile">
+          <div class="total-display">
+            <span class="total-label">Total a Pagar:</span>
+            <span class="total-amount" id="totalAmountMobile">$0.00</span>
+          </div>
+          
+          <div class="currency-totals-mobile">
+            <div class="currency-total" id="usdTotalMobile">
+              <i class="fas fa-dollar-sign"></i> $0.00
+            </div>
+            <div class="currency-total" id="eurTotalMobile">
+              <i class="fas fa-euro-sign"></i> €0.00
+            </div>
+          </div>
+          
+          <div class="action-buttons-mobile">
+            <button class="action-btn btn-discount" id="discountBtnMobile">
+              <i class="fas fa-percent"></i>
+              <span>Descuento</span>
+            </button>
+            <button class="action-btn btn-cash" id="cashBtnMobile">
+              <i class="fas fa-money-bill"></i>
+              <span>Efectivo</span>
+            </button>
+            <button class="action-btn btn-card" id="cardBtnMobile">
+              <i class="fas fa-credit-card"></i>
+              <span>Tarjeta</span>
+            </button>
+            <button class="action-btn btn-invoice" id="invoiceBtnMobile">
+              <i class="fas fa-file-invoice"></i>
+              <span>Facturar</span>
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav">
+      <div class="nav-grid">
+        <a href="#" class="nav-item active" id="navProducts">
+          <i class="fas fa-boxes"></i>
+          <span>Productos</span>
+        </a>
+        <a href="#" class="nav-item" id="navInvoice">
+          <i class="fas fa-receipt"></i>
+          <span>Factura</span>
+          <span class="badge" id="invoiceBadge">0</span>
+        </a>
+        <a href="#" class="nav-item" id="navHistory">
+          <i class="fas fa-history"></i>
+          <span>Historial</span>
+        </a>
+        <a href="#" class="nav-item" id="navReports">
+          <i class="fas fa-chart-bar"></i>
+          <span>Reportes</span>
+        </a>
+        <a href="#" class="nav-item" id="navMenu">
+          <i class="fas fa-bars"></i>
+          <span>Menú</span>
+        </a>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Payment Modal (Cash) -->
+  <div id="cashModal" class="modal-mobile">
+    <div class="modal-content-mobile">
+      <div class="modal-header">
+        <h2><i class="fas fa-money-bill"></i> Pago en Efectivo</h2>
+        <button class="close-modal" id="closeCashModal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="payment-display">
+          <div class="payment-row">
+            <span>Total a Pagar:</span>
+            <span id="cashTotalAmount">$0.00</span>
+          </div>
+          <div class="payment-row">
+            <span>Monto Recibido:</span>
+            <span id="cashReceivedDisplay">$0.00</span>
+          </div>
+          <div class="payment-row total">
+            <span>Cambio:</span>
+            <span id="cashChangeAmount">$0.00</span>
           </div>
         </div>
         
-        <div class="user-info-compact">
-          <img id="userAvatarMobile" class="user-avatar-small" src="" alt="Avatar">
-          <div>
-            <div style="font-size: 12px; font-weight: bold;" id="shiftInfoMobile">Turno Activo</div>
-            <div style="font-size: 10px; opacity: 0.7;" id="timerMobile">--:--:--</div>
-          </div>
+        <div class="payment-input-group">
+          <label class="payment-label">Monto Recibido:</label>
+          <input type="text" id="cashReceivedInput" class="payment-input" placeholder="0.00" autocomplete="off">
+        </div>
+        
+        <div class="numeric-keypad">
+          <button class="num-btn" data-value="1">1</button>
+          <button class="num-btn" data-value="2">2</button>
+          <button class="num-btn" data-value="3">3</button>
+          <button class="num-btn" data-value="4">4</button>
+          <button class="num-btn" data-value="5">5</button>
+          <button class="num-btn" data-value="6">6</button>
+          <button class="num-btn" data-value="7">7</button>
+          <button class="num-btn" data-value="8">8</button>
+          <button class="num-btn" data-value="9">9</button>
+          <button class="num-btn clear" id="cashClearBtn">C</button>
+          <button class="num-btn" data-value="0">0</button>
+          <button class="num-btn enter" id="cashConfirmBtn">✓</button>
         </div>
       </div>
+    </div>
+  </div>
 
-      <!-- BARRA DE BÚSQUEDA -->
-      <div class="mobile-search-container">
-        <div class="search-with-scanner">
-          <input type="text" id="mobileSearchInput" class="search-input" placeholder="🔍 Buscar producto o EAN">
-          <button id="mobileScannerBtn" class="scanner-button" title="Escanear código">
-            <i class="fas fa-barcode"></i>
+  <!-- Payment Modal (Card) -->
+  <div id="cardModal" class="modal-mobile">
+    <div class="modal-content-mobile">
+      <div class="modal-header">
+        <h2><i class="fas fa-credit-card"></i> Pago con Tarjeta</h2>
+        <button class="close-modal" id="closeCardModal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="payment-display" style="text-align: center; padding: 30px;">
+          <h3 style="margin-bottom: 15px;">Total a Pagar:</h3>
+          <div style="font-size: 32px; color: #16e086; font-weight: bold; margin-bottom: 30px;" id="cardTotalAmount">$0.00</div>
+          <button class="login-btn" id="confirmCardBtn">
+            <i class="fas fa-check"></i> Confirmar Pago
           </button>
         </div>
       </div>
-
-      <!-- LISTA DE PRODUCTOS -->
-      <div id="mobileProductsList" class="products-scroll-area">
-        <!-- Los productos se cargarán aquí dinámicamente -->
-      </div>
-    </div>
-
-    <!-- PANEL DERECHO - FACTURA -->
-    <div class="right-panel">
-      <!-- HEADER DE FACTURA -->
-      <div class="invoice-header">
-        <div class="invoice-title">
-          <i class="fas fa-receipt"></i> Factura Actual
-          <span id="itemCountBadge" style="background: #e74c3c; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px;">0</span>
-        </div>
-        <div style="font-size: 12px; margin-top: 5px; opacity: 0.8;">
-          <i class="fas fa-user"></i> <span id="invoiceUserMobile">Usuario</span>
-        </div>
-      </div>
-
-      <!-- ITEMS DE LA FACTURA -->
-      <div id="mobileInvoiceItems" class="invoice-scroll-area">
-        <!-- Los items de la factura aparecerán aquí -->
-        <div style="text-align: center; padding: 40px 20px; color: #95a5a6;">
-          <i class="fas fa-cart-plus" style="font-size: 40px; margin-bottom: 15px; opacity: 0.5;"></i>
-          <p>No hay productos en la factura</p>
-          <p style="font-size: 12px; margin-top: 10px;">Agrega productos desde el panel izquierdo</p>
-        </div>
-      </div>
-
-      <!-- BARRA DE TOTALES -->
-      <div style="background: rgba(22, 224, 134, 0.1); padding: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <div>
-            <div style="font-size: 12px; opacity: 0.8;">Total Factura</div>
-            <div id="mobileTotalDisplay" style="font-size: 24px; font-weight: bold; color: #16e086;">$0.00</div>
-          </div>
-          <div id="currencyTotalsMobile" style="text-align: right; font-size: 11px;">
-            <div>USD: <span id="usdTotalMobile">$0.00</span></div>
-            <div>EUR: <span id="eurTotalMobile">€0.00</span></div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 
-  <!-- BARRA DE ACCIONES INFERIOR -->
-  <div class="mobile-actions-bar">
-    <button class="action-button btn-discount" id="mobileDiscountBtn">
-      <i class="fas fa-percent"></i>
-      <span>Descuento</span>
-    </button>
-    <button class="action-button btn-cash" id="mobileCashBtn">
-      <i class="fas fa-money-bill"></i>
-      <span>Efectivo</span>
-    </button>
-    <button class="action-button btn-card" id="mobileCardBtn">
-      <i class="fas fa-credit-card"></i>
-      <span>Tarjeta</span>
-    </button>
-    <button class="action-button btn-pay" id="mobilePayBtn">
-      <i class="fas fa-check-circle"></i>
-      <span>Facturar</span>
-    </button>
-  </div>
-
-  <!-- NAVEGACIÓN INFERIOR -->
-  <nav class="mobile-nav">
-    <a href="#" class="nav-item active" id="navHome">
-      <i class="fas fa-home"></i>
-      <span>Inicio</span>
-    </a>
-    <a href="inventario-home-index.html" class="nav-item" id="navInventory">
-      <i class="fas fa-box"></i>
-      <span>Inventario</span>
-    </a>
-    <a href="venta-del-dia.html" class="nav-item" id="navReports">
-      <i class="fas fa-chart-line"></i>
-      <span>Reportes</span>
-    </a>
-    <a href="facturas-del-dia.html" class="nav-item" id="navInvoices">
-      <i class="fas fa-receipt"></i>
-      <span>Facturas</span>
-    </a>
-    <a href="#" class="nav-item" id="navUser">
-      <i class="fas fa-user"></i>
-      <span>Usuario</span>
-    </a>
-  </nav>
-
-  <!-- MODAL DE ESCÁNER -->
-  <div id="scannerModalMobile" class="modal-overlay">
+  <!-- Discount Modal -->
+  <div id="discountModal" class="modal-mobile">
     <div class="modal-content-mobile">
       <div class="modal-header">
-        <div class="modal-title">
-          <i class="fas fa-barcode"></i> Escáner de Códigos
-        </div>
-        <button class="close-modal" id="closeScannerModal">&times;</button>
+        <h2><i class="fas fa-percent"></i> Aplicar Descuento</h2>
+        <button class="close-modal" id="closeDiscountModal">
+          <i class="fas fa-times"></i>
+        </button>
       </div>
+      
       <div class="modal-body">
-        <div id="scannerContainerMobile" style="width: 100%; height: 300px; background: black; border-radius: 10px; overflow: hidden;"></div>
-        <div style="text-align: center; margin-top: 20px; color: #95a5a6; font-size: 13px;">
-          <p>Coloca el código de barras dentro del área de escaneo</p>
+        <div class="payment-input-group">
+          <label class="payment-label">Porcentaje de Descuento:</label>
+          <input type="text" id="discountInput" class="payment-input" placeholder="0%" autocomplete="off">
         </div>
+        
+        <div class="numeric-keypad">
+          <button class="num-btn" data-value="5">5%</button>
+          <button class="num-btn" data-value="10">10%</button>
+          <button class="num-btn" data-value="15">15%</button>
+          <button class="num-btn" data-value="20">20%</button>
+          <button class="num-btn" data-value="25">25%</button>
+          <button class="num-btn" data-value="30">30%</button>
+          <button class="num-btn" data-value="40">40%</button>
+          <button class="num-btn" data-value="50">50%</button>
+          <button class="num-btn clear" id="discountClearBtn">C</button>
+        </div>
+        
+        <button class="login-btn" style="margin-top: 20px;" id="applyDiscountBtn">
+          <i class="fas fa-check"></i> Aplicar Descuento
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL DE PAGO EN EFECTIVO -->
-  <div id="cashModalMobile" class="modal-overlay">
+  <!-- Scanner Modal -->
+  <div id="scannerModal" class="modal-mobile scanner-modal-mobile">
+    <div class="scanner-content">
+      <div class="modal-header">
+        <h2><i class="fas fa-barcode"></i> Escanear Código</h2>
+        <button class="close-modal" id="closeScannerModal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="scanner-viewport" id="scannerViewport">
+        <!-- Scanner will be initialized here -->
+      </div>
+      
+      <div class="scanner-controls">
+        <button class="scanner-btn" id="switchCameraBtn">
+          <i class="fas fa-camera-rotate"></i>
+        </button>
+        <button class="scanner-btn primary" id="toggleScannerBtn">
+          <i class="fas fa-play"></i>
+        </button>
+        <button class="scanner-btn" id="uploadImageBtn">
+          <i class="fas fa-image"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shift Info Modal -->
+  <div id="shiftModal" class="modal-mobile">
     <div class="modal-content-mobile">
       <div class="modal-header">
-        <div class="modal-title">
-          <i class="fas fa-money-bill-wave"></i> Pago en Efectivo
-        </div>
-        <button class="close-modal" id="closeCashModal">&times;</button>
+        <h2><i class="fas fa-clock"></i> Información del Turno</h2>
+        <button class="close-modal" id="closeShiftModal">
+          <i class="fas fa-times"></i>
+        </button>
       </div>
+      
       <div class="modal-body">
-        <div style="text-align: center; margin-bottom: 20px;">
-          <div style="font-size: 14px; opacity: 0.8;">Total a Pagar</div>
-          <div id="cashTotalAmount" style="font-size: 36px; font-weight: bold; color: #16e086;">$0.00</div>
-        </div>
-        
-        <div style="margin: 20px 0;">
-          <label style="display: block; margin-bottom: 8px; font-size: 14px;">Monto Recibido</label>
-          <input type="text" id="cashReceivedInput" style="width: 100%; padding: 15px; font-size: 18px; text-align: center; border: 2px solid #16e086; border-radius: 10px; background: rgba(255,255,255,0.1); color: white;" placeholder="0.00" autocomplete="off">
-        </div>
-        
-        <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin: 20px 0;">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-            <span>Cambio:</span>
-            <span id="cashChangeAmount" style="font-weight: bold; color: #16e086;">$0.00</span>
+        <div class="payment-display">
+          <div class="payment-row">
+            <span>Colaborador:</span>
+            <span id="shiftUserName">-</span>
+          </div>
+          <div class="payment-row">
+            <span>Turno:</span>
+            <span id="shiftName">-</span>
+          </div>
+          <div class="payment-row">
+            <span>Inicio:</span>
+            <span id="shiftStartTime">-</span>
+          </div>
+          <div class="payment-row">
+            <span>Fin:</span>
+            <span id="shiftEndTime">-</span>
+          </div>
+          <div class="payment-row total">
+            <span>Tiempo Restante:</span>
+            <span id="shiftTimeRemaining">-</span>
           </div>
         </div>
         
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;">
-          <button class="cash-num-btn" data-value="1">1</button>
-          <button class="cash-num-btn" data-value="2">2</button>
-          <button class="cash-num-btn" data-value="3">3</button>
-          <button class="cash-num-btn" data-value="4">4</button>
-          <button class="cash-num-btn" data-value="5">5</button>
-          <button class="cash-num-btn" data-value="6">6</button>
-          <button class="cash-num-btn" data-value="7">7</button>
-          <button class="cash-num-btn" data-value="8">8</button>
-          <button class="cash-num-btn" data-value="9">9</button>
-          <button class="cash-num-btn" data-value=".">.</button>
-          <button class="cash-num-btn" data-value="0">0</button>
-          <button id="cashBackspaceBtn" style="background: #e74c3c;">⌫</button>
-        </div>
-        
-        <div style="display: flex; gap: 10px;">
-          <button id="cancelCashBtn" style="flex: 1; padding: 15px; background: #e74c3c; color: white; border: none; border-radius: 10px; font-weight: bold;">Cancelar</button>
-          <button id="confirmCashBtn" style="flex: 1; padding: 15px; background: #16e086; color: white; border: none; border-radius: 10px; font-weight: bold;">Confirmar</button>
-        </div>
+        <button class="login-btn" style="margin-top: 20px; background: linear-gradient(135deg, #e74c3c, #c0392b);" id="endShiftBtn">
+          <i class="fas fa-sign-out-alt"></i> Finalizar Turno
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL DE CONFIRMACIÓN DE FACTURA -->
-  <div id="invoiceModalMobile" class="modal-overlay">
+  <!-- Taxes Modal -->
+  <div id="taxesModal" class="modal-mobile">
     <div class="modal-content-mobile">
-      <div class="modal-header" style="background: #27ae60;">
-        <div class="modal-title">
-          <i class="fas fa-check-circle"></i> Factura Generada
-        </div>
-        <button class="close-modal" id="closeInvoiceModal">&times;</button>
+      <div class="modal-header">
+        <h2><i class="fas fa-percent"></i> Configuración de Impuestos</h2>
+        <button class="close-modal" id="closeTaxesModal">
+          <i class="fas fa-times"></i>
+        </button>
       </div>
+      
       <div class="modal-body">
-        <div style="text-align: center; margin-bottom: 20px;">
-          <i class="fas fa-check-circle" style="font-size: 60px; color: #27ae60; margin-bottom: 15px;"></i>
-          <h3 style="margin-bottom: 10px;">¡Facturación Exitosa!</h3>
-          <p style="color: #95a5a6; margin-bottom: 5px;">ID: <span id="invoiceIdDisplay">Rtm-0001</span></p>
-          <p style="color: #95a5a6;">Fecha: <span id="invoiceDateDisplay">--/--/----</span></p>
-        </div>
-        
-        <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin: 20px 0;">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-            <span>Total Factura:</span>
-            <span id="invoiceModalTotal" style="font-weight: bold; color: #16e086;">$0.00</span>
+        <div class="payment-display">
+          <div class="payment-row">
+            <span>ITBIS:</span>
+            <span id="taxItbisValue">18%</span>
           </div>
-          <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-            <span>Método de Pago:</span>
-            <span id="invoicePaymentMethod" style="font-weight: bold;">Efectivo</span>
+          <div class="payment-row">
+            <span>IVA:</span>
+            <span id="taxIvaValue">0%</span>
           </div>
-          <div style="display: flex; justify-content: space-between;">
-            <span>Cambio:</span>
-            <span id="invoiceModalChange" style="font-weight: bold;">$0.00</span>
+          <div class="payment-row total">
+            <span>Estado:</span>
+            <span id="taxStatus">Activo</span>
           </div>
         </div>
         
-        <div id="invoicePrintContentMobile" style="display: none;"></div>
+        <div class="payment-input-group" style="margin-top: 20px;">
+          <label class="payment-label">Nuevo ITBIS (%):</label>
+          <input type="text" id="newItbisInput" class="payment-input" placeholder="18" autocomplete="off">
+        </div>
         
-        <div style="display: flex; gap: 10px;">
-          <button id="printInvoiceBtn" style="flex: 1; padding: 15px; background: #3498db; color: white; border: none; border-radius: 10px; font-weight: bold;">
+        <div class="numeric-keypad">
+          <button class="num-btn" data-value="10">10%</button>
+          <button class="num-btn" data-value="16">16%</button>
+          <button class="num-btn" data-value="18">18%</button>
+          <button class="num-btn" data-value="20">20%</button>
+          <button class="num-btn clear" id="taxClearBtn">C</button>
+        </div>
+        
+        <button class="login-btn" style="margin-top: 20px;" id="updateTaxesBtn">
+          <i class="fas fa-save"></i> Actualizar Impuestos
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Print Invoice Modal -->
+  <div id="printModal" class="modal-mobile">
+    <div class="modal-content-mobile">
+      <div class="modal-header">
+        <h2><i class="fas fa-print"></i> Factura Generada</h2>
+        <button class="close-modal" id="closePrintModal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <div id="invoicePrintContent" style="background: white; color: black; padding: 20px; border-radius: 10px; font-family: monospace; max-height: 400px; overflow-y: auto;">
+          <!-- Invoice content will be generated here -->
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button class="login-btn" style="flex: 1; background: linear-gradient(135deg, #3498db, #2980b9);" id="sendInvoiceBtn">
+            <i class="fas fa-paper-plane"></i> Enviar
+          </button>
+          <button class="login-btn" style="flex: 1;" id="printInvoiceBtn">
             <i class="fas fa-print"></i> Imprimir
           </button>
-          <button id="closeInvoiceBtn" style="flex: 1; padding: 15px; background: #16e086; color: white; border: none; border-radius: 10px; font-weight: bold;">
-            <i class="fas fa-check"></i> Aceptar
-          </button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- MODAL DE DESCUENTO -->
-  <div id="discountModalMobile" class="modal-overlay">
-    <div class="modal-content-mobile">
-      <div class="modal-header">
-        <div class="modal-title">
-          <i class="fas fa-tag"></i> Aplicar Descuento
-        </div>
-        <button class="close-modal" id="closeDiscountModal">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div style="text-align: center; margin-bottom: 20px;">
-          <div style="font-size: 14px; opacity: 0.8;">Total Actual</div>
-          <div style="font-size: 32px; font-weight: bold; color: #16e086;" id="discountCurrentTotal">$0.00</div>
-        </div>
-        
-        <div style="margin: 20px 0;">
-          <label style="display: block; margin-bottom: 8px; font-size: 14px;">Porcentaje de Descuento (%)</label>
-          <input type="number" id="discountPercentageInput" min="0" max="100" style="width: 100%; padding: 15px; font-size: 18px; text-align: center; border: 2px solid #16e086; border-radius: 10px; background: rgba(255,255,255,0.1); color: white;" placeholder="0" autocomplete="off">
-        </div>
-        
-        <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin: 20px 0;">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-            <span>Descuento:</span>
-            <span id="discountAmountPreview" style="font-weight: bold; color: #e74c3c;">$0.00</span>
-          </div>
-          <div style="display: flex; justify-content: space-between;">
-            <span>Nuevo Total:</span>
-            <span id="discountedTotalPreview" style="font-weight: bold; color: #16e086;">$0.00</span>
-          </div>
-        </div>
-        
-        <div style="display: flex; gap: 10px;">
-          <button id="cancelDiscountBtn" style="flex: 1; padding: 15px; background: #e74c3c; color: white; border: none; border-radius: 10px; font-weight: bold;">Cancelar</button>
-          <button id="applyDiscountBtn" style="flex: 1; padding: 15px; background: #16e086; color: white; border: none; border-radius: 10px; font-weight: bold;">Aplicar</button>
-        </div>
-      </div>
-    </div>
+  <!-- Toast Notification -->
+  <div class="toast" id="toastNotification"></div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div id="loadingText" style="color: white; font-size: 16px;">Cargando...</div>
   </div>
 
-  <!-- SCRIPT PRINCIPAL -->
+  <!-- Hidden file input for image upload -->
+  <input type="file" id="imageUploadInput" accept="image/*" style="display: none;">
+
+  <!-- Firebase SDK -->
   <script type="module">
-    // Importaciones de Firebase (las mismas que en el código original)
+    // Import Firebase modules
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
     import {
       getFirestore,
       collection,
       query,
-      orderBy,
-      limit,
+      where,
       getDocs,
       doc,
       getDoc,
       updateDoc,
       addDoc,
-      deleteDoc,
       Timestamp,
-      where,
       setDoc,
-      arrayUnion,
       onSnapshot
     } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
-    import { 
-      getAuth, 
-      onAuthStateChanged, 
-      signInWithEmailAndPassword,
-      signOut 
-    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
     import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-storage.js";
 
-    // Configuración de Firebase (la misma del código original)
+    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyAMTWJr3mISmNiP-e_KjCO9BdBPi7Uuug4",
       authDomain: "formulario-2-8929a.firebaseapp.com",
@@ -897,76 +1418,122 @@
       measurementId: "G-HJNZXRENE9"
     };
 
-    // Inicialización de Firebase
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const auth = getAuth(app);
     const storage = getStorage(app);
 
-    // Variables globales
+    // State variables
     let currentCollaborator = null;
+    let products = [];
     let invoice = [];
     let totalPrice = 0;
-    let discountPercentage = 0;
+    let discount = 0;
     let discountedTotal = 0;
-    let html5QrCode = null;
-    let currentShift = null;
+    let amountReceived = 0;
+    let taxConfig = { itbis: 18, iva: 0, active: true };
     let exchangeRates = { usd: 56.50, eur: 61.20 };
-    let taxConfig = { itbis: 18, iva: 0, activo: false };
-    let productsMap = new Map();
+    let currentShift = null;
+    let html5QrCode = null;
+    let isScannerActive = false;
 
-    // Elementos del DOM
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    const toastNotification = document.getElementById('toastNotification');
-    const toastMessage = document.getElementById('toastMessage');
-    const mobileSearchInput = document.getElementById('mobileSearchInput');
-    const mobileScannerBtn = document.getElementById('mobileScannerBtn');
-    const mobileProductsList = document.getElementById('mobileProductsList');
-    const mobileInvoiceItems = document.getElementById('mobileInvoiceItems');
-    const mobileTotalDisplay = document.getElementById('mobileTotalDisplay');
-    const itemCountBadge = document.getElementById('itemCountBadge');
-    const userGreeting = document.getElementById('userGreeting');
-    const invoiceUserMobile = document.getElementById('invoiceUserMobile');
-    const userAvatarMobile = document.getElementById('userAvatarMobile');
-    const shiftInfoMobile = document.getElementById('shiftInfoMobile');
-    const timerMobile = document.getElementById('timerMobile');
+    // DOM Elements
+    const loginScreen = document.getElementById('loginScreen');
+    const posScreen = document.getElementById('posScreen');
+    const mobileUsername = document.getElementById('mobileUsername');
+    const mobilePin = document.getElementById('mobilePin');
+    const mobileLoginBtn = document.getElementById('mobileLoginBtn');
+    const loginError = document.getElementById('loginError');
+    
+    const productsGrid = document.getElementById('productsGrid');
+    const invoiceItemsMobile = document.getElementById('invoiceItemsMobile');
+    const totalAmountMobile = document.getElementById('totalAmountMobile');
     const usdTotalMobile = document.getElementById('usdTotalMobile');
     const eurTotalMobile = document.getElementById('eurTotalMobile');
-    const mobileDiscountBtn = document.getElementById('mobileDiscountBtn');
-    const mobileCashBtn = document.getElementById('mobileCashBtn');
-    const mobileCardBtn = document.getElementById('mobileCardBtn');
-    const mobilePayBtn = document.getElementById('mobilePayBtn');
-    const scannerModalMobile = document.getElementById('scannerModalMobile');
-    const closeScannerModal = document.getElementById('closeScannerModal');
-    const scannerContainerMobile = document.getElementById('scannerContainerMobile');
-    const cashModalMobile = document.getElementById('cashModalMobile');
-    const closeCashModal = document.getElementById('closeCashModal');
-    const cashTotalAmount = document.getElementById('cashTotalAmount');
-    const cashReceivedInput = document.getElementById('cashReceivedInput');
-    const cashChangeAmount = document.getElementById('cashChangeAmount');
-    const cashBackspaceBtn = document.getElementById('cashBackspaceBtn');
-    const cancelCashBtn = document.getElementById('cancelCashBtn');
-    const confirmCashBtn = document.getElementById('confirmCashBtn');
-    const invoiceModalMobile = document.getElementById('invoiceModalMobile');
-    const closeInvoiceModal = document.getElementById('closeInvoiceModal');
-    const invoiceIdDisplay = document.getElementById('invoiceIdDisplay');
-    const invoiceDateDisplay = document.getElementById('invoiceDateDisplay');
-    const invoiceModalTotal = document.getElementById('invoiceModalTotal');
-    const invoicePaymentMethod = document.getElementById('invoicePaymentMethod');
-    const invoiceModalChange = document.getElementById('invoiceModalChange');
-    const printInvoiceBtn = document.getElementById('printInvoiceBtn');
+    
+    const mobileSearch = document.getElementById('mobileSearch');
+    const scannerBtnMobile = document.getElementById('scannerBtnMobile');
+    const viewGridMobile = document.getElementById('viewGridMobile');
+    const viewListMobile = document.getElementById('viewListMobile');
     const closeInvoiceBtn = document.getElementById('closeInvoiceBtn');
-    const discountModalMobile = document.getElementById('discountModalMobile');
-    const closeDiscountModal = document.getElementById('closeDiscountModal');
-    const discountCurrentTotal = document.getElementById('discountCurrentTotal');
-    const discountPercentageInput = document.getElementById('discountPercentageInput');
-    const discountAmountPreview = document.getElementById('discountAmountPreview');
-    const discountedTotalPreview = document.getElementById('discountedTotalPreview');
-    const cancelDiscountBtn = document.getElementById('cancelDiscountBtn');
+    const invoiceSection = document.getElementById('invoiceSection');
+    
+    const discountBtnMobile = document.getElementById('discountBtnMobile');
+    const cashBtnMobile = document.getElementById('cashBtnMobile');
+    const cardBtnMobile = document.getElementById('cardBtnMobile');
+    const invoiceBtnMobile = document.getElementById('invoiceBtnMobile');
+    
+    const navProducts = document.getElementById('navProducts');
+    const navInvoice = document.getElementById('navInvoice');
+    const navHistory = document.getElementById('navHistory');
+    const navReports = document.getElementById('navReports');
+    const navMenu = document.getElementById('navMenu');
+    const invoiceBadge = document.getElementById('invoiceBadge');
+    
+    const userBtnMobile = document.getElementById('userBtnMobile');
+    const shiftBtnMobile = document.getElementById('shiftBtnMobile');
+    const taxBtnMobile = document.getElementById('taxBtnMobile');
+    const userAvatarMobile = document.getElementById('userAvatarMobile');
+    
+    const cashModal = document.getElementById('cashModal');
+    const cashTotalAmount = document.getElementById('cashTotalAmount');
+    const cashReceivedDisplay = document.getElementById('cashReceivedDisplay');
+    const cashChangeAmount = document.getElementById('cashChangeAmount');
+    const cashReceivedInput = document.getElementById('cashReceivedInput');
+    const cashClearBtn = document.getElementById('cashClearBtn');
+    const cashConfirmBtn = document.getElementById('cashConfirmBtn');
+    const closeCashModal = document.getElementById('closeCashModal');
+    
+    const cardModal = document.getElementById('cardModal');
+    const cardTotalAmount = document.getElementById('cardTotalAmount');
+    const confirmCardBtn = document.getElementById('confirmCardBtn');
+    const closeCardModal = document.getElementById('closeCardModal');
+    
+    const discountModal = document.getElementById('discountModal');
+    const discountInput = document.getElementById('discountInput');
+    const discountClearBtn = document.getElementById('discountClearBtn');
     const applyDiscountBtn = document.getElementById('applyDiscountBtn');
+    const closeDiscountModal = document.getElementById('closeDiscountModal');
+    
+    const scannerModal = document.getElementById('scannerModal');
+    const scannerViewport = document.getElementById('scannerViewport');
+    const closeScannerModal = document.getElementById('closeScannerModal');
+    const switchCameraBtn = document.getElementById('switchCameraBtn');
+    const toggleScannerBtn = document.getElementById('toggleScannerBtn');
+    const uploadImageBtn = document.getElementById('uploadImageBtn');
+    const imageUploadInput = document.getElementById('imageUploadInput');
+    
+    const shiftModal = document.getElementById('shiftModal');
+    const shiftUserName = document.getElementById('shiftUserName');
+    const shiftName = document.getElementById('shiftName');
+    const shiftStartTime = document.getElementById('shiftStartTime');
+    const shiftEndTime = document.getElementById('shiftEndTime');
+    const shiftTimeRemaining = document.getElementById('shiftTimeRemaining');
+    const endShiftBtn = document.getElementById('endShiftBtn');
+    const closeShiftModal = document.getElementById('closeShiftModal');
+    
+    const taxesModal = document.getElementById('taxesModal');
+    const taxItbisValue = document.getElementById('taxItbisValue');
+    const taxIvaValue = document.getElementById('taxIvaValue');
+    const taxStatus = document.getElementById('taxStatus');
+    const newItbisInput = document.getElementById('newItbisInput');
+    const taxClearBtn = document.getElementById('taxClearBtn');
+    const updateTaxesBtn = document.getElementById('updateTaxesBtn');
+    const closeTaxesModal = document.getElementById('closeTaxesModal');
+    
+    const printModal = document.getElementById('printModal');
+    const invoicePrintContent = document.getElementById('invoicePrintContent');
+    const closePrintModal = document.getElementById('closePrintModal');
+    const sendInvoiceBtn = document.getElementById('sendInvoiceBtn');
+    const printInvoiceBtn = document.getElementById('printInvoiceBtn');
+    
+    const toastNotification = document.getElementById('toastNotification');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const loadingText = document.getElementById('loadingText');
 
-    // Funciones de utilidad
-    function showLoading() {
+    // Utility Functions
+    function showLoading(message = 'Cargando...') {
+      loadingText.textContent = message;
       loadingOverlay.style.display = 'flex';
     }
 
@@ -975,479 +1542,578 @@
     }
 
     function showToast(message, type = 'success') {
-      toastMessage.textContent = message;
+      toastNotification.textContent = message;
+      toastNotification.style.background = type === 'success' ? 'rgba(22, 224, 134, 0.9)' : 
+                                          type === 'error' ? 'rgba(231, 76, 60, 0.9)' :
+                                          'rgba(243, 156, 18, 0.9)';
       toastNotification.style.display = 'block';
-      toastNotification.style.background = type === 'error' ? 'rgba(231, 76, 60, 0.95)' : 
-                                         type === 'warning' ? 'rgba(243, 156, 18, 0.95)' : 
-                                         'rgba(22, 224, 134, 0.95)';
       
       setTimeout(() => {
         toastNotification.style.display = 'none';
       }, 3000);
     }
 
-    function formatNumberWithCommas(number) {
-      if (typeof number === 'string') {
-        number = number.replace(/,/g, '');
-      }
-      const num = parseFloat(number);
-      if (isNaN(num)) return '0';
-      if (num % 1 === 0) {
-        return num.toLocaleString('en-US');
-      } else {
-        return num.toLocaleString('en-US', {
-          minimumFractionDigits: 0,
-          maximumFractionDigits: 2
-        });
+    function formatNumber(num) {
+      return new Intl.NumberFormat('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(num);
+    }
+
+    function formatCurrency(num) {
+      return `$${formatNumber(num)}`;
+    }
+
+    // Authentication
+    async function authenticateCollaborator(username, pin) {
+      try {
+        showLoading('Verificando credenciales...');
+        
+        const collaboratorsQuery = query(
+          collection(db, "Collaborators"),
+          where("username", "==", username),
+          where("pin", "==", pin)
+        );
+        
+        const snapshot = await getDocs(collaboratorsQuery);
+        
+        if (snapshot.empty) {
+          loginError.style.display = 'block';
+          hideLoading();
+          return false;
+        }
+        
+        const collaboratorDoc = snapshot.docs[0];
+        currentCollaborator = {
+          id: collaboratorDoc.id,
+          ...collaboratorDoc.data()
+        };
+        
+        // Save to localStorage
+        localStorage.setItem('collaboratorLoggedIn', 'true');
+        localStorage.setItem('collaboratorData', JSON.stringify(currentCollaborator));
+        
+        hideLoading();
+        return true;
+        
+      } catch (error) {
+        console.error('Authentication error:', error);
+        hideLoading();
+        showToast('Error de conexión', 'error');
+        return false;
       }
     }
 
-    // Función para cargar productos del colaborador
-    async function loadCollaboratorProducts(searchTerm = '') {
-      if (!currentCollaborator) return;
-      
+    function logoutCollaborator() {
+      currentCollaborator = null;
+      localStorage.removeItem('collaboratorLoggedIn');
+      localStorage.removeItem('collaboratorData');
+      loginScreen.style.display = 'flex';
+      posScreen.style.display = 'none';
+      invoice = [];
+      updateInvoiceDisplay();
+    }
+
+    // Load Collaborator Data
+    async function loadCollaboratorData() {
       try {
-        showLoading();
+        showLoading('Cargando datos...');
+        
+        // Load exchange rates
+        const ratesRef = doc(db, "exchangeRates", currentCollaborator.userId);
+        const ratesDoc = await getDoc(ratesRef);
+        if (ratesDoc.exists()) {
+          exchangeRates = ratesDoc.data();
+        }
+        
+        // Load tax config
+        const taxRef = doc(db, "impuesto", currentCollaborator.userId);
+        const taxDoc = await getDoc(taxRef);
+        if (taxDoc.exists()) {
+          taxConfig = taxDoc.data();
+          updateTaxesDisplay();
+        }
+        
+        // Load shift info
+        await checkCurrentShift();
+        
+        // Load products
+        await loadProducts();
+        
+        hideLoading();
+        
+      } catch (error) {
+        console.error('Error loading data:', error);
+        hideLoading();
+        showToast('Error al cargar datos', 'error');
+      }
+    }
+
+    // Products Management
+    async function loadProducts(searchTerm = '') {
+      try {
+        showLoading('Cargando productos...');
+        
+        productsGrid.innerHTML = '';
         
         const businessesRef = collection(db, "businesses");
         const businessesSnapshot = await getDocs(businessesRef);
         
-        productsMap.clear();
-        mobileProductsList.innerHTML = '';
-        
         if (businessesSnapshot.empty) {
-          mobileProductsList.innerHTML = '<div style="text-align: center; padding: 40px; color: #95a5a6;">No hay productos disponibles</div>';
+          productsGrid.innerHTML = '<div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.5);"><i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 15px;"></i><p>No hay productos disponibles</p></div>';
           hideLoading();
           return;
         }
         
-        let productsCount = 0;
-        
         for (const businessDoc of businessesSnapshot.docs) {
           const productsRef = collection(db, "businesses", businessDoc.id, "products");
-          let productsQuery = query(productsRef, where("userId", "==", currentCollaborator.userId));
-          
-          if (searchTerm) {
-            const searchTermLower = searchTerm.toLowerCase();
-            const productsSnapshot = await getDocs(productsQuery);
-            
-            for (const doc of productsSnapshot.docs) {
-              const product = doc.data();
-              const productNameLower = product.name.toLowerCase();
-              const productEAN = product.eanUpcCode || '';
-              
-              if ((productNameLower.includes(searchTermLower) || productEAN.includes(searchTerm)) && 
-                  product.userId === currentCollaborator.userId) {
-                const productKey = `${businessDoc.id}-${doc.id}`;
-                
-                if (!productsMap.has(productKey)) {
-                  productsMap.set(productKey, { product, businessDoc, doc });
-                  productsCount++;
-                }
-              }
-            }
-            continue;
-          }
+          const productsQuery = query(
+            productsRef, 
+            where("userId", "==", currentCollaborator.userId)
+          );
           
           const querySnapshot = await getDocs(productsQuery);
           
-          for (const doc of querySnapshot.docs) {
-            const product = doc.data();
-            const productKey = `${businessDoc.id}-${doc.id}`;
+          for (const productDoc of querySnapshot.docs) {
+            const product = productDoc.data();
             
-            if (!productsMap.has(productKey)) {
-              productsMap.set(productKey, { product, businessDoc, doc });
-              productsCount++;
+            // Apply search filter
+            if (searchTerm) {
+              const searchLower = searchTerm.toLowerCase();
+              const nameMatch = product.name.toLowerCase().includes(searchLower);
+              const eanMatch = product.eanUpcCode?.includes(searchTerm);
+              
+              if (!nameMatch && !eanMatch) {
+                continue;
+              }
             }
+            
+            // Create product card
+            const productCard = document.createElement('div');
+            productCard.className = 'product-card';
+            productCard.dataset.id = productDoc.id;
+            productCard.dataset.business = businessDoc.id;
+            
+            // Check expiration
+            let badgeHtml = '';
+            if (product.expirationDate) {
+              const expirationDate = new Date(product.expirationDate);
+              const today = new Date();
+              const daysDiff = Math.ceil((expirationDate - today) / (1000 * 60 * 60 * 24));
+              
+              if (daysDiff < 0) {
+                badgeHtml = '<span class="product-badge badge-expired">VENCIDO</span>';
+              } else if (daysDiff <= 30) {
+                badgeHtml = `<span class="product-badge badge-warning">VENCE EN ${daysDiff} DÍAS</span>`;
+              }
+            }
+            
+            // Check tax
+            let taxBadge = '';
+            if (taxConfig.active && (product.applyItbis || product.applyIva)) {
+              taxBadge = '<span class="product-badge badge-tax">IMPUESTOS</span>';
+            }
+            
+            productCard.innerHTML = `
+              ${badgeHtml}
+              ${taxBadge}
+              <img src="${product.imageUrl || 'https://via.placeholder.com/100x100?text=No+Image'}" class="product-image" alt="${product.name}">
+              <div class="product-name">${product.name}</div>
+              <div class="product-price">${formatCurrency(product.pricePerUnit)}</div>
+              ${product.eanUpcCode ? `<div class="product-ean-mobile"><i class="fas fa-barcode"></i> ${product.eanUpcCode}</div>` : ''}
+            `;
+            
+            productCard.addEventListener('click', () => addToInvoice(product, businessDoc.id, productDoc.id));
+            productsGrid.appendChild(productCard);
           }
         }
         
-        // Renderizar productos
-        for (const [key, { product, businessDoc, doc }] of productsMap) {
-          const productCard = document.createElement('div');
-          productCard.className = 'mobile-product-card';
-          productCard.setAttribute('data-product-id', doc.id);
-          productCard.setAttribute('data-business-name', businessDoc.id);
-          
-          const productImage = product.imageUrl || 'https://via.placeholder.com/60x60?text=Producto';
-          
-          let taxBadge = '';
-          if (taxConfig.activo && (product.applyItbis || product.applyIva)) {
-            taxBadge = `<div class="product-tax-badge">`;
-            if (product.applyItbis) taxBadge += 'ITBIS';
-            if (product.applyItbis && product.applyIva) taxBadge += '+';
-            if (product.applyIva) taxBadge += 'IVA';
-            taxBadge += `</div>`;
-          }
-          
-          productCard.innerHTML = `
-            ${product.quantity === 0 ? '<div class="badge expired-badge">AGOTADO</div>' : ''}
-            <img src="${productImage}" alt="${product.name}" class="product-image" onerror="this.src='https://via.placeholder.com/60x60?text=Producto'">
-            <div class="product-name">${product.name}</div>
-            ${taxBadge}
-            <div class="product-price">$${formatNumberWithCommas(product.pricePerUnit)}</div>
-            ${product.eanUpcCode ? `<div style="font-size: 9px; color: #95a5a6; margin-top: 3px;">${product.eanUpcCode}</div>` : ''}
-          `;
-          
-          if (product.quantity > 0) {
-            productCard.addEventListener('click', () => addProductToInvoice(product, businessDoc.id, doc.id));
-          }
-          
-          mobileProductsList.appendChild(productCard);
+        if (productsGrid.children.length === 0) {
+          productsGrid.innerHTML = '<div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.5);"><i class="fas fa-search" style="font-size: 48px; margin-bottom: 15px;"></i><p>No se encontraron productos</p></div>';
         }
         
         hideLoading();
         
-        if (productsCount === 0) {
-          mobileProductsList.innerHTML = '<div style="text-align: center; padding: 40px; color: #95a5a6;">No se encontraron productos</div>';
-        }
-        
       } catch (error) {
-        console.error("Error al cargar productos:", error);
+        console.error('Error loading products:', error);
         hideLoading();
         showToast('Error al cargar productos', 'error');
       }
     }
 
-    // Función para agregar producto a la factura
-    function addProductToInvoice(product, businessName, productId) {
+    // Invoice Management
+    function addToInvoice(product, businessName, productId) {
+      // Check stock
       if (product.quantity === 0) {
-        showToast('Producto agotado', 'warning');
+        showToast('Producto agotado', 'error');
         return;
       }
       
-      const existingProduct = invoice.find(item => item.productId === productId);
+      // Check expiration
+      if (product.expirationDate) {
+        const expirationDate = new Date(product.expirationDate);
+        const today = new Date();
+        const daysDiff = Math.ceil((expirationDate - today) / (1000 * 60 * 60 * 24));
+        
+        if (daysDiff < 0) {
+          showToast('Producto vencido', 'warning');
+          return;
+        } else if (daysDiff <= 7) {
+          showToast(`Producto próximo a vencer (${daysDiff} días)`, 'warning');
+        }
+      }
       
-      if (existingProduct) {
-        if (existingProduct.quantity >= product.quantity) {
-          showToast('No hay suficiente stock', 'warning');
+      // Add to invoice
+      const existingItem = invoice.find(item => item.productId === productId);
+      
+      if (existingItem) {
+        if (existingItem.quantity >= product.quantity) {
+          showToast('Stock insuficiente', 'error');
           return;
         }
-        existingProduct.quantity += 1;
+        existingItem.quantity += 1;
       } else {
-        invoice.push({ 
-          ...product, 
-          businessName, 
-          productId, 
-          quantity: 1 
+        invoice.push({
+          ...product,
+          businessName,
+          productId,
+          quantity: 1
         });
       }
       
       updateInvoiceDisplay();
-      showToast(`${product.name} agregado`, 'success');
+      showToast('Producto agregado', 'success');
     }
 
-    // Función para actualizar la visualización de la factura
+    function removeFromInvoice(productId) {
+      const index = invoice.findIndex(item => item.productId === productId);
+      
+      if (index !== -1) {
+        invoice[index].quantity -= 1;
+        
+        if (invoice[index].quantity === 0) {
+          invoice.splice(index, 1);
+        }
+      }
+      
+      updateInvoiceDisplay();
+    }
+
     function updateInvoiceDisplay() {
-      mobileInvoiceItems.innerHTML = '';
+      // Update invoice items
+      invoiceItemsMobile.innerHTML = '';
       totalPrice = 0;
       
-      if (invoice.length === 0) {
-        mobileInvoiceItems.innerHTML = `
-          <div style="text-align: center; padding: 40px 20px; color: #95a5a6;">
-            <i class="fas fa-cart-plus" style="font-size: 40px; margin-bottom: 15px; opacity: 0.5;"></i>
-            <p>No hay productos en la factura</p>
-            <p style="font-size: 12px; margin-top: 10px;">Agrega productos desde el panel izquierdo</p>
-          </div>
-        `;
-        mobileTotalDisplay.textContent = '$0.00';
-        itemCountBadge.textContent = '0';
-        return;
-      }
-      
-      invoice.forEach((item, index) => {
-        const priceWithTaxes = applyTaxesToProduct(item.pricePerUnit, item);
-        const totalItemPrice = priceWithTaxes * item.quantity;
+      invoice.forEach(item => {
+        // Apply taxes if configured
+        let itemPrice = item.pricePerUnit;
+        if (taxConfig.active) {
+          if (item.applyItbis) {
+            itemPrice += itemPrice * (taxConfig.itbis / 100);
+          }
+          if (item.applyIva) {
+            itemPrice += itemPrice * (taxConfig.iva / 100);
+          }
+        }
+        
+        const totalItemPrice = itemPrice * item.quantity;
         totalPrice += totalItemPrice;
         
-        const itemElement = document.createElement('div');
-        itemElement.className = 'invoice-item-mobile';
-        itemElement.innerHTML = `
-          <div class="item-details">
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'invoice-item';
+        itemDiv.innerHTML = `
+          <div class="item-info">
             <div class="item-name">${item.name}</div>
-            <div class="item-quantity-price">
-              ${item.quantity} x $${formatNumberWithCommas(item.pricePerUnit)}
-              ${getTaxInfoForProduct(item)}
+            <div class="item-details">
+              <span>${item.quantity} x ${formatCurrency(itemPrice)}</span>
+              ${taxConfig.active && (item.applyItbis || item.applyIva) ? '<span><i class="fas fa-percent"></i> Impuestos</span>' : ''}
             </div>
           </div>
-          <div class="item-total">$${formatNumberWithCommas(totalItemPrice)}</div>
-          <button class="remove-item-btn" data-index="${index}">
-            <i class="fas fa-times"></i>
+          <div class="item-price">${formatCurrency(totalItemPrice)}</div>
+          <button class="remove-btn-mobile" onclick="removeFromInvoice('${item.productId}')">
+            <i class="fas fa-trash"></i>
           </button>
         `;
-        
-        mobileInvoiceItems.appendChild(itemElement);
+        invoiceItemsMobile.appendChild(itemDiv);
       });
       
-      discountedTotal = discountPercentage > 0 ? totalPrice - (totalPrice * discountPercentage / 100) : totalPrice;
-      
-      mobileTotalDisplay.textContent = `$${formatNumberWithCommas(discountedTotal)}`;
-      itemCountBadge.textContent = invoice.length.toString();
-      
-      updateCurrencyTotals();
-      
-      // Agregar event listeners a los botones de eliminar
-      document.querySelectorAll('.remove-item-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const index = parseInt(e.currentTarget.getAttribute('data-index'));
-          removeItemFromInvoice(index);
-        });
-      });
-    }
-
-    // Función para eliminar item de la factura
-    function removeItemFromInvoice(index) {
-      if (index >= 0 && index < invoice.length) {
-        invoice.splice(index, 1);
-        updateInvoiceDisplay();
-        showToast('Producto eliminado', 'success');
-      }
-    }
-
-    // Función para aplicar impuestos
-    function applyTaxesToProduct(price, productData) {
-      let finalPrice = price;
-      
-      if (taxConfig.activo) {
-        if (productData.applyItbis) {
-          finalPrice = finalPrice + (finalPrice * (taxConfig.itbis / 100));
-        }
-        if (productData.applyIva) {
-          finalPrice = finalPrice + (finalPrice * (taxConfig.iva / 100));
-        }
-      }
-      
-      return finalPrice;
-    }
-
-    function getTaxInfoForProduct(productData) {
-      let taxInfo = '';
-      
-      if (taxConfig.activo) {
-        const basePrice = productData.pricePerUnit;
-        const itbisAmount = productData.applyItbis ? basePrice * (taxConfig.itbis / 100) : 0;
-        const ivaAmount = productData.applyIva ? basePrice * (taxConfig.iva / 100) : 0;
-        
-        if (productData.applyItbis || productData.applyIva) {
-          taxInfo = ' (';
-          if (productData.applyItbis) taxInfo += `+ITBIS`;
-          if (productData.applyItbis && productData.applyIva) taxInfo += '/';
-          if (productData.applyIva) taxInfo += `+IVA`;
-          taxInfo += ')';
-        }
-      }
-      
-      return taxInfo;
-    }
-
-    // Función para actualizar totales en otras monedas
-    function updateCurrencyTotals() {
-      if (!exchangeRates) return;
-      
-      const usdAmount = (discountedTotal / exchangeRates.usd).toFixed(2);
-      const eurAmount = (discountedTotal / exchangeRates.eur).toFixed(2);
-      
-      usdTotalMobile.textContent = `$${formatNumberWithCommas(usdAmount)}`;
-      eurTotalMobile.textContent = `€${formatNumberWithCommas(eurAmount)}`;
-    }
-
-    // Función para inicializar el escáner
-    function initializeScanner() {
-      try {
-        html5QrCode = new Html5Qrcode("scannerContainerMobile");
-        console.log("✅ Escáner inicializado");
-      } catch (error) {
-        console.error("❌ Error al inicializar escáner:", error);
-        showToast('Error al inicializar escáner', 'error');
-      }
-    }
-
-    // Función para abrir modal de escáner
-    async function openScannerModal() {
-      scannerModalMobile.style.display = 'flex';
-      
-      if (!html5QrCode) {
-        initializeScanner();
-      }
-      
-      setTimeout(async () => {
-        try {
-          await html5QrCode.start(
-            { facingMode: "environment" },
-            {
-              fps: 30,
-              qrbox: { width: 250, height: 250 },
-              aspectRatio: 1.0
-            },
-            (decodedText) => {
-              console.log("Código escaneado:", decodedText);
-              html5QrCode.stop();
-              closeScannerModal.click();
-              
-              mobileSearchInput.value = decodedText;
-              loadCollaboratorProducts(decodedText);
-              showToast(`Código escaneado: ${decodedText}`);
-            },
-            (error) => {
-              console.warn("Error de escaneo:", error);
-            }
-          );
-        } catch (error) {
-          console.error("Error al iniciar escáner:", error);
-          showToast('Error al acceder a la cámara', 'error');
-        }
-      }, 300);
-    }
-
-    // Función para procesar pago en efectivo
-    function openCashModal() {
       if (invoice.length === 0) {
-        showToast('No hay productos en la factura', 'warning');
-        return;
+        invoiceItemsMobile.innerHTML = '<div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.5);"><i class="fas fa-receipt" style="font-size: 48px; margin-bottom: 15px;"></i><p>No hay productos en la factura</p></div>';
       }
       
-      cashTotalAmount.textContent = `$${formatNumberWithCommas(discountedTotal)}`;
+      // Update totals
+      discountedTotal = discount > 0 ? totalPrice - (totalPrice * discount / 100) : totalPrice;
+      
+      totalAmountMobile.textContent = formatCurrency(discountedTotal);
+      cashTotalAmount.textContent = formatCurrency(discountedTotal);
+      cardTotalAmount.textContent = formatCurrency(discountedTotal);
+      
+      // Update currency totals
+      usdTotalMobile.innerHTML = `<i class="fas fa-dollar-sign"></i> ${formatCurrency(discountedTotal / exchangeRates.usd)}`;
+      eurTotalMobile.innerHTML = `<i class="fas fa-euro-sign"></i> ${formatCurrency(discountedTotal / exchangeRates.eur)}`;
+      
+      // Update badge
+      invoiceBadge.textContent = invoice.length;
+      
+      // Update invoice button state
+      invoiceBtnMobile.disabled = invoice.length === 0;
+      cashBtnMobile.disabled = invoice.length === 0;
+      cardBtnMobile.disabled = invoice.length === 0;
+    }
+
+    // Payment Processing
+    function setupCashPayment() {
+      // Clear input
       cashReceivedInput.value = '';
-      cashChangeAmount.textContent = '$0.00';
-      cashModalMobile.style.display = 'flex';
       
-      setTimeout(() => {
-        cashReceivedInput.focus();
-      }, 100);
-    }
-
-    // Función para calcular cambio
-    function calculateChange() {
-      const received = parseFloat(cashReceivedInput.value.replace(/,/g, '')) || 0;
-      const change = received - discountedTotal;
-      
-      cashChangeAmount.textContent = `$${formatNumberWithCommas(change)}`;
-      cashChangeAmount.style.color = change >= 0 ? '#16e086' : '#e74c3c';
-    }
-
-    // Función para confirmar pago en efectivo
-    async function confirmCashPayment() {
-      const received = parseFloat(cashReceivedInput.value.replace(/,/g, '')) || 0;
-      
-      if (received <= 0) {
-        showToast('Ingrese un monto válido', 'warning');
-        return;
-      }
-      
-      if (received < discountedTotal) {
-        showToast('Monto insuficiente', 'warning');
-        return;
-      }
-      
-      showLoading();
-      
-      try {
-        // Aquí iría la lógica para guardar la factura en Firebase
-        // Similar a la función saveInvoiceToFirebase del código original
-        
-        const invoiceId = generateInvoiceId();
+      // Calculate change
+      function calculateChange() {
+        const received = parseFloat(cashReceivedInput.value) || 0;
         const change = received - discountedTotal;
         
-        // Mostrar modal de confirmación
-        invoiceIdDisplay.textContent = invoiceId;
-        invoiceDateDisplay.textContent = new Date().toLocaleDateString();
-        invoiceModalTotal.textContent = `$${formatNumberWithCommas(discountedTotal)}`;
-        invoicePaymentMethod.textContent = 'Efectivo';
-        invoiceModalChange.textContent = `$${formatNumberWithCommas(change)}`;
+        amountReceived = received;
         
-        cashModalMobile.style.display = 'none';
-        invoiceModalMobile.style.display = 'flex';
+        cashReceivedDisplay.textContent = formatCurrency(received);
+        cashChangeAmount.textContent = formatCurrency(change);
         
-        // Limpiar factura
+        // Style based on amount
+        if (change < 0) {
+          cashChangeAmount.style.color = '#e74c3c';
+        } else {
+          cashChangeAmount.style.color = '#16e086';
+        }
+      }
+      
+      // Numeric pad
+      document.querySelectorAll('#cashModal .num-btn[data-value]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const value = btn.getAttribute('data-value');
+          cashReceivedInput.value = cashReceivedInput.value + value;
+          calculateChange();
+        });
+      });
+      
+      // Clear button
+      cashClearBtn.addEventListener('click', () => {
+        cashReceivedInput.value = '';
+        calculateChange();
+      });
+      
+      // Confirm button
+      cashConfirmBtn.addEventListener('click', async () => {
+        const received = parseFloat(cashReceivedInput.value) || 0;
+        
+        if (received < discountedTotal) {
+          showToast('Monto insuficiente', 'error');
+          return;
+        }
+        
+        await processPayment('Efectivo', received);
+      });
+      
+      // Input listener
+      cashReceivedInput.addEventListener('input', calculateChange);
+    }
+
+    async function processPayment(paymentType, amountReceived = 0) {
+      try {
+        showLoading('Procesando pago...');
+        
+        // Generate invoice ID
+        const invoiceId = `INV-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        
+        // Save to Firebase
+        const invoiceData = {
+          invoiceId,
+          collaboratorId: currentCollaborator.id,
+          collaboratorName: `${currentCollaborator.firstName} ${currentCollaborator.lastName}`,
+          items: invoice.map(item => ({
+            name: item.name,
+            quantity: item.quantity,
+            price: item.pricePerUnit,
+            total: item.pricePerUnit * item.quantity
+          })),
+          subtotal: totalPrice,
+          discount: discount,
+          discountAmount: totalPrice * (discount / 100),
+          tax: taxConfig.active ? taxConfig.itbis : 0,
+          taxAmount: totalPrice * (taxConfig.itbis / 100),
+          total: discountedTotal,
+          paymentType,
+          amountReceived,
+          change: amountReceived - discountedTotal,
+          timestamp: Timestamp.now(),
+          date: new Date().toISOString()
+        };
+        
+        // Save to invoices collection
+        await addDoc(collection(db, "invoices"), invoiceData);
+        
+        // Save to collaborator's history
+        const historyRef = collection(db, "users", currentCollaborator.userId, "invoiceHistory");
+        await addDoc(historyRef, invoiceData);
+        
+        // Update stock
+        for (const item of invoice) {
+          const productRef = doc(db, "businesses", item.businessName, "products", item.productId);
+          const productDoc = await getDoc(productRef);
+          
+          if (productDoc.exists()) {
+            const currentStock = productDoc.data().quantity;
+            await updateDoc(productRef, {
+              quantity: currentStock - item.quantity
+            });
+          }
+        }
+        
+        // Generate invoice HTML
+        generateInvoiceHTML(invoiceData);
+        
+        // Clear invoice
         invoice = [];
-        discountPercentage = 0;
+        discount = 0;
         updateInvoiceDisplay();
         
+        // Close modals
+        cashModal.style.display = 'none';
+        cardModal.style.display = 'none';
+        
+        // Show print modal
+        printModal.style.display = 'flex';
+        
+        hideLoading();
         showToast('Pago procesado exitosamente', 'success');
         
       } catch (error) {
-        console.error("Error al procesar pago:", error);
-        showToast('Error al procesar pago', 'error');
-      } finally {
+        console.error('Payment processing error:', error);
         hideLoading();
+        showToast('Error al procesar el pago', 'error');
       }
     }
 
-    // Función para generar ID de factura
-    function generateInvoiceId() {
-      const randomNumber = Math.floor(1000 + Math.random() * 9000);
-      return `Rtm-${randomNumber}`;
+    function generateInvoiceHTML(invoiceData) {
+      const itemsHtml = invoiceData.items.map(item => `
+        <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px;">
+          <span>${item.name} x${item.quantity}</span>
+          <span>${formatCurrency(item.total)}</span>
+        </div>
+      `).join('');
+      
+      const invoiceHtml = `
+        <div style="padding: 10px;">
+          <div style="text-align: center; margin-bottom: 15px;">
+            <h3 style="margin: 0 0 10px 0; color: #16e086;">ZANARA POS</h3>
+            <p style="margin: 0; font-size: 11px; color: #666;">Factura: ${invoiceData.invoiceId}</p>
+            <p style="margin: 5px 0; font-size: 11px; color: #666;">${new Date(invoiceData.date).toLocaleString()}</p>
+          </div>
+          
+          <div style="margin-bottom: 15px;">
+            <p style="margin: 0 0 5px 0; font-size: 11px;"><strong>Atendido por:</strong> ${invoiceData.collaboratorName}</p>
+          </div>
+          
+          <div style="margin-bottom: 15px; border-bottom: 1px dashed #ccc; padding-bottom: 10px;">
+            ${itemsHtml}
+          </div>
+          
+          <div style="font-size: 12px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+              <span>Subtotal:</span>
+              <span>${formatCurrency(invoiceData.subtotal)}</span>
+            </div>
+            ${invoiceData.discount > 0 ? `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+              <span>Descuento (${invoiceData.discount}%):</span>
+              <span>-${formatCurrency(invoiceData.discountAmount)}</span>
+            </div>
+            ` : ''}
+            ${invoiceData.tax > 0 ? `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+              <span>ITBIS (${invoiceData.tax}%):</span>
+              <span>${formatCurrency(invoiceData.taxAmount)}</span>
+            </div>
+            ` : ''}
+            <div style="display: flex; justify-content: space-between; margin-bottom: 3px; font-weight: bold;">
+              <span>Total:</span>
+              <span>${formatCurrency(invoiceData.total)}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+              <span>Método:</span>
+              <span>${invoiceData.paymentType}</span>
+            </div>
+            ${invoiceData.paymentType === 'Efectivo' ? `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+              <span>Recibido:</span>
+              <span>${formatCurrency(invoiceData.amountReceived)}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+              <span>Cambio:</span>
+              <span>${formatCurrency(invoiceData.change)}</span>
+            </div>
+            ` : ''}
+          </div>
+          
+          <div style="text-align: center; margin-top: 20px; padding-top: 10px; border-top: 1px dashed #ccc;">
+            <p style="margin: 0; font-size: 10px; color: #666;">¡Gracias por su compra!</p>
+            <p style="margin: 5px 0 0 0; font-size: 9px; color: #999;">Conserve esta factura para cualquier reclamo</p>
+          </div>
+        </div>
+      `;
+      
+      invoicePrintContent.innerHTML = invoiceHtml;
     }
 
-    // Función para abrir modal de descuento
-    function openDiscountModal() {
-      if (invoice.length === 0) {
-        showToast('No hay productos en la factura', 'warning');
-        return;
-      }
-      
-      discountCurrentTotal.textContent = `$${formatNumberWithCommas(totalPrice)}`;
-      discountPercentageInput.value = discountPercentage;
-      updateDiscountPreview();
-      discountModalMobile.style.display = 'flex';
+    // Scanner Functions
+    function initializeScanner() {
+      html5QrCode = new Html5Qrcode("scannerViewport");
     }
 
-    // Función para actualizar vista previa del descuento
-    function updateDiscountPreview() {
-      const percentage = parseFloat(discountPercentageInput.value) || 0;
-      const discountAmount = totalPrice * (percentage / 100);
-      const newTotal = totalPrice - discountAmount;
-      
-      discountAmountPreview.textContent = `$${formatNumberWithCommas(discountAmount)}`;
-      discountedTotalPreview.textContent = `$${formatNumberWithCommas(newTotal)}`;
-    }
-
-    // Función para aplicar descuento
-    function applyDiscount() {
-      const percentage = parseFloat(discountPercentageInput.value) || 0;
-      
-      if (percentage < 0 || percentage > 100) {
-        showToast('Porcentaje inválido (0-100)', 'warning');
-        return;
-      }
-      
-      discountPercentage = percentage;
-      updateInvoiceDisplay();
-      discountModalMobile.style.display = 'none';
-      showToast(`Descuento del ${percentage}% aplicado`, 'success');
-    }
-
-    // Función para cargar información del colaborador
-    async function loadCollaboratorInfo() {
-      if (!currentCollaborator) return;
-      
+    async function startScanner() {
       try {
-        // Cargar información básica
-        userGreeting.textContent = `${currentCollaborator.firstName} ${currentCollaborator.lastName}`;
-        invoiceUserMobile.textContent = `${currentCollaborator.firstName} ${currentCollaborator.lastName}`;
+        const config = {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+          aspectRatio: 1.0
+        };
         
-        if (currentCollaborator.profileImage) {
-          userAvatarMobile.src = currentCollaborator.profileImage;
-        }
+        await html5QrCode.start(
+          { facingMode: "environment" },
+          config,
+          onScanSuccess,
+          onScanError
+        );
         
-        // Cargar turno activo
-        await checkCollaboratorShift();
-        
-        // Cargar tasas de cambio
-        await loadExchangeRates();
-        
-        // Cargar configuración de impuestos
-        await loadTaxConfig();
+        isScannerActive = true;
+        toggleScannerBtn.innerHTML = '<i class="fas fa-stop"></i>';
+        showToast('Escáner activado', 'success');
         
       } catch (error) {
-        console.error("Error al cargar información del colaborador:", error);
+        console.error('Scanner error:', error);
+        showToast('Error al iniciar escáner', 'error');
       }
     }
 
-    // Función para verificar turno del colaborador
-    async function checkCollaboratorShift() {
-      if (!currentCollaborator) return;
-      
+    async function stopScanner() {
+      if (html5QrCode && isScannerActive) {
+        await html5QrCode.stop();
+        isScannerActive = false;
+        toggleScannerBtn.innerHTML = '<i class="fas fa-play"></i>';
+      }
+    }
+
+    function onScanSuccess(decodedText) {
+      stopScanner();
+      mobileSearch.value = decodedText;
+      loadProducts(decodedText);
+      scannerModal.style.display = 'none';
+      showToast(`Código escaneado: ${decodedText}`, 'success');
+    }
+
+    function onScanError(error) {
+      // Ignore scanning errors
+    }
+
+    // Shift Management
+    async function checkCurrentShift() {
       try {
         const shiftsQuery = query(
           collection(db, "Shifts"),
@@ -1455,191 +2121,405 @@
           where("active", "==", true)
         );
         
-        const shiftsSnapshot = await getDocs(shiftsQuery);
+        const snapshot = await getDocs(shiftsQuery);
         
-        if (!shiftsSnapshot.empty) {
-          const shiftDoc = shiftsSnapshot.docs[0];
+        if (!snapshot.empty) {
+          const shiftDoc = snapshot.docs[0];
           currentShift = {
             id: shiftDoc.id,
             ...shiftDoc.data()
           };
           
-          shiftInfoMobile.textContent = currentShift.shiftName || 'Turno Activo';
-          startShiftTimer();
-        } else {
-          shiftInfoMobile.textContent = 'Sin turno activo';
+          updateShiftDisplay();
         }
+        
       } catch (error) {
-        console.error("Error al verificar turno:", error);
+        console.error('Error checking shift:', error);
       }
     }
 
-    // Función para el temporizador del turno
-    function startShiftTimer() {
-      if (!currentShift) return;
-      
-      const updateTimer = () => {
-        if (!currentShift || !currentShift.endTime) return;
+    function updateShiftDisplay() {
+      if (currentShift) {
+        shiftUserName.textContent = `${currentCollaborator.firstName} ${currentCollaborator.lastName}`;
+        shiftName.textContent = currentShift.shiftName || 'Turno Activo';
         
-        const now = new Date();
-        const endTime = currentShift.endTime.toDate();
-        const diff = endTime - now;
+        const startTime = currentShift.startTime?.toDate();
+        const endTime = currentShift.endTime?.toDate();
         
-        if (diff <= 0) {
-          timerMobile.textContent = '00:00:00';
-          timerMobile.style.color = '#e74c3c';
+        if (startTime) {
+          shiftStartTime.textContent = startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+        
+        if (endTime) {
+          shiftEndTime.textContent = endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          
+          // Calculate remaining time
+          const now = new Date();
+          const remaining = endTime - now;
+          
+          if (remaining > 0) {
+            const hours = Math.floor(remaining / (1000 * 60 * 60));
+            const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+            shiftTimeRemaining.textContent = `${hours}h ${minutes}m`;
+          } else {
+            shiftTimeRemaining.textContent = 'FINALIZADO';
+            shiftTimeRemaining.style.color = '#e74c3c';
+          }
+        }
+      }
+    }
+
+    async function endShift() {
+      try {
+        showLoading('Finalizando turno...');
+        
+        if (currentShift) {
+          await updateDoc(doc(db, "Shifts", currentShift.id), {
+            active: false,
+            endTime: Timestamp.now()
+          });
+          
+          // Save to history
+          await addDoc(collection(db, "ShiftHistory"), {
+            collaboratorId: currentCollaborator.id,
+            collaboratorName: `${currentCollaborator.firstName} ${currentCollaborator.lastName}`,
+            shiftName: currentShift.shiftName,
+            startTime: currentShift.startTime,
+            endTime: Timestamp.now(),
+            duration: Math.floor((Date.now() - currentShift.startTime.toDate().getTime()) / (1000 * 60 * 60)),
+            timestamp: Timestamp.now()
+          });
+          
+          currentShift = null;
+          shiftModal.style.display = 'none';
+          showToast('Turno finalizado', 'success');
+        }
+        
+        hideLoading();
+        
+      } catch (error) {
+        console.error('Error ending shift:', error);
+        hideLoading();
+        showToast('Error al finalizar turno', 'error');
+      }
+    }
+
+    // Taxes Management
+    function updateTaxesDisplay() {
+      taxItbisValue.textContent = `${taxConfig.itbis}%`;
+      taxIvaValue.textContent = `${taxConfig.iva}%`;
+      taxStatus.textContent = taxConfig.active ? 'Activo' : 'Inactivo';
+      taxStatus.style.color = taxConfig.active ? '#16e086' : '#e74c3c';
+    }
+
+    async function updateTaxes() {
+      try {
+        const newItbis = parseInt(newItbisInput.value);
+        
+        if (isNaN(newItbis) || newItbis < 0 || newItbis > 100) {
+          showToast('Porcentaje inválido', 'error');
           return;
         }
         
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-        
-        const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        timerMobile.textContent = timeString;
-        
-        if (hours === 0 && minutes < 30) {
-          timerMobile.style.color = '#f39c12';
-        } else {
-          timerMobile.style.color = '#16e086';
-        }
-      };
-      
-      updateTimer();
-      setInterval(updateTimer, 1000);
-    }
-
-    // Función para cargar tasas de cambio
-    async function loadExchangeRates() {
-      try {
-        if (!currentCollaborator) return;
-        
-        const ratesRef = doc(db, "exchangeRates", currentCollaborator.userId);
-        const ratesDoc = await getDoc(ratesRef);
-        
-        if (ratesDoc.exists()) {
-          const ratesData = ratesDoc.data();
-          exchangeRates = {
-            usd: ratesData.usd || 56.50,
-            eur: ratesData.eur || 61.20
-          };
-        }
-      } catch (error) {
-        console.error("Error al cargar tasas:", error);
-      }
-    }
-
-    // Función para cargar configuración de impuestos
-    async function loadTaxConfig() {
-      try {
-        if (!currentCollaborator) return;
+        showLoading('Actualizando impuestos...');
         
         const taxRef = doc(db, "impuesto", currentCollaborator.userId);
-        const taxDoc = await getDoc(taxRef);
+        await setDoc(taxRef, {
+          itbis: newItbis,
+          iva: taxConfig.iva,
+          active: taxConfig.active,
+          updatedAt: Timestamp.now()
+        });
         
-        if (taxDoc.exists()) {
-          const taxData = taxDoc.data();
-          taxConfig = {
-            itbis: taxData.itbis || 18,
-            iva: taxData.iva || 0,
-            activo: taxData.activo || false
-          };
-        }
+        taxConfig.itbis = newItbis;
+        updateTaxesDisplay();
+        updateInvoiceDisplay();
+        
+        newItbisInput.value = '';
+        taxesModal.style.display = 'none';
+        
+        hideLoading();
+        showToast('Impuestos actualizados', 'success');
+        
       } catch (error) {
-        console.error("Error al cargar impuestos:", error);
+        console.error('Error updating taxes:', error);
+        hideLoading();
+        showToast('Error al actualizar impuestos', 'error');
       }
     }
 
     // Event Listeners
-    document.addEventListener('DOMContentLoaded', () => {
-      // Verificar si hay sesión activa
-      if (localStorage.getItem('collaboratorLoggedIn') === 'true') {
-        const collaboratorData = localStorage.getItem('collaboratorData');
-        if (collaboratorData) {
-          currentCollaborator = JSON.parse(collaboratorData);
-          loadCollaboratorInfo();
-          loadCollaboratorProducts();
-        }
+    mobileLoginBtn.addEventListener('click', async () => {
+      const username = mobileUsername.value.trim();
+      const pin = mobilePin.value.trim();
+      
+      if (!username || !pin) {
+        loginError.textContent = 'Por favor complete todos los campos';
+        loginError.style.display = 'block';
+        return;
       }
       
-      // Búsqueda de productos
-      mobileSearchInput.addEventListener('input', (e) => {
-        const searchTerm = e.target.value.trim();
-        loadCollaboratorProducts(searchTerm);
-      });
+      const authenticated = await authenticateCollaborator(username, pin);
       
-      // Botón de escáner
-      mobileScannerBtn.addEventListener('click', openScannerModal);
-      
-      // Cerrar modal de escáner
-      closeScannerModal.addEventListener('click', () => {
-        scannerModalMobile.style.display = 'none';
-        if (html5QrCode) {
-          html5QrCode.stop();
+      if (authenticated) {
+        loginError.style.display = 'none';
+        loginScreen.style.display = 'none';
+        posScreen.style.display = 'flex';
+        
+        // Load collaborator data
+        await loadCollaboratorData();
+        
+        // Initialize scanner
+        initializeScanner();
+      }
+    });
+
+    // Search functionality
+    mobileSearch.addEventListener('input', (e) => {
+      loadProducts(e.target.value);
+    });
+
+    // Scanner
+    scannerBtnMobile.addEventListener('click', () => {
+      scannerModal.style.display = 'flex';
+      if (!isScannerActive) {
+        startScanner();
+      }
+    });
+
+    toggleScannerBtn.addEventListener('click', async () => {
+      if (isScannerActive) {
+        await stopScanner();
+      } else {
+        await startScanner();
+      }
+    });
+
+    switchCameraBtn.addEventListener('click', async () => {
+      await stopScanner();
+      // Implement camera switching logic here
+      await startScanner();
+    });
+
+    uploadImageBtn.addEventListener('click', () => {
+      imageUploadInput.click();
+    });
+
+    imageUploadInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        try {
+          showLoading('Escaneando imagen...');
+          const result = await html5QrCode.scanFile(file);
+          onScanSuccess(result);
+          hideLoading();
+        } catch (error) {
+          hideLoading();
+          showToast('No se detectó código en la imagen', 'error');
         }
-      });
-      
-      // Modal de efectivo - botones numéricos
-      document.querySelectorAll('.cash-num-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const value = btn.getAttribute('data-value');
-          cashReceivedInput.value += value;
-          calculateChange();
-        });
-      });
-      
-      // Backspace en modal de efectivo
-      cashBackspaceBtn.addEventListener('click', () => {
-        cashReceivedInput.value = cashReceivedInput.value.slice(0, -1);
-        calculateChange();
-      });
-      
-      // Calcular cambio en tiempo real
-      cashReceivedInput.addEventListener('input', calculateChange);
-      
-      // Cancelar pago en efectivo
-      cancelCashBtn.addEventListener('click', () => {
-        cashModalMobile.style.display = 'none';
-      });
-      
-      // Confirmar pago en efectivo
-      confirmCashBtn.addEventListener('click', confirmCashPayment);
-      
-      // Botones de acción
-      mobileDiscountBtn.addEventListener('click', openDiscountModal);
-      mobileCashBtn.addEventListener('click', openCashModal);
-      mobilePayBtn.addEventListener('click', openCashModal); // Por ahora usa el mismo modal
-      
-      // Modal de descuento - vista previa
-      discountPercentageInput.addEventListener('input', updateDiscountPreview);
-      
-      // Cancelar descuento
-      cancelDiscountBtn.addEventListener('click', () => {
-        discountModalMobile.style.display = 'none';
-      });
-      
-      // Aplicar descuento
-      applyDiscountBtn.addEventListener('click', applyDiscount);
-      
-      // Cerrar modal de descuento
-      closeDiscountModal.addEventListener('click', () => {
-        discountModalMobile.style.display = 'none';
-      });
-      
-      // Cerrar modal de factura
-      closeInvoiceModal.addEventListener('click', () => {
-        invoiceModalMobile.style.display = 'none';
-      });
-      
-      closeInvoiceBtn.addEventListener('click', () => {
-        invoiceModalMobile.style.display = 'none';
-      });
-      
-      // Imprimir factura 
-      printInvoiceBtn.addEventListener('click', () => {
-        window.print(); 
+      }
+    });
+
+    // View toggle
+    viewGridMobile.addEventListener('click', () => {
+      viewGridMobile.classList.add('active');
+      viewListMobile.classList.remove('active');
+      productsGrid.classList.remove('list-view');
+    });
+
+    viewListMobile.addEventListener('click', () => {
+      viewListMobile.classList.add('active');
+      viewGridMobile.classList.remove('active');
+      productsGrid.classList.add('list-view');
+    });
+
+    // Navigation
+    navProducts.addEventListener('click', (e) => {
+      e.preventDefault();
+      invoiceSection.classList.remove('active');
+      navProducts.classList.add('active');
+      navInvoice.classList.remove('active');
+      navHistory.classList.remove('active');
+      navReports.classList.remove('active');
+      navMenu.classList.remove('active');
+    });
+
+    navInvoice.addEventListener('click', (e) => {
+      e.preventDefault();
+      invoiceSection.classList.add('active');
+      navProducts.classList.remove('active');
+      navInvoice.classList.add('active');
+      navHistory.classList.remove('active');
+      navReports.classList.remove('active');
+      navMenu.classList.remove('active');
+    });
+
+    closeInvoiceBtn.addEventListener('click', () => {
+      invoiceSection.classList.remove('active');
+      navProducts.classList.add('active');
+      navInvoice.classList.remove('active');
+    });
+
+    // Header buttons
+    userBtnMobile.addEventListener('click', () => {
+      // Show user info modal
+      showToast(`Usuario: ${currentCollaborator?.username}`, 'info');
+    });
+
+    shiftBtnMobile.addEventListener('click', () => {
+      updateShiftDisplay();
+      shiftModal.style.display = 'flex';
+    });
+
+    taxBtnMobile.addEventListener('click', () => {
+      updateTaxesDisplay();
+      taxesModal.style.display = 'flex';
+    });
+
+    // Payment buttons
+    discountBtnMobile.addEventListener('click', () => {
+      discountInput.value = discount;
+      discountModal.style.display = 'flex';
+    });
+
+    cashBtnMobile.addEventListener('click', () => {
+      setupCashPayment();
+      cashModal.style.display = 'flex';
+    });
+
+    cardBtnMobile.addEventListener('click', () => {
+      cardModal.style.display = 'flex';
+    });
+
+    invoiceBtnMobile.addEventListener('click', () => {
+      cashModal.style.display = 'flex';
+    });
+
+    // Discount modal
+    document.querySelectorAll('#discountModal .num-btn[data-value]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const value = btn.getAttribute('data-value');
+        discountInput.value = value;
       });
     });
+
+    discountClearBtn.addEventListener('click', () => {
+      discountInput.value = '';
+    });
+
+    applyDiscountBtn.addEventListener('click', () => {
+      const discountValue = parseInt(discountInput.value);
+      
+      if (isNaN(discountValue) || discountValue < 0 || discountValue > 100) {
+        showToast('Descuento inválido', 'error');
+        return;
+      }
+      
+      discount = discountValue;
+      updateInvoiceDisplay();
+      discountModal.style.display = 'none';
+      showToast(`Descuento del ${discount}% aplicado`, 'success');
+    });
+
+    // Card payment
+    confirmCardBtn.addEventListener('click', async () => {
+      await processPayment('Tarjeta');
+    });
+
+    // Shift modal
+    endShiftBtn.addEventListener('click', endShift);
+
+    // Taxes modal
+    document.querySelectorAll('#taxesModal .num-btn[data-value]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const value = btn.getAttribute('data-value');
+        newItbisInput.value = value;
+      });
+    });
+
+    taxClearBtn.addEventListener('click', () => {
+      newItbisInput.value = '';
+    });
+
+    updateTaxesBtn.addEventListener('click', updateTaxes);
+
+    // Print modal
+    printInvoiceBtn.addEventListener('click', () => {
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Factura ${Date.now()}</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; }
+              @media print {
+                body { padding: 0; }
+                button { display: none; }
+              }
+            </style>
+          </head>
+          <body>
+            ${invoicePrintContent.innerHTML}
+            <button onclick="window.print()" style="margin-top: 20px; padding: 10px 20px; background: #16e086; color: white; border: none; border-radius: 5px; cursor: pointer;">Imprimir</button>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+    });
+
+    sendInvoiceBtn.addEventListener('click', () => {
+      showToast('Función de envío en desarrollo', 'info');
+    });
+
+    // Close modal handlers
+    [closeCashModal, closeCardModal, closeDiscountModal, closeScannerModal, 
+     closeShiftModal, closeTaxesModal, closePrintModal].forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.closest('.modal-mobile').style.display = 'none';
+      });
+    });
+
+    // Close modals when clicking outside
+    document.querySelectorAll('.modal-mobile').forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.style.display = 'none';
+        }
+      });
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      // Escape to close modals
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-mobile').forEach(modal => {
+          modal.style.display = 'none';
+        });
+      }
+      
+      // F5 to refresh
+      if (e.key === 'F5') {
+        e.preventDefault();
+        loadProducts(mobileSearch.value);
+      }
+    });
+
+    // Check for saved session
+    window.addEventListener('load', () => {
+      if (localStorage.getItem('collaboratorLoggedIn') === 'true') {
+        const savedData = localStorage.getItem('collaboratorData');
+        if (savedData) {
+          currentCollaborator = JSON.parse(savedData);
+          loginScreen.style.display = 'none';
+          posScreen.style.display = 'flex';
+          loadCollaboratorData();
+          initializeScanner();
+        }
+      }
+    });
+
+    // Make functions available globally
+    window.removeFromInvoice = removeFromInvoice;
   </script>
 </body>
 </html>
