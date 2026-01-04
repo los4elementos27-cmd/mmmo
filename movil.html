@@ -1779,12 +1779,6 @@
       transform: translateY(-2px);
       box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
     }
-
-    /* Estilo para el campo de WhatsApp */
-    #whatsappNumber {
-      font-family: monospace;
-      letter-spacing: 1px;
-    }
   </style>
 </head>
 <body>
@@ -2153,7 +2147,7 @@
     </div>
   </div>
 
-  <!-- Tax Modal -->
+  <!-- Tax Modal (Solo visualización - sin editar) -->
   <div id="taxModal" class="modal-mobile tax-modal">
     <div class="modal-content-mobile">
       <div class="modal-header">
@@ -2169,47 +2163,35 @@
             <div class="config-label">
               <i class="fas fa-toggle-on"></i>
               <span>Sistema de Impuestos</span>
+              <span class="tax-status ${taxConfig.active ? 'tax-active' : 'tax-inactive'}">
+                ${taxConfig.active ? 'ACTIVO' : 'INACTIVO'}
+              </span>
             </div>
-            <label class="switch">
-              <input type="checkbox" id="toggleTaxSystem">
-              <span class="slider round"></span>
-            </label>
           </div>
           
           <div id="taxConfigSection" style="margin-top: 20px;">
             <div class="tax-input-group">
               <label class="tax-input-label">Porcentaje ITBIS:</label>
-              <input type="number" id="taxItbisInput" class="tax-input" placeholder="18" min="0" max="100" step="0.1">
+              <input type="text" id="taxItbisInput" class="tax-input" value="${taxConfig.itbis}%" readonly style="background: rgba(255,255,255,0.05);">
             </div>
             
             <div class="tax-input-group">
               <label class="tax-input-label">Porcentaje IVA:</label>
-              <input type="number" id="taxIvaInput" class="tax-input" placeholder="0" min="0" max="100" step="0.1">
-            </div>
-            
-            <div class="config-item" style="margin-top: 15px;">
-              <div class="config-label">
-                <i class="fas fa-lock"></i>
-                <span>Contraseña para Configuración:</span>
-              </div>
-              <input type="password" id="taxPasswordInput" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; padding: 5px 10px; color: white; width: 100px;">
+              <input type="text" id="taxIvaInput" class="tax-input" value="${taxConfig.iva}%" readonly style="background: rgba(255,255,255,0.05);">
             </div>
           </div>
         </div>
         
         <div class="tax-buttons">
-          <button class="tax-btn tax-btn-save" id="saveTaxConfigBtn">
-            <i class="fas fa-save"></i> Guardar Configuración
-          </button>
-          <button class="tax-btn tax-btn-cancel" id="cancelTaxConfigBtn">
-            Cancelar
+          <button class="tax-btn tax-btn-cancel" id="closeTaxModalBtn">
+            <i class="fas fa-times"></i> Cerrar
           </button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Rates Modal -->
+  <!-- Rates Modal (Solo visualización - sin editar) -->
   <div id="ratesModal" class="modal-mobile">
     <div class="modal-content-mobile">
       <div class="modal-header">
@@ -2235,18 +2217,17 @@
           </div>
         </div>
         
-        <div class="tax-input-group" style="margin-top: 20px;">
-          <label class="tax-input-label">Nueva Tasa USD:</label>
-          <input type="number" id="newUsdRate" class="tax-input" placeholder="56.50" step="0.01" min="0">
+        <div style="text-align: center; margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 10px;">
+          <p style="color: rgba(255,255,255,0.7); font-size: 14px; margin-bottom: 10px;">
+            <i class="fas fa-info-circle"></i> Las tasas de cambio son configuradas por el administrador del sistema.
+          </p>
+          <p style="color: rgba(255,255,255,0.5); font-size: 12px;">
+            Para modificar las tasas, contacte al administrador.
+          </p>
         </div>
         
-        <div class="tax-input-group">
-          <label class="tax-input-label">Nueva Tasa EUR:</label>
-          <input type="number" id="newEurRate" class="tax-input" placeholder="61.20" step="0.01" min="0">
-        </div>
-        
-        <button class="login-btn" style="margin-top: 20px;" id="updateRatesBtn">
-          <i class="fas fa-sync-alt"></i> Actualizar Tasas
+        <button class="login-btn" style="margin-top: 20px;" id="closeRatesModalBtn">
+          <i class="fas fa-check"></i> Entendido
         </button>
       </div>
     </div>
@@ -2498,8 +2479,8 @@
         </div>
         
         <div class="payment-input-group">
-          <label class="payment-label">Número de Teléfono (con código de país):</label>
-          <input type="number" id="whatsappNumber" class="payment-input" placeholder="+18091234567" autocomplete="off" pattern="[0-9]*" inputmode="numeric">
+          <label class="payment-label">Número de Teléfono (sin código de país):</label>
+          <input type="text" id="whatsappNumber" class="payment-input" placeholder="8091234567" autocomplete="off" pattern="[0-9]*" inputmode="numeric">
         </div>
         
         <div style="display: flex; gap: 10px; margin-top: 20px;">
@@ -2702,12 +2683,9 @@
     const closeShiftModal = document.getElementById('closeShiftModal');
     
     const taxModal = document.getElementById('taxModal');
-    const toggleTaxSystem = document.getElementById('toggleTaxSystem');
     const taxItbisInput = document.getElementById('taxItbisInput');
     const taxIvaInput = document.getElementById('taxIvaInput');
-    const taxPasswordInput = document.getElementById('taxPasswordInput');
-    const saveTaxConfigBtn = document.getElementById('saveTaxConfigBtn');
-    const cancelTaxConfigBtn = document.getElementById('cancelTaxConfigBtn');
+    const closeTaxModalBtn = document.getElementById('closeTaxModalBtn');
     const closeTaxModal = document.getElementById('closeTaxModal');
     const taxConfigSection = document.getElementById('taxConfigSection');
     
@@ -2715,9 +2693,7 @@
     const currentUsdRate = document.getElementById('currentUsdRate');
     const currentEurRate = document.getElementById('currentEurRate');
     const ratesUpdateTime = document.getElementById('ratesUpdateTime');
-    const newUsdRate = document.getElementById('newUsdRate');
-    const newEurRate = document.getElementById('newEurRate');
-    const updateRatesBtn = document.getElementById('updateRatesBtn');
+    const closeRatesModalBtn = document.getElementById('closeRatesModalBtn');
     const closeRatesModal = document.getElementById('closeRatesModal');
     
     const menuModal = document.getElementById('menuModal');
@@ -2992,11 +2968,15 @@
             active: taxData.activo || false
           };
           
-          // Update tax modal
-          toggleTaxSystem.checked = taxConfig.active;
-          taxItbisInput.value = taxConfig.itbis;
-          taxIvaInput.value = taxConfig.iva;
-          updateTaxModalVisibility();
+          // Update tax modal with read-only fields
+          const taxStatusElement = document.querySelector('.tax-status');
+          if (taxStatusElement) {
+            taxStatusElement.textContent = taxConfig.active ? 'ACTIVO' : 'INACTIVO';
+            taxStatusElement.className = `tax-status ${taxConfig.active ? 'tax-active' : 'tax-inactive'}`;
+          }
+          
+          if (taxItbisInput) taxItbisInput.value = `${taxConfig.itbis}%`;
+          if (taxIvaInput) taxIvaInput.value = `${taxConfig.iva}%`;
         } else {
           // Create default tax config
           await setDoc(taxRef, {
@@ -3009,68 +2989,6 @@
         }
       } catch (error) {
         console.error('Error loading tax config:', error);
-      }
-    }
-
-    // Save Tax Configuration
-    async function saveTaxConfig() {
-      try {
-        showLoading('Guardando configuración...');
-        
-        const password = taxPasswordInput.value.trim();
-        if (!password) {
-          showToast('Ingrese la contraseña', 'error');
-          hideLoading();
-          return;
-        }
-        
-        // Verificar contraseña (en app real sería encriptada)
-        const configRef = doc(db, "userConfig", currentCollaborator.userId);
-        const configDoc = await getDoc(configRef);
-        let configPassword = "123456"; // Contraseña por defecto
-        
-        if (configDoc.exists() && configDoc.data().adminPassword) {
-          configPassword = configDoc.data().adminPassword;
-        }
-        
-        if (password !== configPassword) {
-          showToast('Contraseña incorrecta', 'error');
-          hideLoading();
-          return;
-        }
-        
-        // Actualizar configuración de impuestos
-        const taxRef = doc(db, "impuesto", currentCollaborator.userId);
-        await updateDoc(taxRef, {
-          itbis: parseFloat(taxItbisInput.value) || 18,
-          iva: parseFloat(taxIvaInput.value) || 0,
-          activo: toggleTaxSystem.checked,
-          updatedAt: Timestamp.now(),
-          updatedBy: currentCollaborator.username
-        });
-        
-        // Update local config
-        taxConfig.itbis = parseFloat(taxItbisInput.value) || 18;
-        taxConfig.iva = parseFloat(taxIvaInput.value) || 0;
-        taxConfig.active = toggleTaxSystem.checked;
-        
-        hideLoading();
-        showToast('Configuración de impuestos guardada', 'success');
-        taxModal.style.display = 'none';
-        taxPasswordInput.value = '';
-        
-      } catch (error) {
-        console.error('Error saving tax config:', error);
-        hideLoading();
-        showToast('Error al guardar configuración', 'error');
-      }
-    }
-
-    function updateTaxModalVisibility() {
-      if (toggleTaxSystem.checked) {
-        taxConfigSection.style.display = 'block';
-      } else {
-        taxConfigSection.style.display = 'none';
       }
     }
 
@@ -3106,71 +3024,6 @@
         currentUsdRate.textContent = `$${exchangeRates.usd}`;
         currentEurRate.textContent = `€${exchangeRates.eur}`;
         ratesUpdateTime.textContent = '-';
-      }
-    }
-
-    // Update Exchange Rates
-    async function updateExchangeRates() {
-      try {
-        showLoading('Actualizando tasas...');
-        
-        const usdRate = parseFloat(newUsdRate.value);
-        const eurRate = parseFloat(newEurRate.value);
-        
-        if (!usdRate || !eurRate || usdRate <= 0 || eurRate <= 0) {
-          showToast('Ingrese tasas válidas', 'error');
-          hideLoading();
-          return;
-        }
-        
-        // Verificar contraseña para tasas
-        const password = prompt("Ingrese la contraseña para modificar tasas:");
-        if (!password) {
-          hideLoading();
-          return;
-        }
-        
-        const configRef = doc(db, "userConfig", currentCollaborator.userId);
-        const configDoc = await getDoc(configRef);
-        let configPassword = "123456"; // Contraseña por defecto
-        
-        if (configDoc.exists() && configDoc.data().adminPassword) {
-          configPassword = configDoc.data().adminPassword;
-        }
-        
-        if (password !== configPassword) {
-          showToast('Contraseña incorrecta', 'error');
-          hideLoading();
-          return;
-        }
-        
-        const ratesRef = doc(db, "exchangeRates", currentCollaborator.userId);
-        await setDoc(ratesRef, {
-          usd: usdRate,
-          eur: eurRate,
-          updatedAt: Timestamp.now(),
-          updatedBy: currentCollaborator.username
-        });
-        
-        exchangeRates.usd = usdRate;
-        exchangeRates.eur = eurRate;
-        
-        currentUsdRate.textContent = `$${usdRate}`;
-        currentEurRate.textContent = `€${eurRate}`;
-        ratesUpdateTime.textContent = formatDate(new Date());
-        
-        // Update currency totals
-        updateCurrencyTotals();
-        
-        hideLoading();
-        showToast('Tasas actualizadas', 'success');
-        newUsdRate.value = '';
-        newEurRate.value = '';
-        
-      } catch (error) {
-        console.error('Error updating exchange rates:', error);
-        hideLoading();
-        showToast('Error al actualizar tasas', 'error');
       }
     }
 
@@ -4396,15 +4249,18 @@
         return;
       }
       
-      // Validar formato de número (debe empezar con + y tener al menos 10 dígitos)
-      if (!phoneNumber.startsWith('+') || phoneNumber.replace(/\D/g, '').length < 10) {
-        showToast('Ingrese un número válido con código de país (ej: +18091234567)', 'error');
+      // Validar que sea un número válido (solo números, sin código de país)
+      if (!/^\d{10,}$/.test(phoneNumber)) {
+        showToast('Ingrese un número válido (10 dígitos mínimo, sin código de país)', 'error');
         return;
       }
       
+      // Asumir que es República Dominicana (+1)
+      const phoneNumberWithCountryCode = `+1${phoneNumber}`;
+      
       const message = window.currentWhatsAppMessage;
       const encodedMessage = encodeURIComponent(message);
-      const whatsappUrl = `https://wa.me/${phoneNumber.replace('+', '')}?text=${encodedMessage}`;
+      const whatsappUrl = `https://wa.me/${phoneNumberWithCountryCode}?text=${encodedMessage}`;
       
       window.open(whatsappUrl, '_blank');
       sendInvoiceModal.style.display = 'none';
@@ -4817,16 +4673,15 @@
       ratesModal.style.display = 'flex';
     });
 
-    // Tax modal
-    toggleTaxSystem.addEventListener('change', updateTaxModalVisibility);
-    saveTaxConfigBtn.addEventListener('click', saveTaxConfig);
-    cancelTaxConfigBtn.addEventListener('click', () => {
+    // Tax modal - Solo visualización
+    closeTaxModalBtn.addEventListener('click', () => {
       taxModal.style.display = 'none';
-      taxPasswordInput.value = '';
     });
 
-    // Rates modal
-    updateRatesBtn.addEventListener('click', updateExchangeRates);
+    // Rates modal - Solo visualización
+    closeRatesModalBtn.addEventListener('click', () => {
+      ratesModal.style.display = 'none';
+    });
 
     // Payment buttons
     discountBtnMobile.addEventListener('click', () => {
