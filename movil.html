@@ -1994,19 +1994,19 @@
       
       <div class="modal-body">
         <div class="menu-grid">
-          <a href="#" class="menu-item" id="menuInventory">
+          <a href="inventario.html" class="menu-item" id="menuInventory">
             <i class="fas fa-boxes"></i>
             <span>Inventario</span>
           </a>
-          <a href="#" class="menu-item" id="menuReports">
+          <a href="reportes.html" class="menu-item" id="menuReports">
             <i class="fas fa-chart-bar"></i>
             <span>Reportes</span>
           </a>
-          <a href="#" class="menu-item" id="menuInvoices">
+          <a href="facturas.html" class="menu-item" id="menuInvoices">
             <i class="fas fa-receipt"></i>
             <span>Facturas</span>
           </a>
-          <a href="#" class="menu-item" id="menuAnalysis">
+          <a href="analisis.html" class="menu-item" id="menuAnalysis">
             <i class="fas fa-chart-line"></i>
             <span>Análisis</span>
           </a>
@@ -2014,7 +2014,7 @@
             <i class="fas fa-exchange-alt"></i>
             <span>Tasas</span>
           </a>
-          <a href="#" class="menu-item" id="menuConfig">
+          <a href="configuracion.html" class="menu-item" id="menuConfig">
             <i class="fas fa-cog"></i>
             <span>Configuración</span>
           </a>
@@ -2732,7 +2732,7 @@
       }
     }
 
-    // Save Tax Configuration
+    // Save Tax Configuration - CORREGIDO PARA EDITAR
     async function saveTaxConfig() {
       try {
         showLoading('Guardando configuración...');
@@ -2779,7 +2779,7 @@
       }
     }
 
-    // Load Exchange Rates
+    // Load Exchange Rates - CORREGIDO PARA EDITAR
     async function loadExchangeRates() {
       try {
         if (!currentCollaborator) {
@@ -2799,11 +2799,19 @@
           currentUsdRate.textContent = `$${exchangeRates.usd}`;
           currentEurRate.textContent = `€${exchangeRates.eur}`;
           ratesUpdateTime.textContent = ratesData.updatedAt ? formatDate(ratesData.updatedAt.toDate()) : '-';
+          
+          // Set values in edit fields
+          newUsdRate.value = exchangeRates.usd;
+          newEurRate.value = exchangeRates.eur;
         } else {
           exchangeRates = { usd: 56.50, eur: 61.20 };
           currentUsdRate.textContent = `$${exchangeRates.usd}`;
           currentEurRate.textContent = `€${exchangeRates.eur}`;
           ratesUpdateTime.textContent = '-';
+          
+          // Set values in edit fields
+          newUsdRate.value = exchangeRates.usd;
+          newEurRate.value = exchangeRates.eur;
         }
       } catch (error) {
         console.error('Error loading exchange rates:', error);
@@ -2814,7 +2822,7 @@
       }
     }
 
-    // Update Exchange Rates
+    // Update Exchange Rates - CORREGIDO
     async function updateExchangeRates() {
       try {
         showLoading('Actualizando tasas...');
@@ -2848,8 +2856,6 @@
         
         hideLoading();
         showToast('Tasas actualizadas', 'success');
-        newUsdRate.value = '';
-        newEurRate.value = '';
         
       } catch (error) {
         console.error('Error updating exchange rates:', error);
@@ -2972,7 +2978,28 @@
               ${taxBadge}
             `;
             
-            productCard.addEventListener('click', () => addToInvoice(product, businessDoc.id, productDoc.id));
+            productCard.addEventListener('click', async () => {
+              // Verificar vencimiento del producto
+              const expirationDate = product.expirationDate ? new Date(product.expirationDate) : null;
+              if (expirationDate) {
+                const today = new Date();
+                const daysDiff = Math.ceil((expirationDate - today) / (1000 * 60 * 60 * 24));
+                
+                if (daysDiff < 0) {
+                  // Producto vencido
+                  const confirmSale = confirm(`¡ATENCIÓN!\n\nEste producto está VENCIDO hace ${Math.abs(daysDiff)} días.\n\n¿Desea continuar con la venta?\n\nUsted asume toda responsabilidad en caso de facturar este producto.`);
+                  if (!confirmSale) return;
+                } else if (daysDiff <= 30) {
+                  // Producto próximo a vencer
+                  const confirmSale = confirm(`¡ATENCIÓN!\n\nEste producto está PRÓXIMO A VENCER.\nLe faltan ${daysDiff} días para vencer.\n\n¿Desea continuar con la venta?\n\nUsted asume toda responsabilidad en caso de facturar este producto.`);
+                  if (!confirmSale) return;
+                }
+              }
+              
+              // Si pasa la verificación de vencimiento, agregar a la factura
+              addToInvoice(product, businessDoc.id, productDoc.id);
+            });
+            
             productsGrid.appendChild(productCard);
           }
         }
@@ -3020,20 +3047,6 @@
         return;
       }
       
-      // Check expiration
-      if (product.expirationDate) {
-        const expirationDate = new Date(product.expirationDate);
-        const today = new Date();
-        const daysDiff = Math.ceil((expirationDate - today) / (1000 * 60 * 60 * 24));
-        
-        if (daysDiff < 0) {
-          showToast('Producto vencido', 'warning');
-          return;
-        } else if (daysDiff <= 7) {
-          showToast(`Producto próximo a vencer (${daysDiff} días)`, 'warning');
-        }
-      }
-      
       // Add to invoice
       const existingItem = invoice.find(item => item.productId === productId);
       
@@ -3057,6 +3070,105 @@
       
       // Update real-time data in Firebase
       updateRealTimeData();
+    }
+
+    // MODIFICACIÓN: Buscar y agregar automáticamente a la factura
+    async function searchAndAddProduct(searchTerm) {
+      if (!searchTerm.trim()) return;
+      
+      try {
+        showLoading('Buscando producto...');
+        
+        let productFound = null;
+        let productBusiness = null;
+        let productDocId = null;
+        
+        // Buscar en todas las empresas
+        const businessesRef = collection(db, "businesses");
+        const businessesSnapshot = await getDocs(businessesRef);
+        
+        for (const businessDoc of businessesSnapshot.docs) {
+          const productsRef = collection(db, "businesses", businessDoc.id, "products");
+          
+          // Buscar por código EAN
+          const eanQuery = query(
+            productsRef, 
+            where("userId", "==", currentCollaborator.userId),
+            where("eanUpcCode", "==", searchTerm)
+          );
+          
+          const eanSnapshot = await getDocs(eanQuery);
+          
+          if (!eanSnapshot.empty) {
+            productFound = eanSnapshot.docs[0].data();
+            productBusiness = businessDoc.id;
+            productDocId = eanSnapshot.docs[0].id;
+            break;
+          }
+          
+          // Buscar por nombre (coincidencia parcial)
+          const nameQuery = query(
+            productsRef, 
+            where("userId", "==", currentCollaborator.userId)
+          );
+          
+          const nameSnapshot = await getDocs(nameQuery);
+          
+          for (const doc of nameSnapshot.docs) {
+            const product = doc.data();
+            if (product.name.toLowerCase().includes(searchTerm.toLowerCase())) {
+              productFound = product;
+              productBusiness = businessDoc.id;
+              productDocId = doc.id;
+              break;
+            }
+          }
+          
+          if (productFound) break;
+        }
+        
+        if (productFound) {
+          // Verificar vencimiento del producto
+          const expirationDate = productFound.expirationDate ? new Date(productFound.expirationDate) : null;
+          if (expirationDate) {
+            const today = new Date();
+            const daysDiff = Math.ceil((expirationDate - today) / (1000 * 60 * 60 * 24));
+            
+            if (daysDiff < 0) {
+              // Producto vencido
+              const confirmSale = confirm(`¡ATENCIÓN!\n\nEste producto está VENCIDO hace ${Math.abs(daysDiff)} días.\n\n¿Desea continuar con la venta?\n\nUsted asume toda responsabilidad en caso de facturar este producto.`);
+              if (!confirmSale) {
+                hideLoading();
+                return;
+              }
+            } else if (daysDiff <= 30) {
+              // Producto próximo a vencer
+              const confirmSale = confirm(`¡ATENCIÓN!\n\nEste producto está PRÓXIMO A VENCER.\nLe faltan ${daysDiff} días para vencer.\n\n¿Desea continuar con la venta?\n\nUsted asume toda responsabilidad en caso de facturar este producto.`);
+              if (!confirmSale) {
+                hideLoading();
+                return;
+              }
+            }
+          }
+          
+          // Agregar a la factura
+          addToInvoice(productFound, productBusiness, productDocId);
+          
+          // Limpiar el buscador después de agregar
+          if (autoClearSearchEnabled) {
+            mobileSearch.value = '';
+          }
+        } else {
+          showToast('Producto no encontrado', 'warning');
+        }
+        
+        hideLoading();
+        
+      } catch (error) {
+        console.error('Error searching product:', error);
+        hideLoading();
+        showToast('Error al buscar producto', 'error');
+      }
     }
 
     function removeFromInvoice(productId) {
@@ -3246,12 +3358,19 @@
       cashReceivedInput.addEventListener('input', calculateChange);
     }
 
+    // Función para generar ID de factura con 6 números aleatorios
+    function generateInvoiceId() {
+      // Generar 6 dígitos aleatorios
+      const randomNumber = Math.floor(100000 + Math.random() * 900000);
+      return `RTM-${randomNumber}`;
+    }
+
     async function processPayment(paymentType, amountReceived = 0) {
       try {
         showLoading('Procesando pago...');
         
-        // Generate invoice ID
-        const invoiceId = `INV-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        // Generate invoice ID con nuevo formato
+        const invoiceId = generateInvoiceId();
         
         // Calculate taxes
         let totalITBIS = 0;
@@ -3370,6 +3489,7 @@
       }
     }
 
+    // Generar factura HTML CON EL FORMATO COMPLETO DE WHATSAPP
     async function generateInvoiceHTML(invoiceData) {
       try {
         // Load logo from Firebase Storage
@@ -3414,6 +3534,34 @@
           </div>
         `).join('');
         
+        // Generar contenido para WhatsApp (TEXTO COMPLETO)
+        const whatsappText = `
+*FACTURA ${invoiceData.invoiceId}*
+
+*${businessDetails.name}*
+RNC: ${businessDetails.rnc}
+Fecha: ${formatDate(invoiceData.date)}
+Atendido por: ${invoiceData.collaboratorName}
+
+*DETALLES DE LA COMPRA:*
+${invoiceData.items.map(item => `• ${item.name} x${item.quantity} - ${formatCurrency(item.total)}`).join('\n')}
+
+*RESUMEN:*
+Subtotal: ${formatCurrency(invoiceData.subtotal)}
+${invoiceData.discount > 0 ? `Descuento: -${formatCurrency(invoiceData.discountAmount)}` : ''}
+${invoiceData.itbis > 0 ? `ITBIS: ${formatCurrency(invoiceData.itbis)}` : ''}
+${invoiceData.iva > 0 ? `IVA: ${formatCurrency(invoiceData.iva)}` : ''}
+*TOTAL: ${formatCurrency(invoiceData.total)}*
+Método de pago: ${invoiceData.paymentType}
+
+¡Gracias por su compra! 🛒
+        `.trim();
+        
+        // Guardar el texto para WhatsApp
+        window.currentWhatsAppMessage = whatsappText;
+        window.currentInvoiceId = invoiceData.invoiceId;
+        
+        // HTML para visualización
         const invoiceHtml = `
           <div style="padding: 15px; max-width: 300px; margin: 0 auto;">
             <div style="text-align: center; margin-bottom: 15px;">
@@ -3555,7 +3703,8 @@
     function onScanSuccess(decodedText) {
       stopScanner();
       mobileSearch.value = decodedText;
-      loadProducts(decodedText);
+      // MODIFICADO: Ahora busca y agrega automáticamente a la factura
+      searchAndAddProduct(decodedText);
       scannerModal.style.display = 'none';
       showToast(`Código escaneado: ${decodedText}`, 'success');
     }
@@ -3779,7 +3928,7 @@
       showToast(`Descuento del ${discount}% aplicado`, 'success');
     }
 
-    // History Functions
+    // History Functions - CORREGIDAS
     async function loadHistory() {
       try {
         showLoading('Cargando historial...');
@@ -3842,7 +3991,7 @@
       } catch (error) {
         console.error('Error loading history:', error);
         hideLoading();
-        showToast('Error al cargar historial', 'error');
+        historyContainer.innerHTML = '<div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.5);"><i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 15px;"></i><p>Error al cargar el historial. Intente nuevamente.</p></div>';
       }
     }
 
@@ -3877,39 +4026,31 @@
         if (invoiceDoc.exists()) {
           const invoiceData = invoiceDoc.data();
           
-          // Format message for WhatsApp
-          let message = `*FACTURA ${invoiceData.invoiceId}*\n\n`;
-          message += `*${businessDetails.name}*\n`;
-          message += `RNC: ${businessDetails.rnc}\n`;
-          message += `Fecha: ${formatDate(invoiceData.date)}\n`;
-          message += `Atendido por: ${invoiceData.collaboratorName}\n\n`;
-          message += `*DETALLES DE LA COMPRA:*\n`;
-          
-          invoiceData.items.forEach(item => {
-            message += `• ${item.name} x${item.quantity} - ${formatCurrency(item.total)}\n`;
-          });
-          
-          message += `\n*RESUMEN:*\n`;
-          message += `Subtotal: ${formatCurrency(invoiceData.subtotal)}\n`;
-          
-          if (invoiceData.discount > 0) {
-            message += `Descuento: -${formatCurrency(invoiceData.discountAmount)}\n`;
-          }
-          
-          if (invoiceData.itbis > 0) {
-            message += `ITBIS: ${formatCurrency(invoiceData.itbis)}\n`;
-          }
-          
-          if (invoiceData.iva > 0) {
-            message += `IVA: ${formatCurrency(invoiceData.iva)}\n`;
-          }
-          
-          message += `*TOTAL: ${formatCurrency(invoiceData.total)}*\n`;
-          message += `Método de pago: ${invoiceData.paymentType}\n\n`;
-          message += `¡Gracias por su compra! 🛒`;
+          // Generar mensaje con el formato completo de WhatsApp
+          const whatsappText = `
+*FACTURA ${invoiceData.invoiceId}*
+
+*${businessDetails.name}*
+RNC: ${businessDetails.rnc}
+Fecha: ${formatDate(invoiceData.date)}
+Atendido por: ${invoiceData.collaboratorName}
+
+*DETALLES DE LA COMPRA:*
+${invoiceData.items.map(item => `• ${item.name} x${item.quantity} - ${formatCurrency(item.total)}`).join('\n')}
+
+*RESUMEN:*
+Subtotal: ${formatCurrency(invoiceData.subtotal)}
+${invoiceData.discount > 0 ? `Descuento: -${formatCurrency(invoiceData.discountAmount)}` : ''}
+${invoiceData.itbis > 0 ? `ITBIS: ${formatCurrency(invoiceData.itbis)}` : ''}
+${invoiceData.iva > 0 ? `IVA: ${formatCurrency(invoiceData.iva)}` : ''}
+*TOTAL: ${formatCurrency(invoiceData.total)}*
+Método de pago: ${invoiceData.paymentType}
+
+¡Gracias por su compra! 🛒
+          `.trim();
           
           // Store message for sending
-          window.currentWhatsAppMessage = message;
+          window.currentWhatsAppMessage = whatsappText;
           window.currentInvoiceId = invoiceData.invoiceId;
           
           // Show send modal
@@ -4161,17 +4302,63 @@
       }
     }
 
-    // View Toggle Functions
+    // View Toggle Functions - CORREGIDAS
     function setProductView(view) {
       if (view === 'grid') {
         viewGridMobile.classList.add('active');
         viewListMobile.classList.remove('active');
         productsGrid.classList.remove('list-view');
+        // Actualizar productos en vista cuadrícula
+        updateProductsView();
       } else if (view === 'list') {
         viewListMobile.classList.add('active');
         viewGridMobile.classList.remove('active');
         productsGrid.classList.add('list-view');
+        // Actualizar productos en vista lista
+        updateProductsView();
       }
+    }
+
+    function updateProductsView() {
+      const productCards = productsGrid.querySelectorAll('.product-card');
+      productCards.forEach(card => {
+        if (productsGrid.classList.contains('list-view')) {
+          card.style.display = 'flex';
+          card.style.flexDirection = 'row';
+          card.style.alignItems = 'center';
+          card.style.textAlign = 'left';
+          card.style.padding = '10px';
+          
+          // Ajustar imagen en vista lista
+          const img = card.querySelector('.product-image');
+          if (img) {
+            img.style.width = '50px';
+            img.style.height = '50px';
+            img.style.marginBottom = '0';
+            img.style.marginRight = '12px';
+          }
+          
+          // Ajustar detalles
+          const details = card.querySelector('.product-name').parentNode;
+          details.style.flex = '1';
+        } else {
+          // Restaurar vista cuadrícula
+          card.style.display = 'flex';
+          card.style.flexDirection = 'column';
+          card.style.alignItems = 'center';
+          card.style.textAlign = 'center';
+          card.style.padding = '12px';
+          
+          // Restaurar imagen en vista cuadrícula
+          const img = card.querySelector('.product-image');
+          if (img) {
+            img.style.width = '70px';
+            img.style.height = '70px';
+            img.style.marginBottom = '8px';
+            img.style.marginRight = '0';
+          }
+        }
+      });
     }
 
     // Event Listeners
@@ -4210,10 +4397,21 @@
       }
     });
 
-    // Search functionality with auto clear
+    // MODIFICADO: Búsqueda con enter para agregar automáticamente a la factura
+    mobileSearch.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        const searchTerm = mobileSearch.value.trim();
+        if (searchTerm) {
+          searchAndAddProduct(searchTerm);
+        }
+      }
+    });
+
     mobileSearch.addEventListener('input', (e) => {
       const searchTerm = e.target.value.trim();
-      loadProducts(searchTerm);
+      if (!searchTerm) {
+        loadProducts('');
+      }
     });
 
     // Scanner
@@ -4257,7 +4455,7 @@
       }
     });
 
-    // View toggle
+    // View toggle - CORREGIDO
     viewGridMobile.addEventListener('click', () => {
       setProductView('grid');
     });
@@ -4337,15 +4535,14 @@
     });
 
     taxBtnMobile.addEventListener('click', () => {
-      if (taxConfig.active) {
-        showToast('Sistema de impuestos activo', 'success');
-      } else {
-        showToast('Sistema de impuestos inactivo', 'info');
-      }
+      // Cargar configuración actual antes de mostrar
+      loadTaxConfig();
       taxModal.style.display = 'flex';
     });
 
     ratesBtnMobile.addEventListener('click', () => {
+      // Cargar tasas actuales antes de mostrar
+      loadExchangeRates();
       ratesModal.style.display = 'flex';
     });
 
@@ -4403,29 +4600,25 @@
     // Shift modal
     endShiftBtn.addEventListener('click', endShift);
 
-    // Menu items - Now with actual links
+    // Menu items - CORREGIDO CON ENLACES REALES
     menuInventory.addEventListener('click', (e) => {
       e.preventDefault();
-      window.open('#', '_blank');
-      menuModal.style.display = 'none';
+      window.location.href = 'inventario.html';
     });
 
     menuReports.addEventListener('click', (e) => {
       e.preventDefault();
-      window.open('#', '_blank');
-      menuModal.style.display = 'none';
+      window.location.href = 'reportes.html';
     });
 
     menuInvoices.addEventListener('click', (e) => {
       e.preventDefault();
-      window.open('#', '_blank');
-      menuModal.style.display = 'none';
+      window.location.href = 'facturas.html';
     });
 
     menuAnalysis.addEventListener('click', (e) => {
       e.preventDefault();
-      window.open('#', '_blank');
-      menuModal.style.display = 'none';
+      window.location.href = 'analisis.html';
     });
 
     menuRates.addEventListener('click', (e) => {
@@ -4463,7 +4656,7 @@
       printWindow.document.write(`
         <html>
           <head>
-            <title>Factura ${Date.now()}</title>
+            <title>Factura ${window.currentInvoiceId}</title>
             <style>
               body { font-family: Arial, sans-serif; padding: 20px; }
               @media print {
@@ -4487,29 +4680,28 @@
       
       // Prepare current invoice for sending
       if (invoice.length > 0) {
-        let message = `*FACTURA EN PROCESO*\n\n`;
-        message += `*${businessDetails.name}*\n`;
-        message += `RNC: ${businessDetails.rnc}\n`;
-        message += `Fecha: ${new Date().toLocaleString()}\n`;
-        message += `Atendido por: ${currentCollaborator.firstName} ${currentCollaborator.lastName}\n\n`;
-        message += `*DETALLES DE LA COMPRA:*\n`;
+        // Generar mensaje de WhatsApp con el formato completo
+        const whatsappText = `
+*FACTURA EN PROCESO*
+
+*${businessDetails.name}*
+RNC: ${businessDetails.rnc}
+Fecha: ${new Date().toLocaleString()}
+Atendido por: ${currentCollaborator.firstName} ${currentCollaborator.lastName}
+
+*DETALLES DE LA COMPRA:*
+${invoice.map(item => `• ${item.name} x${item.quantity} - ${formatCurrency(item.pricePerUnit * item.quantity)}`).join('\n')}
+
+*RESUMEN:*
+Subtotal: ${formatCurrency(totalPrice)}
+${discount > 0 ? `Descuento: -${formatCurrency(totalPrice * (discount / 100))}` : ''}
+*TOTAL: ${formatCurrency(discountedTotal)}*
+
+¡Gracias por su compra! 🛒
+        `.trim();
         
-        invoice.forEach(item => {
-          message += `• ${item.name} x${item.quantity} - ${formatCurrency(item.pricePerUnit * item.quantity)}\n`;
-        });
-        
-        message += `\n*RESUMEN:*\n`;
-        message += `Subtotal: ${formatCurrency(totalPrice)}\n`;
-        
-        if (discount > 0) {
-          message += `Descuento: -${formatCurrency(totalPrice * (discount / 100))}\n`;
-        }
-        
-        message += `*TOTAL: ${formatCurrency(discountedTotal)}*\n\n`;
-        message += `¡Gracias por su compra! 🛒`;
-        
-        window.currentWhatsAppMessage = message;
-        window.currentInvoiceId = `PRE-${Date.now()}`;
+        window.currentWhatsAppMessage = whatsappText;
+        window.currentInvoiceId = generateInvoiceId();
       }
     });
 
@@ -4584,6 +4776,15 @@
         loadProducts('');
         if (alwaysActiveSearchEnabled) {
           mobileSearch.focus();
+        }
+      }
+      
+      // Enter en el buscador para buscar y agregar automáticamente
+      if (e.key === 'Enter' && document.activeElement === mobileSearch) {
+        e.preventDefault();
+        const searchTerm = mobileSearch.value.trim();
+        if (searchTerm) {
+          searchAndAddProduct(searchTerm);
         }
       }
     });
