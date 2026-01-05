@@ -1871,20 +1871,12 @@
       </div>
       
       <div class="header-actions">
+        <!-- CORRECCIÓN: Solo mantener los iconos necesarios en el header -->
         <a href="usuario.html" class="header-icon" id="userBtnMobile" title="Usuario">
           <i class="fas fa-user"></i>
         </a>
         <button class="header-icon" id="shiftBtnMobile" title="Turno">
           <i class="fas fa-clock"></i>
-        </button>
-        <button class="header-icon" id="taxBtnMobile" title="Impuestos">
-          <i class="fas fa-percent"></i>
-        </button>
-        <button class="header-icon" id="ratesBtnMobile" title="Tasas">
-          <i class="fas fa-exchange-alt"></i>
-        </button>
-        <button class="header-icon" id="configBtnMobile" title="Configuración">
-          <i class="fas fa-cog"></i>
         </button>
         <img id="userAvatarMobile" class="user-avatar-mobile" src="" alt="" style="display: none;">
       </div>
@@ -1978,6 +1970,7 @@
     </main>
 
     <!-- Mobile Navigation -->
+    <!-- CORRECCIÓN: Los iconos inferiores se mostrarán en tablet y PC según los estilos media queries -->
     <nav class="mobile-nav">
       <div class="nav-grid">
         <a href="#" class="nav-item active" id="navProducts">
@@ -1997,9 +1990,18 @@
           <i class="fas fa-chart-bar"></i>
           <span>Reportes</span>
         </a>
-        <a href="#" class="nav-item" id="navMenu">
-          <i class="fas fa-bars"></i>
-          <span>Menú</span>
+        <!-- CORRECCIÓN: Los iconos de configuración y taza se han movido aquí -->
+        <a href="#" class="nav-item" id="navTax">
+          <i class="fas fa-percent"></i>
+          <span>Impuestos</span>
+        </a>
+        <a href="#" class="nav-item" id="navRates">
+          <i class="fas fa-exchange-alt"></i>
+          <span>Tasas</span>
+        </a>
+        <a href="#" class="nav-item" id="navConfig">
+          <i class="fas fa-cog"></i>
+          <span>Configuración</span>
         </a>
       </div>
     </nav>
@@ -2689,14 +2691,13 @@
     const navInvoice = document.getElementById('navInvoice');
     const navHistory = document.getElementById('navHistory');
     const navReports = document.getElementById('navReports');
-    const navMenu = document.getElementById('navMenu');
+    const navTax = document.getElementById('navTax');
+    const navRates = document.getElementById('navRates');
+    const navConfig = document.getElementById('navConfig');
     const invoiceBadge = document.getElementById('invoiceBadge');
     
     const userBtnMobile = document.getElementById('userBtnMobile');
     const shiftBtnMobile = document.getElementById('shiftBtnMobile');
-    const taxBtnMobile = document.getElementById('taxBtnMobile');
-    const ratesBtnMobile = document.getElementById('ratesBtnMobile');
-    const configBtnMobile = document.getElementById('configBtnMobile');
     const userAvatarMobile = document.getElementById('userAvatarMobile');
     const headerLogoMobile = document.getElementById('headerLogoMobile');
     
@@ -3255,11 +3256,11 @@
       // Check expiration
       if (expirationDays !== null && expirationDays <= 30) {
         if (expirationDays < 0) {
-          // Producto vencido - mostrar alerta elegante
+          // Producto vencido - NO PERMITIR LA VENTA
           showExpirationAlert(product, businessName, productId, expirationDays, true);
           return;
         } else if (expirationDays <= 7) {
-          // Producto próximo a vencer (7 días o menos) - mostrar alerta elegante
+          // Producto próximo a vencer (7 días o menos) - mostrar alerta de confirmación
           showExpirationAlert(product, businessName, productId, expirationDays, false);
           return;
         }
@@ -3287,6 +3288,12 @@
         message = `El producto "${product.name}" está PRÓXIMO A VENCER. Le faltan ${daysDiff} días para su fecha de vencimiento.`;
       }
       
+      // CORRECCIÓN: Para productos vencidos, solo mostrar botón de cancelar
+      const buttonsHtml = isExpired ? 
+        `<button class="expiration-btn expiration-btn-no">ENTENDIDO</button>` :
+        `<button class="expiration-btn expiration-btn-no">NO, CANCELAR</button>
+         <button class="expiration-btn expiration-btn-yes">SÍ, VENDER</button>`;
+      
       modal.innerHTML = `
         <div class="expiration-icon">
           <i class="fas ${icon}"></i>
@@ -3294,11 +3301,12 @@
         <h2 class="expiration-title">${title}</h2>
         <div class="expiration-message">${message}</div>
         <div class="expiration-warning">
-          <strong>ADVERTENCIA:</strong> Usted asume toda responsabilidad en caso de facturar este producto.
+          <strong>ADVERTENCIA:</strong> ${isExpired ? 
+            'VENTA NO PERMITIDA. Producto vencido no puede ser vendido.' : 
+            'Usted asume toda responsabilidad en caso de facturar este producto.'}
         </div>
         <div class="expiration-buttons">
-          <button class="expiration-btn expiration-btn-no">NO, CANCELAR</button>
-          <button class="expiration-btn expiration-btn-yes">SÍ, VENDER</button>
+          ${buttonsHtml}
         </div>
       `;
       
@@ -3306,14 +3314,15 @@
       document.body.appendChild(overlay);
       
       // Event listeners para los botones
-      const yesBtn = overlay.querySelector('.expiration-btn-yes');
+      if (!isExpired) {
+        const yesBtn = overlay.querySelector('.expiration-btn-yes');
+        yesBtn.addEventListener('click', () => {
+          document.body.removeChild(overlay);
+          addToInvoice(product, businessName, productId);
+        });
+      }
+      
       const noBtn = overlay.querySelector('.expiration-btn-no');
-      
-      yesBtn.addEventListener('click', () => {
-        document.body.removeChild(overlay);
-        addToInvoice(product, businessName, productId);
-      });
-      
       noBtn.addEventListener('click', () => {
         document.body.removeChild(overlay);
       });
@@ -4659,7 +4668,9 @@
       navInvoice.classList.remove('active');
       navHistory.classList.remove('active');
       navReports.classList.remove('active');
-      navMenu.classList.remove('active');
+      navTax.classList.remove('active');
+      navRates.classList.remove('active');
+      navConfig.classList.remove('active');
     });
 
     navInvoice.addEventListener('click', (e) => {
@@ -4669,7 +4680,9 @@
       navInvoice.classList.add('active');
       navHistory.classList.remove('active');
       navReports.classList.remove('active');
-      navMenu.classList.remove('active');
+      navTax.classList.remove('active');
+      navRates.classList.remove('active');
+      navConfig.classList.remove('active');
     });
 
     navHistory.addEventListener('click', async (e) => {
@@ -4680,7 +4693,9 @@
       navInvoice.classList.remove('active');
       navHistory.classList.add('active');
       navReports.classList.remove('active');
-      navMenu.classList.remove('active');
+      navTax.classList.remove('active');
+      navRates.classList.remove('active');
+      navConfig.classList.remove('active');
     });
 
     navReports.addEventListener('click', async (e) => {
@@ -4691,17 +4706,46 @@
       navInvoice.classList.remove('active');
       navHistory.classList.remove('active');
       navReports.classList.add('active');
-      navMenu.classList.remove('active');
+      navTax.classList.remove('active');
+      navRates.classList.remove('active');
+      navConfig.classList.remove('active');
     });
 
-    navMenu.addEventListener('click', (e) => {
+    // CORRECCIÓN: Botones de impuestos, tasas y configuración ahora están en la navegación inferior
+    navTax.addEventListener('click', (e) => {
       e.preventDefault();
-      menuModal.style.display = 'flex';
+      taxModal.style.display = 'flex';
       navProducts.classList.remove('active');
       navInvoice.classList.remove('active');
       navHistory.classList.remove('active');
       navReports.classList.remove('active');
-      navMenu.classList.add('active');
+      navTax.classList.add('active');
+      navRates.classList.remove('active');
+      navConfig.classList.remove('active');
+    });
+
+    navRates.addEventListener('click', (e) => {
+      e.preventDefault();
+      ratesModal.style.display = 'flex';
+      navProducts.classList.remove('active');
+      navInvoice.classList.remove('active');
+      navHistory.classList.remove('active');
+      navReports.classList.remove('active');
+      navTax.classList.remove('active');
+      navRates.classList.add('active');
+      navConfig.classList.remove('active');
+    });
+
+    navConfig.addEventListener('click', (e) => {
+      e.preventDefault();
+      configModal.style.display = 'flex';
+      navProducts.classList.remove('active');
+      navInvoice.classList.remove('active');
+      navHistory.classList.remove('active');
+      navReports.classList.remove('active');
+      navTax.classList.remove('active');
+      navRates.classList.remove('active');
+      navConfig.classList.add('active');
     });
 
     closeInvoiceBtn.addEventListener('click', () => {
@@ -4710,7 +4754,7 @@
       navInvoice.classList.remove('active');
     });
 
-    // Header buttons - CORRECCIÓN: Botón de configuración con funcionalidad local
+    // Header buttons - CORRECCIÓN: Solo mantener usuario y turno en el header
     userBtnMobile.addEventListener('click', (e) => {
       // El enlace ya está configurado en el HTML
     });
@@ -4718,20 +4762,6 @@
     shiftBtnMobile.addEventListener('click', () => {
       updateShiftDisplay();
       shiftModal.style.display = 'flex';
-    });
-
-    taxBtnMobile.addEventListener('click', () => {
-      taxModal.style.display = 'flex';
-    });
-
-    ratesBtnMobile.addEventListener('click', () => {
-      ratesModal.style.display = 'flex';
-    });
-
-    // CORRECCIÓN: Botón de configuración abre modal local
-    configBtnMobile.addEventListener('click', (e) => {
-      e.preventDefault();
-      configModal.style.display = 'flex';
     });
 
     // Tax modal - Solo visualización
