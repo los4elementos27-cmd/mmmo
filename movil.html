@@ -9,2371 +9,2431 @@
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
-    /* Reset y estilos base */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #1a2b3c, #2c3e50);
-      color: #ffffff;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      overflow-x: hidden;
-      font-size: 14px;
-      line-height: 1.3;
-    }
-
-    /* Animaciones globales */
-    * {
-      transition: all 0.3s ease;
-    }
-
-    /* Contenedor principal móvil */
-    .mobile-container {
-      width: 100%;
-      max-width: 768px;
-      margin: 0 auto;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      background: #1a2b3c;
-      box-shadow: 0 0 20px rgba(0,0,0,0.3);
-      position: relative;
-      overflow: hidden;
-      animation: fadeIn 0.5s ease;
-      transform: scale(0.95);
-      transform-origin: center top;
-    }
-
-    @media (max-width: 767px) {
-      .mobile-container {
-        transform: scale(1);
-        max-width: 100%;
-      }
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px) scale(0.98); }
-      to { opacity: 1; transform: translateY(0) scale(0.95); }
-    }
-
-    /* Header móvil */
-    .mobile-header {
-      background: linear-gradient(135deg, #16e086, #15a086);
-      padding: 12px 15px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-      animation: slideDown 0.3s ease;
-      min-height: 60px;
-    }
-
-    @keyframes slideDown {
-      from { transform: translateY(-100%); }
-      to { transform: translateY(0); }
-    }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .logo-mobile {
-      width: 36px;
-      height: 36px;
-      background: #ffffff;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      color: #16e086;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .logo-mobile:hover {
-      transform: scale(1.1);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    }
-
-    .system-name-mobile {
-      font-size: 16px;
-      font-weight: bold;
-      color: #ffffff;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-    }
-
-    .header-actions {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .header-icon {
-      color: #ffffff;
-      font-size: 1.2em;
-      background: rgba(255,255,255,0.2);
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
-      position: relative;
-      text-decoration: none;
-    }
-
-    .header-icon:hover {
-      background: rgba(255,255,255,0.3);
-      transform: scale(1.1) rotate(5deg);
-      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-    }
-
-    .user-avatar-mobile {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid #ffffff;
-      transition: transform 0.3s ease;
-    }
-
-    .user-avatar-mobile:hover {
-      transform: scale(1.1);
-    }
-
-    /* Menu Hamburger para tablet/PC */
-    .menu-hamburger {
-      display: none;
-      background: rgba(255,255,255,0.2);
-      border: none;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      color: white;
-      font-size: 1.1em;
-      cursor: pointer;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
-    }
-
-    .menu-hamburger:hover {
-      background: rgba(255,255,255,0.3);
-      transform: scale(1.1);
-    }
-
-    /* Modal de Información del Usuario */
-    .user-info-modal {
-      max-width: 450px;
-      width: 90%;
-    }
-
-    .user-info-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 15px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      position: relative;
-    }
-
-    .user-avatar-large {
-      width: 70px;
-      height: 70px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid #16e086;
-    }
-
-    .user-info-details {
-      flex: 1;
-    }
-
-    .user-info-name {
-      font-size: 18px;
-      font-weight: bold;
-      color: #16e086;
-      margin-bottom: 5px;
-    }
-
-    .user-info-role {
-      font-size: 13px;
-      color: rgba(255,255,255,0.8);
-      background: rgba(22, 224, 134, 0.1);
-      padding: 3px 8px;
-      border-radius: 12px;
-      display: inline-block;
-    }
-
-    .user-info-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-bottom: 15px;
-    }
-
-    .user-info-item {
-      background: rgba(255,255,255,0.05);
-      border-radius: 8px;
-      padding: 10px;
-      transition: all 0.3s ease;
-    }
-
-    .user-info-item:hover {
-      background: rgba(255,255,255,0.08);
-      transform: translateY(-2px);
-    }
-
-    .user-info-label {
-      font-size: 11px;
-      color: rgba(255,255,255,0.6);
-      margin-bottom: 5px;
-    }
-
-    .user-info-value {
-      font-size: 13px;
-      font-weight: 500;
-      color: #ffffff;
-    }
-
-    /* BOTÓN CERRAR SESIÓN - ESTILOS AGREGADOS */
-    .logout-btn {
-      width: 100%;
-      padding: 12px;
-      background: linear-gradient(135deg, #e74c3c, #c0392b);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 15px;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 3px 8px rgba(231, 76, 60, 0.3);
-    }
-
-    .logout-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
-      background: linear-gradient(135deg, #ff6b6b, #e74c3c);
-    }
-
-    .logout-btn:active {
-      transform: translateY(0);
-      box-shadow: 0 2px 5px rgba(231, 76, 60, 0.3);
-    }
-
-    .logout-btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-      transition: left 0.5s ease;
-    }
-
-    .logout-btn:hover::before {
-      left: 100%;
-    }
-
-    .logout-btn i {
-      transition: transform 0.3s ease;
-    }
-
-    .logout-btn:hover i {
-      transform: rotate(180deg);
-    }
-
-    /* Sección de búsqueda */
-    .search-section {
-      padding: 12px;
-      background: #233445;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      animation: fadeInUp 0.4s ease 0.1s both;
-    }
-
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .search-container-mobile {
-      display: flex;
-      gap: 8px;
-      width: 100%;
-    }
-
-    .search-box {
-      flex: 1;
-      background: rgba(255,255,255,0.1);
-      border: none;
-      border-radius: 20px;
-      padding: 10px 15px;
-      color: #ffffff;
-      font-size: 14px;
-      outline: none;
-      transition: all 0.3s ease;
-    }
-
-    .search-box:focus {
-      background: rgba(255,255,255,0.15);
-      box-shadow: 0 0 0 2px rgba(22, 224, 134, 0.3);
-      transform: translateY(-1px);
-    }
-
-    .search-box::placeholder {
-      color: rgba(255,255,255,0.6);
-    }
-
-    .scanner-btn-mobile {
-      background: linear-gradient(135deg, #16e086, #15a086);
-      color: white;
-      border: none;
-      border-radius: 20px;
-      width: 45px;
-      height: 45px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 3px 8px rgba(22,224,134,0.3);
-    }
-
-    .scanner-btn-mobile:hover {
-      transform: scale(1.05) rotate(5deg);
-      box-shadow: 0 5px 12px rgba(22,224,134,0.4);
-    }
-
-    /* Vista principal de productos */
-    .main-content {
-      flex: 1;
-      display: flex;
-      overflow: hidden;
-      animation: fadeIn 0.6s ease 0.2s both;
-    }
-
-    .products-section {
-      flex: 1;
-      overflow-y: auto;
-      padding: 12px;
-      background: #1a2b3c;
-    }
-
-    .products-section h2 {
-      font-size: 16px;
-      margin-bottom: 12px;
-      color: #16e086;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      animation: slideInLeft 0.4s ease;
-    }
-
-    @keyframes slideInLeft {
-      from { opacity: 0; transform: translateX(-20px); }
-      to { opacity: 1; transform: translateX(0); }
-    }
-
-    .view-toggle-mobile {
-      display: flex;
-      gap: 6px;
-    }
-
-    .view-btn {
-      background: rgba(255,255,255,0.1);
-      border: none;
-      color: #16e086;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .view-btn:hover {
-      transform: scale(1.1);
-      background: rgba(22, 224, 134, 0.2);
-    }
-
-    .view-btn.active {
-      background: #16e086;
-      color: white;
-      transform: scale(1.1);
-      box-shadow: 0 3px 8px rgba(22,224,134,0.3);
-    }
-
-    /* Total en tiempo real en productos */
-    .real-time-total-container {
-      background: rgba(22, 224, 134, 0.1);
-      border: 2px solid rgba(22, 224, 134, 0.3);
-      border-radius: 10px;
-      padding: 10px;
-      margin-bottom: 12px;
-      display: none;
-      animation: slideInDown 0.3s ease;
-    }
-
-    @keyframes slideInDown {
-      from {
-        transform: translateY(-10px);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
-
-    .real-time-total-label {
-      font-size: 11px;
-      color: rgba(255,255,255,0.8);
-      margin-bottom: 5px;
-    }
-
-    .real-time-total-amount {
-      font-size: 18px;
-      font-weight: bold;
-      color: #16e086;
-      text-align: center;
-    }
-
-    /* Lista de productos */
-    .products-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-      gap: 10px;
-      margin-top: 8px;
-      animation: fadeIn 0.5s ease;
-    }
-
-    .products-grid.list-view {
-      display: flex !important;
-      flex-direction: column !important;
-      gap: 8px;
-    }
-
-    .products-grid.list-view .product-card {
-      display: flex !important;
-      flex-direction: row !important;
-      align-items: center !important;
-      padding: 8px !important;
-      text-align: left !important;
-      height: auto !important;
-    }
-
-    .products-grid.list-view .product-image {
-      width: 50px !important;
-      height: 50px !important;
-      margin-bottom: 0 !important;
-      margin-right: 10px !important;
-    }
-
-    .products-grid.list-view .product-name {
-      font-size: 13px !important;
-      margin-bottom: 3px !important;
-      text-align: left !important;
-      flex: 1 !important;
-    }
-
-    .products-grid.list-view .product-price {
-      font-size: 12px !important;
-      margin-bottom: 2px !important;
-      text-align: left !important;
-    }
-
-    .products-grid.list-view .product-ean-mobile {
-      font-size: 9px !important;
-      margin-top: 2px !important;
-      text-align: left !important;
-    }
-
-    .products-grid.list-view .product-badge {
-      position: relative !important;
-      top: 0 !important;
-      right: 0 !important;
-      margin-top: 5px !important;
-    }
-
-    @media (min-width: 768px) {
-      .products-grid {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      }
-    }
-
-    .product-card {
-      background: rgba(255,255,255,0.05);
-      border-radius: 10px;
-      padding: 10px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      border: 1px solid rgba(255,255,255,0.1);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      position: relative;
-      height: 160px;
-      overflow: hidden;
-    }
-
-    .product-card:hover {
-      background: rgba(255,255,255,0.1);
-      transform: translateY(-3px);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-      border-color: rgba(22, 224, 134, 0.3);
-    }
-
-    .product-image {
-      width: 60px;
-      height: 60px;
-      object-fit: contain;
-      margin-bottom: 6px;
-      border-radius: 6px;
-      background: rgba(255,255,255,0.05);
-      transition: transform 0.3s ease;
-    }
-
-    .product-card:hover .product-image {
-      transform: scale(1.05);
-    }
-
-    .product-name {
-      font-weight: 600;
-      font-size: 12px;
-      margin-bottom: 3px;
-      line-height: 1.2;
-      color: #ffffff;
-      height: 28px;
-      overflow: hidden;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-    }
-
-    .product-price {
-      color: #16e086;
-      font-weight: bold;
-      font-size: 13px;
-      margin-bottom: 4px;
-    }
-
-    .product-ean-mobile {
-      font-size: 9px;
-      color: rgba(255,255,255,0.6);
-      background: rgba(0,0,0,0.2);
-      padding: 2px 6px;
-      border-radius: 8px;
-      margin-top: 3px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-      max-width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .product-badge {
-      position: absolute;
-      font-size: 9px;
-      padding: 2px 6px;
-      border-radius: 8px;
-      font-weight: bold;
-      z-index: 1;
-    }
-
-    .badge-expired {
-      background: rgba(231, 76, 60, 0.9);
-      color: white;
-      top: 6px;
-      right: 6px;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
-    }
-
-    .badge-warning {
-      background: rgba(243, 156, 18, 0.9);
-      color: white;
-      top: 6px;
-      right: 6px;
-    }
-
-    .badge-tax {
-      background: rgba(22, 224, 134, 0.9);
-      color: white;
-      font-size: 8px;
-      bottom: 6px;
-      left: 6px;
-      padding: 2px 5px;
-    }
-
-    /* Ventana de cantidad de producto */
-    .quantity-modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.8);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 2000;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .quantity-modal {
-      background: #233445;
-      border-radius: 15px;
-      padding: 20px;
-      max-width: 300px;
-      width: 90%;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-      animation: modalSlideUp 0.4s ease;
-    }
-
-    .quantity-modal-header {
-      text-align: center;
-      margin-bottom: 15px;
-    }
-
-    .quantity-modal-header h3 {
-      color: #16e086;
-      font-size: 16px;
-      margin-bottom: 5px;
-    }
-
-    .quantity-modal-header p {
-      font-size: 12px;
-      color: rgba(255,255,255,0.7);
-    }
-
-    .quantity-input-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 15px;
-      margin: 20px 0;
-    }
-
-    .quantity-btn {
-      background: rgba(22, 224, 134, 0.2);
-      border: none;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      color: #16e086;
-      font-size: 18px;
-      cursor: pointer;
-      transition: all 0.3s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .quantity-btn:hover {
-      background: rgba(22, 224, 134, 0.3);
-      transform: scale(1.1);
-    }
-
-    .quantity-display {
-      font-size: 24px;
-      font-weight: bold;
-      color: #16e086;
-      min-width: 60px;
-      text-align: center;
-    }
-
-    .quantity-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .quantity-action-btn {
-      flex: 1;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      font-size: 14px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
-    }
-
-    .quantity-action-add {
-      background: linear-gradient(135deg, #16e086, #15a086);
-      color: white;
-    }
-
-    .quantity-action-cancel {
-      background: rgba(255,255,255,0.1);
-      color: white;
-    }
-
-    .quantity-action-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-    }
-
-    /* Sección de factura */
-    .invoice-section {
-      width: 100%;
-      background: #233445;
-      border-left: 1px solid rgba(255,255,255,0.1);
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      animation: slideInRight 0.4s ease;
-    }
-
-    @keyframes slideInRight {
-      from { transform: translateX(100%); }
-      to { transform: translateX(0); }
-    }
-
-    .invoice-header {
-      padding: 12px;
-      background: rgba(0,0,0,0.2);
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .invoice-header h2 {
-      color: #16e086;
-      font-size: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .invoice-close-btn {
-      background: rgba(255,255,255,0.1);
-      border: none;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .invoice-close-btn:hover {
-      background: rgba(255,255,255,0.2);
-      transform: rotate(90deg) scale(1.1);
-    }
-
-    @media (min-width: 768px) {
-      .invoice-close-btn {
-        display: none;
-      }
-    }
-
-    .invoice-items {
-      flex: 1;
-      overflow-y: auto;
-      padding: 12px;
-    }
-
-    .invoice-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px;
-      background: rgba(255,255,255,0.05);
-      border-radius: 8px;
-      margin-bottom: 8px;
-      border-left: 4px solid #16e086;
-      animation: fadeInUp 0.3s ease;
-    }
-
-    .item-info {
-      flex: 1;
-    }
-
-    .item-name {
-      font-weight: 600;
-      font-size: 13px;
-      margin-bottom: 3px;
-    }
-
-    .item-details {
-      font-size: 11px;
-      color: rgba(255,255,255,0.7);
-      display: flex;
-      gap: 8px;
-    }
-
-    .item-price {
-      font-weight: bold;
-      color: #16e086;
-      font-size: 14px;
-    }
-
-    .remove-btn-mobile {
-      background: rgba(231, 76, 60, 0.2);
-      color: #e74c3c;
-      border: none;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .remove-btn-mobile:hover {
-      background: rgba(231, 76, 60, 0.3);
-      transform: scale(1.1) rotate(90deg);
-    }
-
-    /* Barra de totales móvil */
-    .totals-bar-mobile {
-      background: #233445;
-      padding: 12px;
-      border-top: 1px solid rgba(255,255,255,0.1);
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      position: sticky;
-      bottom: 0;
-      box-shadow: 0 -3px 10px rgba(0,0,0,0.2);
-      animation: slideUp 0.3s ease;
-    }
-
-    @keyframes slideUp {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
-    }
-
-    .total-display {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: rgba(22, 224, 134, 0.1);
-      padding: 10px 12px;
-      border-radius: 8px;
-      border: 1px solid rgba(22, 224, 134, 0.3);
-    }
-
-    .total-label {
-      font-size: 13px;
-      color: rgba(255,255,255,0.9);
-    }
-
-    .total-amount {
-      font-size: 20px;
-      font-weight: bold;
-      color: #16e086;
-    }
-
-    .currency-totals-mobile {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding-bottom: 5px;
-    }
-
-    .currency-total {
-      background: rgba(255,255,255,0.05);
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-size: 11px;
-      white-space: nowrap;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      transition: transform 0.2s ease;
-    }
-
-    .currency-total:hover {
-      transform: translateY(-2px);
-      background: rgba(255,255,255,0.08);
-    }
-
-    .currency-total i {
-      color: #16e086;
-    }
-
-    /* Botones de acción móvil */
-    .action-buttons-mobile {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      margin-top: 8px;
-    }
-
-    .action-btn {
-      background: rgba(255,255,255,0.1);
-      border: none;
-      border-radius: 8px;
-      padding: 10px 6px;
-      color: white;
-      font-size: 12px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      min-height: 60px;
-      justify-content: center;
-    }
-
-    .action-btn i {
-      font-size: 16px;
-      margin-bottom: 2px;
-      transition: transform 0.3s ease;
-    }
-
-    .action-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
-
-    .action-btn:hover i {
-      transform: scale(1.2);
-    }
-
-    .btn-discount {
-      background: linear-gradient(135deg, #e67e22, #d35400);
-    }
-
-    .btn-cash {
-      background: linear-gradient(135deg, #27ae60, #2ecc71);
-    }
-
-    .btn-card {
-      background: linear-gradient(135deg, #2980b9, #3498db);
-    }
-
-    .btn-invoice {
-      background: linear-gradient(135deg, #16e086, #15a086);
-      font-weight: bold;
-    }
-
-    /* Menú de navegación móvil */
-    .mobile-nav {
-      display: none;
-      background: #233445;
-      border-top: 1px solid rgba(255,255,255,0.1);
-      padding: 8px;
-      animation: slideUp 0.3s ease;
-    }
-
-    .nav-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 5px;
-    }
-
-    .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      padding: 8px 4px;
-      color: rgba(255,255,255,0.7);
-      text-decoration: none;
-      font-size: 10px;
-      border-radius: 6px;
-      transition: all 0.3s;
-    }
-
-    .nav-item:hover, .nav-item.active {
-      background: rgba(255,255,255,0.1);
-      color: #16e086;
-      transform: translateY(-2px);
-    }
-
-    .nav-item i {
-      font-size: 14px;
-      transition: transform 0.3s ease;
-    }
-
-    .nav-item:hover i {
-      transform: scale(1.2);
-    }
-
-    /* Modales móviles */
-    .modal-mobile {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.8);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-      padding: 15px;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .modal-content-mobile {
-      background: #233445;
-      border-radius: 15px;
-      width: 100%;
-      max-width: 360px;
-      max-height: 85vh;
-      overflow-y: auto;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-      animation: modalSlideUp 0.3s ease;
-      transform: scale(0.95);
-    }
-
-    @keyframes modalSlideUp {
-      from {
-        transform: translateY(50px) scale(0.9);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0) scale(0.95);
-        opacity: 1;
-      }
-    }
-
-    .modal-header {
-      padding: 15px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .modal-header h2 {
-      color: #16e086;
-      font-size: 18px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .close-modal {
-      background: rgba(255,255,255,0.1);
-      border: none;
-      color: white;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .close-modal:hover {
-      background: rgba(255,255,255,0.2);
-      transform: rotate(90deg) scale(1.1);
-    }
-
-    .modal-body {
-      padding: 15px;
-    }
-
-    /* Modal de pago en efectivo */
-    .payment-input-group {
-      margin-bottom: 15px;
-    }
-
-    .payment-label {
-      display: block;
-      margin-bottom: 6px;
-      color: rgba(255,255,255,0.9);
-      font-weight: 500;
-    }
-
-    .payment-input {
-      width: 100%;
-      background: rgba(255,255,255,0.1);
-      border: 2px solid rgba(255,255,255,0.2);
-      border-radius: 10px;
-      padding: 12px;
-      font-size: 16px;
-      color: white;
-      text-align: center;
-      font-weight: bold;
-      outline: none;
-      transition: all 0.3s ease;
-    }
-
-    .payment-input:focus {
-      border-color: #16e086;
-      transform: translateY(-1px);
-      box-shadow: 0 3px 8px rgba(22,224,134,0.2);
-    }
-
-    .payment-display {
-      background: rgba(22, 224, 134, 0.1);
-      border: 2px solid rgba(22, 224, 134, 0.3);
-      border-radius: 10px;
-      padding: 12px;
-      margin-bottom: 15px;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .payment-row {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 8px;
-    }
-
-    .payment-row:last-child {
-      margin-bottom: 0;
-    }
-
-    .payment-row.total {
-      font-weight: bold;
-      font-size: 16px;
-      color: #16e086;
-    }
-
-    .numeric-keypad {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-top: 15px;
-    }
-
-    .num-btn {
-      background: rgba(255,255,255,0.1);
-      border: none;
-      border-radius: 10px;
-      padding: 15px;
-      font-size: 20px;
-      color: white;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-weight: bold;
-      touch-action: manipulation;
-    }
-
-    .num-btn:hover, .num-btn:active {
-      background: rgba(255,255,255,0.2);
-      transform: scale(0.95);
-    }
-
-    .num-btn.clear {
-      background: rgba(231, 76, 60, 0.2);
-      color: #e74c3c;
-    }
-
-    .num-btn.enter {
-      background: rgba(22, 224, 134, 0.2);
-      color: #16e086;
-      grid-column: span 2;
-    }
-
-    /* Modal de login */
-    .login-container-mobile {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #1a2b3c, #2c3e50);
-      padding: 15px;
-      animation: fadeIn 0.5s ease;
-    }
-
-    .login-card {
-      background: #233445;
-      border-radius: 15px;
-      padding: 25px;
-      width: 100%;
-      max-width: 350px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-      text-align: center;
-      animation: bounceIn 0.6s ease;
-      transform: scale(0.95);
-    }
-
-    @keyframes bounceIn {
-      0% { transform: scale(0.3); opacity: 0; }
-      50% { transform: scale(1.05); opacity: 0.8; }
-      100% { transform: scale(0.95); opacity: 1; }
-    }
-
-    .login-logo {
-      width: 70px;
-      height: 70px;
-      background: linear-gradient(135deg, #16e086, #15a086);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 15px;
-      font-size: 32px;
-      color: white;
-      transition: transform 0.3s ease;
-    }
-
-    .login-logo:hover {
-      transform: rotate(360deg) scale(1.1);
-    }
-
-    .login-title {
-      font-size: 22px;
-      color: #16e086;
-      margin-bottom: 8px;
-      font-weight: bold;
-    }
-
-    .login-input {
-      width: 100%;
-      background: rgba(255,255,255,0.1);
-      border: 2px solid rgba(255,255,255,0.2);
-      border-radius: 10px;
-      padding: 12px;
-      color: white;
-      font-size: 14px;
-      margin-bottom: 12px;
-      outline: none;
-      transition: all 0.3s ease;
-    }
-
-    .login-input:focus {
-      border-color: #16e086;
-      transform: translateY(-1px);
-      box-shadow: 0 3px 8px rgba(22,224,134,0.2);
-    }
-
-    .login-btn {
-      width: 100%;
-      background: linear-gradient(135deg, #16e086, #15a086);
-      border: none;
-      border-radius: 10px;
-      padding: 12px;
-      color: white;
-      font-size: 14px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s;
-      margin-top: 8px;
-    }
-
-    .login-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(22,224,134,0.4);
-    }
-
-    /* Scanner modal */
-    .scanner-modal-mobile {
-      background: #000;
-    }
-
-    .scanner-content {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .scanner-viewport {
-      flex: 1;
-      position: relative;
-      background: #000;
-    }
-
-    .scanner-controls {
-      padding: 15px;
-      background: #233445;
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      position: relative;
-      z-index: 100;
-    }
-
-    .scanner-btn {
-      background: rgba(255,255,255,0.1);
-      border: none;
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      color: white;
-      font-size: 20px;
-      cursor: pointer;
-      transition: all 0.3s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .scanner-btn.primary {
-      background: linear-gradient(135deg, #16e086, #15a086);
-    }
-
-    .scanner-btn:hover {
-      transform: scale(1.1) rotate(10deg);
-    }
-
-    /* Menú Modal */
-    .menu-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-    }
-
-    .menu-item {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 10px;
-      padding: 15px 8px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      transition: all 0.3s;
-      color: white;
-      text-decoration: none;
-    }
-
-    .menu-item:hover {
-      background: rgba(22, 224, 134, 0.1);
-      transform: translateY(-3px) scale(1.05);
-      border-color: #16e086;
-    }
-
-    .menu-item i {
-      font-size: 24px;
-      color: #16e086;
-      transition: transform 0.3s ease;
-    }
-
-    .menu-item:hover i {
-      transform: scale(1.2) rotate(5deg);
-    }
-
-    .menu-item span {
-      font-size: 11px;
-      text-align: center;
-      line-height: 1.3;
-    }
-
-    /* Configuración Modal */
-    .config-section {
-      margin-bottom: 20px;
-    }
-
-    .config-section h3 {
-      color: #16e086;
-      font-size: 14px;
-      margin-bottom: 12px;
-      padding-bottom: 6px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .config-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px;
-      background: rgba(255,255,255,0.05);
-      border-radius: 8px;
-      margin-bottom: 8px;
-      transition: all 0.3s;
-    }
-
-    .config-item:hover {
-      background: rgba(255,255,255,0.08);
-      transform: translateX(5px);
-    }
-
-    .config-label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-    }
-
-    .config-label i {
-      color: #16e086;
-      width: 18px;
-      text-align: center;
-    }
-
-    /* Switch/Toggle */
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 45px;
-      height: 22px;
-    }
-
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(255,255,255,0.2);
-      transition: .4s;
-    }
-
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 14px;
-      width: 14px;
-      left: 4px;
-      bottom: 4px;
-      background-color: white;
-      transition: .4s;
-    }
-
-    input:checked + .slider {
-      background-color: #16e086;
-    }
-
-    input:checked + .slider:before {
-      transform: translateX(23px);
-    }
-
-    .slider.round {
-      border-radius: 24px;
-    }
-
-    .slider.round:before {
-      border-radius: 50%;
-    }
-
-    /* Historial Modal */
-    .history-container {
-      max-height: 350px;
-      overflow-y: auto;
-    }
-
-    .history-item {
-      background: rgba(255,255,255,0.05);
-      border-radius: 10px;
-      padding: 12px;
-      margin-bottom: 8px;
-      border-left: 4px solid #16e086;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .history-item:hover {
-      background: rgba(255,255,255,0.08);
-      transform: translateX(5px) scale(1.02);
-    }
-
-    .history-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 6px;
-    }
-
-    .history-id {
-      font-weight: bold;
-      color: #16e086;
-      font-size: 13px;
-    }
-
-    .history-date {
-      font-size: 11px;
-      color: rgba(255,255,255,0.6);
-    }
-
-    .history-details {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      font-size: 11px;
-    }
-
-    .history-detail {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .history-label {
-      color: rgba(255,255,255,0.6);
-      font-size: 9px;
-    }
-
-    .history-value {
-      color: #ffffff;
-      font-weight: 500;
-    }
-
-    .history-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 8px;
-    }
-
-    .history-action-btn {
-      flex: 1;
-      padding: 6px;
-      border-radius: 6px;
-      border: none;
-      font-size: 11px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      transition: all 0.3s;
-    }
-
-    .history-action-view {
-      background: rgba(22, 224, 134, 0.1);
-      color: #16e086;
-    }
-
-    .history-action-view:hover {
-      background: rgba(22, 224, 134, 0.2);
-      transform: translateY(-2px);
-    }
-
-    .history-action-whatsapp {
-      background: rgba(37, 211, 102, 0.1);
-      color: #25D366;
-    }
-
-    .history-action-whatsapp:hover {
-      background: rgba(37, 211, 102, 0.2);
-      transform: translateY(-2px);
-    }
-
-    /* Reportes Modal */
-    .reports-container {
-      max-height: 350px;
-      overflow-y: auto;
-    }
-
-    .report-section {
-      margin-bottom: 15px;
-    }
-
-    .chart-container {
-      background: rgba(255,255,255,0.05);
-      border-radius: 8px;
-      padding: 12px;
-      margin-bottom: 12px;
-    }
-
-    .chart-title {
-      color: #16e086;
-      font-size: 13px;
-      margin-bottom: 8px;
-      text-align: center;
-    }
-
-    .chart-canvas {
-      width: 100% !important;
-      height: 130px !important;
-    }
-
-    .report-stats {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .stat-card {
-      background: rgba(255,255,255,0.05);
-      border-radius: 6px;
-      padding: 8px;
-      text-align: center;
-      transition: transform 0.3s ease;
-    }
-
-    .stat-card:hover {
-      transform: translateY(-3px);
-      background: rgba(255,255,255,0.08);
-    }
-
-    .stat-value {
-      font-size: 16px;
-      font-weight: bold;
-      color: #16e086;
-      margin-bottom: 4px;
-    }
-
-    .stat-label {
-      font-size: 10px;
-      color: rgba(255,255,255,0.7);
-    }
-
-    /* Tax Modal */
-    .tax-modal {
-      max-width: 450px;
-    }
-
-    .tax-config-section {
-      background: rgba(255,255,255,0.05);
-      border-radius: 10px;
-      padding: 15px;
-      margin-bottom: 15px;
-    }
-
-    .tax-status {
-      display: inline-block;
-      padding: 4px 8px;
-      border-radius: 15px;
-      font-size: 11px;
-      font-weight: bold;
-      margin-left: 8px;
-    }
-
-    .tax-active {
-      background: rgba(22, 224, 134, 0.2);
-      color: #16e086;
-    }
-
-    .tax-inactive {
-      background: rgba(231, 76, 60, 0.2);
-      color: #e74c3c;
-    }
-
-    .tax-input-group {
-      margin-bottom: 12px;
-    }
-
-    .tax-input-label {
-      display: block;
-      margin-bottom: 4px;
-      color: rgba(255,255,255,0.9);
-      font-size: 13px;
-    }
-
-    .tax-input {
-      width: 100%;
-      background: rgba(255,255,255,0.1);
-      border: 2px solid rgba(255,255,255,0.2);
-      border-radius: 6px;
-      padding: 8px;
-      color: white;
-      font-size: 13px;
-      outline: none;
-      transition: all 0.3s ease;
-    }
-
-    .tax-input:focus {
-      border-color: #16e086;
-      transform: translateY(-1px);
-    }
-
-    .tax-buttons {
-      display: flex;
-      gap: 8px;
-      margin-top: 15px;
-    }
-
-    .tax-btn {
-      flex: 1;
-      padding: 10px;
-      border-radius: 6px;
-      border: none;
-      font-size: 13px;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .tax-btn-save {
-      background: linear-gradient(135deg, #16e086, #15a086);
-      color: white;
-    }
-
-    .tax-btn-cancel {
-      background: rgba(255,255,255,0.1);
-      color: white;
-    }
-
-    .tax-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-    }
-
-    /* Estilos para tablet y pantallas grandes */
-    @media (min-width: 768px) {
-      .mobile-container {
-        max-width: 100%;
-        height: 100vh;
-        border-radius: 15px;
-        margin: 15px auto;
-        overflow: hidden;
-        transform: scale(0.9);
-      }
-
-      .main-content {
-        flex-direction: row;
-      }
-
-      .products-section {
-        flex: 2;
-        max-height: calc(100vh - 120px);
-      }
-
-      .invoice-section {
-        flex: 1;
-        display: flex !important;
-        max-height: calc(100vh - 120px);
-      }
-
-      .mobile-nav {
-        display: none !important;
-      }
-
-      .menu-hamburger {
-        display: flex !important;
-      }
-
-      .action-buttons-mobile {
-        grid-template-columns: repeat(4, 1fr);
-      }
-
-      .header-actions {
-        gap: 12px;
-      }
-
-      .search-section {
-        padding: 15px;
-      }
-
-      .search-container-mobile {
-        gap: 12px;
-      }
-
-      .products-grid {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 12px;
-      }
-
-      .product-card {
-        height: 170px;
-        padding: 12px;
-      }
-
-      .product-image {
-        width: 70px;
-        height: 70px;
-      }
-
-      .product-name {
-        font-size: 13px;
-        height: 32px;
-      }
-
-      .product-price {
-        font-size: 14px;
-      }
-
-      .totals-bar-mobile {
-        padding: 15px;
-      }
-
-      .action-btn {
-        padding: 12px 8px;
-        min-height: 70px;
-      }
-
-      .action-btn i {
-        font-size: 18px;
-      }
-
-      .action-btn span {
-        font-size: 12px;
-      }
-    }
-
-    /* Estilos para pantallas pequeñas */
-    @media (max-width: 767px) {
-      .mobile-container {
-        height: 100vh;
-        transform: scale(1);
-      }
-
-      .invoice-section {
-        position: fixed;
-        top: 0;
-        right: -100%;
-        width: 100%;
-        height: 100vh;
-        z-index: 200;
-        transition: right 0.3s ease;
-      }
-
-      .invoice-section.active {
-        right: 0;
-      }
-
-      .mobile-nav {
-        display: block;
-      }
-
-      .menu-hamburger {
-        display: none;
-      }
-
-      .action-buttons-mobile {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .products-grid {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-      }
-
-      .header-actions {
-        gap: 8px;
-      }
-    }
-
-    /* Scrollbar personalizada */
-    ::-webkit-scrollbar {
-      width: 5px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: rgba(255,255,255,0.05);
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: #16e086;
-      border-radius: 3px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: #15a086;
-    }
-
-    /* Toast */
-    .toast {
-      position: fixed;
-      bottom: 15px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(22, 224, 134, 0.9);
-      color: white;
-      padding: 10px 15px;
-      border-radius: 8px;
-      z-index: 1000;
-      animation: slideInUp 0.3s ease;
-      display: none;
-      font-weight: 500;
-      font-size: 13px;
-    }
-
-    @keyframes slideInUp {
-      from {
-        transform: translateX(-50%) translateY(20px);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(-50%) translateY(0);
-        opacity: 1;
-      }
-    }
-
-    /* Loading */
-    .loading-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.8);
-      z-index: 9999;
-      display: none;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      gap: 15px;
-    }
-
-    .spinner {
-      width: 50px;
-      height: 50px;
-      border: 4px solid rgba(255,255,255,0.1);
-      border-radius: 50%;
-      border-top-color: #16e086;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    /* Turno terminado modal */
-    .shift-end-modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.95);
-      z-index: 9999;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      text-align: center;
-      padding: 15px;
-    }
-
-    .shift-end-content {
-      background: linear-gradient(135deg, #2c3e50, #1a2b3c);
-      border-radius: 15px;
-      padding: 25px;
-      max-width: 350px;
-      width: 100%;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-      animation: scaleIn 0.5s ease;
-      transform: scale(0.95);
-    }
-
-    @keyframes scaleIn {
-      from {
-        transform: scale(0.8);
-        opacity: 0;
-      }
-      to {
-        transform: scale(0.95);
-        opacity: 1;
-      }
-    }
-
-    .shift-end-icon {
-      font-size: 50px;
-      color: #e74c3c;
-      margin-bottom: 15px;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-    }
-
-    .shift-end-title {
-      color: #e74c3c;
-      font-size: 22px;
-      margin-bottom: 12px;
-      font-weight: bold;
-    }
-
-    .shift-end-message {
-      color: rgba(255,255,255,0.8);
-      margin-bottom: 20px;
-      line-height: 1.4;
-    }
-
-    .shift-end-buttons {
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-    }
-
-    .shift-end-btn {
-      padding: 10px 20px;
-      border-radius: 10px;
-      border: none;
-      font-size: 13px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s;
-      min-width: 110px;
-    }
-
-    .shift-end-btn-change {
-      background: linear-gradient(135deg, #16e086, #15a086);
-      color: white;
-    }
-
-    .shift-end-btn-reload {
-      background: rgba(255,255,255,0.1);
-      color: white;
-      border: 1px solid rgba(255,255,255,0.2);
-    }
-
-    /* Estilos para ventana de confirmación de producto próximo a vencer */
-    .expiration-modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 2000;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .expiration-modal {
-      background: linear-gradient(135deg, #f39c12, #d35400);
-      border-radius: 15px;
-      padding: 25px;
-      max-width: 350px;
-      width: 90%;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-      color: white;
-      text-align: center;
-      animation: modalSlideUp 0.4s ease;
-    }
-
-    .expiration-modal.expired {
-      background: linear-gradient(135deg, #e74c3c, #c0392b);
-    }
-
-    .expiration-icon {
-      font-size: 50px;
-      margin-bottom: 15px;
-      animation: bounce 1s ease infinite;
-    }
-
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
-    }
-
-    .expiration-title {
-      font-size: 22px;
-      font-weight: bold;
-      margin-bottom: 12px;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-    }
-
-    .expiration-message {
-      font-size: 14px;
-      line-height: 1.4;
-      margin-bottom: 20px;
-      background: rgba(255, 255, 255, 0.1);
-      padding: 12px;
-      border-radius: 8px;
-      text-align: left;
-    }
-
-    .expiration-warning {
-      font-size: 13px;
-      font-style: italic;
-      color: rgba(255, 255, 255, 0.9);
-      margin-bottom: 15px;
-      padding: 8px;
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 6px;
-      border-left: 4px solid #e74c3c;
-    }
-
-    .expiration-buttons {
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-    }
-
-    .expiration-btn {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: 14px;
-    }
-
-    .expiration-btn-yes {
-      background: linear-gradient(135deg, #2ecc71, #27ae60);
-      color: white;
-    }
-
-    .expiration-btn-yes:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
-    }
-
-    .expiration-btn-no {
-      background: linear-gradient(135deg, #e74c3c, #c0392b);
-      color: white;
-    }
-
-    .expiration-btn-no:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
-    }
-
-    /* ============================ */
-    /* NUEVOS ESTILOS AGREGADOS */
-    /* ============================ */
-
-    /* Botón deslizante para ventana de cantidad - REMOVIDO */
-    .quantity-toggle-btn {
-      display: none;
-    }
-
-    /* Opción de ventana de cantidad en configuración */
-    .config-quantity-toggle {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px;
-      background: rgba(255,255,255,0.05);
-      border-radius: 8px;
-      margin-bottom: 8px;
-      transition: all 0.3s;
-    }
-
-    .config-quantity-toggle:hover {
-      background: rgba(255,255,255,0.08);
-      transform: translateX(5px);
-    }
-
-    .config-quantity-label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      flex: 1;
-    }
-
-    /* Icono de zanahoria para sin foto */
-    .carrot-icon {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #ff9966, #ff5e62);
-      border-radius: 50%;
-      color: white;
-      font-size: 18px;
-    }
-
-    /* Eliminar icono de copiar */
-    .copy-icon {
-      display: none !important;
-    }
-
-    /* Ajustes para cámara del scanner */
-    #scannerViewport {
-      position: relative;
-      width: 100%;
-      height: 100%;
-    }
-
-    #scannerViewport video {
-      width: 100% !important;
-      height: 100% !important;
-      object-fit: cover;
-    }
-
-    .scanner-controls {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: rgba(0,0,0,0.7);
-      padding: 15px;
-      z-index: 10;
-    }
-
-    /* Eliminar iconos de stop/play y selector de imágenes */
-    #toggleScannerBtn,
-    #uploadImageBtn {
-      display: none !important;
-    }
-
-    /* Teclados virtuales - Adaptación automática a pantallas */
-    .numeric-keypad, .calculator-keypad {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-top: 15px;
-    }
-
-    .num-btn, .calc-btn {
-      background: rgba(255,255,255,0.1);
-      border: none;
-      border-radius: 10px;
-      padding: 15px;
-      font-size: 20px;
-      color: white;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-weight: bold;
-      touch-action: manipulation;
-      min-height: 50px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    @media (max-width: 480px) {
-      .num-btn, .calc-btn {
-        padding: 12px;
-        font-size: 18px;
-        min-height: 45px;
-      }
-    }
-
-    @media (min-width: 768px) {
-      .num-btn, .calc-btn {
-        padding: 20px;
-        font-size: 24px;
-        min-height: 60px;
-      }
-    }
-
-    /* Ajustes de teclado para pantallas pequeñas */
-    @media (max-height: 700px) {
-      .num-btn, .calc-btn {
-        padding: 10px;
-        font-size: 16px;
-        min-height: 40px;
-      }
-    }
-
-    /* Ajustes de teclado para pantallas muy pequeñas */
-    @media (max-width: 320px) {
-      .numeric-keypad, .calculator-keypad {
-        gap: 5px;
-      }
-      
-      .num-btn, .calc-btn {
-        padding: 8px;
-        font-size: 14px;
-        min-height: 35px;
-      }
-    }
-
-    /* Animaciones adicionales */
-    .fade-in {
-      animation: fadeIn 0.5s ease;
-    }
-
-    .slide-in-left {
-      animation: slideInLeft 0.4s ease;
-    }
-
-    .slide-in-right {
-      animation: slideInRight 0.4s ease;
-    }
-
-    .bounce-in {
-      animation: bounceIn 0.6s ease;
-    }
-
-    .pulse {
-      animation: pulse 2s infinite;
-    }
-
-    /* Estilos elegantes para elementos */
-    .elegant-card {
-      background: rgba(255,255,255,0.05);
-      border-radius: 12px;
-      padding: 15px;
-      border: 1px solid rgba(255,255,255,0.1);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-      transition: all 0.3s ease;
-    }
-
-    .elegant-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-      border-color: rgba(22, 224, 134, 0.3);
-    }
-
-    .gradient-text {
-      background: linear-gradient(135deg, #16e086, #3498db);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .glow-effect {
-      position: relative;
-    }
-
-    .glow-effect::after {
-      content: '';
-      position: absolute;
-      top: -2px;
-      left: -2px;
-      right: -2px;
-      bottom: -2px;
-      background: linear-gradient(45deg, #16e086, #3498db, #9b59b6, #e74c3c);
-      border-radius: inherit;
-      z-index: -1;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .glow-effect:hover::after {
-      opacity: 0.3;
-    }
-
-    /* Campo de usuario no editable en modal de edición */
-    .readonly-field {
-      background: rgba(255,255,255,0.05) !important;
-      color: rgba(255,255,255,0.5) !important;
-      cursor: not-allowed !important;
-    }
-
+/* CSS COMPLETO PARA ADAPTACIÓN DE TAMAÑOS Y MODALES CON COLORES RESTAURADOS */
+
+/* ============================================
+   RESET Y CONFIGURACIÓN INICIAL - TAMAÑOS REDUCIDOS
+   ============================================ */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: all 0.2s ease;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #1a2b3c, #2c3e50);
+  color: #ffffff;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow-x: hidden;
+  font-size: 12px; /* REDUCIDO de 14px */
+  line-height: 1.2; /* REDUCIDO de 1.3 */
+  width: 100%;
+  height: 100%;
+}
+
+/* ============================================
+   CONTENEDOR PRINCIPAL - ADAPTACIÓN COMPLETA
+   ============================================ */
+.mobile-container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  height: 100vh; /* Ocupa toda la pantalla */
+  display: flex;
+  flex-direction: column;
+  background: #1a2b3c;
+  box-shadow: 0 0 15px rgba(0,0,0,0.2); /* REDUCIDO */
+  position: relative;
+  overflow: hidden;
+  animation: fadeIn 0.4s ease;
+}
+
+@media (min-width: 769px) {
+  .mobile-container {
+    max-width: 95%; /* Más ancho en tablets */
+    height: 98vh; /* Altura casi completa */
+    margin: 1vh auto; /* Margen muy pequeño */
+    border-radius: 12px; /* REDUCIDO de 15px */
+  }
+}
+
+@media (min-width: 1024px) {
+  .mobile-container {
+    max-width: 97%;
+    height: 99vh;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); } /* REDUCIDO */
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   HEADER - TAMAÑO REDUCIDO
+   ============================================ */
+.mobile-header {
+  background: linear-gradient(135deg, #16e086, #15a086);
+  padding: 8px 10px; /* REDUCIDO de 12px 15px */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15); /* REDUCIDO */
+  animation: slideDown 0.2s ease; /* REDUCIDO */
+  min-height: 50px; /* REDUCIDO de 60px */
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-80%); } /* REDUCIDO */
+  to { transform: translateY(0); }
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 6px; /* REDUCIDO de 10px */
+}
+
+.logo-mobile {
+  width: 30px; /* REDUCIDO de 36px */
+  height: 30px; /* REDUCIDO de 36px */
+  background: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px; /* REDUCIDO de 18px */
+  color: #16e086;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15); /* REDUCIDO */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.logo-mobile:hover {
+  transform: scale(1.1);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+}
+
+.system-name-mobile {
+  font-size: 14px; /* REDUCIDO de 16px */
+  font-weight: bold;
+  color: #ffffff;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.2); /* REDUCIDO */
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px; /* REDUCIDO de 12px */
+  align-items: center;
+}
+
+.header-icon {
+  color: #ffffff;
+  font-size: 1em; /* REDUCIDO de 1.2em */
+  background: rgba(255,255,255,0.2);
+  width: 28px; /* REDUCIDO de 32px */
+  height: 28px; /* REDUCIDO de 32px */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  position: relative;
+  text-decoration: none;
+}
+
+.header-icon:hover {
+  background: rgba(255,255,255,0.3);
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.user-avatar-mobile {
+  width: 28px; /* REDUCIDO de 32px */
+  height: 28px; /* REDUCIDO de 32px */
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ffffff;
+  transition: transform 0.3s ease;
+}
+
+.user-avatar-mobile:hover {
+  transform: scale(1.1);
+}
+
+.menu-hamburger {
+  display: none;
+  background: rgba(255,255,255,0.2);
+  border: none;
+  width: 32px; /* REDUCIDO de 36px */
+  height: 32px; /* REDUCIDO de 36px */
+  border-radius: 50%;
+  color: white;
+  font-size: 1em; /* REDUCIDO de 1.1em */
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.menu-hamburger:hover {
+  background: rgba(255,255,255,0.3);
+  transform: scale(1.1);
+}
+
+/* ============================================
+   MODALES - MÁS COMPACTOS Y ADAPTABLES
+   ============================================ */
+.modal-mobile {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.8);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  padding: 10px; /* REDUCIDO de 15px */
+  animation: fadeIn 0.3s ease;
+  overflow-y: auto;
+}
+
+.modal-content-mobile {
+  background: #233445;
+  border-radius: 12px; /* REDUCIDO de 15px */
+  width: 100%;
+  max-width: 480px; /* REDUCIDO de 500px para más compacto */
+  max-height: 90vh; /* Aumentado para usar más espacio vertical */
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  animation: modalSlideUpCompact 0.3s ease; /* Animación más rápida */
+  border: 1px solid rgba(22, 224, 134, 0.3); /* REDUCIDO de 2px */
+}
+
+@keyframes modalSlideUpCompact {
+  from {
+    transform: translateY(30px) scale(0.95); /* REDUCIDO */
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.modal-header {
+  padding: 12px; /* REDUCIDO de 15px */
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0,0,0,0.2);
+  border-radius: 12px 12px 0 0; /* REDUCIDO */
+}
+
+.modal-header h2 {
+  color: #16e086;
+  font-size: 16px; /* REDUCIDO de 18px */
+  display: flex;
+  align-items: center;
+  gap: 6px; /* REDUCIDO de 8px */
+}
+
+.close-modal {
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: white;
+  width: 28px; /* REDUCIDO de 32px */
+  height: 28px; /* REDUCIDO de 32px */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.close-modal:hover {
+  background: rgba(255,255,255,0.2);
+  transform: rotate(90deg) scale(1.1);
+}
+
+.modal-body {
+  padding: 16px; /* REDUCIDO de 20px */
+}
+
+/* ============================================
+   MODAL DE INFORMACIÓN DE USUARIO - COMPACTO
+   ============================================ */
+.user-info-modal {
+  max-width: 520px; /* REDUCIDO de 600px */
+  width: 90%;
+  background: #233445 !important;
+  border-radius: 12px; /* REDUCIDO */
+  box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+  border: 2px solid #16e086;
+}
+
+.user-info-modal::before {
+  display: none;
+}
+
+.user-info-header {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* REDUCIDO de 12px */
+  margin-bottom: 12px; /* REDUCIDO de 15px */
+  padding-bottom: 10px; /* REDUCIDO de 12px */
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  position: relative;
+}
+
+.user-avatar-large {
+  width: 60px; /* REDUCIDO de 70px */
+  height: 60px; /* REDUCIDO de 70px */
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #16e086;
+}
+
+.user-info-details {
+  flex: 1;
+}
+
+.user-info-name {
+  font-size: 16px; /* REDUCIDO de 18px */
+  font-weight: bold;
+  color: #16e086;
+  margin-bottom: 4px; /* REDUCIDO de 5px */
+}
+
+.user-info-role {
+  font-size: 12px; /* REDUCIDO de 13px */
+  color: rgba(255,255,255,0.8);
+  background: rgba(22, 224, 134, 0.1);
+  padding: 2px 6px; /* REDUCIDO de 3px 8px */
+  border-radius: 10px; /* REDUCIDO de 12px */
+  display: inline-block;
+}
+
+.user-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px; /* REDUCIDO de 12px */
+  margin-bottom: 12px; /* REDUCIDO de 15px */
+}
+
+.user-info-item {
+  background: rgba(255,255,255,0.05);
+  border-radius: 6px; /* REDUCIDO de 8px */
+  padding: 8px; /* REDUCIDO de 10px */
+  transition: all 0.3s ease;
+}
+
+.user-info-item:hover {
+  background: rgba(255,255,255,0.08);
+  transform: translateY(-2px);
+}
+
+.user-info-label {
+  font-size: 10px; /* REDUCIDO de 11px */
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 3px; /* REDUCIDO de 5px */
+}
+
+.user-info-value {
+  font-size: 12px; /* REDUCIDO de 13px */
+  font-weight: 500;
+  color: #ffffff;
+}
+
+/* ============================================
+   BOTÓN CERRAR SESIÓN - CON COLORES
+   ============================================ */
+.logout-btn {
+  width: 100%;
+  padding: 10px; /* REDUCIDO de 12px */
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+  border: none;
+  border-radius: 8px; /* REDUCIDO de 10px */
+  font-size: 13px; /* REDUCIDO de 14px */
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px; /* REDUCIDO de 8px */
+  margin-top: 12px; /* REDUCIDO de 15px */
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 3px 8px rgba(231, 76, 60, 0.3);
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+  background: linear-gradient(135deg, #ff6b6b, #e74c3c);
+}
+
+.logout-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 5px rgba(231, 76, 60, 0.3);
+}
+
+.logout-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.logout-btn:hover::before {
+  left: 100%;
+}
+
+.logout-btn i {
+  transition: transform 0.3s ease;
+}
+
+.logout-btn:hover i {
+  transform: rotate(180deg);
+}
+
+/* ============================================
+   SECCIÓN DE BÚSQUEDA - COMPACTA
+   ============================================ */
+.search-section {
+  padding: 10px; /* REDUCIDO de 12px */
+  background: #233445;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  animation: fadeInUp 0.3s ease 0.1s both; /* REDUCIDO */
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); } /* REDUCIDO de 20px */
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.search-container-mobile {
+  display: flex;
+  gap: 6px; /* REDUCIDO de 8px */
+  width: 100%;
+}
+
+.search-box {
+  flex: 1;
+  background: rgba(255,255,255,0.1);
+  border: none;
+  border-radius: 15px; /* REDUCIDO de 20px */
+  padding: 8px 12px; /* REDUCIDO de 10px 15px */
+  color: #ffffff;
+  font-size: 12px; /* REDUCIDO de 14px */
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.search-box:focus {
+  background: rgba(255,255,255,0.15);
+  box-shadow: 0 0 0 2px rgba(22, 224, 134, 0.3);
+  transform: translateY(-1px);
+}
+
+.search-box::placeholder {
+  color: rgba(255,255,255,0.6);
+}
+
+.scanner-btn-mobile {
+  background: linear-gradient(135deg, #16e086, #15a086);
+  color: white;
+  border: none;
+  border-radius: 15px; /* REDUCIDO de 20px */
+  width: 40px; /* REDUCIDO de 45px */
+  height: 40px; /* REDUCIDO de 45px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 8px rgba(22,224,134,0.3);
+}
+
+.scanner-btn-mobile:hover {
+  transform: scale(1.05) rotate(5deg);
+  box-shadow: 0 5px 12px rgba(22,224,134,0.4);
+}
+
+/* ============================================
+   SECCIÓN PRINCIPAL - COMPACTA
+   ============================================ */
+.main-content {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  animation: fadeIn 0.4s ease 0.1s both; /* REDUCIDO */
+}
+
+.products-section {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px; /* REDUCIDO de 12px */
+  background: #1a2b3c;
+}
+
+.products-section h2 {
+  font-size: 14px; /* REDUCIDO de 16px */
+  margin-bottom: 10px; /* REDUCIDO de 12px */
+  color: #16e086;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  animation: slideInLeft 0.3s ease; /* REDUCIDO */
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-15px); } /* REDUCIDO */
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.view-toggle-mobile {
+  display: flex;
+  gap: 4px; /* REDUCIDO de 6px */
+}
+
+.view-btn {
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: #16e086;
+  width: 28px; /* REDUCIDO de 32px */
+  height: 28px; /* REDUCIDO de 32px */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.view-btn:hover {
+  transform: scale(1.1);
+  background: rgba(22, 224, 134, 0.2);
+}
+
+.view-btn.active {
+  background: #16e086;
+  color: white;
+  transform: scale(1.1);
+  box-shadow: 0 3px 8px rgba(22,224,134,0.3);
+}
+
+/* ============================================
+   TOTAL EN TIEMPO REAL
+   ============================================ */
+.real-time-total-container {
+  background: rgba(22, 224, 134, 0.1);
+  border: 2px solid rgba(22, 224, 134, 0.3);
+  border-radius: 8px; /* REDUCIDO de 10px */
+  padding: 8px; /* REDUCIDO de 10px */
+  margin-bottom: 10px; /* REDUCIDO de 12px */
+  display: none;
+  animation: slideInDown 0.3s ease;
+}
+
+@keyframes slideInDown {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.real-time-total-label {
+  font-size: 10px; /* REDUCIDO de 11px */
+  color: rgba(255,255,255,0.8);
+  margin-bottom: 4px; /* REDUCIDO de 5px */
+}
+
+.real-time-total-amount {
+  font-size: 16px; /* REDUCIDO de 18px */
+  font-weight: bold;
+  color: #16e086;
+  text-align: center;
+}
+
+/* ============================================
+   PRODUCTOS - TARJETAS MÁS PEQUEÑAS
+   ============================================ */
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); /* REDUCIDO de 130px */
+  gap: 8px; /* REDUCIDO de 10px */
+  margin-top: 6px; /* REDUCIDO de 8px */
+  animation: fadeIn 0.5s ease;
+}
+
+.products-grid.list-view {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px; /* REDUCIDO de 8px */
+}
+
+.products-grid.list-view .product-card {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  padding: 6px !important; /* REDUCIDO de 8px */
+  text-align: left !important;
+  height: auto !important;
+}
+
+.products-grid.list-view .product-image {
+  width: 40px !important; /* REDUCIDO de 50px */
+  height: 40px !important; /* REDUCIDO de 50px */
+  margin-bottom: 0 !important;
+  margin-right: 8px !important; /* REDUCIDO de 10px */
+}
+
+.products-grid.list-view .product-name {
+  font-size: 12px !important; /* REDUCIDO de 13px */
+  margin-bottom: 2px !important; /* REDUCIDO de 3px */
+  text-align: left !important;
+  flex: 1 !important;
+}
+
+.products-grid.list-view .product-price {
+  font-size: 11px !important; /* REDUCIDO de 12px */
+  margin-bottom: 2px !important; /* REDUCIDO de 2px */
+  text-align: left !important;
+}
+
+.products-grid.list-view .product-ean-mobile {
+  font-size: 8px !important; /* REDUCIDO de 9px */
+  margin-top: 2px !important;
+  text-align: left !important;
+}
+
+.products-grid.list-view .product-badge {
+  position: relative !important;
+  top: 0 !important;
+  right: 0 !important;
+  margin-top: 4px !important; /* REDUCIDO de 5px */
+}
+
+@media (min-width: 768px) {
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); /* REDUCIDO de 150px */
+  }
+}
+
+.product-card {
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px; /* REDUCIDO de 10px */
+  padding: 8px; /* REDUCIDO de 10px */
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  height: 140px; /* REDUCIDO de 160px */
+  overflow: hidden;
+}
+
+.product-card:hover {
+  background: rgba(255,255,255,0.1);
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  border-color: rgba(22, 224, 134, 0.3);
+}
+
+.product-image {
+  width: 50px; /* REDUCIDO de 60px */
+  height: 50px; /* REDUCIDO de 60px */
+  object-fit: contain;
+  margin-bottom: 4px; /* REDUCIDO de 6px */
+  border-radius: 4px; /* REDUCIDO de 6px */
+  background: rgba(255,255,255,0.05);
+  transition: transform 0.3s ease;
+}
+
+.product-card:hover .product-image {
+  transform: scale(1.05);
+}
+
+.product-name {
+  font-weight: 600;
+  font-size: 11px; /* REDUCIDO de 12px */
+  margin-bottom: 3px;
+  line-height: 1.1; /* REDUCIDO de 1.2 */
+  color: #ffffff;
+  height: 24px; /* REDUCIDO de 28px */
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.product-price {
+  color: #16e086;
+  font-weight: bold;
+  font-size: 11px; /* REDUCIDO de 13px */
+  margin-bottom: 3px; /* REDUCIDO de 4px */
+}
+
+.product-ean-mobile {
+  font-size: 8px; /* REDUCIDO de 9px */
+  color: rgba(255,255,255,0.6);
+  background: rgba(0,0,0,0.2);
+  padding: 1px 4px; /* REDUCIDO de 2px 6px */
+  border-radius: 6px; /* REDUCIDO de 8px */
+  margin-top: 2px; /* REDUCIDO de 3px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px; /* REDUCIDO de 3px */
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.product-badge {
+  position: absolute;
+  font-size: 8px; /* REDUCIDO de 9px */
+  padding: 1px 4px; /* REDUCIDO de 2px 6px */
+  border-radius: 6px; /* REDUCIDO de 8px */
+  font-weight: bold;
+  z-index: 1;
+}
+
+.badge-expired {
+  background: rgba(231, 76, 60, 0.9);
+  color: white;
+  top: 4px; /* REDUCIDO de 6px */
+  right: 4px; /* REDUCIDO de 6px */
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.badge-warning {
+  background: rgba(243, 156, 18, 0.9);
+  color: white;
+  top: 4px; /* REDUCIDO de 6px */
+  right: 4px; /* REDUCIDO de 6px */
+}
+
+.badge-tax {
+  background: rgba(22, 224, 134, 0.9);
+  color: white;
+  font-size: 7px; /* REDUCIDO de 8px */
+  bottom: 4px; /* REDUCIDO de 6px */
+  left: 4px; /* REDUCIDO de 6px */
+  padding: 1px 4px; /* REDUCIDO de 2px 5px */
+}
+
+/* ============================================
+   VENTANA DE CANTIDAD - COMPACTA
+   ============================================ */
+.quantity-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease;
+}
+
+.quantity-modal {
+  background: #233445;
+  border-radius: 12px; /* REDUCIDO de 15px */
+  padding: 16px; /* REDUCIDO de 20px */
+  max-width: 260px; /* REDUCIDO de 300px */
+  width: 85%;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  animation: modalSlideUp 0.4s ease;
+}
+
+@keyframes modalSlideUp {
+  from {
+    transform: translateY(30px) scale(0.9); /* REDUCIDO de 50px */
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.quantity-modal-header {
+  text-align: center;
+  margin-bottom: 12px; /* REDUCIDO de 15px */
+}
+
+.quantity-modal-header h3 {
+  color: #16e086;
+  font-size: 14px; /* REDUCIDO de 16px */
+  margin-bottom: 3px; /* REDUCIDO de 5px */
+}
+
+.quantity-modal-header p {
+  font-size: 11px; /* REDUCIDO de 12px */
+  color: rgba(255,255,255,0.7);
+}
+
+.quantity-input-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px; /* REDUCIDO de 15px */
+  margin: 16px 0; /* REDUCIDO de 20px */
+}
+
+.quantity-btn {
+  background: rgba(22, 224, 134, 0.2);
+  border: none;
+  width: 36px; /* REDUCIDO de 40px */
+  height: 36px; /* REDUCIDO de 40px */
+  border-radius: 50%;
+  color: #16e086;
+  font-size: 16px; /* REDUCIDO de 18px */
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quantity-btn:hover {
+  background: rgba(22, 224, 134, 0.3);
+  transform: scale(1.1);
+}
+
+.quantity-display {
+  font-size: 20px; /* REDUCIDO de 24px */
+  font-weight: bold;
+  color: #16e086;
+  min-width: 50px; /* REDUCIDO de 60px */
+  text-align: center;
+}
+
+.quantity-actions {
+  display: flex;
+  gap: 8px; /* REDUCIDO de 10px */
+  margin-top: 16px; /* REDUCIDO de 20px */
+}
+
+.quantity-action-btn {
+  flex: 1;
+  padding: 8px; /* REDUCIDO de 10px */
+  border-radius: 6px; /* REDUCIDO de 8px */
+  border: none;
+  font-size: 12px; /* REDUCIDO de 14px */
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px; /* REDUCIDO de 5px */
+}
+
+.quantity-action-add {
+  background: linear-gradient(135deg, #16e086, #15a086);
+  color: white;
+}
+
+.quantity-action-cancel {
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+
+.quantity-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+}
+
+/* ============================================
+   SECCIÓN DE FACTURA - COMPACTA
+   ============================================ */
+.invoice-section {
+  width: 100%;
+  background: #233445;
+  border-left: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  animation: slideInRight 0.4s ease;
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.invoice-header {
+  padding: 10px; /* REDUCIDO de 12px */
+  background: rgba(0,0,0,0.2);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.invoice-header h2 {
+  color: #16e086;
+  font-size: 14px; /* REDUCIDO de 16px */
+  display: flex;
+  align-items: center;
+  gap: 6px; /* REDUCIDO de 8px */
+}
+
+.invoice-close-btn {
+  background: rgba(255,255,255,0.1);
+  border: none;
+  width: 28px; /* REDUCIDO de 32px */
+  height: 28px; /* REDUCIDO de 32px */
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.invoice-close-btn:hover {
+  background: rgba(255,255,255,0.2);
+  transform: rotate(90deg) scale(1.1);
+}
+
+@media (min-width: 768px) {
+  .invoice-close-btn {
+    display: none;
+  }
+}
+
+.invoice-items {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px; /* REDUCIDO de 12px */
+}
+
+.invoice-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px; /* REDUCIDO de 10px */
+  background: rgba(255,255,255,0.05);
+  border-radius: 6px; /* REDUCIDO de 8px */
+  margin-bottom: 6px; /* REDUCIDO de 8px */
+  border-left: 4px solid #16e086;
+  animation: fadeInUp 0.3s ease;
+}
+
+.item-info {
+  flex: 1;
+}
+
+.item-name {
+  font-weight: 600;
+  font-size: 12px; /* REDUCIDO de 13px */
+  margin-bottom: 2px; /* REDUCIDO de 3px */
+}
+
+.item-details {
+  font-size: 10px; /* REDUCIDO de 11px */
+  color: rgba(255,255,255,0.7);
+  display: flex;
+  gap: 6px; /* REDUCIDO de 8px */
+}
+
+.item-price {
+  font-weight: bold;
+  color: #16e086;
+  font-size: 12px; /* REDUCIDO de 14px */
+}
+
+.remove-btn-mobile {
+  background: rgba(231, 76, 60, 0.2);
+  color: #e74c3c;
+  border: none;
+  width: 24px; /* REDUCIDO de 28px */
+  height: 24px; /* REDUCIDO de 28px */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.remove-btn-mobile:hover {
+  background: rgba(231, 76, 60, 0.3);
+  transform: scale(1.1) rotate(90deg);
+}
+
+/* ============================================
+   BARRA DE TOTALES - COMPACTA
+   ============================================ */
+.totals-bar-mobile {
+  background: #233445;
+  padding: 10px; /* REDUCIDO de 12px */
+  border-top: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 6px; /* REDUCIDO de 8px */
+  position: sticky;
+  bottom: 0;
+  box-shadow: 0 -3px 10px rgba(0,0,0,0.2);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.total-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(22, 224, 134, 0.1);
+  padding: 8px 10px; /* REDUCIDO de 10px 12px */
+  border-radius: 6px; /* REDUCIDO de 8px */
+  border: 1px solid rgba(22, 224, 134, 0.3); /* REDUCIDO de 2px */
+}
+
+.total-label {
+  font-size: 12px; /* REDUCIDO de 13px */
+  color: rgba(255,255,255,0.9);
+}
+
+.total-amount {
+  font-size: 18px; /* REDUCIDO de 20px */
+  font-weight: bold;
+  color: #16e086;
+}
+
+.currency-totals-mobile {
+  display: flex;
+  gap: 6px; /* REDUCIDO de 8px */
+  overflow-x: auto;
+  padding-bottom: 4px; /* REDUCIDO de 5px */
+}
+
+.currency-total {
+  background: rgba(255,255,255,0.05);
+  padding: 4px 8px; /* REDUCIDO de 6px 10px */
+  border-radius: 4px; /* REDUCIDO de 6px */
+  font-size: 10px; /* REDUCIDO de 11px */
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 3px; /* REDUCIDO de 4px */
+  transition: transform 0.2s ease;
+}
+
+.currency-total:hover {
+  transform: translateY(-2px);
+  background: rgba(255,255,255,0.08);
+}
+
+.currency-total i {
+  color: #16e086;
+}
+
+/* ============================================
+   BOTONES DE ACCIÓN - COMPACTOS CON COLORES
+   ============================================ */
+.action-buttons-mobile {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px; /* REDUCIDO de 8px */
+  margin-top: 6px; /* REDUCIDO de 8px */
+}
+
+.action-btn {
+  background: rgba(255,255,255,0.1);
+  border: none;
+  border-radius: 6px; /* REDUCIDO de 8px */
+  padding: 8px 4px; /* REDUCIDO de 10px 6px */
+  color: white;
+  font-size: 11px; /* REDUCIDO de 12px */
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px; /* REDUCIDO de 4px */
+  min-height: 50px; /* REDUCIDO de 60px */
+  justify-content: center;
+}
+
+.action-btn i {
+  font-size: 14px; /* REDUCIDO de 16px */
+  margin-bottom: 1px; /* REDUCIDO de 2px */
+  transition: transform 0.3s ease;
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.action-btn:hover i {
+  transform: scale(1.2);
+}
+
+.btn-discount {
+  background: linear-gradient(135deg, #e67e22, #d35400);
+}
+
+.btn-cash {
+  background: linear-gradient(135deg, #27ae60, #2ecc71);
+}
+
+.btn-card {
+  background: linear-gradient(135deg, #2980b9, #3498db);
+}
+
+.btn-invoice {
+  background: linear-gradient(135deg, #16e086, #15a086);
+  font-weight: bold;
+}
+
+/* ============================================
+   NAVEGACIÓN MÓVIL - COMPACTA CON COLORES
+   ============================================ */
+.mobile-nav {
+  display: none;
+  background: #233445;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding: 6px; /* REDUCIDO de 8px */
+  animation: slideUp 0.3s ease;
+}
+
+.nav-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px; /* REDUCIDO de 5px */
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px; /* REDUCIDO de 4px */
+  padding: 6px 3px; /* REDUCIDO de 8px 4px */
+  color: rgba(255,255,255,0.7);
+  text-decoration: none;
+  font-size: 9px; /* REDUCIDO de 10px */
+  border-radius: 4px; /* REDUCIDO de 6px */
+  transition: all 0.3s;
+}
+
+.nav-item:hover, .nav-item.active {
+  background: rgba(255,255,255,0.1);
+  color: #16e086;
+  transform: translateY(-2px);
+}
+
+.nav-item i {
+  font-size: 12px; /* REDUCIDO de 14px */
+  transition: transform 0.3s ease;
+}
+
+.nav-item:hover i {
+  transform: scale(1.2);
+}
+
+/* ============================================
+   MODAL DE PAGO - COMPACTO CON COLORES
+   ============================================ */
+.payment-input-group {
+  margin-bottom: 12px; /* REDUCIDO de 15px */
+}
+
+.payment-label {
+  display: block;
+  margin-bottom: 4px; /* REDUCIDO de 6px */
+  color: rgba(255,255,255,0.9);
+  font-weight: 500;
+}
+
+.payment-input {
+  width: 100%;
+  background: rgba(255,255,255,0.1);
+  border: 2px solid rgba(255,255,255,0.2);
+  border-radius: 8px; /* REDUCIDO de 10px */
+  padding: 10px; /* REDUCIDO de 12px */
+  font-size: 14px; /* REDUCIDO de 16px */
+  color: white;
+  text-align: center;
+  font-weight: bold;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.payment-input:focus {
+  border-color: #16e086;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(22,224,134,0.2);
+}
+
+.payment-display {
+  background: rgba(22, 224, 134, 0.1);
+  border: 2px solid rgba(22, 224, 134, 0.3);
+  border-radius: 8px; /* REDUCIDO de 10px */
+  padding: 10px; /* REDUCIDO de 12px */
+  margin-bottom: 12px; /* REDUCIDO de 15px */
+  animation: fadeIn 0.3s ease;
+}
+
+.payment-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px; /* REDUCIDO de 8px */
+}
+
+.payment-row:last-child {
+  margin-bottom: 0;
+}
+
+.payment-row.total {
+  font-weight: bold;
+  font-size: 14px; /* REDUCIDO de 16px */
+  color: #16e086;
+}
+
+/* ============================================
+   TECLADO NUMÉRICO - BOTONES MÁS PEQUEÑOS CON COLORES
+   ============================================ */
+.numeric-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px; /* REDUCIDO de 8px */
+  margin-top: 12px; /* REDUCIDO de 15px */
+}
+
+.num-btn {
+  background: rgba(255,255,255,0.1);
+  border: none;
+  border-radius: 8px; /* REDUCIDO de 10px */
+  padding: 12px; /* REDUCIDO de 15px */
+  font-size: 16px; /* REDUCIDO de 20px */
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: bold;
+  touch-action: manipulation;
+  min-height: 50px; /* REDUCIDO de 60px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.num-btn:hover, .num-btn:active {
+  background: rgba(255,255,255,0.2);
+  transform: scale(0.95);
+}
+
+.num-btn.clear {
+  background: rgba(231, 76, 60, 0.2);
+  color: #e74c3c;
+}
+
+.num-btn.clear:active {
+  background: rgba(231, 76, 60, 0.3) !important;
+  transform: scale(0.95) !important;
+}
+
+.num-btn.enter {
+  background: rgba(22, 224, 134, 0.2);
+  color: #16e086;
+  grid-column: span 2;
+}
+
+.num-btn.backspace {
+  background: rgba(155, 89, 182, 0.2);
+  color: #9b59b6;
+}
+
+.num-btn.backspace:active {
+  background: rgba(155, 89, 182, 0.3) !important;
+  transform: scale(0.95) !important;
+}
+
+/* Modal de efectivo con 4 columnas */
+#cashModal .numeric-keypad {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+#cashModal .num-btn.enter {
+  grid-column: span 1;
+}
+
+/* ============================================
+   LOGIN - COMPACTO CON COLORES
+   ============================================ */
+.login-container-mobile {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a2b3c, #2c3e50);
+  padding: 10px; /* REDUCIDO de 15px */
+  animation: fadeIn 0.5s ease;
+}
+
+.login-card {
+  background: #233445;
+  border-radius: 12px; /* REDUCIDO de 15px */
+  padding: 20px; /* REDUCIDO de 25px */
+  width: 100%;
+  max-width: 320px; /* REDUCIDO de 350px */
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  text-align: center;
+  animation: bounceInCompact 0.6s ease; /* REDUCIDO */
+  transform: scale(0.97); /* REDUCIDO de 0.95 */
+}
+
+@keyframes bounceInCompact {
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.05); opacity: 0.8; }
+  100% { transform: scale(0.97); opacity: 1; }
+}
+
+.login-logo {
+  width: 60px; /* REDUCIDO de 70px */
+  height: 60px; /* REDUCIDO de 70px */
+  background: linear-gradient(135deg, #16e086, #15a086);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px; /* REDUCIDO de 15px */
+  font-size: 26px; /* REDUCIDO de 32px */
+  color: white;
+  transition: transform 0.3s ease;
+}
+
+.login-logo:hover {
+  transform: rotate(360deg) scale(1.1);
+}
+
+.login-title {
+  font-size: 20px; /* REDUCIDO de 22px */
+  color: #16e086;
+  margin-bottom: 6px; /* REDUCIDO de 8px */
+  font-weight: bold;
+}
+
+.login-input {
+  width: 100%;
+  background: rgba(255,255,255,0.1);
+  border: 2px solid rgba(255,255,255,0.2);
+  border-radius: 8px; /* REDUCIDO de 10px */
+  padding: 10px; /* REDUCIDO de 12px */
+  color: white;
+  font-size: 12px; /* REDUCIDO de 14px */
+  margin-bottom: 10px; /* REDUCIDO de 12px */
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.login-input:focus {
+  border-color: #16e086;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(22,224,134,0.2);
+}
+
+.login-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #16e086, #15a086);
+  border: none;
+  border-radius: 8px; /* REDUCIDO de 10px */
+  padding: 10px; /* REDUCIDO de 12px */
+  color: white;
+  font-size: 12px; /* REDUCIDO de 14px */
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 6px; /* REDUCIDO de 8px */
+}
+
+.login-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(22,224,134,0.4);
+}
+
+/* ============================================
+   MENÚ MODAL - COMPACTO CON COLORES
+   ============================================ */
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px; /* REDUCIDO de 12px */
+}
+
+.menu-item {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px; /* REDUCIDO de 10px */
+  padding: 12px 6px; /* REDUCIDO de 15px 8px */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px; /* REDUCIDO de 8px */
+  cursor: pointer;
+  transition: all 0.3s;
+  color: white;
+  text-decoration: none;
+}
+
+.menu-item:hover {
+  background: rgba(22, 224, 134, 0.1);
+  transform: translateY(-3px) scale(1.05);
+  border-color: #16e086;
+}
+
+.menu-item i {
+  font-size: 20px; /* REDUCIDO de 24px */
+  color: #16e086;
+  transition: transform 0.3s ease;
+}
+
+.menu-item:hover i {
+  transform: scale(1.2) rotate(5deg);
+}
+
+.menu-item span {
+  font-size: 10px; /* REDUCIDO de 11px */
+  text-align: center;
+  line-height: 1.2; /* REDUCIDO de 1.3 */
+}
+
+/* ============================================
+   CONFIGURACIÓN - COMPACTA CON COLORES
+   ============================================ */
+.config-section {
+  margin-bottom: 16px; /* REDUCIDO de 20px */
+}
+
+.config-section h3 {
+  color: #16e086;
+  font-size: 13px; /* REDUCIDO de 14px */
+  margin-bottom: 10px; /* REDUCIDO de 12px */
+  padding-bottom: 4px; /* REDUCIDO de 6px */
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.config-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px; /* REDUCIDO de 10px */
+  background: rgba(255,255,255,0.05);
+  border-radius: 6px; /* REDUCIDO de 8px */
+  margin-bottom: 6px; /* REDUCIDO de 8px */
+  transition: all 0.3s;
+}
+
+.config-item:hover {
+  background: rgba(255,255,255,0.08);
+  transform: translateX(5px);
+}
+
+.config-label {
+  display: flex;
+  align-items: center;
+  gap: 6px; /* REDUCIDO de 8px */
+  font-size: 12px; /* REDUCIDO de 13px */
+}
+
+.config-label i {
+  color: #16e086;
+  width: 16px; /* REDUCIDO de 18px */
+  text-align: center;
+}
+
+/* Switch/Toggle más pequeño */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px; /* REDUCIDO de 45px */
+  height: 20px; /* REDUCIDO de 22px */
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255,255,255,0.2);
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 12px; /* REDUCIDO de 14px */
+  width: 12px; /* REDUCIDO de 14px */
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #16e086;
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px); /* REDUCIDO de 23px */
+}
+
+.slider.round {
+  border-radius: 24px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+/* ============================================
+   HISTORIAL - COMPACTO CON COLORES
+   ============================================ */
+.history-container {
+  max-height: 300px; /* REDUCIDO de 350px */
+  overflow-y: auto;
+}
+
+.history-item {
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px; /* REDUCIDO de 10px */
+  padding: 10px; /* REDUCIDO de 12px */
+  margin-bottom: 6px; /* REDUCIDO de 8px */
+  border-left: 4px solid #16e086;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.history-item:hover {
+  background: rgba(255,255,255,0.08);
+  transform: translateX(5px) scale(1.02);
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px; /* REDUCIDO de 6px */
+}
+
+.history-id {
+  font-weight: bold;
+  color: #16e086;
+  font-size: 12px; /* REDUCIDO de 13px */
+}
+
+.history-date {
+  font-size: 10px; /* REDUCIDO de 11px */
+  color: rgba(255,255,255,0.6);
+}
+
+.history-details {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px; /* REDUCIDO de 8px */
+  font-size: 10px; /* REDUCIDO de 11px */
+}
+
+.history-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 1px; /* REDUCIDO de 2px */
+}
+
+.history-label {
+  color: rgba(255,255,255,0.6);
+  font-size: 8px; /* REDUCIDO de 9px */
+}
+
+.history-value {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.history-actions {
+  display: flex;
+  gap: 6px; /* REDUCIDO de 8px */
+  margin-top: 6px; /* REDUCIDO de 8px */
+}
+
+.history-action-btn {
+  flex: 1;
+  padding: 5px; /* REDUCIDO de 6px */
+  border-radius: 4px; /* REDUCIDO de 6px */
+  border: none;
+  font-size: 10px; /* REDUCIDO de 11px */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px; /* REDUCIDO de 4px */
+  transition: all 0.3s;
+}
+
+.history-action-view {
+  background: rgba(22, 224, 134, 0.1);
+  color: #16e086;
+}
+
+.history-action-view:hover {
+  background: rgba(22, 224, 134, 0.2);
+  transform: translateY(-2px);
+}
+
+.history-action-whatsapp {
+  background: rgba(37, 211, 102, 0.1);
+  color: #25D366;
+}
+
+.history-action-whatsapp:hover {
+  background: rgba(37, 211, 102, 0.2);
+  transform: translateY(-2px);
+}
+
+/* ============================================
+   REPORTES - COMPACTOS CON COLORES
+   ============================================ */
+.reports-container {
+  max-height: 300px; /* REDUCIDO de 350px */
+  overflow-y: auto;
+}
+
+.chart-container {
+  background: rgba(255,255,255,0.05);
+  border-radius: 6px; /* REDUCIDO de 8px */
+  padding: 10px; /* REDUCIDO de 12px */
+  margin-bottom: 10px; /* REDUCIDO de 12px */
+}
+
+.chart-title {
+  color: #16e086;
+  font-size: 12px; /* REDUCIDO de 13px */
+  margin-bottom: 6px; /* REDUCIDO de 8px */
+  text-align: center;
+}
+
+.chart-canvas {
+  width: 100% !important;
+  height: 110px !important; /* REDUCIDO de 130px */
+}
+
+.report-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px; /* REDUCIDO de 8px */
+  margin-top: 10px; /* REDUCIDO de 12px */
+}
+
+.stat-card {
+  background: rgba(255,255,255,0.05);
+  border-radius: 4px; /* REDUCIDO de 6px */
+  padding: 6px; /* REDUCIDO de 8px */
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  background: rgba(255,255,255,0.08);
+}
+
+.stat-value {
+  font-size: 14px; /* REDUCIDO de 16px */
+  font-weight: bold;
+  color: #16e086;
+  margin-bottom: 2px; /* REDUCIDO de 4px */
+}
+
+.stat-label {
+  font-size: 9px; /* REDUCIDO de 10px */
+  color: rgba(255,255,255,0.7);
+}
+
+/* ============================================
+   MODAL DE TURNOS - COMPACTO CON COLORES
+   ============================================ */
+.shift-end-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.95);
+  z-index: 9999;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+  padding: 10px; /* REDUCIDO de 15px */
+}
+
+.shift-end-content {
+  background: linear-gradient(135deg, #2c3e50, #1a2b3c);
+  border-radius: 12px; /* REDUCIDO de 15px */
+  padding: 20px; /* REDUCIDO de 25px */
+  max-width: 320px; /* REDUCIDO de 350px */
+  width: 100%;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  animation: scaleInCompact 0.5s ease; /* REDUCIDO */
+  transform: scale(0.97); /* REDUCIDO de 0.95 */
+}
+
+@keyframes scaleInCompact {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(0.97); /* REDUCIDO de 0.95 */
+    opacity: 1;
+  }
+}
+
+.shift-end-icon {
+  font-size: 40px; /* REDUCIDO de 50px */
+  color: #e74c3c;
+  margin-bottom: 12px; /* REDUCIDO de 15px */
+  animation: pulse 2s infinite;
+}
+
+.shift-end-title {
+  color: #e74c3c;
+  font-size: 20px; /* REDUCIDO de 22px */
+  margin-bottom: 10px; /* REDUCIDO de 12px */
+  font-weight: bold;
+}
+
+.shift-end-message {
+  color: rgba(255,255,255,0.8);
+  margin-bottom: 16px; /* REDUCIDO de 20px */
+  line-height: 1.3; /* REDUCIDO de 1.4 */
+}
+
+.shift-end-buttons {
+  display: flex;
+  gap: 6px; /* REDUCIDO de 8px */
+  justify-content: center;
+}
+
+.shift-end-btn {
+  padding: 8px 16px; /* REDUCIDO de 10px 20px */
+  border-radius: 8px; /* REDUCIDO de 10px */
+  border: none;
+  font-size: 12px; /* REDUCIDO de 13px */
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  min-width: 100px; /* REDUCIDO de 110px */
+}
+
+.shift-end-btn-change {
+  background: linear-gradient(135deg, #16e086, #15a086);
+  color: white;
+}
+
+.shift-end-btn-reload {
+  background: rgba(255,255,255,0.1);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+/* ============================================
+   MODALES DE VENCIMIENTO - MÁS PEQUEÑOS CON COLORES
+   ============================================ */
+.expiration-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease;
+}
+
+.expiration-modal {
+  background: linear-gradient(135deg, #f39c12, #d35400);
+  border-radius: 10px; /* REDUCIDO de 12px */
+  padding: 16px; /* REDUCIDO de 20px */
+  max-width: 280px; /* REDUCIDO de 320px */
+  width: 85%;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  color: white;
+  text-align: center;
+  animation: modalSlideUp 0.4s ease;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.expiration-modal.expired {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+.expiration-icon {
+  font-size: 32px; /* REDUCIDO de 40px */
+  margin-bottom: 10px; /* REDUCIDO de 12px */
+  animation: bounce 1s ease infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.expiration-title {
+  font-size: 16px; /* REDUCIDO de 18px */
+  font-weight: bold;
+  margin-bottom: 8px; /* REDUCIDO de 10px */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.expiration-message {
+  font-size: 12px; /* REDUCIDO de 13px */
+  line-height: 1.2; /* REDUCIDO de 1.3 */
+  margin-bottom: 12px; /* REDUCIDO de 15px */
+  background: rgba(255, 255, 255, 0.1);
+  padding: 8px; /* REDUCIDO de 10px */
+  border-radius: 4px; /* REDUCIDO de 6px */
+  text-align: left;
+}
+
+.expiration-warning {
+  font-size: 11px; /* REDUCIDO de 12px */
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 10px; /* REDUCIDO de 12px */
+  padding: 5px; /* REDUCIDO de 6px */
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px; /* REDUCIDO de 4px */
+  border-left: 3px solid #e74c3c;
+}
+
+.expiration-buttons {
+  display: flex;
+  gap: 5px; /* REDUCIDO de 6px */
+  justify-content: center;
+}
+
+.expiration-btn {
+  padding: 6px 12px; /* REDUCIDO de 8px 16px */
+  border: none;
+  border-radius: 4px; /* REDUCIDO de 6px */
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 12px; /* REDUCIDO de 13px */
+}
+
+.expiration-btn-yes {
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  color: white;
+}
+
+.expiration-btn-yes:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(46, 204, 113, 0.4);
+}
+
+.expiration-btn-no {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+}
+
+.expiration-btn-no:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+}
+
+/* ============================================
+   TOAST Y LOADING - COMPACTOS CON COLORES
+   ============================================ */
+.toast {
+  position: fixed;
+  bottom: 10px; /* REDUCIDO de 15px */
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(22, 224, 134, 0.9);
+  color: white;
+  padding: 8px 12px; /* REDUCIDO de 10px 15px */
+  border-radius: 6px; /* REDUCIDO de 8px */
+  z-index: 1000;
+  animation: slideInUpCompact 0.3s ease; /* REDUCIDO */
+  display: none;
+  font-weight: 500;
+  font-size: 12px; /* REDUCIDO de 13px */
+}
+
+@keyframes slideInUpCompact {
+  from {
+    transform: translateX(-50%) translateY(15px); /* REDUCIDO de 20px */
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.8);
+  z-index: 9999;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 12px; /* REDUCIDO de 15px */
+}
+
+.spinner {
+  width: 40px; /* REDUCIDO de 50px */
+  height: 40px; /* REDUCIDO de 50px */
+  border: 4px solid rgba(255,255,255,0.1);
+  border-radius: 50%;
+  border-top-color: #16e086;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================
+   AJUSTES RESPONSIVOS - MEJOR ADAPTACIÓN
+   ============================================ */
+@media (min-width: 768px) {
+  .mobile-container {
+    max-width: 95%;
+    height: 98vh;
+    margin: 1vh auto;
+    border-radius: 12px;
+  }
+  
+  .main-content {
+    flex-direction: row;
+  }
+  
+  .products-section {
+    flex: 2;
+    max-height: calc(98vh - 110px); /* AJUSTADO */
+  }
+  
+  .invoice-section {
+    flex: 1;
+    display: flex !important;
+    max-height: calc(98vh - 110px); /* AJUSTADO */
+  }
+  
+  .mobile-nav {
+    display: none !important;
+  }
+  
+  .menu-hamburger {
+    display: flex !important;
+  }
+  
+  .action-buttons-mobile {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .header-actions {
+    gap: 10px; /* REDUCIDO de 12px */
+  }
+  
+  .search-section {
+    padding: 12px; /* REDUCIDO de 15px */
+  }
+  
+  .search-container-mobile {
+    gap: 10px; /* REDUCIDO de 12px */
+  }
+  
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); /* REDUCIDO de 150px */
+    gap: 10px; /* REDUCIDO de 12px */
+  }
+  
+  .product-card {
+    height: 150px; /* REDUCIDO de 170px */
+    padding: 10px; /* REDUCIDO de 12px */
+  }
+  
+  .product-image {
+    width: 60px; /* REDUCIDO de 70px */
+    height: 60px; /* REDUCIDO de 70px */
+  }
+  
+  .product-name {
+    font-size: 12px; /* REDUCIDO de 13px */
+    height: 28px; /* REDUCIDO de 32px */
+  }
+  
+  .product-price {
+    font-size: 13px; /* REDUCIDO de 14px */
+  }
+  
+  .totals-bar-mobile {
+    padding: 12px; /* REDUCIDO de 15px */
+  }
+  
+  .action-btn {
+    padding: 10px 6px; /* REDUCIDO de 12px 8px */
+    min-height: 60px; /* REDUCIDO de 70px */
+  }
+  
+  .action-btn i {
+    font-size: 16px; /* REDUCIDO de 18px */
+  }
+  
+  .action-btn span {
+    font-size: 11px; /* REDUCIDO de 12px */
+  }
+  
+  .modal-content-mobile {
+    max-width: 550px; /* REDUCIDO de 600px */
+  }
+}
+
+@media (max-width: 767px) {
+  .mobile-container {
+    height: 100vh;
+  }
+  
+  .invoice-section {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 100%;
+    height: 100vh;
+    z-index: 200;
+    transition: right 0.3s ease;
+  }
+  
+  .invoice-section.active {
+    right: 0;
+  }
+  
+  .mobile-nav {
+    display: block;
+  }
+  
+  .menu-hamburger {
+    display: none;
+  }
+  
+  .action-buttons-mobile {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* REDUCIDO de 120px */
+  }
+  
+  .header-actions {
+    gap: 6px; /* REDUCIDO de 8px */
+  }
+}
+
+/* ============================================
+   AJUSTES PARA TECLADO VIRTUAL - EVITAR DESPLAZAMIENTO
+   ============================================ */
+@media (max-height: 700px) {
+  .mobile-container {
+    height: 100vh;
+    overflow-y: auto;
+  }
+  
+  .modal-content-mobile {
+    max-height: 85vh;
+    margin: 10px;
+  }
+  
+  .numeric-keypad {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+  }
+  
+  .num-btn {
+    padding: 8px;
+    font-size: 14px;
+    min-height: 40px;
+  }
+  
+  #cashModal .num-btn {
+    min-height: 45px;
+    padding: 6px;
+  }
+  
+  /* Asegurar que los modales no causen desplazamiento */
+  .modal-mobile {
+    align-items: flex-start;
+    padding-top: 20px;
+    overflow-y: auto;
+  }
+}
+
+@media (max-height: 600px) {
+  .modal-content-mobile {
+    max-height: 80vh;
+  }
+  
+  .modal-body {
+    padding: 12px;
+  }
+  
+  .numeric-keypad {
+    gap: 3px;
+  }
+  
+  .num-btn {
+    padding: 6px;
+    min-height: 35px;
+    font-size: 12px;
+  }
+}
+
+/* ============================================
+   SCROLLBAR PERSONALIZADA - MÁS DELGADA
+   ============================================ */
+::-webkit-scrollbar {
+  width: 3px; /* REDUCIDO de 5px */
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.05);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #16e086;
+  border-radius: 2px; /* REDUCIDO de 3px */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #15a086;
+}
+
+/* ============================================
+   AJUSTES FINALES PARA ADAPTACIÓN TOTAL
+   ============================================ */
+@media (orientation: landscape) and (max-height: 500px) {
+  .mobile-header {
+    min-height: 40px;
+    padding: 6px 8px;
+  }
+  
+  .search-section {
+    padding: 6px;
+  }
+  
+  .mobile-nav {
+    padding: 4px;
+  }
+  
+  .nav-item {
+    padding: 4px 2px;
+    font-size: 8px;
+  }
+  
+  .nav-item i {
+    font-size: 10px;
+  }
+  
+  /* Modales en landscape */
+  .modal-content-mobile {
+    max-height: 90vh;
+    width: 90%;
+  }
+  
+  .modal-body {
+    padding: 10px;
+  }
+}
+
+/* Ajuste para tablets grandes */
+@media (min-width: 1024px) and (min-height: 800px) {
+  .mobile-container {
+    max-width: 1200px;
+    height: 96vh;
+    margin: 2vh auto;
+  }
+  
+  .modal-content-mobile {
+    max-width: 600px;
+  }
+}
+
+/* Ajuste para pantallas muy grandes */
+@media (min-width: 1600px) {
+  .mobile-container {
+    max-width: 1400px;
+  }
+  
+  body {
+    font-size: 13px; /* Un poco más grande */
+  }
+}
+
+/* ============================================
+   ESTILOS ADICIONALES RESTAURADOS
+   ============================================ */
+
+/* Icono de zanahoria para sin foto */
+.carrot-icon {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #ff9966, #ff5e62);
+  border-radius: 50%;
+  color: white;
+  font-size: 16px; /* REDUCIDO de 18px */
+}
+
+/* CORRECCIÓN: Icono de reporte */
+#navReports i {
+  color: #f39c12;
+}
+
+/* Configuración de impuestos */
+.tax-modal {
+  max-width: 420px; /* REDUCIDO de 450px */
+}
+
+.tax-config-section {
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px; /* REDUCIDO de 10px */
+  padding: 12px; /* REDUCIDO de 15px */
+  margin-bottom: 12px; /* REDUCIDO de 15px */
+}
+
+.tax-status {
+  display: inline-block;
+  padding: 3px 6px; /* REDUCIDO de 4px 8px */
+  border-radius: 12px; /* REDUCIDO de 15px */
+  font-size: 10px; /* REDUCIDO de 11px */
+  font-weight: bold;
+  margin-left: 6px; /* REDUCIDO de 8px */
+}
+
+.tax-active {
+  background: rgba(22, 224, 134, 0.2);
+  color: #16e086;
+}
+
+.tax-inactive {
+  background: rgba(231, 76, 60, 0.2);
+  color: #e74c3c;
+}
+
+.tax-input-group {
+  margin-bottom: 10px; /* REDUCIDO de 12px */
+}
+
+.tax-input-label {
+  display: block;
+  margin-bottom: 3px; /* REDUCIDO de 4px */
+  color: rgba(255,255,255,0.9);
+  font-size: 12px; /* REDUCIDO de 13px */
+}
+
+.tax-input {
+  width: 100%;
+  background: rgba(255,255,255,0.1);
+  border: 2px solid rgba(255,255,255,0.2);
+  border-radius: 4px; /* REDUCIDO de 6px */
+  padding: 6px; /* REDUCIDO de 8px */
+  color: white;
+  font-size: 12px; /* REDUCIDO de 13px */
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.tax-input:focus {
+  border-color: #16e086;
+  transform: translateY(-1px);
+}
+
+.tax-buttons {
+  display: flex;
+  gap: 6px; /* REDUCIDO de 8px */
+  margin-top: 12px; /* REDUCIDO de 15px */
+}
+
+.tax-btn {
+  flex: 1;
+  padding: 8px; /* REDUCIDO de 10px */
+  border-radius: 4px; /* REDUCIDO de 6px */
+  border: none;
+  font-size: 12px; /* REDUCIDO de 13px */
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.tax-btn-save {
+  background: linear-gradient(135deg, #16e086, #15a086);
+  color: white;
+}
+
+.tax-btn-cancel {
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+
+.tax-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+}
+
+/* Animaciones adicionales */
+.fade-in {
+  animation: fadeIn 0.5s ease;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.4s ease;
+}
+
+.slide-in-right {
+  animation: slideInRight 0.4s ease;
+}
+
+.bounce-in {
+  animation: bounceInCompact 0.6s ease;
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+/* Estilos elegantes para elementos */
+.elegant-card {
+  background: rgba(255,255,255,0.05);
+  border-radius: 10px; /* REDUCIDO de 12px */
+  padding: 12px; /* REDUCIDO de 15px */
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+}
+
+.elegant-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  border-color: rgba(22, 224, 134, 0.3);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #16e086, #3498db);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.glow-effect {
+  position: relative;
+}
+
+.glow-effect::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #16e086, #3498db, #9b59b6, #e74c3c);
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.glow-effect:hover::after {
+  opacity: 0.3;
+}
+
+/* Campo de usuario no editable en modal de edición */
+.readonly-field {
+  background: rgba(255,255,255,0.05) !important;
+  color: rgba(255,255,255,0.5) !important;
+  cursor: not-allowed !important;
+}
+
+/* CORRECCIÓN: Fondo del modal de perfil */
+#userInfoModal .modal-content-mobile {
+  background: #233445;
+  border: 2px solid #16e086;  
+}
+
+/* CORRECCIÓN: Para pantallas grandes, centrar mejor */
+@media (min-width: 1200px) {
+  .mobile-container {
+    max-width: 1100px;
+  }
+}
   </style>
 </head>
 <body>
@@ -2415,12 +2475,17 @@
           <i class="fas fa-bars"></i>
         </button>
         
-        <a href="usuario.html" class="header-icon" id="userBtnMobile" title="Usuario">
+        <a href="#" class="header-icon" id="userBtnMobile" title="Usuario">
           <i class="fas fa-user"></i>
         </a>
         <button class="header-icon" id="shiftBtnMobile" title="Turno">
           <i class="fas fa-clock"></i>
         </button>
+        
+        <!-- CORRECCIÓN: Icono de reporte enlazado -->
+        <a href="estadistica-rapida-colaboradores.html" class="header-icon" id="reportBtnMobile" title="Reportes">
+          <i class="fas fa-chart-bar"></i>
+        </a>
         
         <img id="userAvatarMobile" class="user-avatar-mobile" src="" alt="" style="display: none;">
       </div>
@@ -2603,8 +2668,8 @@
             </div>
             
             <div class="user-info-item">
-              <div class="user-info-label">ID</div>
-              <div class="user-info-value" id="profileUserId">-</div>
+              <div class="user-info-label">ID Único</div>
+              <div class="user-info-value" id="profileUserId">RTM-00000</div>
             </div>
             
             <div class="user-info-item">
@@ -2663,21 +2728,27 @@
         
         <div class="payment-input-group">
           <label class="payment-label">Monto Recibido:</label>
-          <input type="text" id="cashReceivedInput" class="payment-input" placeholder="0.00" autocomplete="off">
+          <input type="text" id="cashReceivedInput" class="payment-input" placeholder="0.00" autocomplete="off" readonly>
         </div>
         
+        <!-- CORRECCIÓN: Teclado con 4 columnas y botón de backspace -->
         <div class="numeric-keypad">
-          <button class="num-btn" data-value="1">1</button>
-          <button class="num-btn" data-value="2">2</button>
-          <button class="num-btn" data-value="3">3</button>
-          <button class="num-btn" data-value="4">4</button>
-          <button class="num-btn" data-value="5">5</button>
-          <button class="num-btn" data-value="6">6</button>
           <button class="num-btn" data-value="7">7</button>
           <button class="num-btn" data-value="8">8</button>
           <button class="num-btn" data-value="9">9</button>
+          <button class="num-btn backspace" id="cashBackspaceBtn">
+            <i class="fas fa-backspace"></i>
+          </button>
+          <button class="num-btn" data-value="4">4</button>
+          <button class="num-btn" data-value="5">5</button>
+          <button class="num-btn" data-value="6">6</button>
           <button class="num-btn clear" id="cashClearBtn">C</button>
+          <button class="num-btn" data-value="1">1</button>
+          <button class="num-btn" data-value="2">2</button>
+          <button class="num-btn" data-value="3">3</button>
+          <button class="num-btn" data-value=".">.</button>
           <button class="num-btn" data-value="0">0</button>
+          <button class="num-btn" data-value="00">00</button>
           <button class="num-btn enter" id="cashConfirmBtn">✓</button>
         </div>
       </div>
@@ -2729,6 +2800,24 @@
           <input type="password" id="discountPasswordInput" class="payment-input" placeholder="Ingrese contraseña" autocomplete="off">
         </div>
         
+        <!-- Teclado numérico para contraseña -->
+        <div class="numeric-keypad">
+          <button class="num-btn" data-value="1">1</button>
+          <button class="num-btn" data-value="2">2</button>
+          <button class="num-btn" data-value="3">3</button>
+          <button class="num-btn" data-value="4">4</button>
+          <button class="num-btn" data-value="5">5</button>
+          <button class="num-btn" data-value="6">6</button>
+          <button class="num-btn" data-value="7">7</button>
+          <button class="num-btn" data-value="8">8</button>
+          <button class="num-btn" data-value="9">9</button>
+          <button class="num-btn clear" id="discountClearPasswordBtn">C</button>
+          <button class="num-btn" data-value="0">0</button>
+          <button class="num-btn backspace" id="discountBackspaceBtn">
+            <i class="fas fa-backspace"></i>
+          </button>
+        </div>
+        
         <button class="login-btn" style="margin-top: 15px;" id="verifyDiscountBtn">
           <i class="fas fa-check"></i> Verificar Contraseña
         </button>
@@ -2749,9 +2838,10 @@
       <div class="modal-body">
         <div class="payment-input-group">
           <label class="payment-label">Porcentaje de Descuento:</label>
-          <input type="text" id="discountInput" class="payment-input" placeholder="0%" autocomplete="off">
+          <input type="text" id="discountInput" class="payment-input" placeholder="0%" autocomplete="off" readonly>
         </div>
         
+        <!-- Teclado para porcentaje de descuento -->
         <div class="numeric-keypad">
           <button class="num-btn" data-value="5">5%</button>
           <button class="num-btn" data-value="10">10%</button>
@@ -2759,6 +2849,9 @@
           <button class="num-btn" data-value="20">20%</button>
           <button class="num-btn" data-value="25">25%</button>
           <button class="num-btn" data-value="30">30%</button>
+          <button class="num-btn backspace" id="discountBackspaceBtn2">
+            <i class="fas fa-backspace"></i>
+          </button>
           <button class="num-btn clear" id="discountClearBtn">C</button>
         </div>
         
@@ -3039,21 +3132,37 @@
       
       <div class="modal-body">
         <div class="menu-grid">
-          <a href="inventario.html" class="menu-item" id="menuInventory">
-            <i class="fas fa-boxes"></i>
-            <span>Inventario</span>
+          <a href="novedad-cliente.html" class="menu-item" id="menuInventory">
+            <i class="fa-solid fa-bell"></i>
+            <span>Novedades</span>
           </a>
-          <a href="#" class="menu-item" id="menuReportsMain">
+          <a href="estadistica-rapida-colaboradores.html" class="menu-item" id="menuReportsMain">
             <i class="fas fa-chart-bar"></i>
             <span>Reportes</span>
           </a>
-          <a href="facturas.html" class="menu-item" id="menuInvoices">
+          <a href="facturas-del-dia.html" class="menu-item" id="menuInvoices">
             <i class="fas fa-receipt"></i>
             <span>Facturas</span>
           </a>
           <a href="analisis.html" class="menu-item" id="menuAnalysis">
             <i class="fas fa-chart-line"></i>
             <span>Análisis</span>
+          </a>
+          <a href="devolucion-de-faturacion.html" class="menu-item" id="menuAnalysis">
+            <i class="fa-solid fa-arrow-rotate-left"></i>
+            <span>Devoluciones</span>
+          </a>
+          <a href="conciliacion-de-Caja.html" class="menu-item" id="menuAnalysis">
+            <i class="fas fa-cash-register"></i>
+            <span>Cierre de Caja</span>
+          </a>
+          <a href="venta-a-credito.html" class="menu-item" id="menuAnalysis">
+            <i class="fas fa-cart-plus"></i>
+            <span>Ventas a Crédito</span>
+          </a>
+          <a href="Perla-chatbot-Pos.html" class="menu-item" id="menuAnalysis">
+            <i class="fas fa-robot"></i>
+            <span>Perla - Asistente</span>
           </a>
           <a href="#" class="menu-item" id="menuConfigMain">
             <i class="fas fa-cog"></i>
@@ -3158,7 +3267,7 @@
   <input type="file" id="imageUploadInput" accept="image/*" style="display: none;">
 
   <!-- Firebase SDK -->
-  <script type="module">
+<script type="module">
     // Import Firebase modules
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
     import {
@@ -3232,6 +3341,10 @@
     let isSearchInProgress = false;
     let lastSearchQuery = '';
 
+    // CORRECCIÓN: Variables para control de registro de facturas
+    let isProcessingPayment = false;
+    let invoiceCounter = 10000; // Base para IDs
+
     // DOM Elements
     const loginScreen = document.getElementById('loginScreen');
     const posScreen = document.getElementById('posScreen');
@@ -3270,6 +3383,7 @@
     
     const userBtnMobile = document.getElementById('userBtnMobile');
     const shiftBtnMobile = document.getElementById('shiftBtnMobile');
+    const reportBtnMobile = document.getElementById('reportBtnMobile');
     const userAvatarMobile = document.getElementById('userAvatarMobile');
     const headerLogoMobile = document.getElementById('headerLogoMobile');
     const menuHamburgerBtn = document.getElementById('menuHamburgerBtn');
@@ -3308,6 +3422,7 @@
     const cashChangeAmount = document.getElementById('cashChangeAmount');
     const cashReceivedInput = document.getElementById('cashReceivedInput');
     const cashClearBtn = document.getElementById('cashClearBtn');
+    const cashBackspaceBtn = document.getElementById('cashBackspaceBtn');
     const cashConfirmBtn = document.getElementById('cashConfirmBtn');
     const closeCashModal = document.getElementById('closeCashModal');
     
@@ -3318,11 +3433,14 @@
     
     const discountModal = document.getElementById('discountModal');
     const discountPasswordInput = document.getElementById('discountPasswordInput');
+    const discountClearPasswordBtn = document.getElementById('discountClearPasswordBtn');
+    const discountBackspaceBtn = document.getElementById('discountBackspaceBtn');
     const verifyDiscountBtn = document.getElementById('verifyDiscountBtn');
     const closeDiscountModal = document.getElementById('closeDiscountModal');
     
     const discountPercentageModal = document.getElementById('discountPercentageModal');
     const discountInput = document.getElementById('discountInput');
+    const discountBackspaceBtn2 = document.getElementById('discountBackspaceBtn2');
     const discountClearBtn = document.getElementById('discountClearBtn');
     const applyDiscountBtn = document.getElementById('applyDiscountBtn');
     const closeDiscountPercentageModal = document.getElementById('closeDiscountPercentageModal');
@@ -3395,6 +3513,121 @@
     const loadingOverlay = document.getElementById('loadingOverlay');
     const loadingText = document.getElementById('loadingText');
 
+    // CORRECCIÓN: Variables para los botones de teclado numérico
+    const allNumButtons = document.querySelectorAll('.num-btn[data-value]');
+
+    // ====================================================================
+    // FUNCIONES CORREGIDAS PARA ALERTAS DE VENCIMIENTO PERSONALIZADAS
+    // ====================================================================
+
+    // FUNCIÓN MEJORADA: Calcular estado de vencimiento del producto USANDO ALERT DAYS PERSONALIZADO
+    function getExpirationStatus(product) {
+      if (!product.expirationDate) return { status: 'no-date', days: null };
+      
+      const daysUntilExpiration = calculateDaysUntilExpiration(product.expirationDate);
+      
+      // *** USAR ALERT DAYS PERSONALIZADO DEL PRODUCTO ***
+      const alertDays = product.alertDays || 30; // Valor por defecto si no está configurado
+      
+      // Verificar si tiene plazo de gracia
+      if (product.gracePeriod && product.gracePeriod > 0) {
+        const gracePeriodEnd = new Date(product.expirationDate);
+        gracePeriodEnd.setDate(gracePeriodEnd.getDate() + product.gracePeriod);
+        const daysUntilGraceEnd = calculateDaysUntilExpiration(gracePeriodEnd);
+        
+        if (daysUntilExpiration <= 0 && daysUntilGraceEnd > 0) {
+          return { 
+            status: 'in-grace-period', 
+            days: daysUntilGraceEnd,
+            originalExpiration: product.expirationDate,
+            graceEnd: gracePeriodEnd.toISOString().split('T')[0]
+          };
+        } else if (daysUntilGraceEnd <= 0) {
+          return { 
+            status: 'expired-grace', 
+            days: 0,
+            originalExpiration: product.expirationDate,
+            graceEnd: gracePeriodEnd.toISOString().split('T')[0]
+          };
+        }
+      }
+      
+      // Sin plazo de gracia o dentro del periodo normal
+      if (daysUntilExpiration < 0) {
+        return { status: 'expired', days: 0 };
+      } else if (daysUntilExpiration <= alertDays) { // *** AQUÍ SE USA EL VALOR PERSONALIZADO ***
+        return { 
+          status: 'expiring-soon', 
+          days: daysUntilExpiration,
+          alertDays: alertDays // Incluir los días de alerta en la respuesta
+        };
+      } else {
+        return { status: 'ok', days: daysUntilExpiration };
+      }
+    }
+
+    // FUNCIÓN AUXILIAR: Calcular días restantes hasta la fecha de vencimiento
+    function calculateDaysUntilExpiration(expirationDate) {
+      if (!expirationDate) return null;
+      
+      const currentDate = new Date();
+      const expiration = new Date(expirationDate);
+      
+      // Ajustar ambas fechas a medianoche para calcular días completos
+      currentDate.setHours(0, 0, 0, 0);
+      expiration.setHours(0, 0, 0, 0);
+      
+      const timeDiff = expiration.getTime() - currentDate.getTime();
+      const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+      
+      return daysDiff;
+    }
+
+    // FUNCIÓN PARA OBTENER TEXTO DESCRIPTIVO DEL ESTADO
+    function getExpirationStatusText(statusInfo) {
+      switch (statusInfo.status) {
+        case 'no-date':
+          return 'Sin fecha de vencimiento';
+        case 'ok':
+          return `Vence en ${statusInfo.days} días`;
+        case 'expiring-soon':
+          // Mostrar también los días de alerta personalizados
+          return `Por vencer (en ${statusInfo.days} días, alerta: ${statusInfo.alertDays || 30} días)`;
+        case 'in-grace-period':
+          return `Vencido - En plazo de gracia (${statusInfo.days} días restantes)`;
+        case 'expired':
+          return 'Vencido';
+        case 'expired-grace':
+          return 'Vencido (Plazo cumplido)';
+        default:
+          return 'Estado desconocido';
+      }
+    }
+
+    // FUNCIÓN PARA OBTENER CLASE CSS PARA EL ESTADO
+    function getExpirationStatusClass(statusInfo) {
+      switch (statusInfo.status) {
+        case 'no-date':
+          return 'badge-secondary';
+        case 'ok':
+          return 'badge-success';
+        case 'expiring-soon':
+          return 'badge-warning';
+        case 'in-grace-period':
+          return 'badge-warning';
+        case 'expired':
+          return 'badge-danger';
+        case 'expired-grace':
+          return 'badge-danger';
+        default:
+          return 'badge-secondary';
+      }
+    }
+
+    // ====================================================================
+    // FIN DE FUNCIONES CORREGIDAS
+    // ====================================================================
+
     // Utility Functions
     function showLoading(message = 'Cargando...') {
       loadingText.textContent = message;
@@ -3438,9 +3671,23 @@
       });
     }
 
-    function generateInvoiceId() {
-      const randomNum = Math.floor(100000 + Math.random() * 900000);
-      return `RTM-${randomNum}`;
+    // CORRECCIÓN: Función mejorada para generar ID único de factura con 5 dígitos y sin repeticiones
+    function generateUniqueInvoiceId(collaboratorId) {
+      // Generar un ID único basado en timestamp y colaborador
+      const timestamp = Date.now().toString().slice(-6); // Últimos 6 dígitos del timestamp
+      const randomNum = Math.floor(10000 + Math.random() * 90000); // Número aleatorio de 5 dígitos
+      const collaboratorCode = collaboratorId ? collaboratorId.slice(-4) : '0000';
+      
+      // Tomar solo los últimos 5 dígitos del número aleatorio
+      const uniqueNumber = randomNum.toString().slice(-5);
+      
+      // Formato: RTM-34256 (ejemplo)
+      const invoiceId = `RTM-${uniqueNumber}`;
+      
+      // Incrementar el contador para el próximo ID
+      invoiceCounter = (invoiceCounter + 1) % 100000; // Asegurar que sea de 5 dígitos
+      
+      return invoiceId;
     }
 
     // Check logo and set icon if not found
@@ -3459,6 +3706,27 @@
         loginLogo.style.background = '';
       };
       logoImage.src = 'logo.png';
+    }
+
+    // CORRECCIÓN: Función para generar ID de perfil único por colaborador
+    function generateUniqueProfileId(collaborator) {
+      if (!collaborator) return 'RTM-00000';
+      
+      // Usar el userId del colaborador para crear un ID único
+      const userId = collaborator.userId || collaborator.id;
+      const timestamp = Date.now();
+      
+      // Crear un hash simple del userId
+      let hash = 0;
+      for (let i = 0; i < userId.length; i++) {
+        hash = ((hash << 5) - hash) + userId.charCodeAt(i);
+        hash = hash & hash;
+      }
+      
+      // Tomar los últimos 5 dígitos del hash
+      const uniqueNumber = Math.abs(hash % 100000).toString().padStart(5, '0');
+      
+      return `RTM-${uniqueNumber}`;
     }
 
     // Authentication
@@ -3486,6 +3754,9 @@
           ...collaboratorDoc.data()
         };
         
+        // CORRECCIÓN: Generar ID único para el perfil
+        currentCollaborator.uniqueProfileId = generateUniqueProfileId(currentCollaborator);
+        
         // Save to localStorage
         localStorage.setItem('collaboratorLoggedIn', 'true');
         localStorage.setItem('collaboratorData', JSON.stringify(currentCollaborator));
@@ -3501,20 +3772,35 @@
       }
     }
 
+    // CORRECCIÓN: Función logout mejorada para cerrar el modal
     function logoutCollaborator() {
+      // Cerrar el modal de perfil si está abierto
+      userInfoModal.style.display = 'none';
+      
+      // Limpiar datos
       currentCollaborator = null;
       localStorage.removeItem('collaboratorLoggedIn');
       localStorage.removeItem('collaboratorData');
+      
+      // Mostrar pantalla de login
       loginScreen.style.display = 'flex';
       posScreen.style.display = 'none';
+      
+      // Limpiar factura
       invoice = [];
       updateInvoiceDisplay();
       
+      // Limpiar timers y listeners
       if (shiftTimer) clearInterval(shiftTimer);
       if (shiftEndTimer) clearTimeout(shiftEndTimer);
       if (autoClearSearchTimeout) clearTimeout(autoClearSearchTimeout);
       if (realTimeInvoiceListener) realTimeInvoiceListener();
       if (realTimeTotalListener) realTimeTotalListener();
+      
+      // CORRECCIÓN: Resetear contador de facturas
+      invoiceCounter = 10000;
+      
+      showToast('Sesión cerrada exitosamente', 'success');
     }
 
     // Load Collaborator Data
@@ -3582,6 +3868,7 @@
           alwaysActiveSearchEnabled = toggleAlwaysActiveSearch.checked;
           autoClearSearchEnabled = toggleAutoClearSearch.checked;
           shiftModeEnabled = toggleShiftMode.checked;
+          quantityWindowEnabled = toggleQuantityWindow.checked;
         }
         
         // Load shift info if shift mode is enabled
@@ -3773,7 +4060,31 @@
         // Limpiar el grid antes de agregar nuevos productos
         productsGrid.innerHTML = '';
         
-        // Mostrar productos
+        // === CORRECCIÓN PRINCIPAL: Si hay exactamente 1 resultado, agregarlo automáticamente ===
+        if (uniqueProducts.length === 1 && searchTerm !== '') {
+          const productInfo = uniqueProducts[0];
+          
+          // Agregar a la factura automáticamente
+          if (quantityWindowEnabled) {
+            showQuantityWindow(productInfo.productData, productInfo.businessName, productInfo.productId);
+          } else {
+            addToInvoice(productInfo.productData, productInfo.businessName, productInfo.productId);
+          }
+          
+          // Limpiar el buscador automáticamente
+          if (autoClearSearchEnabled) {
+            setTimeout(() => {
+              mobileSearch.value = '';
+              loadProducts('');
+            }, 500);
+          }
+          
+          hideLoading();
+          isSearchInProgress = false;
+          return;
+        }
+        
+        // Mostrar productos (cuando hay 0 o múltiples resultados)
         if (uniqueProducts.length === 0) {
           productsGrid.innerHTML = '<div style="text-align: center; padding: 30px; color: rgba(255,255,255,0.5);"><i class="fas fa-search" style="font-size: 40px; margin-bottom: 10px;"></i><p>No se encontraron productos</p></div>';
         } else {
@@ -3807,18 +4118,26 @@
       productCard.dataset.business = businessName;
       productCard.dataset.uniqueKey = `${businessName}_${productId}_${product.name}`;
       
+      // ====================================================================
+      // CORRECCIÓN: Usar las nuevas funciones de alertas personalizadas
+      // ====================================================================
       let badgeHtml = '';
-      let expirationDays = null;
-      if (product.expirationDate) {
-        const expirationDate = new Date(product.expirationDate);
-        const today = new Date();
-        expirationDays = Math.ceil((expirationDate - today) / (1000 * 60 * 60 * 24));
-        
-        if (expirationDays < 0) {
+      const expirationStatus = getExpirationStatus(product);
+      
+      switch (expirationStatus.status) {
+        case 'expired':
           badgeHtml = '<span class="product-badge badge-expired">VENCIDO</span>';
-        } else if (expirationDays <= 30) {
-          badgeHtml = `<span class="product-badge badge-warning">VENCE EN ${expirationDays} DÍAS</span>`;
-        }
+          break;
+        case 'expired-grace':
+          badgeHtml = '<span class="product-badge badge-expired">VENCIDO (PLAZO CUMPLIDO)</span>';
+          break;
+        case 'in-grace-period':
+          badgeHtml = `<span class="product-badge badge-warning">PLAZO GRACIA: ${expirationStatus.days} DÍAS</span>`;
+          break;
+        case 'expiring-soon':
+          const alertDays = product.alertDays || 30;
+          badgeHtml = `<span class="product-badge badge-warning">VENCE EN ${expirationStatus.days} DÍAS (Alerta: ${alertDays} días)</span>`;
+          break;
       }
       
       let taxBadge = '';
@@ -3835,13 +4154,15 @@
         ${taxBadge}
       `;
       
-      productCard.dataset.expirationDays = expirationDays;
+      productCard.dataset.expirationStatus = expirationStatus.status;
+      productCard.dataset.expirationDays = expirationStatus.days;
+      productCard.dataset.alertDays = product.alertDays || 30;
       productCard.dataset.productName = product.name;
       productCard.dataset.productId = productId;
       productCard.dataset.businessName = businessName;
       
       productCard.addEventListener('click', () => {
-        handleProductClick(product, businessName, productId, expirationDays);
+        handleProductClick(product, businessName, productId, expirationStatus);
       });
       productsGrid.appendChild(productCard);
       
@@ -3849,23 +4170,35 @@
       currentSearchResults.add(`${businessName}_${productId}_${product.name}`);
     }
 
-    // Función para manejar el clic en producto
-    async function handleProductClick(product, businessName, productId, expirationDays) {
+    // Función para manejar el clic en producto con verificación de vencimiento
+    async function handleProductClick(product, businessName, productId, expirationStatus) {
       if (product.quantity === 0) {
         showToast('Producto agotado', 'error');
         return;
       }
       
-      if (expirationDays !== null && expirationDays <= 30) {
-        if (expirationDays < 0) {
-          showExpirationAlert(product, businessName, productId, expirationDays, true);
-          return;
-        } else if (expirationDays <= 7) {
-          showExpirationAlert(product, businessName, productId, expirationDays, false);
-          return;
-        }
+      // ====================================================================
+      // CORRECCIÓN: Usar las nuevas funciones de alertas personalizadas
+      // ====================================================================
+      // Verificar si el producto está vencido o en estado crítico
+      if (expirationStatus.status === 'expired' || expirationStatus.status === 'expired-grace') {
+        showExpirationAlert(product, businessName, productId, expirationStatus.days, true, expirationStatus.status);
+        return;
       }
       
+      // Verificar si el producto está próximo a vencer según alert days personalizado
+      if (expirationStatus.status === 'expiring-soon') {
+        showExpirationAlert(product, businessName, productId, expirationStatus.days, false, expirationStatus.status);
+        return;
+      }
+      
+      // Verificar si está en plazo de gracia
+      if (expirationStatus.status === 'in-grace-period') {
+        showExpirationAlert(product, businessName, productId, expirationStatus.days, false, expirationStatus.status);
+        return;
+      }
+      
+      // Si no hay alertas de vencimiento, proceder normalmente
       if (quantityWindowEnabled) {
         // Mostrar ventana de cantidad
         showQuantityWindow(product, businessName, productId);
@@ -3920,36 +4253,123 @@
       updateRealTimeData();
     }
 
-    // Función para mostrar alerta de vencimiento
-    function showExpirationAlert(product, businessName, productId, daysDiff, isExpired) {
+    // CORRECCIÓN: Función mejorada para mostrar alerta de vencimiento con ventanas más pequeñas
+    function showExpirationAlert(product, businessName, productId, daysDiff, isExpired, status) {
       const overlay = document.createElement('div');
       overlay.className = 'expiration-modal-overlay';
+      overlay.style.position = 'fixed';
+      overlay.style.top = '0';
+      overlay.style.left = '0';
+      overlay.style.width = '100%';
+      overlay.style.height = '100%';
+      overlay.style.backgroundColor = 'rgba(0,0,0,0.7)';
+      overlay.style.zIndex = '9999';
+      overlay.style.display = 'flex';
+      overlay.style.justifyContent = 'center';
+      overlay.style.alignItems = 'center';
+      overlay.style.backdropFilter = 'blur(5px)';
       
       const modal = document.createElement('div');
-      modal.className = `expiration-modal ${isExpired ? 'expired' : ''}`;
       
-      const title = isExpired ? 'PRODUCTO VENCIDO' : 'PRODUCTO PRÓXIMO A VENCER';
-      const icon = isExpired ? 'fa-exclamation-circle' : 'fa-exclamation-triangle';
-      
+      // ====================================================================
+      // CORRECCIÓN: Configurar según el estado específico
+      // ====================================================================
+      let modalStyle = {};
+      let title = '';
+      let icon = '';
+      let iconColor = '';
+      let buttonColor = '';
       let message = '';
-      if (isExpired) {
-        message = `El producto "${product.name}" está VENCIDO hace ${Math.abs(daysDiff)} días.`;
+      let isCritical = false;
+      
+      switch(status) {
+        case 'expired':
+        case 'expired-grace':
+          modalStyle.background = 'linear-gradient(135deg, #e74c3c, #c0392b)';
+          title = '¡PRODUCTO VENCIDO!';
+          icon = 'fa-exclamation-circle';
+          iconColor = '#ffffff';
+          buttonColor = '#ffffff';
+          isCritical = true;
+          message = `<strong style="color: #ffffff;">¡ADVERTENCIA CRÍTICA!</strong><br>
+            El producto <strong>"${product.name}"</strong> está <strong>VENCIDO</strong>.<br><br>
+            <span style="color: #ffffff; font-weight: bold;">¿ESTÁ SEGURO QUE DESEA VENDER ESTE PRODUCTO?</span>`;
+          break;
+          
+        case 'expiring-soon':
+          modalStyle.background = 'linear-gradient(135deg, #f39c12, #d35400)';
+          title = 'ADVERTENCIA: Producto próximo a vencer';
+          icon = 'fa-exclamation-triangle';
+          iconColor = '#ffffff';
+          buttonColor = '#f39c12';
+          message = `<strong style="color: #ffffff;">¡ATENCIÓN!</strong><br>
+            El producto <strong>"${product.name}"</strong> está próximo a vencer.<br>
+            Faltan <strong>${daysDiff} días</strong> para su fecha de vencimiento.<br>
+            <small>(Alerta configurada: ${product.alertDays || 30} días)</small><br><br>
+            <span style="color: #ffffff; font-weight: bold;">¿DESEA PROCEDER CON LA VENTA?</span>`;
+          break;
+          
+        case 'in-grace-period':
+          modalStyle.background = 'linear-gradient(135deg, #f39c12, #d35400)';
+          title = 'PRODUCTO EN PLAZO DE GRACIA';
+          icon = 'fa-clock';
+          iconColor = '#ffffff';
+          buttonColor = '#f39c12';
+          message = `<strong style="color: #ffffff;">¡INFORMACIÓN IMPORTANTE!</strong><br>
+            El producto <strong>"${product.name}"</strong> está en plazo de gracia.<br>
+            Tiene <strong>${daysDiff} días</strong> restantes en el plazo de gracia.<br><br>
+            <span style="color: #ffffff; font-weight: bold;">¿DESEA PROCEDER CON LA VENTA?</span>`;
+          break;
+      }
+      
+      modal.className = isCritical ? 'expiration-modal expired' : 'expiration-modal';
+      modal.style.background = modalStyle.background;
+      modal.style.borderRadius = '12px';
+      modal.style.padding = '20px';
+      modal.style.width = '85%';
+      modal.style.maxWidth = '320px';
+      modal.style.boxShadow = '0 8px 25px rgba(0,0,0,0.4)';
+      modal.style.color = 'white';
+      modal.style.textAlign = 'center';
+      modal.style.animation = 'fadeIn 0.3s ease-out';
+      modal.style.border = '2px solid rgba(255, 255, 255, 0.2)';
+      
+      let warningText = '';
+      if (isCritical) {
+        warningText = 'La venta de productos vencidos puede acarrear sanciones legales y riesgos para la salud.';
+      } else if (status === 'expiring-soon') {
+        warningText = 'Productos próximos a vencer deben ser vendidos con precaución.';
       } else {
-        message = `El producto "${product.name}" está PRÓXIMO A VENCER. Le faltan ${daysDiff} días para su fecha de vencimiento.`;
+        warningText = 'Productos en plazo de gracia deben ser consumidos pronto.';
       }
       
       modal.innerHTML = `
-        <div class="expiration-icon">
+        <div class="expiration-icon" style="font-size: 40px; color: ${iconColor}; margin-bottom: 15px;">
           <i class="fas ${icon}"></i>
         </div>
-        <h2 class="expiration-title">${title}</h2>
-        <div class="expiration-message">${message}</div>
-        <div class="expiration-warning">
-          <strong>ADVERTENCIA:</strong> Usted asume toda responsabilidad en caso de facturar este producto.
+        <h2 class="expiration-title" style="color: #ffffff; margin: 0 0 12px 0; font-size: 18px;">
+          ${title}
+        </h2>
+        <div class="expiration-message" style="margin-bottom: 20px; font-size: 13px; line-height: 1.4;">
+          ${message}
         </div>
-        <div class="expiration-buttons">
-          <button class="expiration-btn expiration-btn-no">NO, CANCELAR</button>
-          ${!isExpired ? '<button class="expiration-btn expiration-btn-yes">SÍ, VENDER</button>' : ''}
+        <div class="expiration-warning" style="background: rgba(0, 0, 0, 0.3); 
+              border-left: 3px solid ${iconColor};
+              padding: 8px; margin: 12px 0; text-align: left; border-radius: 4px; font-size: 11px;">
+          <strong>⚠️ RESPONSABILIDAD:</strong><br>
+          ${warningText}
+        </div>
+        <div class="expiration-buttons" style="display: flex; gap: 8px; justify-content: center; margin-top: 15px;">
+          <button class="expiration-btn expiration-btn-no" 
+                  style="flex: 1; padding: 10px 15px; background: #7f8c8d; color: white; border: none; border-radius: 6px; 
+                         font-weight: bold; cursor: pointer; font-size: 13px;">
+            <i class="fas fa-times"></i> NO, CANCELAR
+          </button>
+          <button class="expiration-btn expiration-btn-yes" 
+                  style="flex: 1; padding: 10px 15px; background: ${buttonColor}; 
+                         color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px;">
+            <i class="fas fa-check"></i> SÍ, ${isCritical ? 'VENDER' : 'PROCEDER'}
+          </button>
         </div>
       `;
       
@@ -3962,17 +4382,136 @@
       if (yesBtn) {
         yesBtn.addEventListener('click', () => {
           document.body.removeChild(overlay);
-          if (quantityWindowEnabled) {
-            showQuantityWindow(product, businessName, productId);
+          if (isCritical) {
+            // Para productos vencidos, mostrar confirmación adicional
+            showFinalConfirmation(product, businessName, productId, status);
           } else {
-            addToInvoice(product, businessName, productId);
+            // Para otros estados, continuar normal
+            if (quantityWindowEnabled) {
+              showQuantityWindow(product, businessName, productId);
+            } else {
+              addToInvoice(product, businessName, productId);
+            }
           }
         });
       }
       
       noBtn.addEventListener('click', () => {
         document.body.removeChild(overlay);
+        showToast('Venta cancelada', 'info');
       });
+    }
+
+    // Función para mostrar confirmación final de productos vencidos
+    function showFinalConfirmation(product, businessName, productId, status) {
+      const overlay = document.createElement('div');
+      overlay.className = 'expiration-modal-overlay';
+      overlay.style.position = 'fixed';
+      overlay.style.top = '0';
+      overlay.style.left = '0';
+      overlay.style.width = '100%';
+      overlay.style.height = '100%';
+      overlay.style.backgroundColor = 'rgba(0,0,0,0.8)';
+      overlay.style.zIndex = '10000';
+      overlay.style.display = 'flex';
+      overlay.style.justifyContent = 'center';
+      overlay.style.alignItems = 'center';
+      
+      const modal = document.createElement('div');
+      modal.style.background = 'linear-gradient(135deg, #e74c3c, #c0392b)';
+      modal.style.borderRadius = '12px';
+      modal.style.padding = '20px';
+      modal.style.width = '85%';
+      modal.style.maxWidth = '320px';
+      modal.style.boxShadow = '0 8px 25px rgba(0,0,0,0.4)';
+      modal.style.textAlign = 'center';
+      modal.style.color = 'white';
+      modal.style.border = '2px solid rgba(255, 255, 255, 0.3)';
+      
+      modal.innerHTML = `
+        <div style="color: #ffffff; font-size: 40px; margin-bottom: 15px;">
+          <i class="fas fa-skull-crossbones"></i>
+        </div>
+        <h2 style="color: #ffffff; margin: 0 0 12px 0; font-size: 20px;">
+          ¡CONFIRMACIÓN FINAL!
+        </h2>
+        <div style="margin-bottom: 20px; font-size: 14px; line-height: 1.4;">
+          Está a punto de vender un producto <strong>${status === 'expired-grace' ? 'VENCIDO (PLAZO CUMPLIDO)' : 'VENCIDO'}</strong>:<br>
+          <strong>"${product.name}"</strong>
+        </div>
+        <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.3); padding: 10px; 
+                    margin: 15px 0; border-radius: 6px; text-align: left; font-size: 11px;">
+          <strong style="color: #ffffff;">⚠️ ADVERTENCIA LEGAL:</strong><br>
+          • Usted asume toda responsabilidad legal<br>
+          • Esta acción será registrada<br>
+          • Se notificará al administrador
+        </div>
+        <div style="display: flex; gap: 8px; justify-content: center;">
+          <button id="cancelFinal" 
+                  style="flex: 1; padding: 10px 15px; background: #7f8c8d; color: white; 
+                         border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px;">
+            <i class="fas fa-ban"></i> CANCELAR
+          </button>
+          <button id="confirmFinal" 
+                  style="flex: 1; padding: 10px 15px; background: #ffffff; color: #e74c3c; 
+                         border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px;">
+            <i class="fas fa-check-double"></i> CONFIRMAR
+          </button>
+        </div>
+      `;
+      
+      overlay.appendChild(modal);
+      document.body.appendChild(overlay);
+      
+      document.getElementById('cancelFinal').addEventListener('click', () => {
+        document.body.removeChild(overlay);
+        showToast('Venta de producto vencido cancelada', 'warning');
+      });
+      
+      document.getElementById('confirmFinal').addEventListener('click', () => {
+        document.body.removeChild(overlay);
+        // Registrar la venta de producto vencido en el sistema
+        registerExpiredProductSale(product, businessName, productId, status);
+        
+        // Proceder con la venta
+        if (quantityWindowEnabled) {
+          showQuantityWindow(product, businessName, productId);
+        } else {
+          addToInvoice(product, businessName, productId);
+        }
+        
+        showToast('Producto vencido agregado - REGISTRADO', 'error');
+      });
+    }
+
+    // Función para registrar venta de producto vencido
+    async function registerExpiredProductSale(product, businessName, productId, status) {
+      try {
+        if (!currentCollaborator) return;
+        
+        const expirationStatus = getExpirationStatus(product);
+        
+        const expiredSaleRef = collection(db, "expiredProductSales");
+        await addDoc(expiredSaleRef, {
+          productId: productId,
+          productName: product.name,
+          businessName: businessName,
+          collaboratorId: currentCollaborator.id,
+          collaboratorName: `${currentCollaborator.firstName} ${currentCollaborator.lastName}`,
+          userId: currentCollaborator.userId,
+          timestamp: Timestamp.now(),
+          expirationDate: product.expirationDate,
+          alertDays: product.alertDays || 30,
+          gracePeriod: product.gracePeriod || 0,
+          expirationStatus: status,
+          daysUntilExpiration: expirationStatus.days,
+          action: 'added_to_invoice'
+        });
+        
+        console.log('Venta de producto vencido registrada');
+      } catch (error) {
+        console.error('Error registrando venta de producto vencido:', error);
+      }
     }
 
     // Auto clear search function
@@ -4154,8 +4693,78 @@
       }
     }
 
+    // CORRECCIÓN: Configuración mejorada del teclado numérico
+    function setupNumpadForModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+      
+      const inputField = modal.querySelector('input[type="text"], input[type="password"]');
+      if (!inputField) return;
+      
+      // Configurar botones numéricos
+      const numButtons = modal.querySelectorAll('.num-btn[data-value]');
+      numButtons.forEach(btn => {
+        // Remover event listeners existentes
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+        
+        newBtn.addEventListener('click', (e) => {
+          const now = Date.now();
+          if (now - lastNumpadClickTime < numpadClickDelay) return;
+          lastNumpadClickTime = now;
+          
+          const value = newBtn.getAttribute('data-value');
+          
+          // Manejar valores especiales
+          if (value === '.') {
+            // Evitar múltiples puntos decimales
+            if (!inputField.value.includes('.')) {
+              inputField.value = inputField.value + value;
+            }
+          } else if (value === '00') {
+            inputField.value = inputField.value + '00';
+          } else {
+            inputField.value = inputField.value + value;
+          }
+          
+          // Disparar evento input
+          const inputEvent = new Event('input', { bubbles: true });
+          inputField.dispatchEvent(inputEvent);
+        });
+      });
+      
+      // Configurar botón clear
+      const clearBtn = modal.querySelector('.num-btn.clear');
+      if (clearBtn) {
+        const newClearBtn = clearBtn.cloneNode(true);
+        clearBtn.parentNode.replaceChild(newClearBtn, clearBtn);
+        
+        newClearBtn.addEventListener('click', () => {
+          inputField.value = '';
+          const inputEvent = new Event('input', { bubbles: true });
+          inputField.dispatchEvent(inputEvent);
+        });
+      }
+      
+      // Configurar botón backspace
+      const backspaceBtn = modal.querySelector('.num-btn.backspace');
+      if (backspaceBtn) {
+        const newBackspaceBtn = backspaceBtn.cloneNode(true);
+        backspaceBtn.parentNode.replaceChild(newBackspaceBtn, backspaceBtn);
+        
+        newBackspaceBtn.addEventListener('click', () => {
+          inputField.value = inputField.value.slice(0, -1);
+          const inputEvent = new Event('input', { bubbles: true });
+          inputField.dispatchEvent(inputEvent);
+        });
+      }
+    }
+
     // Payment Processing
     function setupCashPayment() {
+      // Configurar teclado numérico para cashReceivedInput
+      setupNumpadForModal('cashModal');
+      
       cashReceivedInput.value = '';
       
       function calculateChange() {
@@ -4174,25 +4783,6 @@
         }
       }
       
-      document.querySelectorAll('#cashModal .num-btn[data-value]').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const now = Date.now();
-          if (now - lastNumpadClickTime < numpadClickDelay) {
-            return;
-          }
-          lastNumpadClickTime = now;
-          
-          const value = btn.getAttribute('data-value');
-          cashReceivedInput.value = cashReceivedInput.value + value;
-          calculateChange();
-        });
-      });
-      
-      cashClearBtn.addEventListener('click', () => {
-        cashReceivedInput.value = '';
-        calculateChange();
-      });
-      
       cashConfirmBtn.addEventListener('click', async () => {
         const received = parseFloat(cashReceivedInput.value) || 0;
         
@@ -4207,11 +4797,29 @@
       cashReceivedInput.addEventListener('input', calculateChange);
     }
 
+    // CORRECCIÓN PRINCIPAL: Función para procesar pagos que evita registrar dos facturas a la vez
     async function processPayment(paymentType, amountReceived = 0) {
+      // Verificar si ya se está procesando un pago
+      if (isProcessingPayment) {
+        showToast('Ya se está procesando un pago. Por favor espere.', 'warning');
+        return;
+      }
+      
       try {
+        // Establecer que se está procesando un pago
+        isProcessingPayment = true;
         showLoading('Procesando pago...');
         
-        const invoiceId = generateInvoiceId();
+        // CORRECCIÓN: Usar la nueva función para generar ID único con 5 dígitos
+        const invoiceId = generateUniqueInvoiceId(currentCollaborator.id);
+        
+        // Verificar que la factura tenga productos
+        if (invoice.length === 0) {
+          showToast('La factura está vacía', 'error');
+          isProcessingPayment = false;
+          hideLoading();
+          return;
+        }
         
         let totalITBIS = 0;
         let totalIVA = 0;
@@ -4234,14 +4842,24 @@
           collaboratorName: `${currentCollaborator.firstName} ${currentCollaborator.lastName}`,
           userId: currentCollaborator.userId,
           username: currentCollaborator.username,
-          items: invoice.map(item => ({
-            name: item.name,
-            quantity: item.quantity,
-            price: item.pricePerUnit,
-            total: item.pricePerUnit * item.quantity,
-            applyItbis: item.applyItbis || false,
-            applyIva: item.applyIva || false
-          })),
+          items: invoice.map(item => {
+            const expirationStatus = getExpirationStatus(item);
+            return {
+              name: item.name,
+              quantity: item.quantity,
+              price: item.pricePerUnit,
+              total: item.pricePerUnit * item.quantity,
+              applyItbis: item.applyItbis || false,
+              applyIva: item.applyIva || false,
+              expirationDate: item.expirationDate || null,
+              alertDays: item.alertDays || 30,
+              gracePeriod: item.gracePeriod || 0,
+              expirationStatus: expirationStatus.status,
+              daysToExpire: expirationStatus.days,
+              hasExpired: expirationStatus.status === 'expired' || expirationStatus.status === 'expired-grace',
+              inGracePeriod: expirationStatus.status === 'in-grace-period'
+            };
+          }),
           subtotal: totalPrice,
           discount: discount,
           discountAmount: totalPrice * (discount / 100),
@@ -4258,17 +4876,26 @@
           businessAddress: businessDetails.address,
           businessPhone: businessDetails.phone,
           businessEmail: businessDetails.email,
-          businessNCF: businessDetails.ncf
+          businessNCF: businessDetails.ncf,
+          // Nuevo campo para registrar productos vencidos
+          hasExpiredProducts: invoice.some(item => {
+            const expirationStatus = getExpirationStatus(item);
+            return expirationStatus.status === 'expired' || expirationStatus.status === 'expired-grace';
+          }),
+          hasGracePeriodProducts: invoice.some(item => {
+            const expirationStatus = getExpirationStatus(item);
+            return expirationStatus.status === 'in-grace-period';
+          })
         };
         
-        // Guardar en facturacionCarrito
+        // CORRECCIÓN: Guardar en facturacionCarrito (SOLO UNA VEZ)
         await addDoc(collection(db, "facturacionCarrito"), invoiceData);
         
-        // Guardar en el historial del usuario
+        // CORRECCIÓN: Guardar en el historial del usuario (SOLO UNA VEZ)
         const historyRef = collection(db, "users", currentCollaborator.userId, "invoiceHistory");
         await addDoc(historyRef, invoiceData);
         
-        // Guardar en FacturaDeCuadres
+        // CORRECCIÓN: Guardar en FacturaDeCuadres (SOLO UNA VEZ)
         await addDoc(collection(db, "FacturaDeCuadres"), invoiceData);
         
         // Actualizar stock de productos
@@ -4286,6 +4913,7 @@
         
         await generateInvoiceHTML(invoiceData);
         
+        // CORRECCIÓN: Limpiar la factura actual después del procesamiento exitoso
         invoice = [];
         discount = 0;
         updateInvoiceDisplay();
@@ -4304,6 +4932,9 @@
         console.error('Payment processing error:', error);
         hideLoading();
         showToast('Error al procesar el pago', 'error');
+      } finally {
+        // CORRECCIÓN: Siempre liberar el bloqueo de procesamiento
+        isProcessingPayment = false;
       }
     }
 
@@ -4353,17 +4984,35 @@
           }
         }
         
-        const itemsHtml = invoiceData.items.map(item => `
+        const itemsHtml = invoiceData.items.map(item => {
+          let expirationWarning = '';
+          if (item.expirationStatus) {
+            switch(item.expirationStatus) {
+              case 'expired':
+              case 'expired-grace':
+                expirationWarning = `<br><small style="color: #e74c3c; font-weight: bold;">¡PRODUCTO VENCIDO!</small>`;
+                break;
+              case 'in-grace-period':
+                expirationWarning = `<br><small style="color: #f39c12;">Plazo de gracia: ${item.daysToExpire} días restantes</small>`;
+                break;
+              case 'expiring-soon':
+                expirationWarning = `<br><small style="color: #f39c12;">Vence en ${item.daysToExpire} días (Alerta: ${item.alertDays} días)</small>`;
+                break;
+            }
+          }
+          
+          return `
           <div style="display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 11px; border-bottom: 1px dashed #eee; padding-bottom: 2px;">
             <div style="flex: 3;">
               ${item.name} x${item.quantity}
               ${item.applyItbis || item.applyIva ? `<br><small style="color: #666;">${item.applyItbis ? 'ITBIS ' : ''}${item.applyIva ? 'IVA' : ''}</small>` : ''}
+              ${expirationWarning}
             </div>
             <div style="flex: 1; text-align: right;">
               ${formatCurrency(item.total)}
             </div>
           </div>
-        `).join('');
+        `}).join('');
         
         let summaryHtml = '';
         summaryHtml += `<div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
@@ -4397,6 +5046,27 @@
           <span>${formatCurrency(invoiceData.total)}</span>
         </div>`;
         
+        // Advertencia si hay productos vencidos
+        let expiredWarning = '';
+        if (invoiceData.hasExpiredProducts) {
+          expiredWarning = `
+            <div style="background: #fee; border: 2px solid #e74c3c; padding: 8px; margin: 10px 0; border-radius: 4px; text-align: center;">
+              <strong style="color: #e74c3c;">⚠️ ADVERTENCIA: ESTA FACTURA CONTIENE PRODUCTOS VENCIDOS</strong><br>
+              <small style="color: #e74c3c;">Facturado por: ${invoiceData.collaboratorName}</small>
+            </div>
+          `;
+        }
+        
+        // Advertencia si hay productos en plazo de gracia
+        let graceWarning = '';
+        if (invoiceData.hasGracePeriodProducts) {
+          graceWarning = `
+            <div style="background: #fff3cd; border: 2px solid #f39c12; padding: 8px; margin: 10px 0; border-radius: 4px; text-align: center;">
+              <strong style="color: #856404;">ℹ️ INFORMACIÓN: PRODUCTOS EN PLAZO DE GRACIA</strong>
+            </div>
+          `;
+        }
+        
         const invoiceHtml = `
           <div style="padding: 12px; max-width: 280px; margin: 0 auto;">
             <div style="text-align: center; margin-bottom: 12px;">
@@ -4409,6 +5079,9 @@
               <p style="margin: 4px 0; font-size: 10px; color: #666;">Factura: ${invoiceData.invoiceId}</p>
               <p style="margin: 0; font-size: 10px; color: #666;">${formatDate(invoiceData.date)}</p>
             </div>
+            
+            ${expiredWarning}
+            ${graceWarning}
             
             <div style="margin-bottom: 12px; padding: 8px; background: #f5f5f5; border-radius: 4px;">
               <p style="margin: 0 0 4px 0; font-size: 10px;"><strong>Atendido por:</strong> ${invoiceData.collaboratorName}</p>
@@ -4466,7 +5139,23 @@
         whatsappMessage += `*DETALLES DE LA COMPRA:*\n`;
         
         invoiceData.items.forEach(item => {
-          whatsappMessage += `• ${item.name} x${item.quantity} - ${formatCurrency(item.total)}\n`;
+          let expirationInfo = '';
+          if (item.expirationStatus) {
+            switch(item.expirationStatus) {
+              case 'expired':
+              case 'expired-grace':
+                expirationInfo = ` ⚠️ VENCIDO`;
+                break;
+              case 'in-grace-period':
+                expirationInfo = ` ⏳ PLAZO GRACIA: ${item.daysToExpire} DÍAS`;
+                break;
+              case 'expiring-soon':
+                expirationInfo = ` ⏰ VENCE EN ${item.daysToExpire} DÍAS (Alerta: ${item.alertDays} días)`;
+                break;
+            }
+          }
+          
+          whatsappMessage += `• ${item.name} x${item.quantity} - ${formatCurrency(item.total)}${expirationInfo}\n`;
         });
         
         whatsappMessage += `\n*RESUMEN:*\n`;
@@ -4486,6 +5175,16 @@
         
         whatsappMessage += `*TOTAL: ${formatCurrency(invoiceData.total)}*\n`;
         whatsappMessage += `Método de pago: ${invoiceData.paymentType}\n\n`;
+        
+        if (invoiceData.hasExpiredProducts) {
+          whatsappMessage += `⚠️ *ADVERTENCIA: ESTA FACTURA CONTIENE PRODUCTOS VENCIDOS*\n`;
+          whatsappMessage += `Facturado por: ${invoiceData.collaboratorName}\n\n`;
+        }
+        
+        if (invoiceData.hasGracePeriodProducts) {
+          whatsappMessage += `ℹ️ *INFORMACIÓN: PRODUCTOS EN PLAZO DE GRACIA*\n\n`;
+        }
+        
         whatsappMessage += `¡Gracias por su compra! 🛒`;
         
         window.currentWhatsAppMessage = whatsappMessage;
@@ -4736,6 +5435,8 @@
           
           discountInput.value = discountSettings.percentage || 10;
           discountPercentageModal.style.display = 'flex';
+          // Configurar teclado numérico para discountInput
+          setupNumpadForModal('discountPercentageModal');
         } else {
           showToast('Contraseña incorrecta', 'error');
         }
@@ -4760,7 +5461,7 @@
       showToast(`Descuento del ${discount}% aplicado`, 'success');
     }
 
-    // User Profile Functions - MODIFICADA
+    // CORRECCIÓN: User Profile Functions - Mostrar ID único
     async function loadUserProfile() {
       try {
         if (!currentCollaborator) return;
@@ -4776,7 +5477,8 @@
         // Actualizar información del perfil
         profileName.textContent = `${userData.firstName} ${userData.lastName}`;
         profileUsername.textContent = userData.username;
-        profileUserId.textContent = userData.userId || currentCollaborator.userId;
+        // Mostrar el ID único generado
+        profileUserId.textContent = userData.uniqueProfileId || generateUniqueProfileId(userData);
         profileFullName.textContent = `${userData.firstName} ${userData.lastName}`;
         profileShift.textContent = currentShift ? currentShift.shiftName || 'Activo' : 'No activo';
         
@@ -4822,7 +5524,7 @@
       
       // Para el avatar pequeño
       userAvatarMobile.style.display = 'none';
-      userBtnMobile.innerHTML = '<i class="fas fa-carrot"></i>';
+      userBtnMobile.innerHTML = '<i class="fas fa-user"></i>';
     }
 
     // Config Functions
@@ -5023,6 +5725,195 @@
       }
     }
 
+    // CORRECCIÓN: Configuración inicial de teclados numéricos
+    function initializeAllNumpads() {
+      // Configurar teclados cuando se abren los modales
+      const modalsWithNumpads = ['cashModal', 'discountModal', 'discountPercentageModal'];
+      
+      modalsWithNumpads.forEach(modalId => {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+          // Configurar cuando se muestre el modal
+          const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+              if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                if (modal.style.display === 'flex') {
+                  setupNumpadForModal(modalId);
+                }
+              }
+            });
+          });
+          
+          observer.observe(modal, { attributes: true });
+        }
+      });
+    }
+
+    // CORRECCIÓN: History functions - CORREGIDAS para manejar errores y diferentes estructuras de datos
+    async function loadHistory() {
+      try {
+        showLoading('Cargando historial...');
+        
+        historyContainer.innerHTML = '';
+        
+        if (!currentCollaborator) {
+          historyContainer.innerHTML = '<div style="text-align: center; padding: 30px; color: rgba(255,255,255,0.5);"><i class="fas fa-history" style="font-size: 40px; margin-bottom: 10px;"></i><p>No hay historial disponible</p></div>';
+          hideLoading();
+          return;
+        }
+        
+        let allInvoices = [];
+        
+        // Intentar cargar de facturacionCarrito (ubicación principal)
+        try {
+          const invoiceQuery = query(
+            collection(db, "facturacionCarrito"),
+            where("userId", "==", currentCollaborator.userId),
+            orderBy("timestamp", "desc"),
+            limit(50)
+          );
+          
+          const snapshot = await getDocs(invoiceQuery);
+          
+          snapshot.forEach((doc) => {
+            try {
+              const invoiceData = doc.data();
+              // Asegurarse de que la factura pertenece al colaborador actual
+              if (invoiceData.collaboratorId === currentCollaborator.id || 
+                  invoiceData.userId === currentCollaborator.userId ||
+                  invoiceData.username === currentCollaborator.username) {
+                allInvoices.push({
+                  id: doc.id,
+                  ...invoiceData,
+                  source: 'facturacionCarrito'
+                });
+              }
+            } catch (error) {
+              console.warn('Error procesando documento de facturacionCarrito:', error);
+            }
+          });
+        } catch (error) {
+          console.warn('Error al cargar facturacionCarrito:', error);
+        }
+        
+        // Si no hay facturas, intentar cargar del historial del usuario
+        if (allInvoices.length === 0) {
+          try {
+            const userHistoryRef = collection(db, "users", currentCollaborator.userId, "invoiceHistory");
+            const userHistoryQuery = query(
+              userHistoryRef,
+              orderBy("timestamp", "desc"),
+              limit(50)
+            );
+            
+            const userSnapshot = await getDocs(userHistoryQuery);
+            
+            userSnapshot.forEach((doc) => {
+              try {
+                const invoiceData = doc.data();
+                allInvoices.push({
+                  id: doc.id,
+                  ...invoiceData,
+                  source: 'userHistory'
+                });
+              } catch (error) {
+                console.warn('Error procesando documento de userHistory:', error);
+              }
+            });
+          } catch (error) {
+            console.warn('Error al cargar userHistory:', error);
+          }
+        }
+        
+        // Si no hay facturas, mostrar mensaje
+        if (allInvoices.length === 0) {
+          historyContainer.innerHTML = '<div style="text-align: center; padding: 30px; color: rgba(255,255,255,0.5);"><i class="fas fa-history" style="font-size: 40px; margin-bottom: 10px;"></i><p>No hay historial de facturas</p></div>';
+          hideLoading();
+          return;
+        }
+        
+        // Ordenar facturas por fecha (más recientes primero)
+        allInvoices.sort((a, b) => {
+          const dateA = a.timestamp?.toDate?.() || new Date(a.date || 0);
+          const dateB = b.timestamp?.toDate?.() || new Date(b.date || 0);
+          return dateB - dateA;
+        });
+        
+        // Mostrar solo las últimas 30 facturas
+        const recentInvoices = allInvoices.slice(0, 30);
+        
+        // Crear elementos para cada factura
+        recentInvoices.forEach((invoiceData) => {
+          try {
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+            
+            // Extraer información con manejo de errores
+            const invoiceId = invoiceData.invoiceId || invoiceData.id || 'Sin ID';
+            const total = invoiceData.total || 0;
+            const paymentType = invoiceData.paymentType || 'Desconocido';
+            const itemsCount = invoiceData.items?.length || 0;
+            const collaboratorName = invoiceData.collaboratorName || currentCollaborator.firstName + ' ' + currentCollaborator.lastName;
+            
+            // Obtener fecha con manejo de errores
+            let invoiceDate;
+            try {
+              if (invoiceData.timestamp?.toDate) {
+                invoiceDate = invoiceData.timestamp.toDate();
+              } else if (invoiceData.date) {
+                invoiceDate = new Date(invoiceData.date);
+              } else {
+                invoiceDate = new Date();
+              }
+            } catch (error) {
+              invoiceDate = new Date();
+            }
+            
+            // Marcar si tiene productos vencidos
+            const expiredBadge = invoiceData.hasExpiredProducts ? 
+              '<span class="history-expired-badge">VENCIDOS</span>' : '';
+            
+            historyItem.innerHTML = `
+              <div class="history-header">
+                <span class="history-id">${invoiceId}</span>
+                ${expiredBadge}
+                <span class="history-date">${formatDate(invoiceDate)}</span>
+              </div>
+              <div class="history-details">
+                <div class="history-detail">
+                  <span class="history-label">Total</span>
+                  <span class="history-value">${formatCurrency(total)}</span>
+                </div>
+                <div class="history-detail">
+                  <span class="history-label">Método</span>
+                  <span class="history-value">${paymentType}</span>
+                </div>
+                <div class="history-detail">
+                  <span class="history-label">Items</span>
+                  <span class="history-value">${itemsCount}</span>
+                </div>
+              </div>
+              <div class="history-collaborator">
+                <small>${collaboratorName}</small>
+              </div>
+            `;
+            
+            historyContainer.appendChild(historyItem);
+          } catch (error) {
+            console.error('Error creando elemento de historial:', error);
+          }
+        });
+        
+        hideLoading();
+        
+      } catch (error) {
+        console.error('Error general al cargar historial:', error);
+        historyContainer.innerHTML = '<div style="text-align: center; padding: 30px; color: rgba(255,255,255,0.5);"><i class="fas fa-exclamation-triangle" style="font-size: 40px; margin-bottom: 10px;"></i><p>Error al cargar el historial. Intente nuevamente.</p></div>';
+        hideLoading();
+        showToast('Error al cargar historial', 'error');
+      }
+    }
+
     // Event Listeners
     mobileLoginBtn.addEventListener('click', async () => {
       const username = mobileUsername.value.trim();
@@ -5044,6 +5935,7 @@
         checkHeaderLogo();
         await loadCollaboratorData();
         initializeScanner();
+        initializeAllNumpads(); // Inicializar teclados numéricos
         
         if (alwaysActiveSearchEnabled) {
           setTimeout(() => {
@@ -5185,10 +6077,10 @@
       navMenu.classList.remove('active');
     });
 
-    navReports.addEventListener('click', async (e) => {
+    navReports.addEventListener('click', (e) => {
       e.preventDefault();
-      await loadReports();
-      reportsModal.style.display = 'flex';
+      // Redirigir a estadistica-rapida-colaboradores.html
+      window.location.href = 'estadistica-rapida-colaboradores.html';
       navProducts.classList.remove('active');
       navInvoice.classList.remove('active');
       navHistory.classList.remove('active');
@@ -5246,12 +6138,20 @@
       userInfoModal.style.display = 'none';
     });
 
-    logoutBtn.addEventListener('click', logoutCollaborator);
+    // CORRECCIÓN: Logout button cierra el modal y hace logout
+    logoutBtn.addEventListener('click', () => {
+      userInfoModal.style.display = 'none';
+      setTimeout(() => {
+        logoutCollaborator();
+      }, 300);
+    });
 
     // Payment buttons
     discountBtnMobile.addEventListener('click', () => {
       discountPasswordInput.value = '';
       discountModal.style.display = 'flex';
+      // Configurar teclado para contraseña
+      setupNumpadForModal('discountModal');
     });
 
     cashBtnMobile.addEventListener('click', () => {
@@ -5263,28 +6163,29 @@
       cardModal.style.display = 'flex';
     });
 
+    // CORRECCIÓN DEL BOTÓN "FACTURAR" - Ahora funciona igual que "Efectivo"
     invoiceBtnMobile.addEventListener('click', () => {
+      setupCashPayment();
       cashModal.style.display = 'flex';
     });
 
     // Discount modals
     verifyDiscountBtn.addEventListener('click', applyDiscountWithPassword);
 
-    document.querySelectorAll('#discountPercentageModal .num-btn[data-value]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const now = Date.now();
-        if (now - lastNumpadClickTime < numpadClickDelay) {
-          return;
-        }
-        lastNumpadClickTime = now;
-        
-        const value = btn.getAttribute('data-value');
-        discountInput.value = value;
-      });
+    discountClearPasswordBtn.addEventListener('click', () => {
+      discountPasswordInput.value = '';
+    });
+
+    discountBackspaceBtn.addEventListener('click', () => {
+      discountPasswordInput.value = discountPasswordInput.value.slice(0, -1);
     });
 
     discountClearBtn.addEventListener('click', () => {
       discountInput.value = '';
+    });
+
+    discountBackspaceBtn2.addEventListener('click', () => {
+      discountInput.value = discountInput.value.slice(0, -1);
     });
 
     applyDiscountBtn.addEventListener('click', applyDiscountPercentage);
@@ -5303,10 +6204,7 @@
     });
 
     menuReportsMain.addEventListener('click', (e) => {
-      e.preventDefault();
-      loadReports();
-      reportsModal.style.display = 'flex';
-      menuModal.style.display = 'none';
+      // El enlace ya está configurado en el HTML
     });
 
     menuInvoices.addEventListener('click', (e) => {
@@ -5325,343 +6223,6 @@
 
     // Config
     saveConfigBtn.addEventListener('click', saveConfig);
-
-    // History functions - CORREGIDAS para mostrar solo las facturas del usuario actual
-    async function loadHistory() {
-      try {
-        showLoading('Cargando historial...');
-        
-        historyContainer.innerHTML = '';
-        
-        if (!currentCollaborator) {
-          historyContainer.innerHTML = '<div style="text-align: center; padding: 30px; color: rgba(255,255,255,0.5);"><i class="fas fa-history" style="font-size: 40px; margin-bottom: 10px;"></i><p>No hay historial disponible</p></div>';
-          hideLoading();
-          return;
-        }
-        
-        const historyQuery = query(
-          collection(db, "users", currentCollaborator.userId, "invoiceHistory"),
-          orderBy("timestamp", "desc"),
-          limit(30)
-        );
-        
-        const snapshot = await getDocs(historyQuery);
-        
-        if (snapshot.empty) {
-          historyContainer.innerHTML = '<div style="text-align: center; padding: 30px; color: rgba(255,255,255,0.5);"><i class="fas fa-history" style="font-size: 40px; margin-bottom: 10px;"></i><p>No hay historial de facturas</p></div>';
-          hideLoading();
-          return;
-        }
-        
-        snapshot.forEach((doc) => {
-          try {
-            const invoiceData = doc.data();
-            
-            // Verificar que la factura pertenezca al usuario actual
-            if (invoiceData.collaboratorId !== currentCollaborator.id) {
-              return;
-            }
-            
-            const historyItem = document.createElement('div');
-            historyItem.className = 'history-item';
-            
-            historyItem.innerHTML = `
-              <div class="history-header">
-                <span class="history-id">${invoiceData.invoiceId}</span>
-                <span class="history-date">${formatDate(invoiceData.timestamp?.toDate())}</span>
-              </div>
-              <div class="history-details">
-                <div class="history-detail">
-                  <span class="history-label">Total</span>
-                  <span class="history-value">${formatCurrency(invoiceData.total)}</span>
-                </div>
-                <div class="history-detail">
-                  <span class="history-label">Método</span>
-                  <span class="history-value">${invoiceData.paymentType}</span>
-                </div>
-                <div class="history-detail">
-                  <span class="history-label">Items</span>
-                  <span class="history-value">${invoiceData.items?.length || 0}</span>
-                </div>
-              </div>
-            `;
-            
-            historyContainer.appendChild(historyItem);
-          } catch (error) {
-            console.error('Error procesando item de historial:', error);
-          }
-        });
-        
-        hideLoading();
-        
-      } catch (error) {
-        console.error('Error loading history:', error);
-        hideLoading();
-        showToast('Error al cargar historial', 'error');
-      }
-    }
-
-    // Reports functions - CORREGIDAS para recuperar correctamente los datos
-    async function loadReports() {
-      try {
-        showLoading('Generando reportes...');
-        
-        if (!currentCollaborator) {
-          hideLoading();
-          return;
-        }
-        
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        
-        // CORRECCIÓN: Consultar la colección correcta de facturas para el usuario actual
-        // Primero intentar obtener de facturacionCarrito
-        try {
-          const salesQuery = query(
-            collection(db, "facturacionCarrito"),
-            where("timestamp", ">=", Timestamp.fromDate(today)),
-            where("timestamp", "<", Timestamp.fromDate(tomorrow)),
-            where("collaboratorId", "==", currentCollaborator.id)
-          );
-          
-          const snapshot = await getDocs(salesQuery);
-          
-          let totalSales = 0;
-          let transactionCount = 0;
-          let paymentMethods = { Efectivo: 0, Tarjeta: 0 };
-          let productCounts = {};
-          
-          if (!snapshot.empty) {
-            snapshot.forEach((doc) => {
-              const sale = doc.data();
-              
-              // Solo contar las ventas del usuario actual
-              if (sale.collaboratorId === currentCollaborator.id) {
-                totalSales += sale.total || 0;
-                transactionCount++;
-                
-                // Contar métodos de pago
-                if (sale.paymentType) {
-                  if (paymentMethods[sale.paymentType] !== undefined) {
-                    paymentMethods[sale.paymentType] += sale.total || 0;
-                  } else {
-                    paymentMethods[sale.paymentType] = sale.total || 0;
-                  }
-                }
-                
-                // Contar productos vendidos
-                if (sale.items && Array.isArray(sale.items)) {
-                  sale.items.forEach(item => {
-                    if (item && item.name) {
-                      if (productCounts[item.name]) {
-                        productCounts[item.name] += item.quantity || 0;
-                      } else {
-                        productCounts[item.name] = item.quantity || 0;
-                      }
-                    }
-                  });
-                }
-              }
-            });
-          } else {
-            // Si no hay datos en facturacionCarrito, intentar obtener del historial del usuario
-            const historyQuery = query(
-              collection(db, "users", currentCollaborator.userId, "invoiceHistory"),
-              where("timestamp", ">=", Timestamp.fromDate(today)),
-              where("timestamp", "<", Timestamp.fromDate(tomorrow))
-            );
-            
-            const historySnapshot = await getDocs(historyQuery);
-            
-            historySnapshot.forEach((doc) => {
-              const sale = doc.data();
-              
-              if (sale.collaboratorId === currentCollaborator.id) {
-                totalSales += sale.total || 0;
-                transactionCount++;
-                
-                if (sale.paymentType) {
-                  if (paymentMethods[sale.paymentType] !== undefined) {
-                    paymentMethods[sale.paymentType] += sale.total || 0;
-                  } else {
-                    paymentMethods[sale.paymentType] = sale.total || 0;
-                  }
-                }
-                
-                if (sale.items && Array.isArray(sale.items)) {
-                  sale.items.forEach(item => {
-                    if (item && item.name) {
-                      if (productCounts[item.name]) {
-                        productCounts[item.name] += item.quantity || 0;
-                      } else {
-                        productCounts[item.name] = item.quantity || 0;
-                      }
-                    }
-                  });
-                }
-              }
-            });
-          }
-          
-          // Encontrar el producto más vendido
-          let topProductName = '-';
-          let maxQuantity = 0;
-          for (const [productName, quantity] of Object.entries(productCounts)) {
-            if (quantity > maxQuantity) {
-              maxQuantity = quantity;
-              topProductName = productName;
-            }
-          }
-          
-          // Actualizar los elementos del DOM
-          todaySales.textContent = formatCurrency(totalSales);
-          todayTransactions.textContent = transactionCount;
-          avgTicket.textContent = transactionCount > 0 ? formatCurrency(totalSales / transactionCount) : '$0.00';
-          topProduct.textContent = topProductName.substring(0, 15) + (topProductName.length > 15 ? '...' : '');
-          
-          // Crear gráficos
-          createSalesChart(totalSales, transactionCount);
-          createPaymentMethodsChart(paymentMethods);
-          
-        } catch (firestoreError) {
-          console.error('Error accediendo a Firebase:', firestoreError);
-          // En caso de error, mostrar datos de ejemplo
-          todaySales.textContent = formatCurrency(1250.75);
-          todayTransactions.textContent = '8';
-          avgTicket.textContent = formatCurrency(156.34);
-          topProduct.textContent = 'Producto A';
-          
-          // Crear gráficos con datos de ejemplo
-          createSalesChart(1250.75, 8);
-          createPaymentMethodsChart({ Efectivo: 850.75, Tarjeta: 400.00 });
-          
-          showToast('Usando datos de ejemplo', 'info');
-        }
-        
-        hideLoading();
-        
-      } catch (error) {
-        console.error('Error loading reports:', error);
-        hideLoading();
-        showToast('Error al cargar reportes', 'error');
-        
-        // Mostrar datos por defecto en caso de error
-        todaySales.textContent = '$0.00';
-        todayTransactions.textContent = '0';
-        avgTicket.textContent = '$0.00';
-        topProduct.textContent = '-';
-        
-        // Crear gráficos vacíos
-        createSalesChart(0, 0);
-        createPaymentMethodsChart({});
-      }
-    }
-
-    function createSalesChart(totalSales, transactionCount) {
-      const ctx = salesChart.getContext('2d');
-      
-      if (window.salesChartInstance) {
-        window.salesChartInstance.destroy();
-      }
-      
-      window.salesChartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: ['Ventas Hoy'],
-          datasets: [{
-            label: 'Monto Total',
-            data: [totalSales],
-            backgroundColor: 'rgba(22, 224, 134, 0.5)',
-            borderColor: '#16e086',
-            borderWidth: 1
-          }, {
-            label: 'Transacciones',
-            data: [transactionCount * 100],
-            backgroundColor: 'rgba(52, 152, 219, 0.5)',
-            borderColor: '#3498db',
-            borderWidth: 1,
-            yAxisID: 'y1'
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true,
-              title: {
-                display: true,
-                text: 'Monto ($)'
-              }
-            },
-            y1: {
-              beginAtZero: true,
-              position: 'right',
-              title: {
-                display: true,
-                text: 'Transacciones'
-              },
-              grid: {
-                drawOnChartArea: false
-              }
-            }
-          }
-        }
-      });
-    }
-
-    function createPaymentMethodsChart(paymentMethods) {
-      const ctx = paymentMethodsChart.getContext('2d');
-      
-      if (window.paymentMethodsChartInstance) {
-        window.paymentMethodsChartInstance.destroy();
-      }
-      
-      // Filtrar métodos de pago con valor mayor a 0
-      const filteredLabels = [];
-      const filteredData = [];
-      const colors = ['rgba(22, 224, 134, 0.5)', 'rgba(52, 152, 219, 0.5)', 'rgba(155, 89, 182, 0.5)', 'rgba(241, 196, 15, 0.5)'];
-      const borderColors = ['#16e086', '#3498db', '#9b59b6', '#f1c40f'];
-      
-      let colorIndex = 0;
-      for (const [method, value] of Object.entries(paymentMethods)) {
-        if (value > 0) {
-          filteredLabels.push(method);
-          filteredData.push(value);
-          colorIndex++;
-        }
-      }
-      
-      // Si no hay datos, mostrar un mensaje
-      if (filteredData.length === 0) {
-        filteredLabels.push('Sin datos');
-        filteredData.push(1);
-      }
-      
-      window.paymentMethodsChartInstance = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: filteredLabels,
-          datasets: [{
-            data: filteredData,
-            backgroundColor: colors.slice(0, filteredLabels.length),
-            borderColor: borderColors.slice(0, filteredLabels.length),
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'bottom'
-            }
-          }
-        }
-      });
-    }
 
     // Print modal
     printInvoiceBtn.addEventListener('click', () => {
@@ -5800,6 +6361,7 @@
           checkHeaderLogo();
           loadCollaboratorData();
           initializeScanner();
+          initializeAllNumpads(); // Inicializar teclados numéricos
           
           if (alwaysActiveSearchEnabled) {
             setTimeout(() => {
@@ -5808,6 +6370,9 @@
           }
         }
       }
+      
+      // Inicializar todos los teclados numéricos
+      initializeAllNumpads();
     });
 
     // Make functions available globally
@@ -5825,6 +6390,64 @@
       updateInvoiceDisplay();
       updateRealTimeData();
     };
+    
+    // Inicializar estilos CSS adicionales
+    document.addEventListener('DOMContentLoaded', () => {
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .expiration-modal-overlay {
+          animation: fadeIn 0.3s ease-out;
+        }
+        
+        .history-expired-badge {
+          background: #e74c3c;
+          color: white;
+          padding: 2px 6px;
+          border-radius: 4px;
+          font-size: 10px;
+          font-weight: bold;
+          margin-left: 8px;
+        }
+        
+        /* CORRECCIÓN: Para pantallas grandes, adaptación completa */
+        @media (min-width: 769px) {
+          body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a2b3c, #2c3e50);
+          }
+          
+          .mobile-container {
+            max-width: 90%; 
+            height: 95vh;
+          }
+        }
+        
+        @media (min-width: 1200px) {
+          .mobile-container {
+            max-width: 1100px;
+          }
+        }
+        
+        @media (min-width: 1600px) {
+          .mobile-container {
+            max-width: 1300px;
+          }
+          
+          .modal-content-mobile {
+            max-width: 700px;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+    });
   </script>
 </body>
 </html>
