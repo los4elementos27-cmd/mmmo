@@ -470,37 +470,67 @@
       font-size: 0.9rem;
     }
 
-    /* CORREGIDO: BUSCADOR - COLOR DE TEXTO VISIBLE */
+    /* BUSCADOR MEJORADO - FUNCIONA EN TIEMPO REAL */
     .search-container {
       position: relative;
       max-width: 100%;
       width: 100%;
     }
 
-    .search-container .input-group {
-      flex-wrap: nowrap;
+    .search-input-wrapper {
+      position: relative;
     }
 
-    .search-container .form-control {
-      font-size: 0.9rem;
-      padding: 8px 12px;
-      color: white !important; /* CORREGIDO: TEXTO BLANCO */
-      background: rgba(255, 255, 255, 0.1) !important; /* CORREGIDO: FONDO VISIBLE */
-      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255, 255, 255, 0.7);
+      z-index: 2;
     }
 
-    .search-container .form-control::placeholder {
-      color: rgba(255, 255, 255, 0.7) !important; /* CORREGIDO: PLACEHOLDER VISIBLE */
+    .search-input {
+      width: 100%;
+      padding: 10px 12px 10px 40px;
+      font-size: 0.95rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.15);
+      color: white !important;
+      transition: all 0.3s ease;
     }
 
-    .search-container .form-control:focus {
-      color: white !important; /* CORREGIDO: TEXTO BLANCO AL ENFOCAR */
-      background: rgba(255, 255, 255, 0.15) !important;
-      border-color: var(--primary-color) !important;
-      box-shadow: 0 0 0 0.2rem rgba(21, 160, 134, 0.25) !important;
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      background: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 0 0 3px rgba(21, 160, 134, 0.2);
     }
 
-    .search-results {
+    .search-input::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .clear-search-btn {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.7);
+      cursor: pointer;
+      padding: 4px;
+      display: none;
+      z-index: 2;
+    }
+
+    .clear-search-btn:hover {
+      color: white;
+    }
+
+    .search-results-dropdown {
       position: absolute;
       top: 100%;
       left: 0;
@@ -509,30 +539,120 @@
       backdrop-filter: blur(20px);
       border: 1px solid rgba(21, 160, 134, 0.3);
       border-radius: 8px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
       z-index: 1000;
-      max-height: 300px;
+      max-height: 400px;
       overflow-y: auto;
       display: none;
+      margin-top: 5px;
+    }
+
+    .search-results-dropdown.show {
+      display: block;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .search-result-item {
-      padding: 10px 15px;
+      padding: 12px 15px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       cursor: pointer;
-      transition: background 0.3s;
-      font-size: 0.9rem;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
     .search-result-item:hover {
       background: rgba(21, 160, 134, 0.2);
     }
 
+    .search-result-item:last-child {
+      border-bottom: none;
+    }
+
+    .search-result-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      object-fit: cover;
+      border: 2px solid var(--primary-color);
+    }
+
+    .search-result-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .search-result-name {
+      font-weight: 600;
+      color: white;
+      font-size: 0.95rem;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .search-result-details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 0.8rem;
+    }
+
+    .search-result-id {
+      color: var(--primary-color);
+      font-family: 'Courier New', monospace;
+    }
+
+    .search-result-phone {
+      color: #bdc3c7;
+    }
+
+    .search-result-amount {
+      color: #2ecc71;
+      font-weight: 600;
+    }
+
+    .search-result-status {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(21, 160, 134, 0.2);
+      color: var(--primary-color);
+      border: 1px solid var(--primary-color);
+    }
+
+    .no-search-results {
+      padding: 20px;
+      text-align: center;
+      color: #bdc3c7;
+    }
+
+    .no-search-results i {
+      font-size: 2rem;
+      margin-bottom: 10px;
+      display: block;
+      color: #7f8c8d;
+    }
+
     .highlight {
-      background-color: rgba(21, 160, 134, 0.3);
+      background-color: rgba(21, 160, 134, 0.4);
       color: white;
       padding: 0 2px;
       border-radius: 3px;
+      font-weight: 600;
     }
 
     /* CORREGIDO: SELECT Y OPTIONS CON COLORES VISIBLES */
@@ -995,6 +1115,15 @@
       .accordion-body {
         padding: 10px !important;
       }
+
+      .search-input {
+        padding: 8px 12px 8px 36px;
+        font-size: 0.9rem;
+      }
+
+      .search-results-dropdown {
+        max-height: 300px;
+      }
     }
 
     @media (max-width: 480px) {
@@ -1025,6 +1154,15 @@
 
       .invoice-container {
         padding: 10px;
+      }
+
+      .search-result-item {
+        padding: 10px 12px;
+      }
+
+      .search-result-avatar {
+        width: 35px;
+        height: 35px;
       }
     }
 
@@ -1121,20 +1259,24 @@
         <p class="text-muted mb-0" style="font-size: 0.9rem;">Administra tus clientes y préstamos</p>
       </div>
       <div class="d-flex gap-3 align-items-center">
+        <!-- BUSCADOR MEJORADO - FUNCIONA EN TIEMPO REAL -->
         <div class="search-container">
-          <div class="input-group">
-            <input type="text" class="form-control border-0 text-white" 
-                   placeholder="Buscar cliente..." 
+          <div class="search-input-wrapper">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" 
+                   class="search-input" 
                    id="searchInput"
-                   style="border-radius: 8px 0 0 8px; font-size: 0.9rem;">
-            <!-- CORREGIDO: Botón de búsqueda funciona ahora -->
-            <button class="btn btn-primary" type="button" id="searchBtn" style="border-radius: 0 8px 8px 0; padding: 8px 15px;">
-              <i class="fas fa-search"></i>
+                   placeholder="Buscar cliente por nombre, teléfono, ID..."
+                   autocomplete="off">
+            <button class="clear-search-btn" id="clearSearchBtn">
+              <i class="fas fa-times"></i>
             </button>
           </div>
-          <div class="search-results" id="searchResults">
+          <div class="search-results-dropdown" id="searchResults">
+            <!-- Los resultados de búsqueda aparecerán aquí -->
           </div>
         </div>
+        
         <button class="btn btn-primary d-flex align-items-center gap-2" id="exportBtn" style="padding: 8px 15px;">
           <i class="fas fa-file-export"></i>
           <span class="d-none d-md-inline">Exportar</span>
@@ -1195,7 +1337,7 @@
     <div class="card animated">
       <div class="card-header">
         <div class="d-flex align-items-center">
-          <span>Clientes Registrados</span>
+          <span id="clientsTitle">Clientes Registrados</span>
           <span class="badge bg-primary ms-2" id="clientCount">0</span>
         </div>
         <div class="text-muted mt-1" id="filterInfo" style="font-size: 0.85rem;">
@@ -1286,7 +1428,6 @@
               </div>
             </div>
             
-            <!-- CORREGIDO: Sección de historial de pagos -->
             <div class="payment-history-section">
               <h6 class="payment-history-title">
                 <span>Historial de Pagos</span>
@@ -1311,7 +1452,6 @@
           </div>
         </div>
         <div class="modal-footer">
-          <!-- CORREGIDO: Botón de completar préstamo con confirmación -->
           <button type="button" class="btn btn-success flex-fill d-flex align-items-center justify-content-center gap-2" id="completeLoanBtn">
             <i class="fas fa-check-circle"></i>
             <span>Completar Préstamo</span>
@@ -1353,7 +1493,6 @@
     </div>
   </div>
 
-  <!-- Modal para seleccionar pago específico -->
   <div class="modal fade" id="selectPaymentModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
@@ -1364,7 +1503,6 @@
         <div class="modal-body">
           <p class="mb-3">Selecciona un pago del historial para generar la factura:</p>
           <div id="paymentSelectContainer">
-            <!-- Los pagos se cargarán aquí -->
           </div>
         </div>
         <div class="modal-footer">
@@ -1462,6 +1600,7 @@
     const generatedInvoiceIds = new Set();
     let currentInvoiceData = null;
     let currentClientPayments = [];
+    let searchTimeout = null;
 
     function showLoading() {
       document.getElementById('loadingSpinner').classList.remove('d-none');
@@ -1562,7 +1701,6 @@
       return canvas.toDataURL('image/png', 1.0);
     }
 
-    // CORREGIDO: Función para generar factura de PRÉSTAMO
     async function generateLoanInvoice(client) {
       try {
         showLoading();
@@ -1684,7 +1822,6 @@
       }
     }
 
-    // CORREGIDO: Función para generar factura de PAGO específico
     async function generatePaymentInvoice(client, payment) {
       try {
         showLoading();
@@ -1827,7 +1964,6 @@
       }
     }
 
-    // CORREGIDO: Función para mostrar historial de pagos
     function renderPaymentHistory(payments) {
       const container = document.getElementById('paymentHistoryContainer');
       container.innerHTML = '';
@@ -1842,7 +1978,6 @@
         return;
       }
       
-      // Ordenar pagos por fecha (más reciente primero)
       const sortedPayments = [...payments].sort((a, b) => {
         const dateA = a.date.toDate ? a.date.toDate() : new Date(a.date);
         const dateB = b.date.toDate ? b.date.toDate() : new Date(b.date);
@@ -1864,7 +1999,6 @@
           </div>
         `;
         
-        // Hacer clickable para generar factura de ese pago específico
         paymentDiv.style.cursor = 'pointer';
         paymentDiv.addEventListener('click', () => {
           const client = clientsData.find(c => c.id === currentClientId);
@@ -1876,6 +2010,347 @@
         
         container.appendChild(paymentDiv);
       });
+    }
+
+    // FUNCIÓN DE BÚSQUEDA MEJORADA - FUNCIONA EN TIEMPO REAL
+    function searchClients(query) {
+      const searchInput = document.getElementById('searchInput');
+      const clearBtn = document.getElementById('clearSearchBtn');
+      const resultsDropdown = document.getElementById('searchResults');
+      
+      // Actualizar botón de limpiar
+      if (query.trim()) {
+        clearBtn.style.display = 'block';
+      } else {
+        clearBtn.style.display = 'none';
+        resultsDropdown.classList.remove('show');
+        updateClientsTitle('Clientes Registrados');
+        renderClients();
+        return;
+      }
+      
+      const searchTerm = query.toLowerCase().trim();
+      const results = [];
+      
+      clientsData.forEach(client => {
+        let matchScore = 0;
+        
+        // Búsqueda en múltiples campos con diferentes pesos
+        const searchFields = {
+          name: client.client.name || '',
+          id: client.client.id || '',
+          phone: client.client.phone || '',
+          email: client.client.email || '',
+          address: client.client.address || '',
+          amount: formatNumber(client.amount),
+          status: client.status === 'active' ? 'activo' : 
+                  client.status === 'overdue' ? 'atrasado' : 'completado'
+        };
+        
+        // Verificar coincidencias en cada campo
+        Object.entries(searchFields).forEach(([field, value]) => {
+          if (value && typeof value === 'string') {
+            const fieldValue = value.toLowerCase();
+            
+            // Coincidencia exacta
+            if (fieldValue === searchTerm) {
+              matchScore += 100;
+            }
+            // Coincidencia al inicio
+            else if (fieldValue.startsWith(searchTerm)) {
+              matchScore += 50;
+            }
+            // Coincidencia parcial
+            else if (fieldValue.includes(searchTerm)) {
+              matchScore += 30;
+            }
+            // Coincidencia por palabras
+            else if (searchTerm.includes(' ')) {
+              const words = searchTerm.split(' ');
+              const fieldWords = fieldValue.split(' ');
+              let wordMatches = 0;
+              
+              words.forEach(word => {
+                if (fieldWords.some(fw => fw.includes(word))) {
+                  wordMatches++;
+                }
+              });
+              
+              if (wordMatches > 0) {
+                matchScore += (wordMatches / words.length) * 40;
+              }
+            }
+          }
+        });
+        
+        if (matchScore > 0) {
+          results.push({
+            client,
+            matchScore,
+            searchTerm
+          });
+        }
+      });
+      
+      // Ordenar por puntaje
+      results.sort((a, b) => b.matchScore - a.matchScore);
+      
+      // Mostrar resultados
+      displaySearchResults(results, searchTerm);
+      updateClientsTitle(`Resultados de búsqueda: "${searchTerm}"`);
+      
+      // Filtrar la lista principal
+      filterAndRenderClients(results.map(r => r.client));
+    }
+
+    function displaySearchResults(results, searchTerm) {
+      const resultsContainer = document.getElementById('searchResults');
+      resultsContainer.innerHTML = '';
+      
+      if (results.length === 0) {
+        resultsContainer.innerHTML = `
+          <div class="no-search-results">
+            <i class="fas fa-search fa-2x mb-3"></i>
+            <p class="mb-2">No se encontraron clientes</p>
+            <small class="text-muted">Intenta buscar por nombre, teléfono o ID</small>
+          </div>
+        `;
+      } else {
+        results.forEach(result => {
+          const { client } = result;
+          
+          // Crear nombre con resaltado
+          let displayName = client.client.name;
+          if (searchTerm) {
+            const regex = new RegExp(`(${searchTerm})`, 'gi');
+            displayName = client.client.name.replace(regex, '<span class="highlight">$1</span>');
+          }
+          
+          // Crear ID con resaltado si aplica
+          let displayId = client.client.id;
+          if (searchTerm && client.client.id.toLowerCase().includes(searchTerm)) {
+            const regex = new RegExp(`(${searchTerm})`, 'gi');
+            displayId = client.client.id.replace(regex, '<span class="highlight">$1</span>');
+          }
+          
+          const resultDiv = document.createElement('div');
+          resultDiv.className = 'search-result-item';
+          resultDiv.innerHTML = `
+            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(client.client.name)}&background=15a086&color=fff&size=60" 
+                 class="search-result-avatar">
+            <div class="search-result-info">
+              <div class="search-result-name">${displayName}</div>
+              <div class="search-result-details">
+                <span class="search-result-id">ID: ${displayId}</span>
+                ${client.client.phone ? `<span class="search-result-phone">📱 ${client.client.phone}</span>` : ''}
+                <span class="search-result-amount">💰 $${formatNumber(client.amount)}</span>
+                <span class="search-result-status">
+                  ${client.status === 'active' ? 'Activo' : client.status === 'overdue' ? 'Atrasado' : 'Completado'}
+                </span>
+              </div>
+            </div>
+            <i class="fas fa-chevron-right" style="color: rgba(255, 255, 255, 0.5);"></i>
+          `;
+          
+          resultDiv.addEventListener('click', () => {
+            showClientDetails(client.id);
+            resultsContainer.classList.remove('show');
+            document.getElementById('searchInput').value = '';
+            document.getElementById('clearSearchBtn').style.display = 'none';
+            updateClientsTitle('Clientes Registrados');
+            renderClients();
+          });
+          
+          resultsContainer.appendChild(resultDiv);
+        });
+      }
+      
+      resultsContainer.classList.add('show');
+    }
+
+    function filterAndRenderClients(filteredClients) {
+      const accordion = document.getElementById('clientsAccordion');
+      accordion.innerHTML = '';
+      
+      if (filteredClients.length === 0) {
+        accordion.innerHTML = `
+          <div class="text-center py-4">
+            <i class="fas fa-users-slash fa-2x mb-3" style="color: #bdc3c7;"></i>
+            <p class="text-muted mb-0" style="font-size: 0.9rem;">No se encontraron clientes</p>
+          </div>
+        `;
+        document.getElementById('clientCount').textContent = '0';
+        document.getElementById('filterInfo').textContent = 'No hay resultados';
+        return;
+      }
+      
+      // Aplicar filtro y orden actual si hay
+      let filtered = filteredClients;
+      if (currentFilter !== 'all') {
+        filtered = filteredClients.filter(c => c.status === currentFilter);
+      }
+      
+      filtered.sort((a, b) => {
+        switch (currentSort) {
+          case 'name': return a.client.name.localeCompare(b.client.name);
+          case 'amount': return parseFloat(b.amount) - parseFloat(a.amount);
+          case 'date': return new Date(b.startDate) - new Date(a.startDate);
+          case 'status': return a.status.localeCompare(b.status);
+          default: return 0;
+        }
+      });
+      
+      document.getElementById('clientCount').textContent = filtered.length;
+      document.getElementById('filterInfo').textContent = 
+        `Mostrando ${filtered.length} de ${filteredClients.length} resultados`;
+      
+      filtered.forEach((client, index) => {
+        const progress = ((parseFloat(client.amount) - parseFloat(client.balance)) / parseFloat(client.amount)) * 100;
+        const statusColors = {
+          active: '#15a086',
+          overdue: '#e74c3c',
+          completed: '#2ecc71'
+        };
+        
+        const accordionItem = document.createElement('div');
+        accordionItem.className = 'accordion-item';
+        accordionItem.innerHTML = `
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                    data-bs-target="#client-${index}">
+              <div class="d-flex align-items-center w-100">
+                <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(client.client.name)}&background=${statusColors[client.status].replace('#', '')}&color=fff" 
+                     class="client-avatar me-3">
+                <div class="flex-grow-1">
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="client-name">${client.client.name}</span>
+                    <span class="client-status">${client.status === 'active' ? 'Activo' : 
+                      client.status === 'overdue' ? 'Atrasado' : 'Completado'}</span>
+                  </div>
+                  <small class="client-id d-block mb-1">ID: ${client.client.id}</small>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <small style="font-size: 0.8rem;">$${formatNumber(client.amount)}</small>
+                    <small style="font-size: 0.8rem;">Saldo: $${formatNumber(client.balance)}</small>
+                  </div>
+                </div>
+              </div>
+            </button>
+          </h2>
+          <div id="client-${index}" class="accordion-collapse collapse" data-bs-parent="#clientsAccordion">
+            <div class="accordion-body p-2">
+              <div class="client-item">
+                <div class="client-info">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                      <span class="client-name">${client.client.name}</span>
+                      <div class="client-id">ID: ${client.client.id}</div>
+                    </div>
+                    <span class="client-status">${client.status === 'active' ? 'Activo' : 
+                      client.status === 'overdue' ? 'Atrasado' : 'Completado'}</span>
+                  </div>
+                  
+                  <div class="row g-2 mb-2">
+                    <div class="col-6">
+                      <div class="detail-info">
+                        <small class="text-muted d-block">Teléfono</small>
+                        <span style="font-size: 0.85rem;">${client.client.phone || 'N/A'}</span>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="detail-info">
+                        <small class="text-muted d-block">Monto</small>
+                        <span style="font-size: 0.85rem;">$${formatNumber(client.amount)}</span>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="detail-info">
+                        <small class="text-muted d-block">Interés</small>
+                        <span style="font-size: 0.85rem;">${client.interestRate}%</span>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="detail-info">
+                        <small class="text-muted d-block">Saldo</small>
+                        <span style="font-size: 0.85rem;">$${formatNumber(client.balance)}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="loan-progress mt-2">
+                    <div class="d-flex justify-content-between mb-1">
+                      <small class="text-muted" style="font-size: 0.75rem;">Progreso</small>
+                      <small class="text-muted" style="font-size: 0.75rem;">${progress.toFixed(1)}%</small>
+                    </div>
+                    <div class="progress" style="height: 6px;">
+                      <div class="progress-bar" role="progressbar" 
+                           style="width: ${progress}%; background-color: ${statusColors[client.status]};"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="client-actions mt-2">
+                  <button class="action-btn view-btn" data-client-id="${client.id}" title="Ver detalles">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button class="action-btn loan-invoice-btn" data-client-id="${client.id}" title="Factura préstamo">
+                    <i class="fas fa-file-contract"></i>
+                  </button>
+                  <button class="action-btn payment-invoice-btn" data-client-id="${client.id}" title="Factura pago">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                  </button>
+                  ${client.status !== 'completed' ? `
+                    <button class="action-btn complete-btn" data-client-id="${client.id}" title="Completar préstamo">
+                      <i class="fas fa-check-circle"></i>
+                    </button>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        accordion.appendChild(accordionItem);
+      });
+      
+      // Re-asignar event listeners
+      setTimeout(() => {
+        document.querySelectorAll('.view-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const clientId = e.currentTarget.getAttribute('data-client-id');
+            showClientDetails(clientId);
+          });
+        });
+        
+        document.querySelectorAll('.loan-invoice-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const clientId = e.currentTarget.getAttribute('data-client-id');
+            const client = clientsData.find(c => c.id === clientId);
+            if (client) generateLoanInvoice(client);
+          });
+        });
+        
+        document.querySelectorAll('.payment-invoice-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const clientId = e.currentTarget.getAttribute('data-client-id');
+            const client = clientsData.find(c => c.id === clientId);
+            if (client) showPaymentSelectionModal(client);
+          });
+        });
+        
+        document.querySelectorAll('.complete-btn').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            const clientId = e.currentTarget.getAttribute('data-client-id');
+            currentClientId = clientId;
+            const confirmed = await showConfirmation(
+              "Completar Préstamo",
+              "¿Estás seguro que deseas marcar este préstamo como COMPLETADO?"
+            );
+            if (confirmed) await completeLoan();
+          });
+        });
+      }, 100);
+    }
+
+    function updateClientsTitle(title) {
+      document.getElementById('clientsTitle').textContent = title;
     }
 
     async function shareViaWhatsApp() {
@@ -1946,7 +2421,6 @@
         
         const imageUrl = URL.createObjectURL(blob);
         
-        // Mensaje diferente para factura de préstamo o pago
         let message = '';
         if (type === 'loan') {
           message = `¡Hola ${client.client.name}! 👋
@@ -2065,107 +2539,6 @@ ${payment.lateFee ? `⚠️ *Mora:* $${formatNumber(payment.lateFee)}\n` : ''}�
       link.click();
       document.body.removeChild(link);
       showAlert('Factura descargada como imagen de alta calidad', 'success');
-    }
-
-    // CORREGIDO: Buscador mejorado con coincidencias
-    function searchClients(query) {
-      if (!query.trim()) {
-        document.getElementById('searchResults').classList.remove('show');
-        renderClients();
-        return;
-      }
-      
-      const searchTerm = query.toLowerCase();
-      const results = [];
-      
-      clientsData.forEach(client => {
-        let matchScore = 0;
-        const searchText = `
-          ${client.client.name || ''}
-          ${client.client.id || ''}
-          ${client.client.phone || ''}
-          ${client.client.email || ''}
-          ${client.client.address || ''}
-          ${formatNumber(client.amount)}
-          ${client.status === 'active' ? 'activo activos' : 
-            client.status === 'overdue' ? 'atrasado atrasados' : 
-            'completado completados'}
-        `.toLowerCase();
-        
-        // Búsqueda por coincidencias parciales
-        if (client.client.name && client.client.name.toLowerCase().includes(searchTerm)) matchScore += 50;
-        if (client.client.id && client.client.id.toLowerCase().includes(searchTerm)) matchScore += 40;
-        if (client.client.phone && client.client.phone.includes(searchTerm)) matchScore += 30;
-        if (formatNumber(client.amount).includes(searchTerm)) matchScore += 20;
-        if (searchText.includes(searchTerm)) matchScore += 10;
-        
-        if (matchScore > 0) {
-          results.push({
-            client,
-            matchScore
-          });
-        }
-      });
-      
-      results.sort((a, b) => b.matchScore - a.matchScore);
-      displaySearchResults(results, searchTerm);
-    }
-
-    function displaySearchResults(results, searchTerm) {
-      const resultsContainer = document.getElementById('searchResults');
-      resultsContainer.innerHTML = '';
-      
-      if (results.length === 0) {
-        resultsContainer.innerHTML = `
-          <div class="search-result-item text-center py-3">
-            <i class="fas fa-search mb-2" style="color: #bdc3c7;"></i>
-            <p class="text-muted mb-0" style="font-size: 0.85rem;">No se encontraron resultados para "${searchTerm}"</p>
-          </div>
-        `;
-        resultsContainer.classList.add('show');
-        return;
-      }
-      
-      results.forEach(result => {
-        const { client } = result;
-        const resultDiv = document.createElement('div');
-        resultDiv.className = 'search-result-item';
-        
-        // Resaltar coincidencias en el nombre
-        let displayName = client.client.name;
-        if (searchTerm) {
-          const regex = new RegExp(`(${searchTerm})`, 'gi');
-          displayName = client.client.name.replace(regex, '<span class="highlight">$1</span>');
-        }
-        
-        resultDiv.innerHTML = `
-          <div class="d-flex align-items-center">
-            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(client.client.name)}&background=15a086&color=fff&size=40" 
-                 class="rounded-circle me-3" width="35" height="35" style="min-width: 35px;">
-            <div style="min-width: 0; flex: 1;">
-              <div class="client-name" style="font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                ${displayName}
-              </div>
-              <div class="client-id" style="font-size: 0.75rem;">ID: ${client.client.id}</div>
-              <small class="loan-amount d-block" style="font-size: 0.75rem;">
-                $${formatNumber(client.amount)} • 
-                ${client.status === 'active' ? 'Activo' : client.status === 'overdue' ? 'Atrasado' : 'Completado'}
-              </small>
-            </div>
-          </div>
-        `;
-        
-        resultDiv.addEventListener('click', () => {
-          showClientDetails(client.id);
-          resultsContainer.classList.remove('show');
-          document.getElementById('searchInput').value = '';
-          document.getElementById('searchInput').blur();
-        });
-        
-        resultsContainer.appendChild(resultDiv);
-      });
-      
-      resultsContainer.classList.add('show');
     }
 
     function showConfirmation(title = "Confirmar Acción", message = "¿Estás seguro que deseas realizar esta acción?") {
@@ -2291,186 +2664,9 @@ ${payment.lateFee ? `⚠️ *Mora:* $${formatNumber(payment.lateFee)}\n` : ''}�
     }
 
     function renderClients() {
-      const accordion = document.getElementById('clientsAccordion');
-      accordion.innerHTML = '';
-      
-      let filtered = clientsData;
-      if (currentFilter !== 'all') {
-        filtered = clientsData.filter(c => c.status === currentFilter);
-      }
-      
-      filtered.sort((a, b) => {
-        switch (currentSort) {
-          case 'name': return a.client.name.localeCompare(b.client.name);
-          case 'amount': return parseFloat(b.amount) - parseFloat(a.amount);
-          case 'date': return new Date(b.startDate) - new Date(a.startDate);
-          case 'status': return a.status.localeCompare(b.status);
-          default: return 0;
-        }
-      });
-      
-      document.getElementById('clientCount').textContent = filtered.length;
-      document.getElementById('filterInfo').textContent = 
-        currentFilter === 'all' ? 'Mostrando todos los clientes' :
-        currentFilter === 'active' ? 'Mostrando préstamos activos' :
-        currentFilter === 'overdue' ? 'Mostrando préstamos atrasados' :
-        'Mostrando préstamos completados';
-      
-      if (filtered.length === 0) {
-        accordion.innerHTML = `
-          <div class="text-center py-4">
-            <i class="fas fa-users-slash fa-2x mb-3" style="color: #bdc3c7;"></i>
-            <p class="text-muted mb-0" style="font-size: 0.9rem;">No se encontraron clientes</p>
-          </div>
-        `;
-        return;
-      }
-      
-      filtered.forEach((client, index) => {
-        const progress = ((parseFloat(client.amount) - parseFloat(client.balance)) / parseFloat(client.amount)) * 100;
-        const statusColors = {
-          active: '#15a086',
-          overdue: '#e74c3c',
-          completed: '#2ecc71'
-        };
-        
-        const accordionItem = document.createElement('div');
-        accordionItem.className = 'accordion-item';
-        accordionItem.innerHTML = `
-          <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
-                    data-bs-target="#client-${index}">
-              <div class="d-flex align-items-center w-100">
-                <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(client.client.name)}&background=${statusColors[client.status].replace('#', '')}&color=fff" 
-                     class="client-avatar me-3">
-                <div class="flex-grow-1">
-                  <div class="d-flex justify-content-between align-items-center mb-1">
-                    <span class="client-name">${client.client.name}</span>
-                    <span class="client-status">${client.status === 'active' ? 'Activo' : 
-                      client.status === 'overdue' ? 'Atrasado' : 'Completado'}</span>
-                  </div>
-                  <small class="client-id d-block mb-1">ID: ${client.client.id}</small>
-                  <div class="d-flex justify-content-between align-items-center">
-                    <small style="font-size: 0.8rem;">$${formatNumber(client.amount)}</small>
-                    <small style="font-size: 0.8rem;">Saldo: $${formatNumber(client.balance)}</small>
-                  </div>
-                </div>
-              </div>
-            </button>
-          </h2>
-          <div id="client-${index}" class="accordion-collapse collapse" data-bs-parent="#clientsAccordion">
-            <div class="accordion-body p-2">
-              <div class="client-item">
-                <div class="client-info">
-                  <div class="d-flex justify-content-between align-items-center mb-2">
-                    <div>
-                      <span class="client-name">${client.client.name}</span>
-                      <div class="client-id">ID: ${client.client.id}</div>
-                    </div>
-                    <span class="client-status">${client.status === 'active' ? 'Activo' : 
-                      client.status === 'overdue' ? 'Atrasado' : 'Completado'}</span>
-                  </div>
-                  
-                  <div class="row g-2 mb-2">
-                    <div class="col-6">
-                      <div class="detail-info">
-                        <small class="text-muted d-block">Teléfono</small>
-                        <span style="font-size: 0.85rem;">${client.client.phone || 'N/A'}</span>
-                      </div>
-                    </div>
-                    <div class="col-6">
-                      <div class="detail-info">
-                        <small class="text-muted d-block">Monto</small>
-                        <span style="font-size: 0.85rem;">$${formatNumber(client.amount)}</span>
-                      </div>
-                    </div>
-                    <div class="col-6">
-                      <div class="detail-info">
-                        <small class="text-muted d-block">Interés</small>
-                        <span style="font-size: 0.85rem;">${client.interestRate}%</span>
-                      </div>
-                    </div>
-                    <div class="col-6">
-                      <div class="detail-info">
-                        <small class="text-muted d-block">Saldo</small>
-                        <span style="font-size: 0.85rem;">$${formatNumber(client.balance)}</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div class="loan-progress mt-2">
-                    <div class="d-flex justify-content-between mb-1">
-                      <small class="text-muted" style="font-size: 0.75rem;">Progreso</small>
-                      <small class="text-muted" style="font-size: 0.75rem;">${progress.toFixed(1)}%</small>
-                    </div>
-                    <div class="progress" style="height: 6px;">
-                      <div class="progress-bar" role="progressbar" 
-                           style="width: ${progress}%; background-color: ${statusColors[client.status]};"></div>
-                    </div>
-                  </div>
-                </div>
-                <div class="client-actions mt-2">
-                  <button class="action-btn view-btn" data-client-id="${client.id}" title="Ver detalles">
-                    <i class="fas fa-eye"></i>
-                  </button>
-                  <button class="action-btn loan-invoice-btn" data-client-id="${client.id}" title="Factura préstamo">
-                    <i class="fas fa-file-contract"></i>
-                  </button>
-                  <button class="action-btn payment-invoice-btn" data-client-id="${client.id}" title="Factura pago">
-                    <i class="fas fa-file-invoice-dollar"></i>
-                  </button>
-                  ${client.status !== 'completed' ? `
-                    <button class="action-btn complete-btn" data-client-id="${client.id}" title="Completar préstamo">
-                      <i class="fas fa-check-circle"></i>
-                    </button>
-                  ` : ''}
-                </div>
-              </div>
-            </div>
-          </div>
-        `;
-        accordion.appendChild(accordionItem);
-      });
-      
-      setTimeout(() => {
-        document.querySelectorAll('.view-btn').forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            const clientId = e.currentTarget.getAttribute('data-client-id');
-            showClientDetails(clientId);
-          });
-        });
-        
-        document.querySelectorAll('.loan-invoice-btn').forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            const clientId = e.currentTarget.getAttribute('data-client-id');
-            const client = clientsData.find(c => c.id === clientId);
-            if (client) generateLoanInvoice(client);
-          });
-        });
-        
-        document.querySelectorAll('.payment-invoice-btn').forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            const clientId = e.currentTarget.getAttribute('data-client-id');
-            const client = clientsData.find(c => c.id === clientId);
-            if (client) showPaymentSelectionModal(client);
-          });
-        });
-        
-        document.querySelectorAll('.complete-btn').forEach(btn => {
-          btn.addEventListener('click', async (e) => {
-            const clientId = e.currentTarget.getAttribute('data-client-id');
-            currentClientId = clientId;
-            const confirmed = await showConfirmation(
-              "Completar Préstamo",
-              "¿Estás seguro que deseas marcar este préstamo como COMPLETADO? Esta acción no se puede deshacer y cambiará el estado del préstamo a 'completado'."
-            );
-            if (confirmed) await completeLoan();
-          });
-        });
-      }, 100);
+      filterAndRenderClients(clientsData);
     }
 
-    // CORREGIDO: Función para mostrar modal de selección de pago
     function showPaymentSelectionModal(client) {
       if (!client.payments || client.payments.length === 0) {
         showAlert("Este cliente no tiene pagos registrados", "warning");
@@ -2480,7 +2676,6 @@ ${payment.lateFee ? `⚠️ *Mora:* $${formatNumber(payment.lateFee)}\n` : ''}�
       const container = document.getElementById('paymentSelectContainer');
       container.innerHTML = '';
       
-      // Ordenar pagos por fecha (más reciente primero)
       const sortedPayments = [...client.payments].sort((a, b) => {
         const dateA = a.date.toDate ? a.date.toDate() : new Date(a.date);
         const dateB = b.date.toDate ? b.date.toDate() : new Date(b.date);
@@ -2547,7 +2742,6 @@ ${payment.lateFee ? `⚠️ *Mora:* $${formatNumber(payment.lateFee)}\n` : ''}�
       document.getElementById('loanProgressBar').style.width = `${progress}%`;
       document.getElementById('loanProgressText').textContent = `${progress.toFixed(1)}% completado`;
       
-      // Renderizar historial de pagos
       renderPaymentHistory(currentClientPayments);
       
       const modal = new bootstrap.Modal(document.getElementById('clientModal'));
@@ -2587,36 +2781,66 @@ ${payment.lateFee ? `⚠️ *Mora:* $${formatNumber(payment.lateFee)}\n` : ''}�
     }
 
     function setupEventListeners() {
-      // CORREGIDO: Buscador con eventos de input y botón
+      // BUSCADOR EN TIEMPO REAL - FUNCIONA MIENTRAS SE ESCRIBE
       const searchInput = document.getElementById('searchInput');
-      const searchBtn = document.getElementById('searchBtn');
+      const clearBtn = document.getElementById('clearSearchBtn');
+      const resultsDropdown = document.getElementById('searchResults');
       
+      // Búsqueda en tiempo real con debounce
       searchInput.addEventListener('input', (e) => {
-        searchClients(e.target.value);
-      });
-      
-      searchBtn.addEventListener('click', () => {
-        searchClients(searchInput.value);
-      });
-      
-      searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          searchClients(searchInput.value);
+        const query = e.target.value;
+        
+        // Mostrar/ocultar botón de limpiar
+        if (query.trim()) {
+          clearBtn.style.display = 'block';
+        } else {
+          clearBtn.style.display = 'none';
+          resultsDropdown.classList.remove('show');
+          updateClientsTitle('Clientes Registrados');
+          renderClients();
+          return;
         }
-      });
-      
-      searchInput.addEventListener('focus', () => {
-        if (searchInput.value.trim()) {
-          document.getElementById('searchResults').classList.add('show');
+        
+        // Limpiar timeout anterior
+        if (searchTimeout) {
+          clearTimeout(searchTimeout);
         }
+        
+        // Nuevo timeout para búsqueda con debounce
+        searchTimeout = setTimeout(() => {
+          searchClients(query);
+        }, 300); // 300ms de retraso
       });
       
+      // Botón para limpiar búsqueda
+      clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        clearBtn.style.display = 'none';
+        resultsDropdown.classList.remove('show');
+        updateClientsTitle('Clientes Registrados');
+        renderClients();
+        searchInput.focus();
+      });
+      
+      // Ocultar resultados al hacer clic fuera
       document.addEventListener('click', (e) => {
         if (!e.target.closest('.search-container')) {
-          document.getElementById('searchResults').classList.remove('show');
+          resultsDropdown.classList.remove('show');
         }
       });
       
+      // Manejar tecla Escape
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          searchInput.value = '';
+          clearBtn.style.display = 'none';
+          resultsDropdown.classList.remove('show');
+          updateClientsTitle('Clientes Registrados');
+          renderClients();
+        }
+      });
+      
+      // Filtros
       document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -2626,13 +2850,16 @@ ${payment.lateFee ? `⚠️ *Mora:* $${formatNumber(payment.lateFee)}\n` : ''}�
         });
       });
       
+      // Ordenamiento
       document.getElementById('sortSelect').addEventListener('change', (e) => {
         currentSort = e.target.value;
         renderClients();
       });
       
+      // Exportar
       document.getElementById('exportBtn').addEventListener('click', exportToExcel);
       
+      // Generar factura de préstamo
       document.getElementById('generateLoanInvoiceBtn').addEventListener('click', async () => {
         const client = clientsData.find(c => c.id === currentClientId);
         if (client) {
@@ -2641,6 +2868,7 @@ ${payment.lateFee ? `⚠️ *Mora:* $${formatNumber(payment.lateFee)}\n` : ''}�
         }
       });
       
+      // Generar factura de pago
       document.getElementById('generatePaymentInvoiceBtn').addEventListener('click', () => {
         const client = clientsData.find(c => c.id === currentClientId);
         if (client) {
@@ -2653,22 +2881,24 @@ ${payment.lateFee ? `⚠️ *Mora:* $${formatNumber(payment.lateFee)}\n` : ''}�
         }
       });
       
+      // WhatsApp
       document.getElementById('shareWhatsAppBtn').addEventListener('click', shareViaWhatsApp);
-      
       document.getElementById('sendWhatsAppBtn').addEventListener('click', sendWhatsAppWithNumber);
-      
       document.getElementById('whatsappPhoneInput').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
           sendWhatsAppWithNumber();
         }
       });
       
+      // Copiar imagen
       document.getElementById('copyImageBtn').addEventListener('click', copyInvoiceToClipboard);
       
+      // Imprimir
       document.getElementById('printInvoiceBtn').addEventListener('click', () => {
         window.print();
       });
       
+      // Notificaciones
       document.getElementById('notificationsBtn').addEventListener('click', () => {
         const overdue = clientsData.filter(c => c.status === 'overdue').length;
         if (overdue > 0) {
@@ -2678,15 +2908,16 @@ ${payment.lateFee ? `⚠️ *Mora:* $${formatNumber(payment.lateFee)}\n` : ''}�
         }
       });
       
-      // CORREGIDO: Botón completar préstamo con confirmación
+      // Completar préstamo
       document.getElementById('completeLoanBtn').addEventListener('click', async () => {
         const confirmed = await showConfirmation(
           "Completar Préstamo",
-          "¿Estás seguro que deseas marcar este préstamo como COMPLETADO? Esta acción no se puede deshacer y cambiará el estado del préstamo a 'completado'."
+          "¿Estás seguro que deseas marcar este préstamo como COMPLETADO?"
         );
         if (confirmed) await completeLoan();
       });
       
+      // Mejorar experiencia táctil
       document.querySelectorAll('.action-btn, .btn, .filter-btn').forEach(btn => {
         btn.addEventListener('touchstart', function() {
           this.style.transform = 'scale(0.95)';
@@ -2737,21 +2968,6 @@ ${payment.lateFee ? `⚠️ *Mora:* $${formatNumber(payment.lateFee)}\n` : ''}�
           await loadCompanyData();
           await loadUserClients();
           setupEventListeners();
-          
-          // CORREGIDO: Aplicar estilos de texto visibles para selects y inputs
-          const style = document.createElement('style');
-          style.textContent = `
-            .form-select option {
-              background-color: #2c3e50 !important;
-              color: white !important;
-            }
-            .form-select option:hover,
-            .form-select option:checked {
-              background-color: #15a086 !important;
-              color: white !important;
-            }
-          `;
-          document.head.appendChild(style);
         } else {
           window.location.href = 'index.html';
         }
