@@ -41,7 +41,6 @@
       padding: 10px;
     }
 
-    /* ===== CONTENEDOR PRINCIPAL ===== */
     .app-container {
       width: 100%;
       max-width: 1200px;
@@ -70,7 +69,6 @@
       border-radius: 16px;
     }
 
-    /* ===== NAVEGACIÓN ===== */
     .nav-tabs {
       display: flex;
       gap: 15px;
@@ -98,7 +96,6 @@
       color: var(--darker);
     }
 
-    /* ===== LAYOUT HORIZONTAL COMPACTO ===== */
     .row {
       display: flex;
       gap: 20px;
@@ -116,7 +113,6 @@
       min-width: 280px;
     }
 
-    /* ===== CÁMARA - SIN ESPEJO - TAMAÑO COMPACTO ===== */
     .camara-wrapper {
       background: #000;
       border-radius: 16px;
@@ -132,7 +128,7 @@
       height: 100%;
       object-fit: cover;
       display: block;
-      transform: scaleX(1); /* SIN ESPEJO - izquierda es izquierda */
+      transform: scaleX(1);
     }
 
     .camara-badge {
@@ -152,7 +148,6 @@
       backdrop-filter: blur(4px);
     }
 
-    /* ===== CONTENEDOR DE RESULTADO HORIZONTAL ELEGANTE ===== */
     .resultado-card {
       background: var(--dark);
       border-radius: 16px;
@@ -180,7 +175,6 @@
       flex-wrap: wrap;
     }
 
-    /* FOTO */
     .foto-colaborador {
       width: 100px;
       height: 100px;
@@ -203,7 +197,6 @@
       border: 3px dashed var(--primary);
     }
 
-    /* DATOS */
     .detalles-colaborador {
       flex: 1;
     }
@@ -247,7 +240,6 @@
       margin-top: 5px;
     }
 
-    /* MENSAJE DE BLOQUEO */
     .bloqueo-mensaje {
       background: rgba(231, 76, 60, 0.2);
       border: 1px solid var(--danger);
@@ -261,7 +253,19 @@
       gap: 8px;
     }
 
-    /* BOTONES */
+    .bloqueo-horas-mensaje {
+      background: rgba(243, 156, 18, 0.2);
+      border: 1px solid var(--warning);
+      border-radius: 12px;
+      padding: 12px;
+      margin-top: 15px;
+      color: var(--warning);
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     .btn {
       padding: 12px 20px;
       border: none;
@@ -299,7 +303,6 @@
       font-size: 14px;
     }
 
-    /* ===== TOAST Y LOADING ===== */
     .toast {
       position: fixed;
       bottom: 30px;
@@ -345,55 +348,41 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* ===== RESPONSIVE MÓVIL ===== */
-    @media (max-width: 768px) {
-      .app-container {
-        padding: 15px;
-        border-radius: 20px;
-      }
-
-      .col-camara, .col-resultado {
-        min-width: 100%;
-      }
-
-      .info-horizontal {
-        flex-direction: column;
-        text-align: center;
-      }
-
-      .foto-colaborador, .foto-placeholder {
-        width: 80px;
-        height: 80px;
-      }
-
-      .camara-badge {
-        padding: 4px 10px;
-        font-size: 11px;
-      }
+    .registro-counter {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: rgba(22, 224, 134, 0.1);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 13px;
+      border-left: 3px solid var(--primary);
     }
 
-    @media (max-width: 480px) {
-      .foto-colaborador, .foto-placeholder {
-        width: 70px;
-        height: 70px;
-      }
-
-      .nombre-colaborador {
-        font-size: 18px;
-      }
-
-      .codigo-colaborador {
-        font-size: 14px;
-      }
+    .registro-counter i {
+      color: var(--primary);
+      margin-right: 6px;
     }
 
-    /* ===== TIMER ===== */
-    .timer-badge {
+    .confianza-badge {
       background: rgba(255,255,255,0.1);
       padding: 4px 12px;
       border-radius: 20px;
       font-size: 12px;
       color: var(--text-muted);
+      display: inline-block;
+      margin-top: 5px;
+    }
+
+    .confianza-alta {
+      color: #16e086;
+    }
+
+    .confianza-baja {
+      color: #f39c12;
+    }
+
+    .confianza-muy-baja {
+      color: #e74c3c;
     }
   </style>
 </head>
@@ -426,7 +415,7 @@
 
     <!-- LAYOUT HORIZONTAL COMPACTO -->
     <div class="row">
-      <!-- COLUMNA CÁMARA (MÁS PEQUEÑA) -->
+      <!-- COLUMNA CÁMARA -->
       <div class="col-camara">
         <div class="camara-wrapper">
           <video id="videoFacial" autoplay muted playsinline></video>
@@ -439,7 +428,7 @@
         </button>
       </div>
 
-      <!-- COLUMNA RESULTADO (HORIZONTAL ELEGANTE) -->
+      <!-- COLUMNA RESULTADO -->
       <div class="col-resultado">
         <div id="resultadoCard" class="resultado-card" style="border-left-color: #f39c12;">
           <div id="infoContenido" class="info-horizontal">
@@ -460,16 +449,29 @@
               <div id="codigoDisplay" class="codigo-colaborador" style="color: #f39c12;">
                 <i class="fas fa-hourglass-half"></i>
               </div>
+              <div id="confianzaDisplay" class="confianza-badge" style="display: none;"></div>
               <div id="tipoDisplay" class="tipo-registro" style="display: none;"></div>
               <div id="horaDisplay" class="hora-registro">
                 <i class="fas fa-clock"></i> 
                 <span id="horaTexto">--:--:--</span>
               </div>
               
-              <!-- Mensaje de bloqueo (se muestra cuando hay escaneo repetido) -->
+              <!-- Mensaje de bloqueo por escaneo repetido -->
               <div id="bloqueoMensaje" class="bloqueo-mensaje" style="display: none;">
                 <i class="fas fa-exclamation-triangle"></i>
                 <span id="bloqueoTexto"></span>
+              </div>
+              
+              <!-- Mensaje de bloqueo por 4 horas -->
+              <div id="bloqueoHorasMensaje" class="bloqueo-horas-mensaje" style="display: none;">
+                <i class="fas fa-clock"></i>
+                <span id="bloqueoHorasTexto"></span>
+              </div>
+              
+              <!-- Contador de registros del día -->
+              <div id="registroCounter" class="registro-counter" style="display: none;">
+                <i class="fas fa-list-ol"></i>
+                <span id="registroCounterTexto"></span>
               </div>
             </div>
           </div>
@@ -500,7 +502,10 @@
       addDoc,
       Timestamp,
       orderBy,
-      limit
+      limit,
+      getDoc,
+      updateDoc,
+      writeBatch
     } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -518,7 +523,7 @@
     const db = getFirestore(app);
 
     // ============================================================
-    // VARIABLES GLOBALES
+    // VARIABLES GLOBALES - SEGURIDAD MÁXIMA
     // ============================================================
     let modelosCargados = false;
     let streamVideo = null;
@@ -526,12 +531,27 @@
     // Colaboradores desde colección "Ponche"
     let colaboradoresRegistrados = [];
     
-    // Control de escaneos repetidos - 60 SEGUNDOS
-    let ultimoEscaneo = {
-      colaboradorId: null,
-      timestamp: 0,
-      tipo: null
-    };
+    // MAPA para control estricto de escaneos por colaborador
+    const escaneosPorColaborador = new Map();
+    
+    // TIEMPO DE BLOQUEO: 4 HORAS
+    const TIEMPO_BLOQUEO_HORAS = 4 * 60 * 60 * 1000;
+    
+    // Cache de registros diarios
+    const cacheRegistrosDiarios = new Map();
+    
+    // Control de frames
+    let colaboradorActualEnProceso = null;
+    let ultimoDescriptorProcesado = null;
+    let tiempoUltimoRegistroExitoso = 0;
+    
+    // ===== UMBRALES DE SEGURIDAD - EXTREMADAMENTE ESTRICTOS =====
+    // Para evitar cualquier confusión entre diferentes personas
+    const UMBRAL_RECONOCIMIENTO = 0.35;  // REDUCIDO DE 0.48 a 0.35 - MUY ESTRICTO
+    const UMBRAL_MISMA_PERSONA = 0.30;   // Para verificar que es exactamente la misma persona
+    
+    // Historial de descriptores por colaborador (para verificación múltiple)
+    const historialDescriptores = new Map();
     
     let timeoutResultado = null;
     let intervaloDeteccion = null;
@@ -556,6 +576,11 @@
     const resultadoCard = document.getElementById('resultadoCard');
     const bloqueoMensaje = document.getElementById('bloqueoMensaje');
     const bloqueoTexto = document.getElementById('bloqueoTexto');
+    const bloqueoHorasMensaje = document.getElementById('bloqueoHorasMensaje');
+    const bloqueoHorasTexto = document.getElementById('bloqueoHorasTexto');
+    const registroCounter = document.getElementById('registroCounter');
+    const registroCounterTexto = document.getElementById('registroCounterTexto');
+    const confianzaDisplay = document.getElementById('confianzaDisplay');
 
     // ============================================================
     // FUNCIONES UTILITARIAS
@@ -582,13 +607,17 @@
       return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     }
 
+    function formatearFecha(date) {
+      return date.toISOString().split('T')[0];
+    }
+
     function actualizarHora() {
       const ahora = new Date();
       horaTexto.textContent = formatearHora(ahora);
     }
     setInterval(actualizarHora, 1000);
 
-    // Limpiar resultado después de 60 segundos
+    // Limpiar resultado
     function limpiarResultado() {
       if (timeoutResultado) clearTimeout(timeoutResultado);
       timeoutResultado = setTimeout(() => {
@@ -597,7 +626,10 @@
         codigoDisplay.innerHTML = '<i class="fas fa-hourglass-half"></i> Colócate frente a la cámara';
         codigoDisplay.style.color = '#f39c12';
         tipoDisplay.style.display = 'none';
+        confianzaDisplay.style.display = 'none';
         bloqueoMensaje.style.display = 'none';
+        bloqueoHorasMensaje.style.display = 'none';
+        registroCounter.style.display = 'none';
         
         fotoColaborador.style.display = 'none';
         fotoPlaceholder.style.display = 'flex';
@@ -606,7 +638,10 @@
         
         resultadoCard.className = 'resultado-card';
         resultadoCard.style.borderLeftColor = '#f39c12';
-      }, 60000); // 60 segundos
+        
+        colaboradorActualEnProceso = null;
+        ultimoDescriptorProcesado = null;
+      }, 60000);
     }
 
     // ============================================================
@@ -672,6 +707,7 @@
           
           const descriptores = [];
           
+          // Cargar descriptores de todos los ángulos
           if (data.facialDescriptorFrontal) descriptores.push(new Float32Array(data.facialDescriptorFrontal));
           if (data.facialDescriptorIzquierdo) descriptores.push(new Float32Array(data.facialDescriptorIzquierdo));
           if (data.facialDescriptorDerecho) descriptores.push(new Float32Array(data.facialDescriptorDerecho));
@@ -684,6 +720,7 @@
             colaboradoresRegistrados.push({
               id: doc.id,
               descriptores: descriptores,
+              descriptorPrincipal: new Float32Array(data.facialDescriptorFrontal || descriptores[0]),
               nombre: nombreCompleto,
               username: data.username || '',
               codigo: data.uniqueProfileId || `RTM-${doc.id.slice(-5)}`,
@@ -691,6 +728,22 @@
               horasDiarias: data.horasDiarias || 8,
               pin: data.pin || '1234'
             });
+            
+            // Inicializar control de escaneo
+            if (!escaneosPorColaborador.has(doc.id)) {
+              escaneosPorColaborador.set(doc.id, {
+                ultimoRegistroTimestamp: 0,
+                ultimoTipoRegistro: null,
+                contadorDia: 0,
+                fechaActual: formatearFecha(new Date()),
+                verificacionesExitosas: 0
+              });
+            }
+            
+            // Inicializar historial de descriptores
+            if (!historialDescriptores.has(doc.id)) {
+              historialDescriptores.set(doc.id, []);
+            }
           }
         });
         
@@ -702,7 +755,7 @@
     }
 
     // ============================================================
-    // 3. INICIAR CÁMARA (SIN ESPEJO)
+    // 3. INICIAR CÁMARA
     // ============================================================
     async function iniciarCamara() {
       try {
@@ -720,8 +773,6 @@
         
         video.srcObject = streamVideo;
         await video.play();
-        
-        // SIN ESPEJO - izquierda es izquierda, derecha es derecha
         video.style.transform = 'scaleX(1)';
         
         return true;
@@ -732,71 +783,264 @@
     }
 
     // ============================================================
-    // 4. COMPARAR CONTRA TODOS LOS ÁNGULOS
+    // 4. VERIFICACIÓN MULTIFACTOR DE IDENTIDAD FACIAL
     // ============================================================
-    async function compararConTodosAngulos(descriptorDetectado) {
+    async function verificarIdentidadFacial(descriptorDetectado, colaborador) {
+      
+      // ===== VERIFICACIÓN 1: DISTANCIA CON DESCRIPTOR PRINCIPAL =====
+      let distanciaPrincipal = 1.0;
+      if (colaborador.descriptorPrincipal) {
+        distanciaPrincipal = faceapi.euclideanDistance(descriptorDetectado, colaborador.descriptorPrincipal);
+      }
+      
+      // ===== VERIFICACIÓN 2: MEJOR DISTANCIA ENTRE TODOS LOS ÁNGULOS =====
+      let mejorDistancia = 1.0;
+      for (const descriptorGuardado of colaborador.descriptores) {
+        const distancia = faceapi.euclideanDistance(descriptorDetectado, descriptorGuardado);
+        if (distancia < mejorDistancia) {
+          mejorDistancia = distancia;
+        }
+      }
+      
+      // ===== VERIFICACIÓN 3: CONSISTENCIA CON HISTORIAL =====
+      const historial = historialDescriptores.get(colaborador.id) || [];
+      let consistencia = 1.0;
+      
+      if (historial.length > 0) {
+        let sumaDistancias = 0;
+        const muestras = Math.min(historial.length, 3);
+        for (let i = 0; i < muestras; i++) {
+          const distanciaHistorial = faceapi.euclideanDistance(descriptorDetectado, historial[i]);
+          sumaDistancias += distanciaHistorial;
+        }
+        consistencia = sumaDistancias / muestras;
+      }
+      
+      // ===== ACTUALIZAR HISTORIAL =====
+      historial.unshift(descriptorDetectado);
+      if (historial.length > 5) historial.pop();
+      historialDescriptores.set(colaborador.id, historial);
+      
+      // ===== DISTANCIA FINAL =====
+      const distanciaFinal = (mejorDistancia * 0.6) + (consistencia * 0.4);
+      
+      return {
+        esMismaPersona: distanciaFinal < UMBRAL_RECONOCIMIENTO,
+        distancia: distanciaFinal,
+        distanciaPrincipal: distanciaPrincipal,
+        mejorDistancia: mejorDistancia,
+        consistencia: consistencia,
+        nivelConfianza: Math.max(0, Math.min(100, 100 - (distanciaFinal * 100)))
+      };
+    }
+
+    // ============================================================
+    // 5. COMPARAR CONTRA TODOS LOS COLABORADORES
+    // ============================================================
+    async function encontrarColaborador(descriptorDetectado) {
       let mejorCoincidencia = null;
-      let menorDistancia = 1.0;
-      let mejorColaborador = null;
+      let mejorVerificacion = null;
       
       for (const colaborador of colaboradoresRegistrados) {
-        for (const descriptorGuardado of colaborador.descriptores) {
-          const distancia = faceapi.euclideanDistance(descriptorDetectado, descriptorGuardado);
-          
-          if (distancia < menorDistancia) {
-            menorDistancia = distancia;
-            mejorColaborador = colaborador;
+        const verificacion = await verificarIdentidadFacial(descriptorDetectado, colaborador);
+        
+        if (verificacion.esMismaPersona) {
+          if (!mejorCoincidencia || verificacion.distancia < mejorVerificacion.distancia) {
+            mejorCoincidencia = colaborador;
+            mejorVerificacion = verificacion;
           }
         }
       }
       
-      return { mejorColaborador, menorDistancia };
+      return { mejorColaborador: mejorCoincidencia, verificacion: mejorVerificacion };
     }
 
     // ============================================================
-    // 5. DETERMINAR SI ES ENTRADA O SALIDA
+    // 6. OBTENER REGISTROS DEL DÍA
     // ============================================================
-    async function determinarTipoRegistro(colaboradorId) {
+    async function obtenerRegistrosDelDia(colaboradorId) {
       try {
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+        const manana = new Date(hoy);
+        manana.setDate(manana.getDate() + 1);
+        
         const q = query(
           collection(db, 'facialAttendance'),
           where('collaboratorId', '==', colaboradorId),
-          orderBy('timestamp', 'desc'),
-          limit(1)
+          where('timestamp', '>=', Timestamp.fromDate(hoy)),
+          where('timestamp', '<', Timestamp.fromDate(manana)),
+          orderBy('timestamp', 'asc')
         );
         
         const snapshot = await getDocs(q);
+        const registros = [];
         
-        if (snapshot.empty) {
-          return 'entry';
-        }
+        snapshot.forEach(doc => {
+          registros.push({
+            id: doc.id,
+            ...doc.data(),
+            timestamp: doc.data().timestamp.toDate()
+          });
+        });
         
-        const ultimoRegistro = snapshot.docs[0].data();
-        return ultimoRegistro.type === 'entry' ? 'exit' : 'entry';
+        const fechaHoy = formatearFecha(new Date());
+        cacheRegistrosDiarios.set(`${colaboradorId}_${fechaHoy}`, registros);
         
+        return registros;
       } catch (error) {
-        console.error('Error determinando tipo:', error);
-        return 'entry';
+        console.error('Error obteniendo registros:', error);
+        return [];
       }
     }
 
     // ============================================================
-    // 6. REGISTRAR ASISTENCIA
+    // 7. DETERMINAR TIPO DE REGISTRO
     // ============================================================
-    async function registrarAsistencia(colaborador, tipo) {
+    async function determinarTipoRegistro(colaboradorId) {
       try {
+        const registrosHoy = await obtenerRegistrosDelDia(colaboradorId);
+        const cantidadRegistros = registrosHoy.length;
+        
+        if (cantidadRegistros === 0) {
+          return { 
+            tipo: 'entry', 
+            orden: 1, 
+            descripcion: 'Primera Entrada',
+            registrosHoy: []
+          };
+        }
+        
+        const esPar = cantidadRegistros % 2 === 0;
+        
+        if (esPar) {
+          return { 
+            tipo: 'entry', 
+            orden: cantidadRegistros + 1, 
+            descripcion: `${cantidadRegistros + 1}ª Entrada`,
+            registrosHoy: registrosHoy
+          };
+        } else {
+          return { 
+            tipo: 'exit', 
+            orden: cantidadRegistros + 1, 
+            descripcion: `${Math.ceil((cantidadRegistros + 1) / 2)}ª Salida`,
+            registrosHoy: registrosHoy
+          };
+        }
+        
+      } catch (error) {
+        console.error('Error determinando tipo:', error);
+        return { tipo: 'entry', orden: 1, descripcion: 'Entrada', registrosHoy: [] };
+      }
+    }
+
+    // ============================================================
+    // 8. VERIFICAR BLOQUEO DE 4 HORAS
+    // ============================================================
+    async function verificarBloqueo4Horas(colaboradorId) {
+      try {
+        const registrosHoy = await obtenerRegistrosDelDia(colaboradorId);
+        
+        if (registrosHoy.length === 0) {
+          return { bloqueado: false, tiempoRestante: 0, mensaje: '' };
+        }
+        
+        const ultimoRegistro = registrosHoy[registrosHoy.length - 1];
+        const ahora = new Date();
+        const tiempoUltimoRegistro = ultimoRegistro.timestamp instanceof Date 
+          ? ultimoRegistro.timestamp 
+          : new Date(ultimoRegistro.timestamp);
+        
+        const diferenciaMs = ahora - tiempoUltimoRegistro;
+        const registrosPendientes = registrosHoy.length % 2 !== 0;
+        
+        if (registrosPendientes) {
+          if (diferenciaMs < TIEMPO_BLOQUEO_HORAS) {
+            const horasRestantes = Math.floor((TIEMPO_BLOQUEO_HORAS - diferenciaMs) / (60 * 60 * 1000));
+            const minutosRestantes = Math.floor(((TIEMPO_BLOQUEO_HORAS - diferenciaMs) % (60 * 60 * 1000)) / (60 * 1000));
+            
+            return {
+              bloqueado: true,
+              tiempoRestante: TIEMPO_BLOQUEO_HORAS - diferenciaMs,
+              mensaje: `Debe esperar ${horasRestantes}h ${minutosRestantes}m para registrar su salida`,
+              tipoBloqueo: 'horas'
+            };
+          }
+        }
+        
+        return { bloqueado: false, tiempoRestante: 0, mensaje: '' };
+        
+      } catch (error) {
+        console.error('Error verificando bloqueo:', error);
+        return { bloqueado: false, tiempoRestante: 0, mensaje: '' };
+      }
+    }
+
+    // ============================================================
+    // 9. VERIFICAR ESCANEO REPETIDO
+    // ============================================================
+    function verificarEscaneoRepetido(colaboradorId) {
+      const ahora = Date.now();
+      const escaneoColaborador = escaneosPorColaborador.get(colaboradorId) || {
+        ultimoRegistroTimestamp: 0
+      };
+      
+      if (escaneoColaborador.ultimoRegistroTimestamp > 0 && 
+          ahora - escaneoColaborador.ultimoRegistroTimestamp < 60000) {
+        
+        const segundosRestantes = Math.ceil(60 - ((ahora - escaneoColaborador.ultimoRegistroTimestamp) / 1000));
+        
+        return {
+          repetido: true,
+          segundosRestantes: segundosRestantes,
+          mensaje: `Espere ${segundosRestantes} segundos para registrar nuevamente`
+        };
+      }
+      
+      return { repetido: false };
+    }
+
+    // ============================================================
+    // 10. REGISTRAR ASISTENCIA
+    // ============================================================
+    async function registrarAsistencia(colaborador, infoTipo, verificacion) {
+      try {
+        const ahora = new Date();
+        const fechaHoy = formatearFecha(ahora);
+        
         const registroData = {
           collaboratorId: colaborador.id,
           collaboratorName: colaborador.nombre,
           collaboratorCode: colaborador.codigo,
-          timestamp: Timestamp.now(),
-          date: new Date().toISOString(),
-          type: tipo,
+          timestamp: Timestamp.fromDate(ahora),
+          date: ahora.toISOString(),
+          type: infoTipo.tipo,
+          tipoDescripcion: infoTipo.descripcion,
+          numeroRegistro: infoTipo.orden,
+          turno: Math.ceil(infoTipo.orden / 2),
           method: 'auto',
-          horasDiarias: colaborador.horasDiarias || 8
+          horasDiarias: colaborador.horasDiarias || 8,
+          
+          // METADATOS DE SEGURIDAD FACIAL
+          nivelConfianza: verificacion.nivelConfianza,
+          distanciaFacial: verificacion.mejorDistancia,
+          consistenciaHistorial: verificacion.consistencia,
+          verificadoMultifactorial: true
         };
 
         await addDoc(collection(db, 'facialAttendance'), registroData);
+        
+        escaneosPorColaborador.set(colaborador.id, {
+          ultimoRegistroTimestamp: Date.now(),
+          ultimoTipoRegistro: infoTipo.tipo,
+          ultimoNumeroRegistro: infoTipo.orden,
+          fechaActual: fechaHoy,
+          ultimaConfianza: verificacion.nivelConfianza
+        });
+        
+        cacheRegistrosDiarios.delete(`${colaborador.id}_${fechaHoy}`);
+        
         return true;
       } catch (error) {
         console.error('Error registrando:', error);
@@ -805,64 +1049,162 @@
     }
 
     // ============================================================
-    // 7. MOSTRAR COLABORADOR DETECTADO
+    // 11. MOSTRAR COLABORADOR DETECTADO - SEGURIDAD MÁXIMA
     // ============================================================
-    async function mostrarColaboradorDetectado(colaborador, distancia) {
-      // Limpiar timeout anterior
+    async function mostrarColaboradorDetectado(colaborador, verificacion) {
+      
       if (timeoutResultado) clearTimeout(timeoutResultado);
       
-      const ahora = Date.now();
-      
-      // VERIFICAR ESCANEO REPETIDO - 60 SEGUNDOS
-      if (ultimoEscaneo.colaboradorId === colaborador.id && ahora - ultimoEscaneo.timestamp < 60000) {
-        const segundosRestantes = Math.ceil(60 - ((ahora - ultimoEscaneo.timestamp) / 1000));
-        
-        // Mostrar mensaje de advertencia
-        bloqueoMensaje.style.display = 'flex';
-        bloqueoTexto.innerHTML = `Ya realizó ${ultimoEscaneo.tipo === 'entry' ? 'entrada' : 'salida'} hace menos de 60 segundos. Espere ${segundosRestantes} segundos. Esto puede causar anomalías en su ponche.`;
-        
-        resultadoCard.className = 'resultado-card';
-        resultadoCard.style.borderLeftColor = '#e74c3c';
-        
-        mostrarToast(`⏳ Espere ${segundosRestantes} segundos`, 'warning');
+      // PREVENIR MÚLTIPLES REGISTROS
+      if (colaboradorActualEnProceso === colaborador.id) {
         return;
       }
       
-      // Ocultar mensaje de bloqueo
-      bloqueoMensaje.style.display = 'none';
+      colaboradorActualEnProceso = colaborador.id;
       
-      // Determinar tipo
-      const tipo = await determinarTipoRegistro(colaborador.id);
+      // ===== 1. VERIFICAR CONFIANZA MÍNIMA =====
+      if (verificacion.nivelConfianza < 65) { // Mínimo 65% de confianza
+        mostrarToast(`❌ Confianza baja (${Math.round(verificacion.nivelConfianza)}%). Acérquese más a la cámara.`, 'warning');
+        colaboradorActualEnProceso = null;
+        
+        // Mostrar en UI
+        nombreDisplay.textContent = colaborador.nombre;
+        nombreDisplay.style.color = '#f39c12';
+        codigoDisplay.innerHTML = `<i class="fas fa-id-card"></i> ${colaborador.codigo} - CONFIANZA BAJA`;
+        codigoDisplay.style.color = '#f39c12';
+        
+        confianzaDisplay.style.display = 'block';
+        confianzaDisplay.className = 'confianza-badge confianza-baja';
+        confianzaDisplay.innerHTML = `<i class="fas fa-shield-alt"></i> Confianza: ${Math.round(verificacion.nivelConfianza)}% (mínimo 65%)`;
+        
+        setTimeout(() => {
+          colaboradorActualEnProceso = null;
+        }, 2000);
+        return;
+      }
       
-      // Registrar
-      const registrado = await registrarAsistencia(colaborador, tipo);
+      // ===== 2. VERIFICAR ESCANEO REPETIDO =====
+      const escaneoRepetido = verificarEscaneoRepetido(colaborador.id);
+      if (escaneoRepetido.repetido) {
+        bloqueoMensaje.style.display = 'flex';
+        bloqueoTexto.innerHTML = escaneoRepetido.mensaje;
+        bloqueoHorasMensaje.style.display = 'none';
+        
+        resultadoCard.style.borderLeftColor = '#e74c3c';
+        mostrarInformacionColaborador(colaborador, null, 'bloqueado-60s', verificacion);
+        mostrarToast(`⏳ ${escaneoRepetido.mensaje}`, 'warning');
+        
+        setTimeout(() => {
+          colaboradorActualEnProceso = null;
+        }, 3000);
+        return;
+      }
+      
+      // ===== 3. OBTENER TIPO DE REGISTRO =====
+      const infoTipo = await determinarTipoRegistro(colaborador.id);
+      
+      // ===== 4. VERIFICAR BLOQUEO DE 4 HORAS =====
+      const bloqueoHoras = await verificarBloqueo4Horas(colaborador.id);
+      if (bloqueoHoras.bloqueado) {
+        bloqueoHorasMensaje.style.display = 'flex';
+        bloqueoHorasTexto.innerHTML = bloqueoHoras.mensaje;
+        bloqueoMensaje.style.display = 'none';
+        
+        resultadoCard.style.borderLeftColor = '#f39c12';
+        mostrarInformacionColaborador(colaborador, infoTipo, 'bloqueado-horas', verificacion);
+        mostrarToast(`⏳ ${bloqueoHoras.mensaje}`, 'warning');
+        
+        setTimeout(() => {
+          colaboradorActualEnProceso = null;
+        }, 5000);
+        return;
+      }
+      
+      // ===== 5. REGISTRAR ASISTENCIA =====
+      const registrado = await registrarAsistencia(colaborador, infoTipo, verificacion);
       
       if (!registrado) {
         mostrarToast('Error al registrar', 'error');
+        colaboradorActualEnProceso = null;
         return;
       }
       
-      // Actualizar último escaneo
-      ultimoEscaneo = {
-        colaboradorId: colaborador.id,
-        timestamp: ahora,
-        tipo: tipo
-      };
+      // ===== 6. MOSTRAR ÉXITO =====
+      await mostrarInformacionColaborador(colaborador, infoTipo, 'exitoso', verificacion);
+      mostrarToast(`✅ ${infoTipo.descripcion}: ${colaborador.nombre} (${Math.round(verificacion.nivelConfianza)}% confianza)`, 'success');
       
-      // MOSTRAR RESULTADO
-      resultadoCard.className = 'resultado-card resultado-existe';
-      nombreDisplay.style.color = '#16e086';
+      limpiarResultado();
+      
+      setTimeout(() => {
+        colaboradorActualEnProceso = null;
+      }, 5000);
+    }
+
+    // ============================================================
+    // 12. MOSTRAR INFORMACIÓN DEL COLABORADOR
+    // ============================================================
+    async function mostrarInformacionColaborador(colaborador, infoTipo, estado, verificacion) {
+      
       nombreDisplay.textContent = colaborador.nombre;
-      
-      codigoDisplay.style.color = '#16e086';
       codigoDisplay.innerHTML = `<i class="fas fa-id-card"></i> ${colaborador.codigo}`;
       
-      tipoDisplay.style.display = 'inline-block';
-      tipoDisplay.className = `tipo-registro ${tipo === 'entry' ? 'entrada' : 'salida'}`;
-      tipoDisplay.innerHTML = tipo === 'entry' ? '✅ ENTRADA REGISTRADA' : '🚪 SALIDA REGISTRADA';
+      // Mostrar nivel de confianza
+      if (verificacion) {
+        confianzaDisplay.style.display = 'block';
+        const confianza = Math.round(verificacion.nivelConfianza);
+        
+        if (confianza >= 80) {
+          confianzaDisplay.className = 'confianza-badge confianza-alta';
+        } else if (confianza >= 65) {
+          confianzaDisplay.className = 'confianza-badge confianza-baja';
+        } else {
+          confianzaDisplay.className = 'confianza-badge confianza-muy-baja';
+        }
+        
+        confianzaDisplay.innerHTML = `<i class="fas fa-shield-alt"></i> Confianza: ${confianza}% | Distancia: ${verificacion.mejorDistancia.toFixed(3)}`;
+      }
       
-      const ahoraDate = new Date();
-      horaTexto.textContent = formatearHora(ahoraDate);
+      // Colores según estado
+      switch(estado) {
+        case 'exitoso':
+          nombreDisplay.style.color = '#16e086';
+          codigoDisplay.style.color = '#16e086';
+          resultadoCard.className = 'resultado-card resultado-existe';
+          resultadoCard.style.borderLeftColor = '#16e086';
+          
+          if (infoTipo) {
+            tipoDisplay.style.display = 'inline-block';
+            tipoDisplay.className = `tipo-registro ${infoTipo.tipo === 'entry' ? 'entrada' : 'salida'}`;
+            tipoDisplay.innerHTML = infoTipo.tipo === 'entry' ? 
+              `✅ ${infoTipo.descripcion} REGISTRADA` : 
+              `🚪 ${infoTipo.descripcion} REGISTRADA`;
+          }
+          break;
+          
+        case 'bloqueado-horas':
+          nombreDisplay.style.color = '#f39c12';
+          codigoDisplay.style.color = '#f39c12';
+          resultadoCard.style.borderLeftColor = '#f39c12';
+          
+          tipoDisplay.style.display = 'inline-block';
+          tipoDisplay.className = `tipo-registro`;
+          tipoDisplay.style.background = '#f39c12';
+          tipoDisplay.style.color = '#0a1519';
+          tipoDisplay.innerHTML = '⏳ ESPERANDO 4 HORAS';
+          break;
+          
+        case 'bloqueado-60s':
+          nombreDisplay.style.color = '#e74c3c';
+          codigoDisplay.style.color = '#e74c3c';
+          resultadoCard.style.borderLeftColor = '#e74c3c';
+          
+          tipoDisplay.style.display = 'inline-block';
+          tipoDisplay.className = `tipo-registro`;
+          tipoDisplay.style.background = '#e74c3c';
+          tipoDisplay.style.color = 'white';
+          tipoDisplay.innerHTML = '⏳ ESCANEO REPETIDO';
+          break;
+      }
       
       // Foto
       if (colaborador.fotoBase64) {
@@ -875,14 +1217,30 @@
         fotoPlaceholder.innerHTML = '<i class="fas fa-user"></i>';
       }
       
-      mostrarToast(`${tipo === 'entry' ? '✅ Entrada' : '🚪 Salida'}: ${colaborador.nombre}`, 'success');
-      
-      // Programar limpieza a los 60 segundos
-      limpiarResultado();
+      // Contador de registros
+      if (infoTipo && infoTipo.registrosHoy) {
+        const registrosHoy = infoTipo.registrosHoy;
+        registroCounter.style.display = 'block';
+        
+        let entradas = 0;
+        let salidas = 0;
+        
+        registrosHoy.forEach(reg => {
+          if (reg.type === 'entry') entradas++;
+          else salidas++;
+        });
+        
+        if (estado === 'exitoso' && infoTipo) {
+          if (infoTipo.tipo === 'entry') entradas++;
+          else salidas++;
+        }
+        
+        registroCounterTexto.innerHTML = `Registros hoy: ${entradas} entrada(s) | ${salidas} salida(s)`;
+      }
     }
 
     // ============================================================
-    // 8. MOSTRAR ROSTRO NO REGISTRADO
+    // 13. MOSTRAR ROSTRO NO REGISTRADO
     // ============================================================
     function mostrarRostroNoRegistrado() {
       if (timeoutResultado) clearTimeout(timeoutResultado);
@@ -892,25 +1250,50 @@
       nombreDisplay.textContent = '❌ No registrado';
       
       codigoDisplay.style.color = '#e74c3c';
-      codigoDisplay.innerHTML = '<i class="fas fa-user-slash"></i> Rostro no existe en Ponche';
+      codigoDisplay.innerHTML = '<i class="fas fa-user-slash"></i> Rostro no existe en el sistema';
       
       tipoDisplay.style.display = 'none';
+      confianzaDisplay.style.display = 'none';
       bloqueoMensaje.style.display = 'none';
+      bloqueoHorasMensaje.style.display = 'none';
+      registroCounter.style.display = 'none';
       
       fotoColaborador.style.display = 'none';
       fotoPlaceholder.style.display = 'flex';
       fotoPlaceholder.style.borderColor = '#e74c3c';
       fotoPlaceholder.innerHTML = '<i class="fas fa-ban" style="color: #e74c3c; font-size: 40px;"></i>';
       
+      colaboradorActualEnProceso = null;
+      ultimoDescriptorProcesado = null;
       limpiarResultado();
     }
 
     // ============================================================
-    // 9. MOSTRAR ESPERANDO ROSTRO
+    // 14. MOSTRAR MÚLTIPLES ROSTROS
+    // ============================================================
+    function mostrarMultiplesRostros() {
+      nombreDisplay.textContent = '👥 Múltiples rostros';
+      nombreDisplay.style.color = '#f39c12';
+      codigoDisplay.innerHTML = '<i class="fas fa-users"></i> Solo un rostro a la vez';
+      codigoDisplay.style.color = '#f39c12';
+      tipoDisplay.style.display = 'none';
+      confianzaDisplay.style.display = 'none';
+      bloqueoMensaje.style.display = 'none';
+      bloqueoHorasMensaje.style.display = 'none';
+      
+      fotoColaborador.style.display = 'none';
+      fotoPlaceholder.style.display = 'flex';
+      fotoPlaceholder.style.borderColor = '#f39c12';
+      fotoPlaceholder.innerHTML = '<i class="fas fa-users" style="color: #f39c12;"></i>';
+    }
+
+    // ============================================================
+    // 15. MOSTRAR ESPERANDO ROSTRO
     // ============================================================
     function mostrarEsperandoRostro() {
       if (nombreDisplay.textContent !== 'Esperando rostro...' && 
-          nombreDisplay.textContent !== '❌ No registrado') {
+          nombreDisplay.textContent !== '❌ No registrado' &&
+          nombreDisplay.textContent !== '👥 Múltiples rostros') {
         return;
       }
       
@@ -923,59 +1306,85 @@
       codigoDisplay.innerHTML = '<i class="fas fa-hourglass-half"></i> Colócate frente a la cámara';
       
       tipoDisplay.style.display = 'none';
+      confianzaDisplay.style.display = 'none';
       bloqueoMensaje.style.display = 'none';
+      bloqueoHorasMensaje.style.display = 'none';
+      registroCounter.style.display = 'none';
       
       fotoColaborador.style.display = 'none';
       fotoPlaceholder.style.display = 'flex';
       fotoPlaceholder.style.borderColor = '#f39c12';
       fotoPlaceholder.innerHTML = '<i class="fas fa-user" style="color: #f39c12;"></i>';
+      
+      colaboradorActualEnProceso = null;
     }
 
     // ============================================================
-    // 10. DETECCIÓN CONTINUA
+    // 16. DETECCIÓN CONTINUA - CORREGIDA
     // ============================================================
     function iniciarDeteccionContinua() {
       if (intervaloDeteccion) clearInterval(intervaloDeteccion);
       
       if (!modelosCargados || colaboradoresRegistrados.length === 0) return;
       
+      let contadorFrames = 0;
+      const FRAMES_SALTAR = 4; // Procesar cada 4 frames
+      
       intervaloDeteccion = setInterval(async () => {
         if (!video || video.paused || video.ended) return;
         
         try {
+          contadorFrames++;
+          if (contadorFrames % FRAMES_SALTAR !== 0) return;
+          
           const detecciones = await faceapi.detectAllFaces(video, 
             new faceapi.TinyFaceDetectorOptions({
-              inputSize: 224,
-              scoreThreshold: 0.5
+              inputSize: 320, // Mayor precisión
+              scoreThreshold: 0.6 // Umbral más alto
             }))
             .withFaceLandmarks()
             .withFaceDescriptors();
           
           actualizarHora();
           
-          if (detecciones.length > 0) {
+          if (detecciones.length === 1) {
             const descriptorDetectado = detecciones[0].descriptor;
             
-            const { mejorColaborador, menorDistancia } = await compararConTodosAngulos(descriptorDetectado);
+            // ===== EVITAR PROCESAR EL MISMO DESCRIPTOR =====
+            if (ultimoDescriptorProcesado) {
+              const distanciaUltimo = faceapi.euclideanDistance(descriptorDetectado, ultimoDescriptorProcesado);
+              if (distanciaUltimo < 0.1) {
+                return; // Mismo rostro, mismo frame
+              }
+            }
             
-            const UMBRAL = 0.58;
+            ultimoDescriptorProcesado = descriptorDetectado;
             
-            if (mejorColaborador && menorDistancia < UMBRAL) {
-              await mostrarColaboradorDetectado(mejorColaborador, menorDistancia);
+            // ===== ENCONTRAR COLABORADOR CON VERIFICACIÓN MULTIFACTOR =====
+            const { mejorColaborador, verificacion } = await encontrarColaborador(descriptorDetectado);
+            
+            if (mejorColaborador && verificacion) {
+              await mostrarColaboradorDetectado(mejorColaborador, verificacion);
             } else {
               mostrarRostroNoRegistrado();
             }
+          } else if (detecciones.length > 1) {
+            mostrarMultiplesRostros();
+            colaboradorActualEnProceso = null;
+            ultimoDescriptorProcesado = null;
           } else {
             mostrarEsperandoRostro();
+            colaboradorActualEnProceso = null;
+            ultimoDescriptorProcesado = null;
           }
         } catch (e) {
           console.warn('Error en detección:', e);
         }
-      }, 700);
+      }, 600);
     }
 
     // ============================================================
-    // 11. INICIALIZACIÓN
+    // 17. INICIALIZACIÓN
     // ============================================================
     async function inicializarSistema() {
       const modelosOK = await cargarModelosFaceAPI();
@@ -1011,4 +1420,4 @@
     });
   </script>
 </body>
-</html>
+</html> 
