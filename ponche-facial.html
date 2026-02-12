@@ -96,31 +96,27 @@
       color: var(--darker);
     }
 
-    .row {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-      margin-bottom: 30px;
+    /* ===== LAYOUT PRINCIPAL - RESULTADO SOBRE CÁMARA ===== */
+    .main-layout {
+      position: relative;
+      width: 100%;
+      margin-bottom: 20px;
     }
 
-    .col-camara {
-      flex: 1;
-      min-width: 280px;
-    }
-
-    .col-resultado {
-      flex: 1;
-      min-width: 280px;
+    .camara-section {
+      position: relative;
+      width: 100%;
     }
 
     .camara-wrapper {
       background: #000;
-      border-radius: 16px;
+      border-radius: 24px;
       overflow: hidden;
       position: relative;
-      border: 2px solid var(--primary);
-      aspect-ratio: 4/3;
+      border: 3px solid var(--primary);
+      aspect-ratio: 16/9;
       width: 100%;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
 
     #videoFacial {
@@ -128,179 +124,175 @@
       height: 100%;
       object-fit: cover;
       display: block;
-      transform: scaleX(1);
+      transform: scaleX(-1); /* CORREGIDO: Espejo para movimiento natural */
     }
 
     .camara-badge {
       position: absolute;
-      bottom: 10px;
-      left: 10px;
-      background: rgba(0,0,0,0.8);
+      bottom: 15px;
+      left: 15px;
+      background: rgba(0,0,0,0.85);
       color: var(--primary);
-      padding: 6px 14px;
-      border-radius: 30px;
-      font-size: 12px;
+      padding: 8px 18px;
+      border-radius: 40px;
+      font-size: 14px;
       font-weight: bold;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       border: 1px solid var(--primary);
       backdrop-filter: blur(4px);
+      z-index: 20;
     }
 
-    .resultado-card {
-      background: var(--dark);
-      border-radius: 16px;
+    /* ===== OVERLAY DE RESULTADO SOBRE LA CÁMARA ===== */
+    .resultado-overlay {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      background: rgba(10, 21, 25, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
       padding: 20px;
-      height: 100%;
-      border-left: 5px solid;
-      transition: all 0.3s ease;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .resultado-existe {
-      border-left-color: var(--primary);
-      background: linear-gradient(145deg, var(--dark), #14262e);
-    }
-
-    .resultado-no-existe {
-      border-left-color: var(--danger);
-    }
-
-    .info-horizontal {
       display: flex;
       align-items: center;
-      gap: 20px;
-      flex-wrap: wrap;
+      gap: 25px;
+      border: 2px solid var(--primary);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      z-index: 30;
+      animation: slideDown 0.3s ease;
     }
 
-    .foto-colaborador {
+    @keyframes slideDown {
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .resultado-overlay.hidden {
+      display: none;
+    }
+
+    /* FOTO MÁS GRANDE EN EL OVERLAY */
+    .overlay-foto {
       width: 100px;
       height: 100px;
-      border-radius: 50%;
+      border-radius: 20px;
       object-fit: cover;
-      border: 3px solid var(--primary);
+      border: 4px solid var(--primary);
       background: var(--secondary);
+      flex-shrink: 0;
     }
 
-    .foto-placeholder {
+    .overlay-foto-placeholder {
       width: 100px;
       height: 100px;
-      border-radius: 50%;
+      border-radius: 20px;
       background: var(--secondary);
       display: flex;
       align-items: center;
       justify-content: center;
       color: var(--primary);
-      font-size: 40px;
-      border: 3px dashed var(--primary);
+      font-size: 48px;
+      border: 4px dashed var(--primary);
+      flex-shrink: 0;
     }
 
-    .detalles-colaborador {
+    .overlay-info {
       flex: 1;
     }
 
-    .nombre-colaborador {
+    .overlay-nombre {
       color: white;
-      font-size: clamp(18px, 4vw, 24px);
+      font-size: 26px;
       font-weight: bold;
       margin-bottom: 5px;
     }
 
-    .codigo-colaborador {
+    .overlay-codigo {
       color: var(--primary);
-      font-size: clamp(14px, 3.5vw, 18px);
+      font-size: 20px;
       font-weight: 600;
       margin-bottom: 10px;
     }
 
-    .tipo-registro {
+    .overlay-tipo {
       display: inline-block;
-      padding: 6px 16px;
-      border-radius: 30px;
+      padding: 8px 24px;
+      border-radius: 40px;
       font-weight: bold;
-      font-size: 14px;
+      font-size: 18px;
       margin-bottom: 8px;
     }
 
-    .entrada {
+    .overlay-tipo.entrada {
       background: var(--primary);
       color: var(--darker);
     }
 
-    .salida {
+    .overlay-tipo.salida {
       background: var(--danger);
       color: white;
     }
 
-    .hora-registro {
+    .overlay-hora {
       color: var(--text-muted);
-      font-size: 15px;
-      margin-top: 5px;
+      font-size: 16px;
+      margin-top: 8px;
     }
 
-    .bloqueo-mensaje {
-      background: rgba(231, 76, 60, 0.2);
-      border: 1px solid var(--danger);
-      border-radius: 12px;
-      padding: 12px;
-      margin-top: 15px;
-      color: var(--danger);
-      font-size: 13px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .bloqueo-horas-mensaje {
-      background: rgba(243, 156, 18, 0.2);
-      border: 1px solid var(--warning);
-      border-radius: 12px;
-      padding: 12px;
-      margin-top: 15px;
-      color: var(--warning);
-      font-size: 13px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .btn {
-      padding: 12px 20px;
-      border: none;
+    .overlay-confianza {
+      background: rgba(255,255,255,0.1);
+      padding: 6px 16px;
       border-radius: 30px;
       font-size: 14px;
+      color: var(--text-muted);
+      display: inline-block;
+      margin-top: 8px;
+    }
+
+    .overlay-confianza.alta { color: #16e086; }
+    .overlay-confianza.media { color: #f39c12; }
+    .overlay-confianza.baja { color: #e74c3c; }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 40px;
+      font-size: 15px;
       font-weight: bold;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 10px;
       cursor: pointer;
-      margin-top: 10px;
+      transition: all 0.2s;
     }
 
     .btn-gris {
       background: var(--secondary);
       color: white;
-      width: 100%;
+    }
+
+    .btn-gris:hover {
+      background: #3a5a66;
     }
 
     .btn-small {
-      padding: 8px 16px;
-      font-size: 13px;
+      padding: 10px 20px;
+      font-size: 14px;
     }
 
     .link-registro {
       text-align: center;
-      margin-top: 20px;
+      margin-top: 30px;
     }
 
     .link-registro a {
       color: var(--primary);
       text-decoration: none;
       font-weight: 600;
-      font-size: 14px;
+      font-size: 16px;
     }
 
     .toast {
@@ -310,7 +302,7 @@
       right: 20px;
       background: rgba(22, 224, 134, 0.95);
       color: white;
-      padding: 16px 20px;
+      padding: 16px 24px;
       border-radius: 50px;
       text-align: center;
       font-weight: bold;
@@ -348,41 +340,46 @@
       100% { transform: rotate(360deg); }
     }
 
-    .registro-counter {
-      margin-top: 10px;
-      padding: 8px 12px;
-      background: rgba(22, 224, 134, 0.1);
-      border-radius: 8px;
-      color: var(--text-muted);
-      font-size: 13px;
-      border-left: 3px solid var(--primary);
+    .bloqueo-mensaje,
+    .bloqueo-horas-mensaje {
+      background: rgba(231, 76, 60, 0.2);
+      border: 1px solid var(--danger);
+      border-radius: 12px;
+      padding: 12px;
+      margin-top: 15px;
+      color: var(--danger);
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    .registro-counter i {
-      color: var(--primary);
-      margin-right: 6px;
+    .bloqueo-horas-mensaje {
+      background: rgba(243, 156, 18, 0.2);
+      border: 1px solid var(--warning);
+      color: var(--warning);
     }
 
-    .confianza-badge {
-      background: rgba(255,255,255,0.1);
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      color: var(--text-muted);
-      display: inline-block;
-      margin-top: 5px;
+    .hidden {
+      display: none !important;
     }
 
-    .confianza-alta {
-      color: #16e086;
-    }
-
-    .confianza-baja {
-      color: #f39c12;
-    }
-
-    .confianza-muy-baja {
-      color: #e74c3c;
+    @media (max-width: 768px) {
+      .resultado-overlay {
+        flex-direction: column;
+        text-align: center;
+        padding: 15px;
+      }
+      
+      .overlay-foto,
+      .overlay-foto-placeholder {
+        width: 80px;
+        height: 80px;
+      }
+      
+      .overlay-nombre { font-size: 22px; }
+      .overlay-codigo { font-size: 18px; }
+      .overlay-tipo { font-size: 16px; }
     }
   </style>
 </head>
@@ -396,6 +393,9 @@
 
   <!-- TOAST -->
   <div class="toast" id="toastNotification"></div>
+
+  <!-- AUDIO PLAYER OCULTO -->
+  <audio id="sonidoRegistro" preload="auto" style="display: none;"></audio>
 
   <div class="app-container">
     <!-- NAVEGACIÓN -->
@@ -413,70 +413,55 @@
       Control de Asistencia
     </h1>
 
-    <!-- LAYOUT HORIZONTAL COMPACTO -->
-    <div class="row">
-      <!-- COLUMNA CÁMARA -->
-      <div class="col-camara">
+    <!-- LAYOUT PRINCIPAL: CÁMARA CON OVERLAY -->
+    <div class="main-layout">
+      <div class="camara-section">
         <div class="camara-wrapper">
           <video id="videoFacial" autoplay muted playsinline></video>
           <div class="camara-badge">
             <i class="fas fa-face-smile"></i> ESCANEANDO...
           </div>
         </div>
-        <button id="btnReiniciar" class="btn btn-gris btn-small" style="margin-top: 10px;">
-          <i class="fas fa-sync-alt"></i> Reiniciar cámara
-        </button>
-      </div>
-
-      <!-- COLUMNA RESULTADO -->
-      <div class="col-resultado">
-        <div id="resultadoCard" class="resultado-card" style="border-left-color: #f39c12;">
-          <div id="infoContenido" class="info-horizontal">
-            
-            <!-- FOTO -->
-            <div id="fotoContainer">
-              <div class="foto-placeholder" id="fotoPlaceholder">
-                <i class="fas fa-user"></i>
-              </div>
-              <img id="fotoColaborador" class="foto-colaborador" style="display: none;">
+        
+        <!-- OVERLAY DE RESULTADO (APARECE SOBRE LA CÁMARA) -->
+        <div id="resultadoOverlay" class="resultado-overlay hidden">
+          <!-- FOTO -->
+          <div id="overlayFotoContainer">
+            <div id="overlayFotoPlaceholder" class="overlay-foto-placeholder">
+              <i class="fas fa-user"></i>
             </div>
-
-            <!-- DETALLES -->
-            <div class="detalles-colaborador">
-              <div id="nombreDisplay" class="nombre-colaborador" style="color: #f39c12;">
-                Esperando rostro...
-              </div>
-              <div id="codigoDisplay" class="codigo-colaborador" style="color: #f39c12;">
-                <i class="fas fa-hourglass-half"></i>
-              </div>
-              <div id="confianzaDisplay" class="confianza-badge" style="display: none;"></div>
-              <div id="tipoDisplay" class="tipo-registro" style="display: none;"></div>
-              <div id="horaDisplay" class="hora-registro">
-                <i class="fas fa-clock"></i> 
-                <span id="horaTexto">--:--:--</span>
-              </div>
-              
-              <!-- Mensaje de bloqueo por escaneo repetido -->
-              <div id="bloqueoMensaje" class="bloqueo-mensaje" style="display: none;">
-                <i class="fas fa-exclamation-triangle"></i>
-                <span id="bloqueoTexto"></span>
-              </div>
-              
-              <!-- Mensaje de bloqueo por 4 horas -->
-              <div id="bloqueoHorasMensaje" class="bloqueo-horas-mensaje" style="display: none;">
-                <i class="fas fa-clock"></i>
-                <span id="bloqueoHorasTexto"></span>
-              </div>
-              
-              <!-- Contador de registros del día -->
-              <div id="registroCounter" class="registro-counter" style="display: none;">
-                <i class="fas fa-list-ol"></i>
-                <span id="registroCounterTexto"></span>
-              </div>
+            <img id="overlayFoto" class="overlay-foto" style="display: none;">
+          </div>
+          
+          <!-- INFORMACIÓN -->
+          <div class="overlay-info">
+            <div id="overlayNombre" class="overlay-nombre">Esperando rostro...</div>
+            <div id="overlayCodigo" class="overlay-codigo">
+              <i class="fas fa-hourglass-half"></i>
+            </div>
+            <div id="overlayTipo" class="overlay-tipo" style="display: none;"></div>
+            <div id="overlayHora" class="overlay-hora">
+              <i class="fas fa-clock"></i> 
+              <span id="overlayHoraTexto">--:--:--</span>
+            </div>
+            <div id="overlayConfianza" class="overlay-confianza" style="display: none;"></div>
+            
+            <!-- MENSAJES DE BLOQUEO (DENTRO DEL OVERLAY) -->
+            <div id="overlayBloqueoMensaje" class="bloqueo-mensaje hidden">
+              <i class="fas fa-exclamation-triangle"></i>
+              <span id="overlayBloqueoTexto"></span>
+            </div>
+            <div id="overlayBloqueoHoras" class="bloqueo-horas-mensaje hidden">
+              <i class="fas fa-clock"></i>
+              <span id="overlayBloqueoHorasTexto"></span>
             </div>
           </div>
         </div>
       </div>
+      
+      <button id="btnReiniciar" class="btn btn-gris btn-small" style="margin-top: 15px;">
+        <i class="fas fa-sync-alt"></i> Reiniciar cámara
+      </button>
     </div>
 
     <!-- BOTÓN IR A REGISTRO -->
@@ -498,14 +483,10 @@
       query,
       where,
       getDocs,
-      doc,
       addDoc,
       Timestamp,
       orderBy,
-      limit,
-      getDoc,
-      updateDoc,
-      writeBatch
+      limit
     } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -523,38 +504,39 @@
     const db = getFirestore(app);
 
     // ============================================================
-    // VARIABLES GLOBALES - SEGURIDAD MÁXIMA
+    // VARIABLES GLOBALES - OPTIMIZADAS PARA VELOCIDAD Y PRECISIÓN
     // ============================================================
     let modelosCargados = false;
     let streamVideo = null;
     
-    // Colaboradores desde colección "Ponche"
+    // Colaboradores
     let colaboradoresRegistrados = [];
     
-    // MAPA para control estricto de escaneos por colaborador
+    // MAPAS DE CONTROL
     const escaneosPorColaborador = new Map();
-    
-    // TIEMPO DE BLOQUEO: 4 HORAS
-    const TIEMPO_BLOQUEO_HORAS = 4 * 60 * 60 * 1000;
-    
-    // Cache de registros diarios
     const cacheRegistrosDiarios = new Map();
+    const cacheDescriptores = new Map(); // Caché de descriptores para velocidad
     
-    // Control de frames
-    let colaboradorActualEnProceso = null;
+    // TIEMPOS
+    const TIEMPO_BLOQUEO_HORAS = 4 * 60 * 60 * 1000;
+    const UMBRAL_RECONOCIMIENTO = 0.42; // Balance entre velocidad y precisión
+    const TIEMPO_MINIMO_ENTRE_REGISTROS = 60000; // 60 segundos
+    
+    // Control de rendimiento
     let ultimoDescriptorProcesado = null;
-    let tiempoUltimoRegistroExitoso = 0;
+    let colaboradorActualEnProceso = null;
+    let tiempoUltimoRegistro = 0;
+    let ultimaDeteccionExitosa = null;
     
-    // ===== UMBRALES DE SEGURIDAD - EXTREMADAMENTE ESTRICTOS =====
-    // Para evitar cualquier confusión entre diferentes personas
-    const UMBRAL_RECONOCIMIENTO = 0.35;  // REDUCIDO DE 0.48 a 0.35 - MUY ESTRICTO
-    const UMBRAL_MISMA_PERSONA = 0.30;   // Para verificar que es exactamente la misma persona
+    // Opciones de detección OPTIMIZADAS para velocidad
+    const detectorOptions = new faceapi.TinyFaceDetectorOptions({
+      inputSize: 160,      // REDUCIDO: Más rápido (320 -> 160)
+      scoreThreshold: 0.6
+    });
     
-    // Historial de descriptores por colaborador (para verificación múltiple)
-    const historialDescriptores = new Map();
-    
-    let timeoutResultado = null;
-    let intervaloDeteccion = null;
+    // ===== AUDIO =====
+    const AUDIO_URL = "https://firebasestorage.googleapis.com/v0/b/inventario-35d6b.appspot.com/o/songs%2Fvep0iP5hgENLRXkyF8rXF76RyJ43%2F1770857392106_Tu%20entrada....mp3?alt=media&token=a119422d-bebf-4986-a9c8-9c9e0b3361b9";
+    let audioElement;
     
     // Elementos DOM
     const video = document.getElementById('videoFacial');
@@ -566,21 +548,19 @@
     const loadingText = document.getElementById('loadingText');
     const toast = document.getElementById('toastNotification');
     
-    // Elementos de resultado
-    const nombreDisplay = document.getElementById('nombreDisplay');
-    const codigoDisplay = document.getElementById('codigoDisplay');
-    const tipoDisplay = document.getElementById('tipoDisplay');
-    const horaTexto = document.getElementById('horaTexto');
-    const fotoColaborador = document.getElementById('fotoColaborador');
-    const fotoPlaceholder = document.getElementById('fotoPlaceholder');
-    const resultadoCard = document.getElementById('resultadoCard');
-    const bloqueoMensaje = document.getElementById('bloqueoMensaje');
-    const bloqueoTexto = document.getElementById('bloqueoTexto');
-    const bloqueoHorasMensaje = document.getElementById('bloqueoHorasMensaje');
-    const bloqueoHorasTexto = document.getElementById('bloqueoHorasTexto');
-    const registroCounter = document.getElementById('registroCounter');
-    const registroCounterTexto = document.getElementById('registroCounterTexto');
-    const confianzaDisplay = document.getElementById('confianzaDisplay');
+    // Elementos del OVERLAY
+    const overlay = document.getElementById('resultadoOverlay');
+    const overlayNombre = document.getElementById('overlayNombre');
+    const overlayCodigo = document.getElementById('overlayCodigo');
+    const overlayTipo = document.getElementById('overlayTipo');
+    const overlayHoraTexto = document.getElementById('overlayHoraTexto');
+    const overlayFoto = document.getElementById('overlayFoto');
+    const overlayFotoPlaceholder = document.getElementById('overlayFotoPlaceholder');
+    const overlayConfianza = document.getElementById('overlayConfianza');
+    const overlayBloqueoMensaje = document.getElementById('overlayBloqueoMensaje');
+    const overlayBloqueoTexto = document.getElementById('overlayBloqueoTexto');
+    const overlayBloqueoHoras = document.getElementById('overlayBloqueoHoras');
+    const overlayBloqueoHorasTexto = document.getElementById('overlayBloqueoHorasTexto');
 
     // ============================================================
     // FUNCIONES UTILITARIAS
@@ -600,7 +580,7 @@
                              tipo === 'error' ? 'rgba(231, 76, 60, 0.95)' : 
                              'rgba(243, 156, 18, 0.95)';
       toast.style.display = 'block';
-      setTimeout(() => { toast.style.display = 'none'; }, 4000);
+      setTimeout(() => { toast.style.display = 'none'; }, 3000);
     }
 
     function formatearHora(date) {
@@ -611,54 +591,91 @@
       return date.toISOString().split('T')[0];
     }
 
-    function actualizarHora() {
-      const ahora = new Date();
-      horaTexto.textContent = formatearHora(ahora);
+    // ===== REPRODUCIR SONIDO =====
+    async function reproducirSonido(tipo) {
+      try {
+        if (!audioElement) {
+          audioElement = document.getElementById('sonidoRegistro');
+          audioElement.src = AUDIO_URL;
+          await audioElement.load();
+        }
+        
+        audioElement.currentTime = 0;
+        await audioElement.play();
+      } catch (error) {
+        console.warn('Error reproduciendo audio:', error);
+      }
     }
-    setInterval(actualizarHora, 1000);
 
-    // Limpiar resultado
-    function limpiarResultado() {
-      if (timeoutResultado) clearTimeout(timeoutResultado);
-      timeoutResultado = setTimeout(() => {
-        nombreDisplay.textContent = 'Esperando rostro...';
-        nombreDisplay.style.color = '#f39c12';
-        codigoDisplay.innerHTML = '<i class="fas fa-hourglass-half"></i> Colócate frente a la cámara';
-        codigoDisplay.style.color = '#f39c12';
-        tipoDisplay.style.display = 'none';
-        confianzaDisplay.style.display = 'none';
-        bloqueoMensaje.style.display = 'none';
-        bloqueoHorasMensaje.style.display = 'none';
-        registroCounter.style.display = 'none';
+    // ===== OCULTAR OVERLAY =====
+    function ocultarOverlay() {
+      overlay.classList.add('hidden');
+    }
+
+    // ===== MOSTRAR OVERLAY CON INFORMACIÓN =====
+    function mostrarOverlay(colaborador, infoTipo, estado, verificacion) {
+      overlay.classList.remove('hidden');
+      
+      // Nombre y código
+      overlayNombre.textContent = colaborador.nombre;
+      overlayCodigo.innerHTML = `<i class="fas fa-id-card"></i> ${colaborador.codigo}`;
+      
+      // Hora
+      overlayHoraTexto.textContent = formatearHora(new Date());
+      
+      // Foto
+      if (colaborador.fotoBase64) {
+        overlayFoto.src = colaborador.fotoBase64;
+        overlayFoto.style.display = 'block';
+        overlayFotoPlaceholder.style.display = 'none';
+      } else {
+        overlayFoto.style.display = 'none';
+        overlayFotoPlaceholder.style.display = 'flex';
+        overlayFotoPlaceholder.innerHTML = '<i class="fas fa-user"></i>';
+      }
+      
+      // Tipo de registro y estado
+      overlayTipo.style.display = 'inline-block';
+      overlayBloqueoMensaje.classList.add('hidden');
+      overlayBloqueoHoras.classList.add('hidden');
+      
+      if (estado === 'exitoso' && infoTipo) {
+        overlayTipo.className = `overlay-tipo ${infoTipo.tipo === 'entry' ? 'entrada' : 'salida'}`;
+        overlayTipo.innerHTML = infoTipo.tipo === 'entry' ? 
+          '✅ ' + infoTipo.descripcion.toUpperCase() : 
+          '🚪 ' + infoTipo.descripcion.toUpperCase();
         
-        fotoColaborador.style.display = 'none';
-        fotoPlaceholder.style.display = 'flex';
-        fotoPlaceholder.style.borderColor = '#f39c12';
-        fotoPlaceholder.innerHTML = '<i class="fas fa-user" style="color: #f39c12;"></i>';
+        // Confianza
+        if (verificacion) {
+          overlayConfianza.style.display = 'inline-block';
+          const confianza = Math.round(verificacion.nivelConfianza);
+          let claseConfianza = 'alta';
+          if (confianza < 70) claseConfianza = 'media';
+          if (confianza < 60) claseConfianza = 'baja';
+          overlayConfianza.className = `overlay-confianza ${claseConfianza}`;
+          overlayConfianza.innerHTML = `<i class="fas fa-shield-alt"></i> Confianza: ${confianza}%`;
+        }
         
-        resultadoCard.className = 'resultado-card';
-        resultadoCard.style.borderLeftColor = '#f39c12';
+        // REPRODUCIR SONIDO
+        reproducirSonido(infoTipo.tipo);
         
-        colaboradorActualEnProceso = null;
-        ultimoDescriptorProcesado = null;
-      }, 60000);
+      } else if (estado === 'bloqueado-horas') {
+        overlayTipo.className = `overlay-tipo`;
+        overlayTipo.style.background = '#f39c12';
+        overlayTipo.style.color = '#0a1519';
+        overlayTipo.innerHTML = '⏳ ESPERANDO 4 HORAS';
+        overlayConfianza.style.display = 'none';
+      } else if (estado === 'bloqueado-60s') {
+        overlayTipo.className = `overlay-tipo`;
+        overlayTipo.style.background = '#e74c3c';
+        overlayTipo.style.color = 'white';
+        overlayTipo.innerHTML = '⏳ ESCANEO REPETIDO';
+        overlayConfianza.style.display = 'none';
+      }
     }
 
     // ============================================================
-    // NAVEGACIÓN
-    // ============================================================
-    function irARegistro() {
-      window.location.href = 'registro-facial.html';
-    }
-
-    navRegistroLinkBtn.addEventListener('click', irARegistro);
-    irARegistroLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      irARegistro();
-    });
-
-    // ============================================================
-    // 1. CARGAR MODELOS
+    // 1. CARGAR MODELOS (OPTIMIZADO)
     // ============================================================
     async function cargarModelosFaceAPI() {
       mostrarLoading('Cargando modelos faciales...');
@@ -666,9 +683,12 @@
       try {
         const MODEL_URL = 'https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights/';
         
-        await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-        await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
-        await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+        // Cargar solo lo necesario para reconocimiento
+        await Promise.all([
+          faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+          faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
+          faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL)
+        ]);
         
         modelosCargados = true;
         ocultarLoading();
@@ -676,9 +696,11 @@
       } catch (error) {
         try {
           const FALLBACK_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights/';
-          await faceapi.nets.tinyFaceDetector.loadFromUri(FALLBACK_URL);
-          await faceapi.nets.faceLandmark68Net.loadFromUri(FALLBACK_URL);
-          await faceapi.nets.faceRecognitionNet.loadFromUri(FALLBACK_URL);
+          await Promise.all([
+            faceapi.nets.tinyFaceDetector.loadFromUri(FALLBACK_URL),
+            faceapi.nets.faceRecognitionNet.loadFromUri(FALLBACK_URL),
+            faceapi.nets.faceLandmark68Net.loadFromUri(FALLBACK_URL)
+          ]);
           
           modelosCargados = true;
           ocultarLoading();
@@ -692,32 +714,28 @@
     }
 
     // ============================================================
-    // 2. CARGAR COLABORADORES DESDE "Ponche"
+    // 2. CARGAR COLABORADORES (CON CACHÉ DE DESCRIPTORES)
     // ============================================================
     async function cargarColaboradores() {
       try {
         const collRef = collection(db, 'Ponche');
-        const q = query(collRef);
-        const snapshot = await getDocs(q);
+        const snapshot = await getDocs(collRef);
         
         colaboradoresRegistrados = [];
         
         snapshot.forEach(doc => {
           const data = doc.data();
-          
           const descriptores = [];
           
-          // Cargar descriptores de todos los ángulos
+          // Cargar descriptores
           if (data.facialDescriptorFrontal) descriptores.push(new Float32Array(data.facialDescriptorFrontal));
           if (data.facialDescriptorIzquierdo) descriptores.push(new Float32Array(data.facialDescriptorIzquierdo));
           if (data.facialDescriptorDerecho) descriptores.push(new Float32Array(data.facialDescriptorDerecho));
-          if (data.facialDescriptorArriba) descriptores.push(new Float32Array(data.facialDescriptorArriba));
-          if (data.facialDescriptorAbajo) descriptores.push(new Float32Array(data.facialDescriptorAbajo));
           
           if (descriptores.length > 0) {
             const nombreCompleto = `${data.firstName || ''} ${data.lastName || ''}`.trim() || data.username || 'Colaborador';
             
-            colaboradoresRegistrados.push({
+            const colaborador = {
               id: doc.id,
               descriptores: descriptores,
               descriptorPrincipal: new Float32Array(data.facialDescriptorFrontal || descriptores[0]),
@@ -725,24 +743,21 @@
               username: data.username || '',
               codigo: data.uniqueProfileId || `RTM-${doc.id.slice(-5)}`,
               fotoBase64: data.fotoBase64 || '',
-              horasDiarias: data.horasDiarias || 8,
-              pin: data.pin || '1234'
-            });
+              horasDiarias: data.horasDiarias || 8
+            };
+            
+            colaboradoresRegistrados.push(colaborador);
+            
+            // Cache para búsqueda rápida
+            cacheDescriptores.set(doc.id, colaborador.descriptorPrincipal);
             
             // Inicializar control de escaneo
             if (!escaneosPorColaborador.has(doc.id)) {
               escaneosPorColaborador.set(doc.id, {
                 ultimoRegistroTimestamp: 0,
                 ultimoTipoRegistro: null,
-                contadorDia: 0,
-                fechaActual: formatearFecha(new Date()),
-                verificacionesExitosas: 0
+                fechaActual: formatearFecha(new Date())
               });
-            }
-            
-            // Inicializar historial de descriptores
-            if (!historialDescriptores.has(doc.id)) {
-              historialDescriptores.set(doc.id, []);
             }
           }
         });
@@ -755,7 +770,7 @@
     }
 
     // ============================================================
-    // 3. INICIAR CÁMARA
+    // 3. INICIAR CÁMARA (CORREGIDA - MOVIMIENTO NATURAL)
     // ============================================================
     async function iniciarCamara() {
       try {
@@ -767,13 +782,17 @@
           video: {
             width: { ideal: 640 },
             height: { ideal: 480 },
-            facingMode: 'user'
+            facingMode: 'user',
+            frameRate: { ideal: 30 }
           }
         });
         
         video.srcObject = streamVideo;
         await video.play();
-        video.style.transform = 'scaleX(1)';
+        
+        // CORREGIDO: Espejo horizontal para movimiento natural
+        // Izquierda real = izquierda en pantalla, derecha real = derecha en pantalla
+        video.style.transform = 'scaleX(-1)';
         
         return true;
       } catch (error) {
@@ -783,82 +802,99 @@
     }
 
     // ============================================================
-    // 4. VERIFICACIÓN MULTIFACTOR DE IDENTIDAD FACIAL
+    // 4. COMPARACIÓN RÁPIDA (OPTIMIZADA)
     // ============================================================
-    async function verificarIdentidadFacial(descriptorDetectado, colaborador) {
-      
-      // ===== VERIFICACIÓN 1: DISTANCIA CON DESCRIPTOR PRINCIPAL =====
-      let distanciaPrincipal = 1.0;
-      if (colaborador.descriptorPrincipal) {
-        distanciaPrincipal = faceapi.euclideanDistance(descriptorDetectado, colaborador.descriptorPrincipal);
-      }
-      
-      // ===== VERIFICACIÓN 2: MEJOR DISTANCIA ENTRE TODOS LOS ÁNGULOS =====
-      let mejorDistancia = 1.0;
-      for (const descriptorGuardado of colaborador.descriptores) {
-        const distancia = faceapi.euclideanDistance(descriptorDetectado, descriptorGuardado);
-        if (distancia < mejorDistancia) {
-          mejorDistancia = distancia;
-        }
-      }
-      
-      // ===== VERIFICACIÓN 3: CONSISTENCIA CON HISTORIAL =====
-      const historial = historialDescriptores.get(colaborador.id) || [];
-      let consistencia = 1.0;
-      
-      if (historial.length > 0) {
-        let sumaDistancias = 0;
-        const muestras = Math.min(historial.length, 3);
-        for (let i = 0; i < muestras; i++) {
-          const distanciaHistorial = faceapi.euclideanDistance(descriptorDetectado, historial[i]);
-          sumaDistancias += distanciaHistorial;
-        }
-        consistencia = sumaDistancias / muestras;
-      }
-      
-      // ===== ACTUALIZAR HISTORIAL =====
-      historial.unshift(descriptorDetectado);
-      if (historial.length > 5) historial.pop();
-      historialDescriptores.set(colaborador.id, historial);
-      
-      // ===== DISTANCIA FINAL =====
-      const distanciaFinal = (mejorDistancia * 0.6) + (consistencia * 0.4);
-      
-      return {
-        esMismaPersona: distanciaFinal < UMBRAL_RECONOCIMIENTO,
-        distancia: distanciaFinal,
-        distanciaPrincipal: distanciaPrincipal,
-        mejorDistancia: mejorDistancia,
-        consistencia: consistencia,
-        nivelConfianza: Math.max(0, Math.min(100, 100 - (distanciaFinal * 100)))
-      };
-    }
-
-    // ============================================================
-    // 5. COMPARAR CONTRA TODOS LOS COLABORADORES
-    // ============================================================
-    async function encontrarColaborador(descriptorDetectado) {
+    function encontrarColaboradorRapido(descriptorDetectado) {
       let mejorCoincidencia = null;
-      let mejorVerificacion = null;
+      let menorDistancia = 0.6;
+      let mejorColaborador = null;
       
+      // Búsqueda rápida - solo descriptor principal
       for (const colaborador of colaboradoresRegistrados) {
-        const verificacion = await verificarIdentidadFacial(descriptorDetectado, colaborador);
+        const distancia = faceapi.euclideanDistance(descriptorDetectado, colaborador.descriptorPrincipal);
         
-        if (verificacion.esMismaPersona) {
-          if (!mejorCoincidencia || verificacion.distancia < mejorVerificacion.distancia) {
-            mejorCoincidencia = colaborador;
-            mejorVerificacion = verificacion;
+        if (distancia < menorDistancia) {
+          menorDistancia = distancia;
+          mejorColaborador = colaborador;
+        }
+      }
+      
+      if (mejorColaborador) {
+        // Verificación secundaria con otros ángulos
+        let mejorAngulo = menorDistancia;
+        for (const descriptor of mejorColaborador.descriptores) {
+          const distancia = faceapi.euclideanDistance(descriptorDetectado, descriptor);
+          if (distancia < mejorAngulo) {
+            mejorAngulo = distancia;
           }
         }
+        
+        return {
+          colaborador: mejorColaborador,
+          distancia: mejorAngulo,
+          nivelConfianza: Math.max(0, Math.min(100, 100 - (mejorAngulo * 100)))
+        };
       }
       
-      return { mejorColaborador: mejorCoincidencia, verificacion: mejorVerificacion };
+      return null;
     }
 
     // ============================================================
-    // 6. OBTENER REGISTROS DEL DÍA
+    // 5. VERIFICAR BLOQUEO DE 4 HORAS (CORREGIDO)
     // ============================================================
-    async function obtenerRegistrosDelDia(colaboradorId) {
+    async function verificarBloqueo4Horas(colaboradorId) {
+      try {
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+        const manana = new Date(hoy);
+        manana.setDate(manana.getDate() + 1);
+        
+        const q = query(
+          collection(db, 'facialAttendance'),
+          where('collaboratorId', '==', colaboradorId),
+          where('timestamp', '>=', Timestamp.fromDate(hoy)),
+          where('timestamp', '<', Timestamp.fromDate(manana)),
+          orderBy('timestamp', 'desc'),
+          limit(1)
+        );
+        
+        const snapshot = await getDocs(q);
+        
+        if (snapshot.empty) {
+          return { bloqueado: false, mensaje: '' };
+        }
+        
+        const ultimoRegistro = snapshot.docs[0].data();
+        const ahora = new Date();
+        const tiempoUltimoRegistro = ultimoRegistro.timestamp.toDate();
+        
+        // Verificar si el último registro fue una entrada y no ha pasado salida
+        if (ultimoRegistro.type === 'entry') {
+          const diferenciaMs = ahora - tiempoUltimoRegistro;
+          
+          if (diferenciaMs < TIEMPO_BLOQUEO_HORAS) {
+            const horasRestantes = Math.floor((TIEMPO_BLOQUEO_HORAS - diferenciaMs) / (60 * 60 * 1000));
+            const minutosRestantes = Math.floor(((TIEMPO_BLOQUEO_HORAS - diferenciaMs) % (60 * 60 * 1000)) / (60 * 1000));
+            
+            return {
+              bloqueado: true,
+              mensaje: `Debe esperar ${horasRestantes}h ${minutosRestantes}m para registrar su salida`
+            };
+          }
+        }
+        
+        return { bloqueado: false, mensaje: '' };
+        
+      } catch (error) {
+        console.error('Error verificando bloqueo:', error);
+        return { bloqueado: false, mensaje: '' };
+      }
+    }
+
+    // ============================================================
+    // 6. DETERMINAR TIPO DE REGISTRO
+    // ============================================================
+    async function determinarTipoRegistro(colaboradorId) {
       try {
         const hoy = new Date();
         hoy.setHours(0, 0, 0, 0);
@@ -874,140 +910,37 @@
         );
         
         const snapshot = await getDocs(q);
-        const registros = [];
+        const registros = snapshot.docs.length;
         
-        snapshot.forEach(doc => {
-          registros.push({
-            id: doc.id,
-            ...doc.data(),
-            timestamp: doc.data().timestamp.toDate()
-          });
-        });
+        const esPar = registros % 2 === 0;
+        const orden = registros + 1;
         
-        const fechaHoy = formatearFecha(new Date());
-        cacheRegistrosDiarios.set(`${colaboradorId}_${fechaHoy}`, registros);
-        
-        return registros;
-      } catch (error) {
-        console.error('Error obteniendo registros:', error);
-        return [];
-      }
-    }
-
-    // ============================================================
-    // 7. DETERMINAR TIPO DE REGISTRO
-    // ============================================================
-    async function determinarTipoRegistro(colaboradorId) {
-      try {
-        const registrosHoy = await obtenerRegistrosDelDia(colaboradorId);
-        const cantidadRegistros = registrosHoy.length;
-        
-        if (cantidadRegistros === 0) {
-          return { 
-            tipo: 'entry', 
-            orden: 1, 
-            descripcion: 'Primera Entrada',
-            registrosHoy: []
-          };
-        }
-        
-        const esPar = cantidadRegistros % 2 === 0;
-        
-        if (esPar) {
-          return { 
-            tipo: 'entry', 
-            orden: cantidadRegistros + 1, 
-            descripcion: `${cantidadRegistros + 1}ª Entrada`,
-            registrosHoy: registrosHoy
-          };
+        if (registros === 0) {
+          return { tipo: 'entry', orden: 1, descripcion: 'Primera Entrada' };
+        } else if (esPar) {
+          return { tipo: 'entry', orden: orden, descripcion: `${orden}ª Entrada` };
         } else {
-          return { 
-            tipo: 'exit', 
-            orden: cantidadRegistros + 1, 
-            descripcion: `${Math.ceil((cantidadRegistros + 1) / 2)}ª Salida`,
-            registrosHoy: registrosHoy
-          };
+          return { tipo: 'exit', orden: orden, descripcion: `${Math.ceil(orden / 2)}ª Salida` };
         }
         
       } catch (error) {
         console.error('Error determinando tipo:', error);
-        return { tipo: 'entry', orden: 1, descripcion: 'Entrada', registrosHoy: [] };
+        return { tipo: 'entry', orden: 1, descripcion: 'Entrada' };
       }
     }
 
     // ============================================================
-    // 8. VERIFICAR BLOQUEO DE 4 HORAS
-    // ============================================================
-    async function verificarBloqueo4Horas(colaboradorId) {
-      try {
-        const registrosHoy = await obtenerRegistrosDelDia(colaboradorId);
-        
-        if (registrosHoy.length === 0) {
-          return { bloqueado: false, tiempoRestante: 0, mensaje: '' };
-        }
-        
-        const ultimoRegistro = registrosHoy[registrosHoy.length - 1];
-        const ahora = new Date();
-        const tiempoUltimoRegistro = ultimoRegistro.timestamp instanceof Date 
-          ? ultimoRegistro.timestamp 
-          : new Date(ultimoRegistro.timestamp);
-        
-        const diferenciaMs = ahora - tiempoUltimoRegistro;
-        const registrosPendientes = registrosHoy.length % 2 !== 0;
-        
-        if (registrosPendientes) {
-          if (diferenciaMs < TIEMPO_BLOQUEO_HORAS) {
-            const horasRestantes = Math.floor((TIEMPO_BLOQUEO_HORAS - diferenciaMs) / (60 * 60 * 1000));
-            const minutosRestantes = Math.floor(((TIEMPO_BLOQUEO_HORAS - diferenciaMs) % (60 * 60 * 1000)) / (60 * 1000));
-            
-            return {
-              bloqueado: true,
-              tiempoRestante: TIEMPO_BLOQUEO_HORAS - diferenciaMs,
-              mensaje: `Debe esperar ${horasRestantes}h ${minutosRestantes}m para registrar su salida`,
-              tipoBloqueo: 'horas'
-            };
-          }
-        }
-        
-        return { bloqueado: false, tiempoRestante: 0, mensaje: '' };
-        
-      } catch (error) {
-        console.error('Error verificando bloqueo:', error);
-        return { bloqueado: false, tiempoRestante: 0, mensaje: '' };
-      }
-    }
-
-    // ============================================================
-    // 9. VERIFICAR ESCANEO REPETIDO
-    // ============================================================
-    function verificarEscaneoRepetido(colaboradorId) {
-      const ahora = Date.now();
-      const escaneoColaborador = escaneosPorColaborador.get(colaboradorId) || {
-        ultimoRegistroTimestamp: 0
-      };
-      
-      if (escaneoColaborador.ultimoRegistroTimestamp > 0 && 
-          ahora - escaneoColaborador.ultimoRegistroTimestamp < 60000) {
-        
-        const segundosRestantes = Math.ceil(60 - ((ahora - escaneoColaborador.ultimoRegistroTimestamp) / 1000));
-        
-        return {
-          repetido: true,
-          segundosRestantes: segundosRestantes,
-          mensaje: `Espere ${segundosRestantes} segundos para registrar nuevamente`
-        };
-      }
-      
-      return { repetido: false };
-    }
-
-    // ============================================================
-    // 10. REGISTRAR ASISTENCIA
+    // 7. REGISTRAR ASISTENCIA (CON VALIDACIÓN ESTRICTA DE 4 HORAS)
     // ============================================================
     async function registrarAsistencia(colaborador, infoTipo, verificacion) {
       try {
+        // VERIFICAR BLOQUEO DE 4 HORAS ANTES DE REGISTRAR
+        const bloqueo = await verificarBloqueo4Horas(colaborador.id);
+        if (bloqueo.bloqueado) {
+          return { registrado: false, bloqueado: true, mensaje: bloqueo.mensaje };
+        }
+        
         const ahora = new Date();
-        const fechaHoy = formatearFecha(ahora);
         
         const registroData = {
           collaboratorId: colaborador.id,
@@ -1021,385 +954,235 @@
           turno: Math.ceil(infoTipo.orden / 2),
           method: 'auto',
           horasDiarias: colaborador.horasDiarias || 8,
-          
-          // METADATOS DE SEGURIDAD FACIAL
           nivelConfianza: verificacion.nivelConfianza,
-          distanciaFacial: verificacion.mejorDistancia,
-          consistenciaHistorial: verificacion.consistencia,
-          verificadoMultifactorial: true
+          distanciaFacial: verificacion.distancia
         };
 
         await addDoc(collection(db, 'facialAttendance'), registroData);
         
+        // Actualizar control de escaneo
         escaneosPorColaborador.set(colaborador.id, {
           ultimoRegistroTimestamp: Date.now(),
           ultimoTipoRegistro: infoTipo.tipo,
-          ultimoNumeroRegistro: infoTipo.orden,
-          fechaActual: fechaHoy,
-          ultimaConfianza: verificacion.nivelConfianza
+          fechaActual: formatearFecha(ahora)
         });
         
-        cacheRegistrosDiarios.delete(`${colaborador.id}_${fechaHoy}`);
+        return { registrado: true, bloqueado: false };
         
-        return true;
       } catch (error) {
         console.error('Error registrando:', error);
-        return false;
+        return { registrado: false, bloqueado: false, error: true };
       }
     }
 
     // ============================================================
-    // 11. MOSTRAR COLABORADOR DETECTADO - SEGURIDAD MÁXIMA
+    // 8. PROCESAR DETECCIÓN (OPTIMIZADA Y CORREGIDA)
     // ============================================================
-    async function mostrarColaboradorDetectado(colaborador, verificacion) {
+    async function procesarDeteccion(descriptorDetectado) {
       
-      if (timeoutResultado) clearTimeout(timeoutResultado);
+      // 1. ENCONTRAR COLABORADOR (BÚSQUEDA RÁPIDA)
+      const resultado = encontrarColaboradorRapido(descriptorDetectado);
       
-      // PREVENIR MÚLTIPLES REGISTROS
-      if (colaboradorActualEnProceso === colaborador.id) {
+      if (!resultado) {
+        mostrarOverlayNoRegistrado();
         return;
       }
       
-      colaboradorActualEnProceso = colaborador.id;
+      const { colaborador, distancia, nivelConfianza } = resultado;
       
-      // ===== 1. VERIFICAR CONFIANZA MÍNIMA =====
-      if (verificacion.nivelConfianza < 65) { // Mínimo 65% de confianza
-        mostrarToast(`❌ Confianza baja (${Math.round(verificacion.nivelConfianza)}%). Acérquese más a la cámara.`, 'warning');
-        colaboradorActualEnProceso = null;
-        
-        // Mostrar en UI
-        nombreDisplay.textContent = colaborador.nombre;
-        nombreDisplay.style.color = '#f39c12';
-        codigoDisplay.innerHTML = `<i class="fas fa-id-card"></i> ${colaborador.codigo} - CONFIANZA BAJA`;
-        codigoDisplay.style.color = '#f39c12';
-        
-        confianzaDisplay.style.display = 'block';
-        confianzaDisplay.className = 'confianza-badge confianza-baja';
-        confianzaDisplay.innerHTML = `<i class="fas fa-shield-alt"></i> Confianza: ${Math.round(verificacion.nivelConfianza)}% (mínimo 65%)`;
-        
-        setTimeout(() => {
-          colaboradorActualEnProceso = null;
-        }, 2000);
+      // 2. VERIFICAR CONFIANZA MÍNIMA
+      if (nivelConfianza < 58) {
+        mostrarOverlayConfianzaBaja(colaborador, nivelConfianza);
         return;
       }
       
-      // ===== 2. VERIFICAR ESCANEO REPETIDO =====
-      const escaneoRepetido = verificarEscaneoRepetido(colaborador.id);
-      if (escaneoRepetido.repetido) {
-        bloqueoMensaje.style.display = 'flex';
-        bloqueoTexto.innerHTML = escaneoRepetido.mensaje;
-        bloqueoHorasMensaje.style.display = 'none';
+      // 3. VERIFICAR ESCANEO REPETIDO (60 SEGUNDOS)
+      const escaneoColaborador = escaneosPorColaborador.get(colaborador.id);
+      const ahora = Date.now();
+      
+      if (escaneoColaborador && escaneoColaborador.ultimoRegistroTimestamp > 0) {
+        const tiempoTranscurrido = ahora - escaneoColaborador.ultimoRegistroTimestamp;
         
-        resultadoCard.style.borderLeftColor = '#e74c3c';
-        mostrarInformacionColaborador(colaborador, null, 'bloqueado-60s', verificacion);
-        mostrarToast(`⏳ ${escaneoRepetido.mensaje}`, 'warning');
-        
-        setTimeout(() => {
-          colaboradorActualEnProceso = null;
-        }, 3000);
-        return;
+        if (tiempoTranscurrido < TIEMPO_MINIMO_ENTRE_REGISTROS) {
+          const segundosRestantes = Math.ceil((TIEMPO_MINIMO_ENTRE_REGISTROS - tiempoTranscurrido) / 1000);
+          mostrarOverlayBloqueado60s(colaborador, segundosRestantes);
+          return;
+        }
       }
       
-      // ===== 3. OBTENER TIPO DE REGISTRO =====
-      const infoTipo = await determinarTipoRegistro(colaborador.id);
-      
-      // ===== 4. VERIFICAR BLOQUEO DE 4 HORAS =====
+      // 4. VERIFICAR BLOQUEO DE 4 HORAS
       const bloqueoHoras = await verificarBloqueo4Horas(colaborador.id);
       if (bloqueoHoras.bloqueado) {
-        bloqueoHorasMensaje.style.display = 'flex';
-        bloqueoHorasTexto.innerHTML = bloqueoHoras.mensaje;
-        bloqueoMensaje.style.display = 'none';
-        
-        resultadoCard.style.borderLeftColor = '#f39c12';
-        mostrarInformacionColaborador(colaborador, infoTipo, 'bloqueado-horas', verificacion);
-        mostrarToast(`⏳ ${bloqueoHoras.mensaje}`, 'warning');
-        
-        setTimeout(() => {
-          colaboradorActualEnProceso = null;
-        }, 5000);
+        mostrarOverlayBloqueadoHoras(colaborador, bloqueoHoras.mensaje);
         return;
       }
       
-      // ===== 5. REGISTRAR ASISTENCIA =====
-      const registrado = await registrarAsistencia(colaborador, infoTipo, verificacion);
+      // 5. DETERMINAR TIPO DE REGISTRO
+      const infoTipo = await determinarTipoRegistro(colaborador.id);
       
-      if (!registrado) {
-        mostrarToast('Error al registrar', 'error');
-        colaboradorActualEnProceso = null;
-        return;
+      // 6. REGISTRAR ASISTENCIA
+      const registro = await registrarAsistencia(colaborador, infoTipo, resultado);
+      
+      if (registro.registrado) {
+        // ÉXITO - Mostrar overlay y reproducir sonido
+        mostrarOverlay(colaborador, infoTipo, 'exitoso', resultado);
+        mostrarToast(`✅ ${infoTipo.descripcion}: ${colaborador.nombre}`, 'success');
+      } else if (registro.bloqueado) {
+        mostrarOverlayBloqueadoHoras(colaborador, registro.mensaje);
       }
-      
-      // ===== 6. MOSTRAR ÉXITO =====
-      await mostrarInformacionColaborador(colaborador, infoTipo, 'exitoso', verificacion);
-      mostrarToast(`✅ ${infoTipo.descripcion}: ${colaborador.nombre} (${Math.round(verificacion.nivelConfianza)}% confianza)`, 'success');
-      
-      limpiarResultado();
-      
-      setTimeout(() => {
-        colaboradorActualEnProceso = null;
-      }, 5000);
     }
 
     // ============================================================
-    // 12. MOSTRAR INFORMACIÓN DEL COLABORADOR
+    // 9. FUNCIONES DE OVERLAY
     // ============================================================
-    async function mostrarInformacionColaborador(colaborador, infoTipo, estado, verificacion) {
+    function mostrarOverlayNoRegistrado() {
+      overlay.classList.remove('hidden');
+      overlayNombre.textContent = '❌ No registrado';
+      overlayNombre.style.color = '#e74c3c';
+      overlayCodigo.innerHTML = '<i class="fas fa-user-slash"></i> Rostro no existe';
+      overlayCodigo.style.color = '#e74c3c';
+      overlayTipo.style.display = 'none';
+      overlayConfianza.style.display = 'none';
+      overlayBloqueoMensaje.classList.add('hidden');
+      overlayBloqueoHoras.classList.add('hidden');
       
-      nombreDisplay.textContent = colaborador.nombre;
-      codigoDisplay.innerHTML = `<i class="fas fa-id-card"></i> ${colaborador.codigo}`;
+      overlayFoto.style.display = 'none';
+      overlayFotoPlaceholder.style.display = 'flex';
+      overlayFotoPlaceholder.innerHTML = '<i class="fas fa-ban" style="color: #e74c3c;"></i>';
+    }
+
+    function mostrarOverlayConfianzaBaja(colaborador, confianza) {
+      overlay.classList.remove('hidden');
+      overlayNombre.textContent = colaborador.nombre;
+      overlayNombre.style.color = '#f39c12';
+      overlayCodigo.innerHTML = `<i class="fas fa-id-card"></i> ${colaborador.codigo}`;
+      overlayCodigo.style.color = '#f39c12';
       
-      // Mostrar nivel de confianza
-      if (verificacion) {
-        confianzaDisplay.style.display = 'block';
-        const confianza = Math.round(verificacion.nivelConfianza);
-        
-        if (confianza >= 80) {
-          confianzaDisplay.className = 'confianza-badge confianza-alta';
-        } else if (confianza >= 65) {
-          confianzaDisplay.className = 'confianza-badge confianza-baja';
-        } else {
-          confianzaDisplay.className = 'confianza-badge confianza-muy-baja';
-        }
-        
-        confianzaDisplay.innerHTML = `<i class="fas fa-shield-alt"></i> Confianza: ${confianza}% | Distancia: ${verificacion.mejorDistancia.toFixed(3)}`;
-      }
+      overlayTipo.style.display = 'inline-block';
+      overlayTipo.className = 'overlay-tipo';
+      overlayTipo.style.background = '#f39c12';
+      overlayTipo.style.color = '#0a1519';
+      overlayTipo.innerHTML = `⚠️ CONFIANZA BAJA (${Math.round(confianza)}%)`;
       
-      // Colores según estado
-      switch(estado) {
-        case 'exitoso':
-          nombreDisplay.style.color = '#16e086';
-          codigoDisplay.style.color = '#16e086';
-          resultadoCard.className = 'resultado-card resultado-existe';
-          resultadoCard.style.borderLeftColor = '#16e086';
-          
-          if (infoTipo) {
-            tipoDisplay.style.display = 'inline-block';
-            tipoDisplay.className = `tipo-registro ${infoTipo.tipo === 'entry' ? 'entrada' : 'salida'}`;
-            tipoDisplay.innerHTML = infoTipo.tipo === 'entry' ? 
-              `✅ ${infoTipo.descripcion} REGISTRADA` : 
-              `🚪 ${infoTipo.descripcion} REGISTRADA`;
-          }
-          break;
-          
-        case 'bloqueado-horas':
-          nombreDisplay.style.color = '#f39c12';
-          codigoDisplay.style.color = '#f39c12';
-          resultadoCard.style.borderLeftColor = '#f39c12';
-          
-          tipoDisplay.style.display = 'inline-block';
-          tipoDisplay.className = `tipo-registro`;
-          tipoDisplay.style.background = '#f39c12';
-          tipoDisplay.style.color = '#0a1519';
-          tipoDisplay.innerHTML = '⏳ ESPERANDO 4 HORAS';
-          break;
-          
-        case 'bloqueado-60s':
-          nombreDisplay.style.color = '#e74c3c';
-          codigoDisplay.style.color = '#e74c3c';
-          resultadoCard.style.borderLeftColor = '#e74c3c';
-          
-          tipoDisplay.style.display = 'inline-block';
-          tipoDisplay.className = `tipo-registro`;
-          tipoDisplay.style.background = '#e74c3c';
-          tipoDisplay.style.color = 'white';
-          tipoDisplay.innerHTML = '⏳ ESCANEO REPETIDO';
-          break;
-      }
+      overlayConfianza.style.display = 'none';
+      overlayBloqueoMensaje.classList.add('hidden');
+      overlayBloqueoHoras.classList.add('hidden');
       
-      // Foto
       if (colaborador.fotoBase64) {
-        fotoColaborador.src = colaborador.fotoBase64;
-        fotoColaborador.style.display = 'block';
-        fotoPlaceholder.style.display = 'none';
-      } else {
-        fotoColaborador.style.display = 'none';
-        fotoPlaceholder.style.display = 'flex';
-        fotoPlaceholder.innerHTML = '<i class="fas fa-user"></i>';
-      }
-      
-      // Contador de registros
-      if (infoTipo && infoTipo.registrosHoy) {
-        const registrosHoy = infoTipo.registrosHoy;
-        registroCounter.style.display = 'block';
-        
-        let entradas = 0;
-        let salidas = 0;
-        
-        registrosHoy.forEach(reg => {
-          if (reg.type === 'entry') entradas++;
-          else salidas++;
-        });
-        
-        if (estado === 'exitoso' && infoTipo) {
-          if (infoTipo.tipo === 'entry') entradas++;
-          else salidas++;
-        }
-        
-        registroCounterTexto.innerHTML = `Registros hoy: ${entradas} entrada(s) | ${salidas} salida(s)`;
+        overlayFoto.src = colaborador.fotoBase64;
+        overlayFoto.style.display = 'block';
+        overlayFotoPlaceholder.style.display = 'none';
       }
     }
 
-    // ============================================================
-    // 13. MOSTRAR ROSTRO NO REGISTRADO
-    // ============================================================
-    function mostrarRostroNoRegistrado() {
-      if (timeoutResultado) clearTimeout(timeoutResultado);
+    function mostrarOverlayBloqueado60s(colaborador, segundos) {
+      overlay.classList.remove('hidden');
+      overlayNombre.textContent = colaborador.nombre;
+      overlayNombre.style.color = '#e74c3c';
+      overlayCodigo.innerHTML = `<i class="fas fa-id-card"></i> ${colaborador.codigo}`;
+      overlayCodigo.style.color = '#e74c3c';
       
-      resultadoCard.className = 'resultado-card resultado-no-existe';
-      nombreDisplay.style.color = '#e74c3c';
-      nombreDisplay.textContent = '❌ No registrado';
+      overlayTipo.style.display = 'inline-block';
+      overlayTipo.className = 'overlay-tipo';
+      overlayTipo.style.background = '#e74c3c';
+      overlayTipo.style.color = 'white';
+      overlayTipo.innerHTML = `⏳ ESPERE ${segundos}s`;
       
-      codigoDisplay.style.color = '#e74c3c';
-      codigoDisplay.innerHTML = '<i class="fas fa-user-slash"></i> Rostro no existe en el sistema';
+      overlayConfianza.style.display = 'none';
+      overlayBloqueoMensaje.classList.remove('hidden');
+      overlayBloqueoMensaje.querySelector('span').textContent = `Espere ${segundos} segundos para registrar nuevamente`;
       
-      tipoDisplay.style.display = 'none';
-      confianzaDisplay.style.display = 'none';
-      bloqueoMensaje.style.display = 'none';
-      bloqueoHorasMensaje.style.display = 'none';
-      registroCounter.style.display = 'none';
-      
-      fotoColaborador.style.display = 'none';
-      fotoPlaceholder.style.display = 'flex';
-      fotoPlaceholder.style.borderColor = '#e74c3c';
-      fotoPlaceholder.innerHTML = '<i class="fas fa-ban" style="color: #e74c3c; font-size: 40px;"></i>';
-      
-      colaboradorActualEnProceso = null;
-      ultimoDescriptorProcesado = null;
-      limpiarResultado();
-    }
-
-    // ============================================================
-    // 14. MOSTRAR MÚLTIPLES ROSTROS
-    // ============================================================
-    function mostrarMultiplesRostros() {
-      nombreDisplay.textContent = '👥 Múltiples rostros';
-      nombreDisplay.style.color = '#f39c12';
-      codigoDisplay.innerHTML = '<i class="fas fa-users"></i> Solo un rostro a la vez';
-      codigoDisplay.style.color = '#f39c12';
-      tipoDisplay.style.display = 'none';
-      confianzaDisplay.style.display = 'none';
-      bloqueoMensaje.style.display = 'none';
-      bloqueoHorasMensaje.style.display = 'none';
-      
-      fotoColaborador.style.display = 'none';
-      fotoPlaceholder.style.display = 'flex';
-      fotoPlaceholder.style.borderColor = '#f39c12';
-      fotoPlaceholder.innerHTML = '<i class="fas fa-users" style="color: #f39c12;"></i>';
-    }
-
-    // ============================================================
-    // 15. MOSTRAR ESPERANDO ROSTRO
-    // ============================================================
-    function mostrarEsperandoRostro() {
-      if (nombreDisplay.textContent !== 'Esperando rostro...' && 
-          nombreDisplay.textContent !== '❌ No registrado' &&
-          nombreDisplay.textContent !== '👥 Múltiples rostros') {
-        return;
+      if (colaborador.fotoBase64) {
+        overlayFoto.src = colaborador.fotoBase64;
+        overlayFoto.style.display = 'block';
+        overlayFotoPlaceholder.style.display = 'none';
       }
+    }
+
+    function mostrarOverlayBloqueadoHoras(colaborador, mensaje) {
+      overlay.classList.remove('hidden');
+      overlayNombre.textContent = colaborador.nombre;
+      overlayNombre.style.color = '#f39c12';
+      overlayCodigo.innerHTML = `<i class="fas fa-id-card"></i> ${colaborador.codigo}`;
+      overlayCodigo.style.color = '#f39c12';
       
-      resultadoCard.className = 'resultado-card';
-      resultadoCard.style.borderLeftColor = '#f39c12';
-      nombreDisplay.style.color = '#f39c12';
-      nombreDisplay.textContent = '👤 Esperando rostro...';
+      overlayTipo.style.display = 'inline-block';
+      overlayTipo.className = 'overlay-tipo';
+      overlayTipo.style.background = '#f39c12';
+      overlayTipo.style.color = '#0a1519';
+      overlayTipo.innerHTML = '⏳ 4 HORAS';
       
-      codigoDisplay.style.color = '#f39c12';
-      codigoDisplay.innerHTML = '<i class="fas fa-hourglass-half"></i> Colócate frente a la cámara';
+      overlayConfianza.style.display = 'none';
+      overlayBloqueoHoras.classList.remove('hidden');
+      overlayBloqueoHoras.querySelector('span').textContent = mensaje;
       
-      tipoDisplay.style.display = 'none';
-      confianzaDisplay.style.display = 'none';
-      bloqueoMensaje.style.display = 'none';
-      bloqueoHorasMensaje.style.display = 'none';
-      registroCounter.style.display = 'none';
-      
-      fotoColaborador.style.display = 'none';
-      fotoPlaceholder.style.display = 'flex';
-      fotoPlaceholder.style.borderColor = '#f39c12';
-      fotoPlaceholder.innerHTML = '<i class="fas fa-user" style="color: #f39c12;"></i>';
-      
-      colaboradorActualEnProceso = null;
+      if (colaborador.fotoBase64) {
+        overlayFoto.src = colaborador.fotoBase64;
+        overlayFoto.style.display = 'block';
+        overlayFotoPlaceholder.style.display = 'none';
+      }
     }
 
     // ============================================================
-    // 16. DETECCIÓN CONTINUA - CORREGIDA
+    // 10. DETECCIÓN CONTINUA (ULTRA RÁPIDA)
     // ============================================================
     function iniciarDeteccionContinua() {
       if (intervaloDeteccion) clearInterval(intervaloDeteccion);
       
       if (!modelosCargados || colaboradoresRegistrados.length === 0) return;
       
-      let contadorFrames = 0;
-      const FRAMES_SALTAR = 4; // Procesar cada 4 frames
-      
       intervaloDeteccion = setInterval(async () => {
         if (!video || video.paused || video.ended) return;
         
         try {
-          contadorFrames++;
-          if (contadorFrames % FRAMES_SALTAR !== 0) return;
-          
-          const detecciones = await faceapi.detectAllFaces(video, 
-            new faceapi.TinyFaceDetectorOptions({
-              inputSize: 320, // Mayor precisión
-              scoreThreshold: 0.6 // Umbral más alto
-            }))
-            .withFaceLandmarks()
+          const detecciones = await faceapi.detectAllFaces(video, detectorOptions)
             .withFaceDescriptors();
           
-          actualizarHora();
+          // Actualizar hora en overlay
+          overlayHoraTexto.textContent = formatearHora(new Date());
           
           if (detecciones.length === 1) {
-            const descriptorDetectado = detecciones[0].descriptor;
+            const descriptor = detecciones[0].descriptor;
             
-            // ===== EVITAR PROCESAR EL MISMO DESCRIPTOR =====
+            // Evitar procesar el mismo descriptor
             if (ultimoDescriptorProcesado) {
-              const distanciaUltimo = faceapi.euclideanDistance(descriptorDetectado, ultimoDescriptorProcesado);
-              if (distanciaUltimo < 0.1) {
-                return; // Mismo rostro, mismo frame
-              }
+              const distancia = faceapi.euclideanDistance(descriptor, ultimoDescriptorProcesado);
+              if (distancia < 0.08) return;
             }
             
-            ultimoDescriptorProcesado = descriptorDetectado;
+            ultimoDescriptorProcesado = descriptor;
+            await procesarDeteccion(descriptor);
             
-            // ===== ENCONTRAR COLABORADOR CON VERIFICACIÓN MULTIFACTOR =====
-            const { mejorColaborador, verificacion } = await encontrarColaborador(descriptorDetectado);
-            
-            if (mejorColaborador && verificacion) {
-              await mostrarColaboradorDetectado(mejorColaborador, verificacion);
-            } else {
-              mostrarRostroNoRegistrado();
-            }
           } else if (detecciones.length > 1) {
-            mostrarMultiplesRostros();
-            colaboradorActualEnProceso = null;
-            ultimoDescriptorProcesado = null;
-          } else {
-            mostrarEsperandoRostro();
-            colaboradorActualEnProceso = null;
-            ultimoDescriptorProcesado = null;
+            overlay.classList.remove('hidden');
+            overlayNombre.textContent = '👥 Múltiples rostros';
+            overlayNombre.style.color = '#f39c12';
+            overlayCodigo.innerHTML = '<i class="fas fa-users"></i> Solo un rostro a la vez';
+            overlayCodigo.style.color = '#f39c12';
+            overlayTipo.style.display = 'none';
+            overlayConfianza.style.display = 'none';
           }
         } catch (e) {
           console.warn('Error en detección:', e);
         }
-      }, 600);
+      }, 300); // 300ms = MUY RÁPIDO
     }
 
     // ============================================================
-    // 17. INICIALIZACIÓN
+    // 11. INICIALIZACIÓN
     // ============================================================
     async function inicializarSistema() {
       const modelosOK = await cargarModelosFaceAPI();
       if (!modelosOK) return;
       
       const cantidad = await cargarColaboradores();
+      mostrarToast(`✅ ${cantidad} colaboradores cargados`, 'success');
       
       const camaraOK = await iniciarCamara();
       if (!camaraOK) return;
       
       if (cantidad > 0) {
         iniciarDeteccionContinua();
-        mostrarToast(`✅ ${cantidad} colaboradores en sistema`, 'success');
-      } else {
-        mostrarToast('No hay colaboradores registrados', 'warning');
       }
     }
 
@@ -1413,11 +1196,19 @@
       mostrarToast('Cámara reiniciada', 'success');
     });
 
+    navRegistroLinkBtn.addEventListener('click', () => {
+      window.location.href = 'registro-facial.html';
+    });
+    
+    irARegistroLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.location.href = 'registro-facial.html';
+    });
+
     window.addEventListener('beforeunload', () => {
       if (intervaloDeteccion) clearInterval(intervaloDeteccion);
       if (streamVideo) streamVideo.getTracks().forEach(track => track.stop());
-      if (timeoutResultado) clearTimeout(timeoutResultado);
     });
   </script>
 </body>
-</html> 
+</html>
