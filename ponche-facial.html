@@ -2,328 +2,45 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
   <title>Asistencia Facial - TensorFlow.js</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1/dist/face-api.js"></script>
   <style>
-    /* ===== RESET Y VARIABLES ===== */
-    * { 
-      margin: 0; 
-      padding: 0; 
-      box-sizing: border-box; 
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    :root { --primary: #16e086; --primary-dark: #0da85c; --secondary: #2e4a55; --dark: #0e1c22; --danger: #e74c3c; --warning: #f39c12; }
+    body { background: #000; min-height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+    .fullscreen-container { position: relative; width: 100vw; height: 100vh; background: #000; }
+    .camera-full { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+    #videoFacial { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+    .overlay-content { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; display: flex; flex-direction: column; justify-content: space-between; padding: 15px; pointer-events: none; }
+    .overlay-content * { pointer-events: auto; }
+    .top-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); padding: 12px 20px; border-radius: 50px; border: 1px solid var(--primary); color: white; }
+    .title { display: flex; align-items: center; gap: 10px; }
+    .title h1 { font-size: 1.3rem; }
+    .status-led { width: 10px; height: 10px; background: var(--primary); border-radius: 50%; display: inline-block; margin-right: 8px; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     
-    :root { 
-      --primary: #16e086; 
-      --primary-dark: #0da85c; 
-      --secondary: #2e4a55; 
-      --dark: #0e1c22; 
-      --darker: #0a1519; 
-      --danger: #e74c3c; 
-      --warning: #f39c12; 
-      --text: #ffffff; 
-      
-      --text-xs: clamp(0.7rem, 2vw, 0.8rem);
-      --text-sm: clamp(0.8rem, 2.5vw, 0.9rem);
-      --text-base: clamp(0.9rem, 3vw, 1rem);
-      --text-lg: clamp(1rem, 4vw, 1.2rem);
-      --text-xl: clamp(1.2rem, 5vw, 1.5rem);
-      
-      --spacing-xs: clamp(5px, 1.5vw, 8px);
-      --spacing-sm: clamp(8px, 2vw, 12px);
-      --spacing-md: clamp(12px, 3vw, 16px);
-      --spacing-lg: clamp(16px, 4vw, 20px);
-      
-      --border-radius: clamp(15px, 4vw, 30px);
-    }
+    .resultado-flotante { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 450px; background: rgba(10,25,30,0.95); backdrop-filter: blur(15px); border-radius: 30px; padding: 25px; border: 2px solid var(--primary); display: none; flex-direction: column; gap: 15px; z-index: 50; }
+    .resultado-header { display: flex; align-items: center; gap: 20px; }
+    .foto-colaborador { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); }
+    .nombre-colaborador { color: white; font-size: 1.5rem; font-weight: bold; }
+    .tipo-registro { display: inline-block; padding: 5px 15px; border-radius: 40px; font-weight: bold; }
+    .entrada { background: var(--primary); color: #000; }
+    .salida { background: var(--danger); color: white; }
     
-    body { 
-      background: #000; 
-      min-height: 100vh; 
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-      overflow: hidden; 
-      font-size: var(--text-base);
-    }
+    .codigo-input-container { background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); border-radius: 50px; padding: 12px 20px; border: 1px solid var(--primary); display: flex; gap: 10px; }
+    .codigo-input { flex: 1; background: rgba(255,255,255,0.1); border: 1px solid var(--primary); border-radius: 40px; padding: 10px 15px; color: white; }
+    .btn-codigo { background: var(--primary); border: none; border-radius: 40px; padding: 10px 25px; font-weight: bold; cursor: pointer; color: #000; }
     
-    .fullscreen-container { 
-      position: relative; 
-      width: 100vw; 
-      height: 100vh; 
-      background: #000; 
-    }
+    .loading-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
+    .spinner { border: 4px solid rgba(22,224,134,0.1); border-top: 4px solid var(--primary); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     
-    .camera-full { 
-      position: absolute; 
-      top: 0; 
-      left: 0; 
-      width: 100%; 
-      height: 100%; 
-      z-index: 1; 
-    }
+    .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); padding: 12px 25px; border-radius: 50px; background: rgba(0,0,0,0.9); border: 1px solid var(--primary); color: white; z-index: 200; display: none; }
     
-    /* 🔥 CORREGIDO: Espejo para que no esté invertida */
-    #videoFacial { 
-      width: 100%; 
-      height: 100%; 
-      object-fit: cover; 
-      transform: scaleX(-1); /* 👈 ESTO CORRIGE LA INVERSIÓN */
-    }
-    
-    .overlay-content { 
-      position: absolute; 
-      top: 0; 
-      left: 0; 
-      width: 100%; 
-      height: 100%; 
-      z-index: 10; 
-      display: flex; 
-      flex-direction: column; 
-      justify-content: space-between; 
-      padding: var(--spacing-md); 
-      pointer-events: none; 
-    }
-    
-    .overlay-content * { 
-      pointer-events: auto; 
-    }
-    
-    .top-bar { 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      background: rgba(0,0,0,0.7); 
-      backdrop-filter: blur(10px); 
-      padding: var(--spacing-sm) var(--spacing-md); 
-      border-radius: 50px; 
-      border: 1px solid var(--primary); 
-      color: white; 
-      flex-wrap: wrap;
-      gap: var(--spacing-xs);
-    }
-    
-    .title { 
-      display: flex; 
-      align-items: center; 
-      gap: var(--spacing-xs); 
-    }
-    
-    .title i {
-      font-size: var(--text-lg);
-    }
-    
-    .title h1 { 
-      font-size: var(--text-lg); 
-      font-weight: 500;
-    }
-    
-    #statusBadge { 
-      color: var(--primary); 
-      font-weight: bold; 
-      font-size: var(--text-sm);
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-xs);
-    }
-    
-    .status-led { 
-      width: clamp(8px, 2vw, 10px); 
-      height: clamp(8px, 2vw, 10px); 
-      background: var(--primary); 
-      border-radius: 50%; 
-      display: inline-block; 
-      animation: pulse 2s infinite; 
-    }
-    
-    @keyframes pulse { 
-      0% { opacity: 1; } 
-      50% { opacity: 0.5; } 
-      100% { opacity: 1; } 
-    }
-    
-    .resultado-flotante { 
-      position: absolute; 
-      top: 50%; 
-      left: 50%; 
-      transform: translate(-50%, -50%); 
-      width: 90%; 
-      max-width: 450px; 
-      background: rgba(10, 25, 30, 0.95); 
-      backdrop-filter: blur(15px); 
-      border-radius: var(--border-radius); 
-      padding: var(--spacing-lg); 
-      border: 2px solid var(--primary); 
-      box-shadow: 0 0 30px rgba(22, 224, 134, 0.3); 
-      display: none; 
-      flex-direction: column; 
-      gap: var(--spacing-md); 
-      z-index: 50; 
-    }
-    
-    .resultado-header { 
-      display: flex; 
-      align-items: center; 
-      gap: var(--spacing-md); 
-    }
-    
-    .foto-colaborador { 
-      width: clamp(60px, 15vw, 80px); 
-      height: clamp(60px, 15vw, 80px); 
-      border-radius: 50%; 
-      object-fit: cover; 
-      border: 3px solid var(--primary); 
-    }
-    
-    .info-colaborador { 
-      display: flex; 
-      flex-direction: column; 
-      gap: var(--spacing-xs); 
-      flex: 1;
-    }
-    
-    .nombre-colaborador { 
-      color: white; 
-      font-size: var(--text-xl); 
-      font-weight: bold; 
-      line-height: 1.2;
-    }
-    
-    #codigoDisplay { 
-      color: var(--primary); 
-      font-size: var(--text-sm); 
-    }
-    
-    .tipo-registro { 
-      display: inline-block; 
-      padding: var(--spacing-xs) var(--spacing-sm); 
-      border-radius: 40px; 
-      font-weight: bold; 
-      font-size: var(--text-xs);
-      width: fit-content; 
-    }
-    
-    .entrada { 
-      background: var(--primary); 
-      color: var(--darker); 
-    }
-    
-    .salida { 
-      background: var(--danger); 
-      color: white; 
-    }
-    
-    .fecha-hora, #confianzaDisplay { 
-      color: rgba(255,255,255,0.8); 
-      font-size: var(--text-xs); 
-    }
-    
-    .codigo-input-container { 
-      background: rgba(0,0,0,0.7); 
-      backdrop-filter: blur(10px); 
-      border-radius: 50px; 
-      padding: var(--spacing-sm) var(--spacing-md); 
-      border: 1px solid var(--primary); 
-      display: flex; 
-      gap: var(--spacing-sm); 
-      flex-wrap: wrap;
-    }
-    
-    .codigo-input { 
-      flex: 2; 
-      min-width: 150px;
-      background: rgba(255,255,255,0.1); 
-      border: 1px solid var(--primary); 
-      border-radius: 40px; 
-      padding: var(--spacing-sm) var(--spacing-md); 
-      color: white; 
-      font-size: var(--text-sm); 
-    }
-    
-    .btn-codigo { 
-      background: var(--primary); 
-      border: none; 
-      border-radius: 40px; 
-      padding: var(--spacing-sm) var(--spacing-lg); 
-      font-weight: bold; 
-      cursor: pointer; 
-      color: var(--darker); 
-      font-size: var(--text-sm);
-      white-space: nowrap;
-    }
-    
-    .admin-link { 
-      position: absolute; 
-      bottom: clamp(80px, 15vh, 100px); 
-      right: var(--spacing-md); 
-      background: rgba(0,0,0,0.7); 
-      color: white; 
-      padding: var(--spacing-xs) var(--spacing-md); 
-      border-radius: 50px; 
-      border: 1px solid var(--primary); 
-      text-decoration: none; 
-      display: flex; 
-      align-items: center; 
-      gap: var(--spacing-xs); 
-      z-index: 30; 
-      font-size: var(--text-sm);
-    }
-    
-    .admin-link:last-child {
-      bottom: clamp(140px, 25vh, 170px);
-    }
-    
-    .loading-overlay { 
-      position: fixed; 
-      inset: 0; 
-      background: rgba(0,0,0,0.95); 
-      display: flex; 
-      flex-direction: column; 
-      justify-content: center; 
-      align-items: center; 
-      z-index: 100; 
-      padding: var(--spacing-lg);
-    }
-    
-    .spinner { 
-      border: 4px solid rgba(22, 224, 134, 0.1); 
-      border-top: 4px solid var(--primary); 
-      border-radius: 50%; 
-      width: clamp(40px, 10vw, 50px); 
-      height: clamp(40px, 10vw, 50px); 
-      animation: spin 1s linear infinite; 
-      margin-bottom: var(--spacing-md); 
-    }
-    
-    @keyframes spin { 
-      0% { transform: rotate(0deg); } 
-      100% { transform: rotate(360deg); } 
-    }
-    
-    .toast { 
-      position: fixed; 
-      bottom: clamp(20px, 5vh, 30px); 
-      left: 50%; 
-      transform: translateX(-50%); 
-      padding: var(--spacing-sm) var(--spacing-lg); 
-      border-radius: 50px; 
-      background: rgba(0,0,0,0.9); 
-      border: 1px solid var(--primary); 
-      color: white; 
-      z-index: 200; 
-      display: none; 
-      font-size: var(--text-sm);
-      max-width: 90%;
-    }
-    
-    @media (max-width: 480px) {
-      .top-bar { flex-direction: column; align-items: flex-start; }
-      .codigo-input-container { flex-direction: column; }
-      .btn-codigo { width: 100%; }
-      .admin-link span { display: none; }
-    }
+    .admin-link { position: absolute; bottom: 100px; right: 15px; background: rgba(0,0,0,0.7); color: white; padding: 10px 20px; border-radius: 50px; border: 1px solid var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; z-index: 30; font-size: 0.9rem; }
+    .admin-link:last-child { bottom: 160px; }
   </style>
 </head>
 <body>
@@ -343,10 +60,10 @@
     <div class="overlay-content">
       <div class="top-bar">
         <div class="title">
-          <i class="fas fa-user-shield"></i>
+          <i class="fas fa-user-shield" style="color: var(--primary);"></i>
           <h1>Asistencia Facial</h1>
         </div>
-        <div id="statusBadge">
+        <div>
           <span class="status-led"></span>SISTEMA ACTIVO
         </div>
       </div>
@@ -354,30 +71,23 @@
       <div id="resultadoFlotante" class="resultado-flotante">
         <div class="resultado-header">
           <img id="fotoColaborador" class="foto-colaborador" src="">
-          <div class="info-colaborador">
+          <div>
             <div id="nombreDisplay" class="nombre-colaborador">---</div>
-            <div id="codigoDisplay">---</div>
+            <div id="codigoDisplay" style="color: var(--primary);">---</div>
             <div id="tipoDisplay" class="tipo-registro">---</div>
-            <div id="fechaHoraDisplay" class="fecha-hora">---</div>
-            <div id="confianzaDisplay">---</div>
+            <div id="fechaHoraDisplay" style="color: rgba(255,255,255,0.7); font-size: 0.8rem; margin-top: 5px;">---</div>
           </div>
         </div>
       </div>
 
       <div class="codigo-input-container">
-        <input type="text" id="codigoInput" class="codigo-input" placeholder="Código" autocomplete="off">
-        <button id="btnRegistrarPorCodigo" class="btn-codigo">
-          <i class="fas fa-fingerprint"></i> REGISTRAR
-        </button>
+        <input type="text" id="codigoInput" class="codigo-input" placeholder="Código empleado" autocomplete="off">
+        <button id="btnRegistrarPorCodigo" class="btn-codigo">REGISTRAR</button>
       </div>
     </div>
     
-    <a href="admin.html" class="admin-link">
-      <i class="fas fa-cog"></i> <span>ADMIN</span>
-    </a>
-    <a href="reportes.html" class="admin-link">
-      <i class="fas fa-chart-bar"></i> <span>REPORTES</span>
-    </a>
+    <a href="admin.html" class="admin-link"><i class="fas fa-cog"></i> ADMIN</a>
+    <a href="reportes.html" class="admin-link"><i class="fas fa-chart-bar"></i> REPORTES</a>
   </div>
 
   <script type="module">
@@ -394,7 +104,7 @@
       Timestamp,
       doc,
       updateDoc,
-      serverTimestamp
+      serverTimestamp 
     } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
     // ============= CONFIGURACIÓN FIREBASE =============
@@ -410,7 +120,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // ============= VARIABLES =============
+    // ============= VARIABLES GLOBALES =============
     let faceMatcher = null;
     let labeledFaceDescriptors = [];
     let employeesData = new Map();
@@ -420,10 +130,10 @@
     let modelosCargados = false;
     
     const CONFIG = {
-      UMBRAL_PRECISION: 0.5, // Bajado para más sensibilidad
-      DETECTION_INTERVAL: 2000,
+      UMBRAL_PRECISION: 0.5,
+      DETECTION_INTERVAL: 2500,
       COOLDOWN_HORAS: 4,
-      MIN_CONFIDENCE: 0.4,   // Bajado para más sensibilidad
+      MIN_CONFIDENCE: 0.4,
       MODEL_URL: 'https://raw.githubusercontent.com/vladmandic/face-api/master/model/'
     };
 
@@ -435,9 +145,11 @@
     const toast = document.getElementById('toastNotification');
     const resultadoFlotante = document.getElementById('resultadoFlotante');
 
+    // ============= FUNCIONES UTILERÍA =============
     function showToast(message, type = 'success') {
       toast.textContent = message;
-      toast.style.background = type === 'success' ? 'rgba(22, 224, 134, 0.2)' : 'rgba(231, 76, 60, 0.2)';
+      toast.style.background = type === 'success' ? 'rgba(22,224,134,0.2)' : 'rgba(231,76,60,0.2)';
+      toast.style.border = `1px solid ${type === 'success' ? 'var(--primary)' : 'var(--danger)'}`;
       toast.style.display = 'block';
       setTimeout(() => { toast.style.display = 'none'; }, 3000);
     }
@@ -447,7 +159,7 @@
       if (loadingSubtext) loadingSubtext.textContent = submessage;
     }
 
-    // ============= CARGAR MODELOS =============
+    // ============= CARGAR MODELOS TENSORFLOW =============
     async function cargarModelos() {
       try {
         updateLoading('Cargando SSD MobileNet...', 'Detección facial');
@@ -513,10 +225,7 @@
           updateLoading(`Procesando: ${procesados}/${snapshot.size}`, data.username);
 
           try {
-            // 🔥 IMPORTANTE: Cargar imagen correctamente
             const img = await faceapi.fetchImage(data.fotoBase64);
-            
-            // 🔥 Detectar con todos los parámetros
             const detection = await faceapi
               .detectSingleFace(img)
               .withFaceLandmarks()
@@ -532,13 +241,12 @@
                 firstName: data.firstName || '',
                 lastName: data.lastName || '',
                 fotoBase64: data.fotoBase64,
-                turnoHoras: data.turnoHoras || 8
+                turnoHoras: data.turnoHoras || 8,
+                activo: data.activo !== false
               });
               
               exitosos++;
               console.log(`✅ ${data.username} procesado`);
-            } else {
-              console.warn(`⚠️ No se pudo detectar rostro en ${data.username}`);
             }
           } catch (e) {
             console.error(`❌ Error con ${data.username}:`, e);
@@ -546,11 +254,6 @@
         }
 
         console.log(`📊 Procesados: ${exitosos}/${procesados} exitosos`);
-        
-        if (exitosos === 0) {
-          showToast('⚠️ No hay rostros para reconocer', 'error');
-        }
-        
         return descriptors;
         
       } catch (error) {
@@ -580,9 +283,11 @@
         const ahora = new Date();
         const diffHoras = (ahora - lastTimestamp) / (1000 * 60 * 60);
         
+        console.log(`⏳ ${codigo}: Último registro hace ${diffHoras.toFixed(2)}h`);
+        
         if (diffHoras < CONFIG.COOLDOWN_HORAS) {
           const horasRestantes = (CONFIG.COOLDOWN_HORAS - diffHoras).toFixed(1);
-          showToast(`⏳ Espere ${horasRestantes}h`, 'error');
+          showToast(`⏳ Espere ${horasRestantes}h para próximo registro`, 'error');
           return false;
         }
         
@@ -593,7 +298,7 @@
       }
     }
 
-    // ============= DETERMINAR TIPO =============
+    // ============= DETERMINAR TIPO (ENTRADA/SALIDA) =============
     async function determinarTipoRegistro(codigo) {
       try {
         const attendanceQuery = query(
@@ -608,88 +313,106 @@
         const lastType = lastAttendance.docs[0].data().type;
         return lastType === 'entry' ? 'exit' : 'entry';
       } catch (error) {
+        console.error('Error determinando tipo:', error);
         return 'entry';
       }
     }
 
     // ============= PROCESAR REGISTRO =============
     async function procesarRegistro(codigo, confianza = 1.0, metodo = 'facial') {
-      if (isProcessing) return;
+      if (isProcessing) {
+        console.log('⏳ Ya hay un registro en proceso');
+        return;
+      }
 
       isProcessing = true;
 
       try {
+        // Buscar empleado
         const q = query(collection(db, 'Ponche'), where('username', '==', codigo));
         const querySnapshot = await getDocs(q);
         
         if (querySnapshot.empty) {
-          showToast(`❌ Empleado no encontrado`, 'error');
+          showToast(`❌ Empleado no encontrado: ${codigo}`, 'error');
           return;
         }
 
         const userDoc = querySnapshot.docs[0];
         const userData = userDoc.data();
 
+        // Verificar si está activo
         if (userData.activo === false) {
-          showToast(`❌ Empleado desactivado`, 'error');
+          showToast(`❌ Empleado ${codigo} está desactivado`, 'error');
           return;
         }
 
+        // Verificar cooldown individual
         const cooldownOk = await verificarCooldown(codigo);
-        if (!cooldownOk) return;
+        if (!cooldownOk) {
+          return;
+        }
 
+        const nombreCompleto = `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || codigo;
         const tipo = await determinarTipoRegistro(codigo);
+        
         const ahora = Timestamp.now();
         const fechaActual = ahora.toDate();
         
+        // Crear registro completo
         const attendanceData = {
           collaboratorId: userDoc.id,
-          collaboratorName: `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || codigo,
+          collaboratorName: nombreCompleto,
           collaboratorCode: codigo,
+          collaboratorEmail: userData.email || '',
           timestamp: ahora,
-          fecha: fechaActual.toISOString().split('T')[0],
-          hora: fechaActual.toTimeString().split(' ')[0],
+          fecha: `${fechaActual.getFullYear()}-${String(fechaActual.getMonth()+1).padStart(2,'0')}-${String(fechaActual.getDate()).padStart(2,'0')}`,
+          hora: `${String(fechaActual.getHours()).padStart(2,'0')}:${String(fechaActual.getMinutes()).padStart(2,'0')}:${String(fechaActual.getSeconds()).padStart(2,'0')}`,
           type: tipo,
           confidence: confianza,
           method: metodo,
           turnoHoras: userData.turnoHoras || 8,
+          device: 'TensorFlow.js',
           createdAt: serverTimestamp()
         };
 
+        // Guardar en Firebase
         await addDoc(collection(db, 'facialAttendance'), attendanceData);
+        console.log('✅ Registro guardado:', attendanceData);
+
+        // Actualizar último registro del empleado
+        await updateDoc(doc(db, 'Ponche', userDoc.id), {
+          lastAttendance: ahora,
+          lastAttendanceType: tipo
+        });
+
+        // Mostrar éxito
+        document.getElementById('nombreDisplay').textContent = nombreCompleto;
+        document.getElementById('codigoDisplay').textContent = `Código: ${codigo}`;
+        if (userData.fotoBase64) {
+          document.getElementById('fotoColaborador').src = userData.fotoBase64;
+        }
         
-        mostrarExito(userData, tipo, confianza, fechaActual);
+        const tipoLabel = document.getElementById('tipoDisplay');
+        tipoLabel.textContent = tipo === 'entry' ? '✅ ENTRADA' : '🚪 SALIDA';
+        tipoLabel.className = `tipo-registro ${tipo === 'entry' ? 'entrada' : 'salida'}`;
+        
+        document.getElementById('fechaHoraDisplay').textContent = 
+          `📅 ${fechaActual.toLocaleDateString('es-ES')} ${fechaActual.toLocaleTimeString('es-ES')}`;
+        
+        resultadoFlotante.style.display = 'flex';
+        setTimeout(() => { resultadoFlotante.style.display = 'none'; }, 5000);
+        
         showToast(`✅ ${tipo === 'entry' ? 'ENTRADA' : 'SALIDA'} registrada`, 'success');
         
       } catch (error) {
-        console.error('❌ Error:', error);
-        showToast('❌ Error al registrar', 'error');
+        console.error('❌ Error procesando registro:', error);
+        showToast('❌ Error al registrar: ' + error.message, 'error');
       } finally {
         isProcessing = false;
       }
     }
 
-    function mostrarExito(user, tipo, confianza, fecha) {
-      const nombre = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username;
-      
-      document.getElementById('nombreDisplay').textContent = nombre;
-      document.getElementById('codigoDisplay').textContent = `Código: ${user.username}`;
-      if (user.fotoBase64) document.getElementById('fotoColaborador').src = user.fotoBase64;
-      
-      const tipoLabel = document.getElementById('tipoDisplay');
-      tipoLabel.textContent = tipo === 'entry' ? '✅ ENTRADA' : '🚪 SALIDA';
-      tipoLabel.className = `tipo-registro ${tipo === 'entry' ? 'entrada' : 'salida'}`;
-      
-      document.getElementById('fechaHoraDisplay').textContent = 
-        `📅 ${fecha.toLocaleDateString()} ${fecha.toLocaleTimeString()}`;
-      document.getElementById('confianzaDisplay').textContent = 
-        `🎯 ${(confianza * 100).toFixed(1)}%`;
-      
-      resultadoFlotante.style.display = 'flex';
-      setTimeout(() => { resultadoFlotante.style.display = 'none'; }, 5000);
-    }
-
-    // ============= DETECCIÓN EN VIVO =============
+    // ============= INICIAR DETECCIÓN EN VIVO =============
     function iniciarDeteccionEnVivo() {
       if (detectionInterval) clearInterval(detectionInterval);
       
@@ -699,7 +422,6 @@
         }
 
         try {
-          // 🔥 Detectar con todos los parámetros
           const detection = await faceapi
             .detectSingleFace(video)
             .withFaceLandmarks()
@@ -712,8 +434,6 @@
             if (bestMatch.label !== 'unknown' && confidence >= CONFIG.MIN_CONFIDENCE) {
               console.log(`🎯 Detectado: ${bestMatch.label} (${(confidence*100).toFixed(1)}%)`);
               await procesarRegistro(bestMatch.label, confidence, 'facial');
-            } else {
-              console.log('❌ Desconocido o baja confianza');
             }
           }
         } catch (error) {
@@ -731,6 +451,12 @@
       }
       await procesarRegistro(codigo, 1.0, 'manual');
       document.getElementById('codigoInput').value = '';
+    });
+
+    document.getElementById('codigoInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        document.getElementById('btnRegistrarPorCodigo').click();
+      }
     });
 
     // ============= INICIALIZACIÓN =============
@@ -760,6 +486,7 @@
       } catch (error) {
         console.error('❌ Error:', error);
         updateLoading('❌ Error', error.message);
+        showToast('❌ Error: ' + error.message, 'error');
       }
     }
 
@@ -773,4 +500,4 @@
     });
   </script>
 </body>
-</html> 
+</html>
