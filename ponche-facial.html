@@ -76,6 +76,8 @@
             <div id="codigoDisplay" style="color: var(--primary);">---</div>
             <div id="tipoDisplay" class="tipo-registro">---</div>
             <div id="fechaHoraDisplay" style="color: rgba(255,255,255,0.7); font-size: 0.8rem; margin-top: 5px;">---</div>
+            <div id="parIdDisplay" style="color: #16e086; font-size: 0.7rem; margin-top: 2px;">---</div>
+            <div id="estadoDisplay" style="color: #f39c12; font-size: 0.7rem; margin-top: 2px;">---</div>
           </div>
         </div>
       </div>
@@ -101,13 +103,9 @@
       where, 
       orderBy, 
       limit, 
-      Timestamp,
-      doc,
-      updateDoc,
-      serverTimestamp 
+      Timestamp
     } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
-    // ============= CONFIGURACIÓN FIREBASE =============
     const firebaseConfig = {
       apiKey: "AIzaSyAMTWJr3mISmNiP-e_KjCO9BdBPi7Uuug4",
       authDomain: "formulario-2-8929a.firebaseapp.com",
@@ -120,24 +118,24 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // ============= VARIABLES GLOBALES =============
     let faceMatcher = null;
-    let labeledFaceDescriptors = [];
     let employeesData = new Map();
     let isProcessing = false;
     let videoStarted = false;
     let detectionInterval = null;
     let modelosCargados = false;
     
+    // Control de cooldown por colaborador
+    const cooldownTracker = new Map();
+    
     const CONFIG = {
       UMBRAL_PRECISION: 0.5,
       DETECTION_INTERVAL: 2500,
-      COOLDOWN_HORAS: 4,
+      COOLDOWN_SEGUNDOS: 60,
       MIN_CONFIDENCE: 0.4,
       MODEL_URL: 'https://raw.githubusercontent.com/vladmandic/face-api/master/model/'
     };
 
-    // ============= ELEMENTOS DOM =============
     const video = document.getElementById('videoFacial');
     const loadingOverlay = document.getElementById('loadingOverlay');
     const loadingText = document.getElementById('loadingText');
@@ -145,11 +143,9 @@
     const toast = document.getElementById('toastNotification');
     const resultadoFlotante = document.getElementById('resultadoFlotante');
 
-    // ============= FUNCIONES UTILERÍA =============
     function showToast(message, type = 'success') {
       toast.textContent = message;
       toast.style.background = type === 'success' ? 'rgba(22,224,134,0.2)' : 'rgba(231,76,60,0.2)';
-      toast.style.border = `1px solid ${type === 'success' ? 'var(--primary)' : 'var(--danger)'}`;
       toast.style.display = 'block';
       setTimeout(() => { toast.style.display = 'none'; }, 3000);
     }
@@ -159,345 +155,368 @@
       if (loadingSubtext) loadingSubtext.textContent = submessage;
     }
 
-    // ============= CARGAR MODELOS TENSORFLOW =============
     async function cargarModelos() {
-      try {
-        updateLoading('Cargando SSD MobileNet...', 'Detección facial');
-        await faceapi.nets.ssdMobilenetv1.loadFromUri(CONFIG.MODEL_URL);
-        
-        updateLoading('Cargando Face Landmark...', 'Puntos faciales');
-        await faceapi.nets.faceLandmark68Net.loadFromUri(CONFIG.MODEL_URL);
-        
-        updateLoading('Cargando Face Recognition...', 'Reconocimiento facial');
-        await faceapi.nets.faceRecognitionNet.loadFromUri(CONFIG.MODEL_URL);
-        
-        modelosCargados = true;
-        console.log('✅ Modelos TensorFlow.js cargados');
-        return true;
-      } catch (error) {
-        console.error('❌ Error cargando modelos:', error);
-        throw error;
-      }
+      await faceapi.nets.ssdMobilenetv1.loadFromUri(CONFIG.MODEL_URL);
+      await faceapi.nets.faceLandmark68Net.loadFromUri(CONFIG.MODEL_URL);
+      await faceapi.nets.faceRecognitionNet.loadFromUri(CONFIG.MODEL_URL);
+      modelosCargados = true;
     }
 
-    // ============= INICIAR CÁMARA =============
     async function iniciarCamara() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: { 
-            facingMode: 'user',
-            width: { ideal: 640 },
-            height: { ideal: 480 }
-          } 
-        });
-        video.srcObject = stream;
-        
-        return new Promise((resolve) => {
-          video.onloadedmetadata = () => { 
-            video.play(); 
-            videoStarted = true; 
-            resolve(); 
-          };
-        });
-      } catch (error) {
-        console.error('❌ Error cámara:', error);
-        throw new Error('No se pudo acceder a la cámara');
-      }
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+      video.srcObject = stream;
+      return new Promise((resolve) => {
+        video.onloadedmetadata = () => { video.play(); videoStarted = true; resolve(); };
+      });
     }
 
-    // ============= PREPARAR RECONOCIMIENTO =============
     async function prepararReconocimiento() {
-      try {
-        updateLoading('Cargando empleados...', 'Obteniendo datos');
-        const snapshot = await getDocs(collection(db, 'Ponche'));
-        const descriptors = [];
-        
-        let procesados = 0;
-        let exitosos = 0;
+      const snapshot = await getDocs(collection(db, 'Ponche'));
+      const descriptors = [];
 
-        for (const doc of snapshot.docs) {
-          const data = doc.data();
-          procesados++;
-          
-          if (data.activo === false) continue;
-          if (!data.fotoBase64 || !data.username) continue;
+      for (const doc of snapshot.docs) {
+        const data = doc.data();
+        if (data.activo === false || !data.fotoBase64 || !data.username) continue;
 
-          updateLoading(`Procesando: ${procesados}/${snapshot.size}`, data.username);
-
-          try {
-            const img = await faceapi.fetchImage(data.fotoBase64);
-            const detection = await faceapi
-              .detectSingleFace(img)
-              .withFaceLandmarks()
-              .withFaceDescriptor();
-
-            if (detection && detection.descriptor) {
-              descriptors.push(
-                new faceapi.LabeledFaceDescriptors(data.username, [detection.descriptor])
-              );
-              
-              employeesData.set(data.username, {
-                id: doc.id,
-                firstName: data.firstName || '',
-                lastName: data.lastName || '',
-                fotoBase64: data.fotoBase64,
-                turnoHoras: data.turnoHoras || 8,
-                activo: data.activo !== false
-              });
-              
-              exitosos++;
-              console.log(`✅ ${data.username} procesado`);
-            }
-          } catch (e) {
-            console.error(`❌ Error con ${data.username}:`, e);
+        try {
+          const img = await faceapi.fetchImage(data.fotoBase64);
+          const detection = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+          if (detection && detection.descriptor) {
+            descriptors.push(new faceapi.LabeledFaceDescriptors(data.username, [detection.descriptor]));
+            employeesData.set(data.username, {
+              id: doc.id,
+              firstName: data.firstName || '',
+              lastName: data.lastName || '',
+              fotoBase64: data.fotoBase64,
+              turnoHoras: data.turnoHoras || 8
+            });
           }
-        }
-
-        console.log(`📊 Procesados: ${exitosos}/${procesados} exitosos`);
-        return descriptors;
-        
-      } catch (error) {
-        console.error('❌ Error preparando:', error);
-        throw error;
+        } catch (e) {}
       }
+      return descriptors;
     }
 
-    // ============= VERIFICAR COOLDOWN INDIVIDUAL =============
-    async function verificarCooldown(codigo) {
+    // ============= VERIFICAR SI TIENE ENTRADA SIN SALIDA =============
+    async function verificarEntradaSinSalida(codigo) {
       try {
-        const attendanceQuery = query(
+        console.log(`🔍 Verificando si ${codigo} tiene ENTRADA sin SALIDA...`);
+        
+        // Obtener la fecha actual en formato YYYY-MM-DD
+        const hoy = new Date();
+        const fechaHoy = `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}-${String(hoy.getDate()).padStart(2,'0')}`;
+        
+        console.log(`📅 Fecha actual: ${fechaHoy}`);
+        
+        // Buscar TODOS los registros de HOY para este colaborador
+        const q = query(
           collection(db, 'facialAttendance'),
           where('collaboratorCode', '==', codigo),
-          orderBy('timestamp', 'desc'),
-          limit(1)
+          where('fecha', '==', fechaHoy),
+          orderBy('timestamp', 'desc')
         );
         
-        const lastAttendance = await getDocs(attendanceQuery);
+        const snapshot = await getDocs(q);
         
-        if (lastAttendance.empty) {
-          return true;
+        if (snapshot.empty) {
+          console.log('📝 No hay registros hoy');
+          return {
+            tieneEntradaSinSalida: false,
+            ultimoRegistro: null,
+            parId: null,
+            mensaje: 'No hay registros hoy'
+          };
         }
         
-        const lastRecord = lastAttendance.docs[0].data();
-        const lastTimestamp = lastRecord.timestamp.toDate();
-        const ahora = new Date();
-        const diffHoras = (ahora - lastTimestamp) / (1000 * 60 * 60);
+        // Mostrar todos los registros de hoy
+        const registrosHoy = snapshot.docs.map(doc => doc.data());
+        console.log(`📊 Registros de hoy (${registrosHoy.length}):`, registrosHoy.map(r => ({
+          type: r.type,
+          hora: r.hora,
+          parId: r.parId
+        })));
         
-        console.log(`⏳ ${codigo}: Último registro hace ${diffHoras.toFixed(2)}h`);
+        // Verificar si el ÚLTIMO registro del día es ENTRADA
+        const ultimoRegistro = registrosHoy[0];
         
-        if (diffHoras < CONFIG.COOLDOWN_HORAS) {
-          const horasRestantes = (CONFIG.COOLDOWN_HORAS - diffHoras).toFixed(1);
-          showToast(`⏳ Espere ${horasRestantes}h para próximo registro`, 'error');
-          return false;
+        if (ultimoRegistro.type === 'entry') {
+          console.log('✅ TIENE ENTRADA SIN SALIDA - Debe registrar SALIDA');
+          return {
+            tieneEntradaSinSalida: true,
+            ultimoRegistro: ultimoRegistro,
+            parId: ultimoRegistro.parId,
+            mensaje: 'Tiene entrada pendiente'
+          };
+        } else {
+          console.log('✅ El último registro fue SALIDA - Puede registrar nueva ENTRADA');
+          return {
+            tieneEntradaSinSalida: false,
+            ultimoRegistro: ultimoRegistro,
+            parId: null,
+            mensaje: 'Último registro fue salida'
+          };
         }
         
-        return true;
       } catch (error) {
-        console.error('Error cooldown:', error);
-        return true; // Permitir registro si hay error
-      }
-    }
-
-    // ============= DETERMINAR TIPO (ENTRADA/SALIDA) =============
-    async function determinarTipoRegistro(codigo) {
-      try {
-        const attendanceQuery = query(
-          collection(db, 'facialAttendance'),
-          where('collaboratorCode', '==', codigo),
-          orderBy('timestamp', 'desc'),
-          limit(1)
-        );
-        const lastAttendance = await getDocs(attendanceQuery);
-        
-        if (lastAttendance.empty) return 'entry';
-        const lastType = lastAttendance.docs[0].data().type;
-        return lastType === 'entry' ? 'exit' : 'entry';
-      } catch (error) {
-        console.error('Error determinando tipo:', error);
-        return 'entry';
+        console.error('❌ Error verificando:', error);
+        return {
+          tieneEntradaSinSalida: false,
+          ultimoRegistro: null,
+          parId: null,
+          mensaje: 'Error en verificación'
+        };
       }
     }
 
     // ============= PROCESAR REGISTRO =============
     async function procesarRegistro(codigo, confianza = 1.0, metodo = 'facial') {
       if (isProcessing) {
-        console.log('⏳ Ya hay un registro en proceso');
+        console.log('⏳ Procesando...');
         return;
       }
-
+      
       isProcessing = true;
+      console.log('='.repeat(60));
+      console.log(`🚀 INICIANDO REGISTRO PARA: ${codigo}`);
+      console.log('='.repeat(60));
 
       try {
-        // Buscar empleado
+        // Verificar cooldown
+        const ahora = Date.now();
+        const ultimoCooldown = cooldownTracker.get(codigo);
+        if (ultimoCooldown) {
+          const diff = (ahora - ultimoCooldown) / 1000;
+          if (diff < CONFIG.COOLDOWN_SEGUNDOS) {
+            const restante = Math.ceil(CONFIG.COOLDOWN_SEGUNDOS - diff);
+            showToast(`⏳ Espere ${restante} segundos`, 'error');
+            isProcessing = false;
+            return;
+          }
+        }
+
+        // Buscar datos del colaborador
         const q = query(collection(db, 'Ponche'), where('username', '==', codigo));
-        const querySnapshot = await getDocs(q);
+        const userSnap = await getDocs(q);
         
-        if (querySnapshot.empty) {
-          showToast(`❌ Empleado no encontrado: ${codigo}`, 'error');
+        if (userSnap.empty) {
+          showToast('❌ Empleado no encontrado', 'error');
+          isProcessing = false;
           return;
         }
 
-        const userDoc = querySnapshot.docs[0];
+        const userDoc = userSnap.docs[0];
         const userData = userDoc.data();
 
-        // Verificar si está activo
         if (userData.activo === false) {
-          showToast(`❌ Empleado ${codigo} está desactivado`, 'error');
+          showToast('❌ Empleado desactivado', 'error');
+          isProcessing = false;
           return;
         }
 
-        // Verificar cooldown individual
-        const cooldownOk = await verificarCooldown(codigo);
-        if (!cooldownOk) {
-          return;
+        // VERIFICAR SI TIENE ENTRADA SIN SALIDA
+        const { tieneEntradaSinSalida, parId: parIdExistente } = await verificarEntradaSinSalida(codigo);
+        
+        // DETERMINAR TIPO Y PAR ID
+        let tipo;
+        let parId;
+        let estado;
+        
+        if (tieneEntradaSinSalida) {
+          // Si tiene entrada sin salida → SALIDA
+          tipo = 'exit';
+          parId = parIdExistente;
+          estado = 'Registrando SALIDA (entrada pendiente)';
+          console.log('🎯 DECISIÓN: REGISTRAR SALIDA');
+          console.log(`   📎 Usando parId existente: ${parId}`);
+        } else {
+          // Si no tiene entrada sin salida → ENTRADA
+          tipo = 'entry';
+          parId = `PAR_${codigo}_${Date.now()}`;
+          estado = 'Registrando ENTRADA (nuevo ciclo)';
+          console.log('🎯 DECISIÓN: REGISTRAR ENTRADA');
+          console.log(`   📎 Nuevo parId: ${parId}`);
         }
 
-        const nombreCompleto = `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || codigo;
-        const tipo = await determinarTipoRegistro(codigo);
+        // Preparar datos
+        const timestamp = Timestamp.now();
+        const fechaActual = timestamp.toDate();
         
-        const ahora = Timestamp.now();
-        const fechaActual = ahora.toDate();
-        
-        // Crear registro completo
+        const fecha = `${fechaActual.getFullYear()}-${String(fechaActual.getMonth()+1).padStart(2,'0')}-${String(fechaActual.getDate()).padStart(2,'0')}`;
+        const hora = `${String(fechaActual.getHours()).padStart(2,'0')}:${String(fechaActual.getMinutes()).padStart(2,'0')}:${String(fechaActual.getSeconds()).padStart(2,'0')}`;
+
         const attendanceData = {
           collaboratorId: userDoc.id,
-          collaboratorName: nombreCompleto,
+          collaboratorName: `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || codigo,
           collaboratorCode: codigo,
           collaboratorEmail: userData.email || '',
-          timestamp: ahora,
-          fecha: `${fechaActual.getFullYear()}-${String(fechaActual.getMonth()+1).padStart(2,'0')}-${String(fechaActual.getDate()).padStart(2,'0')}`,
-          hora: `${String(fechaActual.getHours()).padStart(2,'0')}:${String(fechaActual.getMinutes()).padStart(2,'0')}:${String(fechaActual.getSeconds()).padStart(2,'0')}`,
+          timestamp: timestamp,
+          fecha: fecha,
+          hora: hora,
           type: tipo,
           confidence: confianza,
           method: metodo,
           turnoHoras: userData.turnoHoras || 8,
           device: 'TensorFlow.js',
-          createdAt: serverTimestamp()
+          parId: parId,
+          registroId: `${codigo}_${Date.now()}`,
+          fechaRegistro: new Date().toISOString()
         };
 
         // Guardar en Firebase
-        await addDoc(collection(db, 'facialAttendance'), attendanceData);
-        console.log('✅ Registro guardado:', attendanceData);
-
-        // Actualizar último registro del empleado
-        await updateDoc(doc(db, 'Ponche', userDoc.id), {
-          lastAttendance: ahora,
-          lastAttendanceType: tipo
+        console.log('💾 Guardando en Firebase...');
+        const docRef = await addDoc(collection(db, 'facialAttendance'), attendanceData);
+        
+        // Actualizar cooldown
+        cooldownTracker.set(codigo, Date.now());
+        
+        console.log('✅ REGISTRO GUARDADO:', {
+          id: docRef.id,
+          tipo: attendanceData.type,
+          parId: attendanceData.parId
         });
 
-        // Mostrar éxito
-        document.getElementById('nombreDisplay').textContent = nombreCompleto;
+        // MOSTRAR EN PANTALLA
+        document.getElementById('nombreDisplay').textContent = `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || codigo;
         document.getElementById('codigoDisplay').textContent = `Código: ${codigo}`;
         if (userData.fotoBase64) {
           document.getElementById('fotoColaborador').src = userData.fotoBase64;
         }
         
+        // Mostrar tipo con color correcto
         const tipoLabel = document.getElementById('tipoDisplay');
-        tipoLabel.textContent = tipo === 'entry' ? '✅ ENTRADA' : '🚪 SALIDA';
-        tipoLabel.className = `tipo-registro ${tipo === 'entry' ? 'entrada' : 'salida'}`;
+        if (tipo === 'entry') {
+          tipoLabel.textContent = '✅ ENTRADA';
+          tipoLabel.className = 'tipo-registro entrada';
+        } else {
+          tipoLabel.textContent = '🚪 SALIDA';
+          tipoLabel.className = 'tipo-registro salida';
+        }
         
-        document.getElementById('fechaHoraDisplay').textContent = 
-          `📅 ${fechaActual.toLocaleDateString('es-ES')} ${fechaActual.toLocaleTimeString('es-ES')}`;
+        // Mostrar fecha, hora y parId
+        document.getElementById('fechaHoraDisplay').textContent = `📅 ${fecha} ${hora}`;
         
+        // Mostrar parId
+        let parIdElement = document.getElementById('parIdDisplay');
+        if (!parIdElement) {
+          parIdElement = document.createElement('div');
+          parIdElement.id = 'parIdDisplay';
+          parIdElement.style.color = '#16e086';
+          parIdElement.style.fontSize = '0.7rem';
+          parIdElement.style.marginTop = '2px';
+          document.querySelector('.resultado-header div').appendChild(parIdElement);
+        }
+        parIdElement.textContent = `ID: ${parId}`;
+        
+        // Mostrar estado
+        let estadoElement = document.getElementById('estadoDisplay');
+        if (!estadoElement) {
+          estadoElement = document.createElement('div');
+          estadoElement.id = 'estadoDisplay';
+          estadoElement.style.color = '#f39c12';
+          estadoElement.style.fontSize = '0.7rem';
+          estadoElement.style.marginTop = '2px';
+          document.querySelector('.resultado-header div').appendChild(estadoElement);
+        }
+        estadoElement.textContent = estado;
+        
+        // Mostrar resultado
         resultadoFlotante.style.display = 'flex';
-        setTimeout(() => { resultadoFlotante.style.display = 'none'; }, 5000);
+        setTimeout(() => {
+          resultadoFlotante.style.display = 'none';
+        }, 5000);
         
         showToast(`✅ ${tipo === 'entry' ? 'ENTRADA' : 'SALIDA'} registrada`, 'success');
         
+        console.log('='.repeat(60));
+        console.log(`🎉 REGISTRO COMPLETADO: ${tipo === 'entry' ? 'ENTRADA' : 'SALIDA'}`);
+        console.log('='.repeat(60));
+        
       } catch (error) {
-        console.error('❌ Error procesando registro:', error);
-        showToast('❌ Error al registrar: ' + error.message, 'error');
+        console.error('❌ Error:', error);
+        showToast('❌ Error al registrar', 'error');
       } finally {
         isProcessing = false;
       }
     }
 
-    // ============= INICIAR DETECCIÓN EN VIVO =============
-    function iniciarDeteccionEnVivo() {
-      if (detectionInterval) clearInterval(detectionInterval);
-      
+    // Iniciar detección facial
+    function iniciarDeteccion() {
       detectionInterval = setInterval(async () => {
-        if (!faceMatcher || !videoStarted || video.paused || video.ended || isProcessing || !modelosCargados) {
-          return;
-        }
+        if (!faceMatcher || !videoStarted || !modelosCargados || isProcessing) return;
 
         try {
-          const detection = await faceapi
-            .detectSingleFace(video)
-            .withFaceLandmarks()
-            .withFaceDescriptor();
-
+          const detection = await faceapi.detectSingleFace(video).withFaceLandmarks().withFaceDescriptor();
           if (detection) {
-            const bestMatch = faceMatcher.findBestMatch(detection.descriptor);
-            const confidence = 1 - bestMatch.distance;
+            const match = faceMatcher.findBestMatch(detection.descriptor);
+            const confidence = 1 - match.distance;
             
-            if (bestMatch.label !== 'unknown' && confidence >= CONFIG.MIN_CONFIDENCE) {
-              console.log(`🎯 Detectado: ${bestMatch.label} (${(confidence*100).toFixed(1)}%)`);
-              await procesarRegistro(bestMatch.label, confidence, 'facial');
+            if (match.label !== 'unknown' && confidence >= CONFIG.MIN_CONFIDENCE) {
+              await procesarRegistro(match.label, confidence, 'facial');
             }
           }
-        } catch (error) {
-          console.error('❌ Error detección:', error);
-        }
+        } catch (error) {}
       }, CONFIG.DETECTION_INTERVAL);
     }
 
-    // ============= REGISTRO MANUAL =============
+    // Eventos para registro manual
     document.getElementById('btnRegistrarPorCodigo').addEventListener('click', async () => {
       const codigo = document.getElementById('codigoInput').value.trim().toUpperCase();
-      if (!codigo) {
-        showToast('❌ Ingrese código', 'error');
-        return;
+      if (!codigo) { 
+        showToast('❌ Ingrese código', 'error'); 
+        return; 
       }
       await procesarRegistro(codigo, 1.0, 'manual');
       document.getElementById('codigoInput').value = '';
     });
 
-    document.getElementById('codigoInput').addEventListener('keypress', (e) => {
+    document.getElementById('codigoInput').addEventListener('keypress', async (e) => {
       if (e.key === 'Enter') {
-        document.getElementById('btnRegistrarPorCodigo').click();
+        const codigo = document.getElementById('codigoInput').value.trim().toUpperCase();
+        if (!codigo) { 
+          showToast('❌ Ingrese código', 'error'); 
+          return; 
+        }
+        await procesarRegistro(codigo, 1.0, 'manual');
+        document.getElementById('codigoInput').value = '';
       }
     });
 
-    // ============= INICIALIZACIÓN =============
+    // Función para probar desde consola
+    window.probar = async function(codigo) {
+      await procesarRegistro(codigo, 1.0, 'test');
+    };
+
+    // Función para ver estado
+    window.verEstado = async function(codigo) {
+      const estado = await verificarEntradaSinSalida(codigo);
+      console.log('📊 ESTADO:', estado);
+      return estado;
+    };
+
+    // Inicializar
     async function init() {
       try {
-        updateLoading('Inicializando TensorFlow.js...');
         await cargarModelos();
-        
-        updateLoading('Iniciando cámara...');
         await iniciarCamara();
+        const descriptors = await prepararReconocimiento();
         
-        updateLoading('Cargando empleados...');
-        labeledFaceDescriptors = await prepararReconocimiento();
-        
-        if (labeledFaceDescriptors.length > 0) {
-          faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, CONFIG.UMBRAL_PRECISION);
-          updateLoading('¡Sistema listo!', `${labeledFaceDescriptors.length} empleados`);
-          console.log('✅ FaceMatcher listo');
-        } else {
-          updateLoading('⚠️ Sin empleados', 'Registre en admin');
+        if (descriptors.length > 0) {
+          faceMatcher = new faceapi.FaceMatcher(descriptors, CONFIG.UMBRAL_PRECISION);
         }
         
-        setTimeout(() => { loadingOverlay.style.display = 'none'; }, 1500);
-        iniciarDeteccionEnVivo();
-        showToast('✅ Sistema activo', 'success');
+        loadingOverlay.style.display = 'none';
+        iniciarDeteccion();
+        showToast('✅ Sistema activo');
+        
+        console.log('📝 Comandos:');
+        console.log('   - probar("CODIGO") - Registrar');
+        console.log('   - verEstado("CODIGO") - Ver estado');
         
       } catch (error) {
-        console.error('❌ Error:', error);
-        updateLoading('❌ Error', error.message);
-        showToast('❌ Error: ' + error.message, 'error');
+        console.error('Error:', error);
       }
     }
-
+    
     init();
-
-    window.addEventListener('beforeunload', () => {
-      if (detectionInterval) clearInterval(detectionInterval);
-      if (video.srcObject) {
-        video.srcObject.getTracks().forEach(track => track.stop());
-      }
-    });
   </script>
 </body>
-</html>
+</html> 
