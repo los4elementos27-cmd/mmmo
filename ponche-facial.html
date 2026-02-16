@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
   <title>Asistencia Facial - PlusMoney</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1/dist/face-api.js"></script>
+  <!-- TENSORFLOW.JS (NO FACEAPI) -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.11.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface@0.0.5/dist/blazeface.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     :root { 
@@ -31,7 +33,7 @@
       align-items: center; 
     }
     
-    /* LOGIN SCREEN - IGUAL AL GESTOR */
+    /* LOGIN SCREEN */
     .login-container {
       display: flex;
       justify-content: center;
@@ -50,14 +52,7 @@
       max-width: 400px;
       box-shadow: var(--shadow);
       text-align: center;
-      animation: bounceIn 0.6s ease;
       border: 1px solid rgba(22, 224, 134, 0.2);
-    }
-
-    @keyframes bounceIn {
-      0% { transform: scale(0.3); opacity: 0; }
-      50% { transform: scale(1.02); }
-      100% { transform: scale(1); opacity: 1; }
     }
 
     .logo {
@@ -134,7 +129,6 @@
       align-items: center;
       border-left: 4px solid;
       font-size: 14px;
-      backdrop-filter: blur(10px);
     }
 
     .alert-error {
@@ -218,7 +212,6 @@
       width: 100%; 
       height: 100%; 
       object-fit: cover; 
-      /* SIN INVERTIR - IMAGEN NORMAL */
     }
     
     .resultado-flotante { 
@@ -322,7 +315,7 @@
   </style>
 </head>
 <body>
-  <!-- LOGIN SCREEN - IGUAL AL GESTOR -->
+  <!-- LOGIN SCREEN -->
   <div id="loginScreen" class="login-container">
     <div class="login-card">
       <div class="logo">
@@ -331,20 +324,20 @@
       <h1>PlusMoney Asistencia</h1>
       <p>Sistema de Reconocimiento Facial</p>
       
-      <input type="text" id="username" class="form-input" placeholder="Usuario" style="margin-bottom: 15px;">
-      <input type="password" id="password" class="form-input" placeholder="PIN / Contraseña" style="margin-bottom: 20px;">
+      <input type="text" id="username" class="form-input" placeholder="Usuario">
+      <input type="password" id="password" class="form-input" placeholder="PIN / Contraseña">
       <button id="loginBtn" class="btn">
         <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
       </button>
       
-      <div id="loginAlert" class="alert alert-error" style="display: none; margin-top: 15px;">
+      <div id="loginAlert" class="alert alert-error" style="display: none;">
         <i class="fas fa-exclamation-circle"></i>
         <div id="loginAlertMessage"></div>
       </div>
       
       <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
-        <p style="color: var(--text-secondary); font-size: 12px; line-height: 1.5;">
-          <i class="fas fa-info-circle"></i> Utilice el usuario y PIN del sistema de colaboradores
+        <p style="color: var(--text-secondary); font-size: 12px;">
+          <i class="fas fa-info-circle"></i> Use su código y PIN
         </p>
       </div>
     </div>
@@ -389,10 +382,10 @@
   <!-- LOADING OVERLAY -->
   <div class="loading-overlay" id="loadingOverlay">
     <div class="spinner"></div>
-    <div id="loadingText" style="color: white; font-size: 16px;">Cargando...</div>
+    <div id="loadingText">Cargando...</div>
   </div>
 
-  <!-- TOAST NOTIFICATION -->
+  <!-- TOAST -->
   <div class="toast" id="toastNotification"></div>
 
   <script type="module">
@@ -407,22 +400,19 @@
       Timestamp
     } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
-    // Firebase configuration - IGUAL AL GESTOR
     const firebaseConfig = {
       apiKey: "AIzaSyAMTWJr3mISmNiP-e_KjCO9BdBPi7Uuug4",
       authDomain: "formulario-2-8929a.firebaseapp.com",
-      databaseURL: "https://formulario-2-8929a-default-rtdb.firebaseio.com",
       projectId: "formulario-2-8929a",
       storageBucket: "formulario-2-8929a.appspot.com",
       messagingSenderId: "136908102526",
-      appId: "1:136908102526:web:d0a3bc1e3cb91a3fcab12f",
-      measurementId: "G-HJNZXRENE9"
+      appId: "1:136908102526:web:d0a3bc1e3cb91a3fcab12f"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Elementos del DOM
+    // Elementos DOM
     const loginScreen = document.getElementById('loginScreen');
     const cameraScreen = document.getElementById('cameraScreen');
     const usernameInput = document.getElementById('username');
@@ -436,29 +426,21 @@
     const loadingText = document.getElementById('loadingText');
     const toast = document.getElementById('toastNotification');
     
-    // Variables de estado
+    // Variables
     let currentUser = null;
-    let faceMatcher = null;
     let isProcessing = false;
     let videoStarted = false;
     let detectionInterval = null;
-    let modelosCargados = false;
+    let model = null;
+    let employeesData = [];
     const video = document.getElementById('videoFacial');
     
-    // Cooldown para evitar múltiples registros
     const cooldownTracker = new Map();
-    
-    const CONFIG = {
-      UMBRAL_PRECISION: 0.5,
-      DETECTION_INTERVAL: 3000,
-      COOLDOWN_SEGUNDOS: 60,
-      MIN_CONFIDENCE: 0.4,
-      MODEL_URL: 'https://raw.githubusercontent.com/vladmandic/face-api/master/model/'
-    };
+    const COOLDOWN_SEGUNDOS = 30;
 
-    // ============ FUNCIONES DE UTILIDAD (IGUAL AL GESTOR) ============
-    function showLoading(message = 'Cargando...') {
-      loadingText.textContent = message;
+    // Utilidades
+    function showLoading(msg) {
+      loadingText.textContent = msg;
       loadingOverlay.style.display = 'flex';
     }
 
@@ -468,9 +450,9 @@
 
     function showToast(message, type = 'success') {
       toast.textContent = message;
-      toast.style.background = type === 'success' ? 'rgba(22, 224, 134, 0.95)' : 'rgba(231, 76, 60, 0.95)';
+      toast.style.background = type === 'success' ? 'rgba(22,224,134,0.95)' : 'rgba(231,76,60,0.95)';
       toast.style.display = 'block';
-      setTimeout(() => { toast.style.display = 'none'; }, 3000);
+      setTimeout(() => toast.style.display = 'none', 3000);
     }
 
     function showLoginAlert(message) {
@@ -482,44 +464,34 @@
       loginAlert.style.display = 'none';
     }
 
-    // ============ LOGIN - IGUAL AL GESTOR ============
+    // ============ LOGIN ============
     async function authenticateUser(username, pin) {
-      try {
-        showLoading('Verificando credenciales...');
-        
-        // Buscar en la colección Collaborators (Ponche)
-        const collaboratorsQuery = query(
-          collection(db, "Collaborators"),
-          where("username", "==", username),
-          where("pin", "==", pin)
-        );
-        
-        const snapshot = await getDocs(collaboratorsQuery);
-        
-        if (snapshot.empty) {
-          throw new Error('Usuario o PIN incorrectos');
-        }
-        
-        const collaboratorDoc = snapshot.docs[0];
-        const collaboratorData = collaboratorDoc.data();
-        
-        return {
-          uid: collaboratorDoc.id,
-          username: collaboratorData.username,
-          name: `${collaboratorData.firstName || ''} ${collaboratorData.lastName || ''}`.trim() || username,
-          firstName: collaboratorData.firstName || '',
-          lastName: collaboratorData.lastName || '',
-          fotoBase64: collaboratorData.fotoBase64 || '',
-          turnoHoras: collaboratorData.turnoHoras || 8,
-          email: collaboratorData.email || ''
-        };
-        
-      } catch (error) {
-        console.error('Authentication error:', error);
-        throw error;
-      } finally {
-        hideLoading();
+      showLoading('Verificando...');
+      
+      const q = query(
+        collection(db, "employees"),
+        where("username", "==", username),
+        where("pin", "==", pin),
+        where("activo", "==", true)
+      );
+      
+      const snapshot = await getDocs(q);
+      
+      if (snapshot.empty) {
+        throw new Error('Usuario o PIN incorrectos');
       }
+      
+      const data = snapshot.docs[0].data();
+      return {
+        uid: snapshot.docs[0].id,
+        username: data.username,
+        name: `${data.firstName || ''} ${data.lastName || ''}`.trim() || username,
+        firstName: data.firstName || '',
+        lastName: data.lastName || '',
+        fotoBase64: data.fotoBase64 || '',
+        turnoHoras: data.turnoHoras || 8,
+        email: data.email || ''
+      };
     }
 
     loginBtn.addEventListener('click', async () => {
@@ -527,62 +499,48 @@
       const pin = passwordInput.value.trim();
       
       if (!username || !pin) {
-        showLoginAlert('Por favor complete todos los campos');
+        showLoginAlert('Complete todos los campos');
         return;
       }
       
       try {
-        const userData = await authenticateUser(username, pin);
-        currentUser = userData;
+        currentUser = await authenticateUser(username, pin);
         
         displayName.textContent = currentUser.name;
         
         loginScreen.style.display = 'none';
         cameraScreen.style.display = 'flex';
         
-        // Guardar en sessionStorage para los reportes
         sessionStorage.setItem('facial_currentUser', JSON.stringify(currentUser));
         
-        // Inicializar sistema facial
-        await initFacialSystem();
+        await iniciarSistemaFacial();
         
         passwordInput.value = '';
         hideLoginAlert();
         showToast(`Bienvenido ${currentUser.name}`);
         
       } catch (error) {
-        console.error('Login error:', error);
-        showLoginAlert(error.message || 'Credenciales incorrectas');
+        showLoginAlert(error.message);
+      } finally {
+        hideLoading();
       }
     });
 
-    // Permitir login con Enter
     usernameInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        passwordInput.focus();
-      }
+      if (e.key === 'Enter') passwordInput.focus();
     });
     
     passwordInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        loginBtn.click();
-      }
+      if (e.key === 'Enter') loginBtn.click();
     });
 
     logoutBtn.addEventListener('click', () => {
-      if (detectionInterval) {
-        clearInterval(detectionInterval);
-        detectionInterval = null;
-      }
-      
+      if (detectionInterval) clearInterval(detectionInterval);
       if (video.srcObject) {
-        video.srcObject.getTracks().forEach(track => track.stop());
+        video.srcObject.getTracks().forEach(t => t.stop());
       }
       
       currentUser = null;
-      faceMatcher = null;
-      videoStarted = false;
-      
       sessionStorage.removeItem('facial_currentUser');
       
       cameraScreen.style.display = 'none';
@@ -590,179 +548,88 @@
       usernameInput.value = '';
       passwordInput.value = '';
       hideLoginAlert();
-      
-      showToast('Sesión cerrada exitosamente');
     });
 
-    // ============ SISTEMA FACIAL ============
-    async function cargarModelos() {
+    // ============ TENSORFLOW.JS ============
+    async function cargarModeloTensorFlow() {
       try {
-        await faceapi.nets.ssdMobilenetv1.loadFromUri(CONFIG.MODEL_URL);
-        await faceapi.nets.faceLandmark68Net.loadFromUri(CONFIG.MODEL_URL);
-        await faceapi.nets.faceRecognitionNet.loadFromUri(CONFIG.MODEL_URL);
-        modelosCargados = true;
-        console.log('Modelos cargados correctamente');
+        model = await blazeface.load();
+        return true;
       } catch (error) {
-        console.error('Error cargando modelos:', error);
-        throw error;
+        console.error('Error cargando modelo:', error);
+        return false;
       }
     }
 
     async function iniciarCamara() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: { 
-            facingMode: 'user',
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          } 
-        });
-        video.srcObject = stream;
-        
-        return new Promise((resolve) => {
-          video.onloadedmetadata = () => { 
-            video.play(); 
-            videoStarted = true; 
-            resolve(); 
-          };
-        });
-      } catch (error) {
-        console.error('Error iniciando cámara:', error);
-        throw error;
-      }
-    }
-
-    async function prepararReconocimiento() {
-      if (!currentUser || !currentUser.fotoBase64) {
-        console.log('No hay foto de referencia');
-        return [];
-      }
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'user' } 
+      });
+      video.srcObject = stream;
       
-      try {
-        const img = await faceapi.fetchImage(currentUser.fotoBase64);
-        const detection = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
-        
-        if (detection && detection.descriptor) {
-          return [new faceapi.LabeledFaceDescriptors(currentUser.username, [detection.descriptor])];
-        } else {
-          return [];
-        }
-      } catch (error) {
-        console.error('Error preparando reconocimiento:', error);
-        return [];
-      }
-    }
-
-    // ============ REGISTRO DE ASISTENCIA ============
-    async function procesarRegistro(codigo, confianza = 1.0) {
-      if (isProcessing) return;
-      if (codigo !== currentUser.username) return;
-      
-      isProcessing = true;
-
-      try {
-        // Verificar cooldown
-        const ahora = Date.now();
-        const ultimoCooldown = cooldownTracker.get(codigo);
-        if (ultimoCooldown) {
-          const diff = (ahora - ultimoCooldown) / 1000;
-          if (diff < CONFIG.COOLDOWN_SEGUNDOS) {
-            const restante = Math.ceil(CONFIG.COOLDOWN_SEGUNDOS - diff);
-            showToast(`⏳ Espera ${restante} segundos`, 'error');
-            isProcessing = false;
-            return;
-          }
-        }
-
-        // Crear registro
-        const timestamp = Timestamp.now();
-        const fechaActual = timestamp.toDate();
-        
-        const fecha = `${fechaActual.getFullYear()}-${String(fechaActual.getMonth()+1).padStart(2,'0')}-${String(fechaActual.getDate()).padStart(2,'0')}`;
-        const hora = `${String(fechaActual.getHours()).padStart(2,'0')}:${String(fechaActual.getMinutes()).padStart(2,'0')}:${String(fechaActual.getSeconds()).padStart(2,'0')}`;
-
-        const attendanceData = {
-          collaboratorId: currentUser.uid,
-          collaboratorName: currentUser.name,
-          collaboratorCode: codigo,
-          collaboratorEmail: currentUser.email || '',
-          timestamp: timestamp,
-          fecha: fecha,
-          hora: hora,
-          type: 'entry', // Todos como entry, la lógica va en reportes
-          confidence: confianza,
-          method: 'facial',
-          turnoHoras: currentUser.turnoHoras || 8,
-          device: 'TensorFlow.js',
-          createdAt: Timestamp.now()
+      return new Promise((resolve) => {
+        video.onloadedmetadata = () => {
+          video.play();
+          videoStarted = true;
+          resolve();
         };
+      });
+    }
 
-        await addDoc(collection(db, 'facialAttendance'), attendanceData);
+    async function cargarEmpleadosParaReconocimiento() {
+      if (!currentUser) return;
+      
+      try {
+        const q = query(
+          collection(db, "employees"),
+          where("adminId", "==", currentUser.adminId || '')
+        );
         
-        // Actualizar cooldown
-        cooldownTracker.set(codigo, Date.now());
-
-        // Mostrar en pantalla
-        document.getElementById('fotoColaborador').src = currentUser.fotoBase64 || '';
-        document.getElementById('nombreDisplay').textContent = currentUser.name;
-        document.getElementById('mensajeDisplay').textContent = '✅ REGISTRADO';
-        document.getElementById('fechaHoraDisplay').textContent = `📅 ${fecha} ${hora}`;
-        
-        document.getElementById('resultadoFlotante').style.display = 'flex';
-        setTimeout(() => {
-          document.getElementById('resultadoFlotante').style.display = 'none';
-        }, 4000);
-        
-        showToast('Registro exitoso');
+        const snapshot = await getDocs(q);
+        employeesData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
         
       } catch (error) {
-        console.error('Error registrando:', error);
-        showToast('Error al registrar', 'error');
-      } finally {
-        isProcessing = false;
+        console.error('Error cargando empleados:', error);
       }
     }
 
-    // Iniciar detección facial
+    async function detectarYComparar() {
+      if (!model || !videoStarted) return;
+
+      try {
+        const predictions = await model.estimateFaces(video, false);
+        
+        if (predictions.length > 0) {
+          // Aquí iría la lógica de comparación facial
+          // Por ahora solo detectamos
+          console.log('Rostro detectado');
+        }
+      } catch (error) {}
+    }
+
     function iniciarDeteccion() {
       if (detectionInterval) clearInterval(detectionInterval);
       
-      detectionInterval = setInterval(async () => {
-        if (!faceMatcher || !videoStarted || !modelosCargados || isProcessing || !video) return;
-
-        try {
-          const detection = await faceapi.detectSingleFace(video).withFaceLandmarks().withFaceDescriptor();
-          if (detection) {
-            const match = faceMatcher.findBestMatch(detection.descriptor);
-            const confidence = 1 - match.distance;
-            
-            if (match.label !== 'unknown' && confidence >= CONFIG.MIN_CONFIDENCE) {
-              await procesarRegistro(match.label, confidence);
-            }
-          }
-        } catch (error) {}
-      }, CONFIG.DETECTION_INTERVAL);
+      detectionInterval = setInterval(detectarYComparar, 2000);
     }
 
-    // Inicializar sistema facial
-    async function initFacialSystem() {
-      showLoading('Iniciando cámara...');
+    async function iniciarSistemaFacial() {
+      showLoading('Cargando TensorFlow.js...');
       
       try {
-        await cargarModelos();
-        await iniciarCamara();
-        
-        showLoading('Preparando reconocimiento...');
-        const descriptors = await prepararReconocimiento();
-        
-        if (descriptors.length > 0) {
-          faceMatcher = new faceapi.FaceMatcher(descriptors, CONFIG.UMBRAL_PRECISION);
-          console.log('FaceMatcher creado correctamente');
-        } else {
-          showToast('⚠️ No se pudo cargar tu foto de referencia', 'error');
+        const modeloOK = await cargarModeloTensorFlow();
+        if (!modeloOK) {
+          showToast('Error cargando modelo', 'error');
+          return;
         }
         
+        await iniciarCamara();
+        await cargarEmpleadosParaReconocimiento();
         iniciarDeteccion();
+        
         hideLoading();
         
       } catch (error) {
@@ -772,10 +639,19 @@
       }
     }
 
-    // Inicializar
-    document.addEventListener('DOMContentLoaded', () => {
-      usernameInput.focus();
-    });
+    // Verificar sesión guardada
+    const savedUser = sessionStorage.getItem('facial_currentUser');
+    if (savedUser) {
+      try {
+        currentUser = JSON.parse(savedUser);
+        displayName.textContent = currentUser.name;
+        loginScreen.style.display = 'none';
+        cameraScreen.style.display = 'flex';
+        iniciarSistemaFacial();
+      } catch (e) {
+        sessionStorage.removeItem('facial_currentUser');
+      }
+    }
   </script>
 </body>
 </html>
