@@ -31,6 +31,7 @@
       display: flex; 
       justify-content: center; 
       align-items: center; 
+      overflow: hidden;
     }
     
     /* LOGIN SCREEN */
@@ -89,13 +90,11 @@
       color: var(--text-primary);
       font-size: 14px;
       outline: none;
-      transition: all 0.3s ease;
       margin-bottom: 15px;
     }
 
     .form-input:focus {
       border-color: var(--primary-color);
-      box-shadow: 0 0 0 2px rgba(22, 224, 134, 0.15);
       background: rgba(255, 255, 255, 0.12);
     }
 
@@ -109,7 +108,6 @@
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s ease;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -136,11 +134,6 @@
       border-left-color: var(--danger-color);
     }
 
-    .alert i {
-      margin-right: 10px;
-      font-size: 16px;
-    }
-    
     /* PANTALLA DE CÁMARA */
     .camera-container {
       display: none;
@@ -200,18 +193,17 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: all 0.3s;
     }
     
     .logout-btn:hover {
       background: rgba(255,255,255,0.2);
-      transform: rotate(90deg);
     }
     
     #videoFacial { 
       width: 100%; 
       height: 100%; 
       object-fit: cover; 
+      /* SIN INVERTIR */
     }
     
     .resultado-flotante { 
@@ -220,34 +212,89 @@
       left: 50%; 
       transform: translate(-50%, -50%); 
       width: 90%; 
-      max-width: 400px; 
+      max-width: 450px; 
       background: #233445; 
       border-radius: var(--border-radius); 
-      padding: 30px 20px; 
+      padding: 25px; 
       border: 2px solid var(--primary-color); 
       display: none; 
       flex-direction: column; 
-      align-items: center; 
       gap: 15px; 
       z-index: 50; 
       box-shadow: 0 20px 40px rgba(0,0,0,0.5);
     }
     
-    .foto-colaborador { 
-      width: 150px; 
-      height: 150px; 
-      border-radius: 50%; 
-      object-fit: cover; 
-      border: 4px solid var(--primary-color); 
-      margin-bottom: 10px;
+    .resultado-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
     }
     
-    .mensaje-registro { 
-      padding: 8px 25px; 
+    .foto-colaborador { 
+      width: 80px; 
+      height: 80px; 
+      border-radius: 50%; 
+      object-fit: cover; 
+      border: 3px solid var(--primary-color); 
+    }
+    
+    .nombre-colaborador { 
+      color: white; 
+      font-size: 1.5rem; 
+      font-weight: bold; 
+    }
+    
+    .tipo-registro { 
+      display: inline-block; 
+      padding: 5px 15px; 
       border-radius: 40px; 
       font-weight: bold; 
-      font-size: 1.2rem;
+    }
+    
+    .entrada { 
       background: var(--primary-color); 
+      color: #000; 
+    }
+    
+    .salida { 
+      background: var(--danger-color); 
+      color: white; 
+    }
+    
+    .codigo-input-container {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 500px;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(10px);
+      border-radius: 50px;
+      padding: 12px 20px;
+      border: 1px solid var(--primary-color);
+      display: flex;
+      gap: 10px;
+      z-index: 30;
+    }
+    
+    .codigo-input {
+      flex: 1;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid var(--primary-color);
+      border-radius: 40px;
+      padding: 10px 15px;
+      color: white;
+      outline: none;
+    }
+    
+    .btn-codigo {
+      background: var(--primary-color);
+      border: none;
+      border-radius: 40px;
+      padding: 10px 25px;
+      font-weight: bold;
+      cursor: pointer;
       color: #000;
     }
     
@@ -255,7 +302,7 @@
       position: fixed; 
       inset: 0; 
       background: rgba(0,0,0,0.95); 
-      display: none; 
+      display: flex; 
       flex-direction: column; 
       justify-content: center; 
       align-items: center; 
@@ -288,29 +335,28 @@
       display: none; 
     }
     
-    .report-link {
+    .admin-links {
       position: absolute;
-      bottom: 30px;
+      bottom: 100px;
       right: 20px;
       z-index: 30;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
     
-    .report-btn {
-      background: rgba(52, 152, 219, 0.9);
+    .admin-link {
+      background: rgba(0,0,0,0.7);
       color: white;
-      padding: 12px 20px;
+      padding: 10px 20px;
       border-radius: 50px;
+      border: 1px solid var(--primary-color);
       text-decoration: none;
       display: flex;
       align-items: center;
       gap: 8px;
-      border: 1px solid var(--primary-color);
+      font-size: 0.9rem;
       backdrop-filter: blur(10px);
-      font-size: 14px;
-    }
-    
-    .report-btn i {
-      color: var(--primary-color);
     }
   </style>
 </head>
@@ -334,12 +380,6 @@
         <i class="fas fa-exclamation-circle"></i>
         <div id="loginAlertMessage"></div>
       </div>
-      
-      <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
-        <p style="color: var(--text-secondary); font-size: 12px;">
-          <i class="fas fa-info-circle"></i> Use su código y PIN
-        </p>
-      </div>
     </div>
   </div>
 
@@ -361,28 +401,37 @@
       </button>
     </div>
     
+    <!-- CÁMARA SIN INVERTIR -->
     <video id="videoFacial" autoplay muted playsinline></video>
     
-    <div class="report-link">
-      <a href="reportes.html" class="report-btn" target="_blank">
-        <i class="fas fa-chart-bar"></i> VER REPORTES
-      </a>
+    <div id="resultadoFlotante" class="resultado-flotante">
+      <div class="resultado-header">
+        <img id="fotoColaborador" class="foto-colaborador" src="">
+        <div>
+          <div id="nombreDisplay" class="nombre-colaborador">---</div>
+          <div id="codigoDisplay" style="color: var(--primary-color);">---</div>
+          <div id="tipoDisplay" class="tipo-registro">---</div>
+          <div id="fechaHoraDisplay" style="color: rgba(255,255,255,0.7); font-size: 0.8rem; margin-top: 5px;">---</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="codigo-input-container">
+      <input type="text" id="codigoInput" class="codigo-input" placeholder="Código empleado" autocomplete="off">
+      <button id="btnRegistrarPorCodigo" class="btn-codigo">REGISTRAR</button>
     </div>
     
-    <div id="resultadoFlotante" class="resultado-flotante">
-      <img id="fotoColaborador" class="foto-colaborador" src="" alt="Foto">
-      <div>
-        <div id="nombreDisplay" style="color: white; font-size: 24px; font-weight: bold; text-align: center;">---</div>
-        <div id="mensajeDisplay" class="mensaje-registro">REGISTRADO</div>
-        <div id="fechaHoraDisplay" style="color: #999; text-align: center; margin-top: 10px;">---</div>
-      </div>
+    <div class="admin-links">
+      <a href="registro_empleados.html" class="admin-link"><i class="fas fa-cog"></i> ADMIN</a>
+      <a href="reportes.html" class="admin-link"><i class="fas fa-chart-bar"></i> REPORTES</a>
     </div>
   </div>
 
   <!-- LOADING OVERLAY -->
   <div class="loading-overlay" id="loadingOverlay">
     <div class="spinner"></div>
-    <div id="loadingText">Cargando...</div>
+    <div id="loadingText">Cargando TensorFlow.js...</div>
+    <div id="loadingSubtext">Inicializando sistema</div>
   </div>
 
   <!-- TOAST -->
@@ -397,6 +446,8 @@
       addDoc, 
       query, 
       where, 
+      orderBy, 
+      limit, 
       Timestamp
     } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
@@ -424,7 +475,9 @@
     const displayName = document.getElementById('displayName');
     const loadingOverlay = document.getElementById('loadingOverlay');
     const loadingText = document.getElementById('loadingText');
+    const loadingSubtext = document.getElementById('loadingSubtext');
     const toast = document.getElementById('toastNotification');
+    const resultadoFlotante = document.getElementById('resultadoFlotante');
     
     // Variables
     let currentUser = null;
@@ -435,24 +488,18 @@
     let employeesData = [];
     const video = document.getElementById('videoFacial');
     
-    const cooldownTracker = new Map();
-    const COOLDOWN_SEGUNDOS = 30;
-
-    // Utilidades
-    function showLoading(msg) {
-      loadingText.textContent = msg;
-      loadingOverlay.style.display = 'flex';
-    }
-
-    function hideLoading() {
-      loadingOverlay.style.display = 'none';
-    }
+    const COOLDOWN_SEGUNDOS = 60;
 
     function showToast(message, type = 'success') {
       toast.textContent = message;
-      toast.style.background = type === 'success' ? 'rgba(22,224,134,0.95)' : 'rgba(231,76,60,0.95)';
+      toast.style.background = type === 'success' ? 'rgba(22,224,134,0.2)' : 'rgba(231,76,60,0.2)';
       toast.style.display = 'block';
-      setTimeout(() => toast.style.display = 'none', 3000);
+      setTimeout(() => { toast.style.display = 'none'; }, 3000);
+    }
+
+    function updateLoading(message, submessage = '') {
+      loadingText.textContent = message;
+      loadingSubtext.textContent = submessage;
     }
 
     function showLoginAlert(message) {
@@ -464,15 +511,177 @@
       loginAlert.style.display = 'none';
     }
 
+    // ============ TENSORFLOW.JS ============
+    async function cargarModeloTensorFlow() {
+      updateLoading('Cargando TensorFlow.js...');
+      model = await blazeface.load();
+      return true;
+    }
+
+    async function iniciarCamara() {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          facingMode: 'user',
+          width: { ideal: 640 },
+          height: { ideal: 480 }
+        } 
+      });
+      video.srcObject = stream;
+      return new Promise((resolve) => {
+        video.onloadedmetadata = () => { video.play(); videoStarted = true; resolve(); };
+      });
+    }
+
+    // ============= VERIFICAR COOLDOWN =============
+    async function verificarCooldown(codigo) {
+      try {
+        const q = query(
+          collection(db, 'facialAttendance'),
+          where('collaboratorCode', '==', codigo),
+          orderBy('timestamp', 'desc'),
+          limit(1)
+        );
+        
+        const last = await getDocs(q);
+        if (last.empty) return true;
+        
+        const lastTime = last.docs[0].data().timestamp.toDate();
+        const ahora = new Date();
+        const diffSegundos = (ahora - lastTime) / 1000;
+        
+        if (diffSegundos < COOLDOWN_SEGUNDOS) {
+          const segundosRestantes = Math.ceil(COOLDOWN_SEGUNDOS - diffSegundos);
+          showToast(`⏳ Espere ${segundosRestantes} segundos`, 'error');
+          return false;
+        }
+        return true;
+      } catch (error) {
+        return true;
+      }
+    }
+
+    // ============= DETERMINAR TIPO CON PAR ID =============
+    async function determinarTipoConPar(codigo) {
+      try {
+        const q = query(
+          collection(db, 'facialAttendance'),
+          where('collaboratorCode', '==', codigo),
+          orderBy('timestamp', 'desc')
+        );
+        
+        const snapshot = await getDocs(q);
+        const registros = snapshot.docs.map(doc => doc.data());
+        
+        if (registros.length === 0) {
+          const nuevoParId = `PAR_${codigo}_${Date.now()}`;
+          return { tipo: 'entry', parId: nuevoParId };
+        }
+        
+        const ultimoRegistro = registros[0];
+        
+        if (ultimoRegistro.type === 'entry') {
+          return { tipo: 'exit', parId: ultimoRegistro.parId };
+        }
+        
+        const nuevoParId = `PAR_${codigo}_${Date.now()}`;
+        return { tipo: 'entry', parId: nuevoParId };
+        
+      } catch (error) {
+        const nuevoParId = `PAR_${codigo}_${Date.now()}`;
+        return { tipo: 'entry', parId: nuevoParId };
+      }
+    }
+
+    // ============= PROCESAR REGISTRO =============
+    async function procesarRegistro(codigo, metodo = 'manual') {
+      if (isProcessing) return;
+      isProcessing = true;
+
+      try {
+        const q = query(collection(db, 'employees'), where('username', '==', codigo));
+        const userSnap = await getDocs(q);
+        
+        if (userSnap.empty) {
+          showToast('❌ Empleado no encontrado', 'error');
+          return;
+        }
+
+        const userDoc = userSnap.docs[0];
+        const userData = userDoc.data();
+
+        if (userData.activo === false) {
+          showToast('❌ Empleado desactivado', 'error');
+          return;
+        }
+
+        const cooldownOk = await verificarCooldown(codigo);
+        if (!cooldownOk) return;
+
+        const { tipo, parId } = await determinarTipoConPar(codigo);
+        
+        const ahora = Timestamp.now();
+        const fechaActual = ahora.toDate();
+        
+        const year = fechaActual.getFullYear();
+        const month = String(fechaActual.getMonth() + 1).padStart(2, '0');
+        const day = String(fechaActual.getDate()).padStart(2, '0');
+        const fechaFormateada = `${year}-${month}-${day}`;
+        
+        const hours = String(fechaActual.getHours()).padStart(2, '0');
+        const minutes = String(fechaActual.getMinutes()).padStart(2, '0');
+        const seconds = String(fechaActual.getSeconds()).padStart(2, '0');
+        const horaFormateada = `${hours}:${minutes}:${seconds}`;
+
+        const attendanceData = {
+          collaboratorId: userDoc.id,
+          collaboratorName: `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || codigo,
+          collaboratorCode: codigo,
+          collaboratorEmail: userData.email || '',
+          timestamp: ahora,
+          fecha: fechaFormateada,
+          hora: horaFormateada,
+          type: tipo,
+          confidence: 1.0,
+          method: metodo,
+          turnoHoras: userData.turnoHoras || 8,
+          device: 'TensorFlow.js',
+          parId: parId,
+          registroId: `${codigo}_${Date.now()}`
+        };
+
+        await addDoc(collection(db, 'facialAttendance'), attendanceData);
+
+        document.getElementById('nombreDisplay').textContent = `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || codigo;
+        document.getElementById('codigoDisplay').textContent = `Código: ${codigo}`;
+        if (userData.fotoBase64) document.getElementById('fotoColaborador').src = userData.fotoBase64;
+        
+        const tipoLabel = document.getElementById('tipoDisplay');
+        tipoLabel.textContent = tipo === 'entry' ? '✅ ENTRADA' : '🚪 SALIDA';
+        tipoLabel.className = `tipo-registro ${tipo === 'entry' ? 'entrada' : 'salida'}`;
+        
+        document.getElementById('fechaHoraDisplay').textContent = `📅 ${fechaFormateada} ${horaFormateada}`;
+        
+        resultadoFlotante.style.display = 'flex';
+        setTimeout(() => { resultadoFlotante.style.display = 'none'; }, 5000);
+        
+        showToast(`✅ ${tipo === 'entry' ? 'ENTRADA' : 'SALIDA'} registrada`, 'success');
+        
+      } catch (error) {
+        console.error('❌ Error:', error);
+        showToast('❌ Error al registrar', 'error');
+      } finally {
+        isProcessing = false;
+      }
+    }
+
     // ============ LOGIN ============
     async function authenticateUser(username, pin) {
-      showLoading('Verificando...');
+      updateLoading('Verificando credenciales...');
       
       const q = query(
-        collection(db, "employees"),
+        collection(db, "Collaborators"),
         where("username", "==", username),
-        where("pin", "==", pin),
-        where("activo", "==", true)
+        where("pin", "==", pin)
       );
       
       const snapshot = await getDocs(q);
@@ -485,12 +694,7 @@
       return {
         uid: snapshot.docs[0].id,
         username: data.username,
-        name: `${data.firstName || ''} ${data.lastName || ''}`.trim() || username,
-        firstName: data.firstName || '',
-        lastName: data.lastName || '',
-        fotoBase64: data.fotoBase64 || '',
-        turnoHoras: data.turnoHoras || 8,
-        email: data.email || ''
+        name: `${data.firstName || ''} ${data.lastName || ''}`.trim() || username
       };
     }
 
@@ -513,25 +717,27 @@
         
         sessionStorage.setItem('facial_currentUser', JSON.stringify(currentUser));
         
-        await iniciarSistemaFacial();
+        updateLoading('Cargando TensorFlow.js...');
+        await cargarModeloTensorFlow();
+        await iniciarCamara();
+        
+        loadingOverlay.style.display = 'none';
         
         passwordInput.value = '';
         hideLoginAlert();
         showToast(`Bienvenido ${currentUser.name}`);
         
       } catch (error) {
+        loadingOverlay.style.display = 'none';
         showLoginAlert(error.message);
-      } finally {
-        hideLoading();
       }
     });
 
-    usernameInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') passwordInput.focus();
-    });
-    
-    passwordInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') loginBtn.click();
+    document.getElementById('btnRegistrarPorCodigo').addEventListener('click', async () => {
+      const codigo = document.getElementById('codigoInput').value.trim().toUpperCase();
+      if (!codigo) { showToast('❌ Ingrese código', 'error'); return; }
+      await procesarRegistro(codigo, 'manual');
+      document.getElementById('codigoInput').value = '';
     });
 
     logoutBtn.addEventListener('click', () => {
@@ -550,96 +756,14 @@
       hideLoginAlert();
     });
 
-    // ============ TENSORFLOW.JS ============
-    async function cargarModeloTensorFlow() {
-      try {
-        model = await blazeface.load();
-        return true;
-      } catch (error) {
-        console.error('Error cargando modelo:', error);
-        return false;
-      }
-    }
+    usernameInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') passwordInput.focus();
+    });
+    
+    passwordInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') loginBtn.click();
+    });
 
-    async function iniciarCamara() {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'user' } 
-      });
-      video.srcObject = stream;
-      
-      return new Promise((resolve) => {
-        video.onloadedmetadata = () => {
-          video.play();
-          videoStarted = true;
-          resolve();
-        };
-      });
-    }
-
-    async function cargarEmpleadosParaReconocimiento() {
-      if (!currentUser) return;
-      
-      try {
-        const q = query(
-          collection(db, "employees"),
-          where("adminId", "==", currentUser.adminId || '')
-        );
-        
-        const snapshot = await getDocs(q);
-        employeesData = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        
-      } catch (error) {
-        console.error('Error cargando empleados:', error);
-      }
-    }
-
-    async function detectarYComparar() {
-      if (!model || !videoStarted) return;
-
-      try {
-        const predictions = await model.estimateFaces(video, false);
-        
-        if (predictions.length > 0) {
-          // Aquí iría la lógica de comparación facial
-          // Por ahora solo detectamos
-          console.log('Rostro detectado');
-        }
-      } catch (error) {}
-    }
-
-    function iniciarDeteccion() {
-      if (detectionInterval) clearInterval(detectionInterval);
-      
-      detectionInterval = setInterval(detectarYComparar, 2000);
-    }
-
-    async function iniciarSistemaFacial() {
-      showLoading('Cargando TensorFlow.js...');
-      
-      try {
-        const modeloOK = await cargarModeloTensorFlow();
-        if (!modeloOK) {
-          showToast('Error cargando modelo', 'error');
-          return;
-        }
-        
-        await iniciarCamara();
-        await cargarEmpleadosParaReconocimiento();
-        iniciarDeteccion();
-        
-        hideLoading();
-        
-      } catch (error) {
-        console.error('Error:', error);
-        hideLoading();
-        showToast('Error al iniciar sistema', 'error');
-      }
-    }
-
-    // Verificar sesión guardada
     const savedUser = sessionStorage.getItem('facial_currentUser');
     if (savedUser) {
       try {
@@ -647,7 +771,12 @@
         displayName.textContent = currentUser.name;
         loginScreen.style.display = 'none';
         cameraScreen.style.display = 'flex';
-        iniciarSistemaFacial();
+        
+        (async () => {
+          await cargarModeloTensorFlow();
+          await iniciarCamara();
+          loadingOverlay.style.display = 'none';
+        })();
       } catch (e) {
         sessionStorage.removeItem('facial_currentUser');
       }
