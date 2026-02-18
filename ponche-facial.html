@@ -2,440 +2,753 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>Asistencia Facial - PlusMoney</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Asistencia Facial - TensorFlow.js</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <!-- TENSORFLOW.JS (NO FACEAPI) -->
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.11.0/dist/tf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface@0.0.5/dist/blazeface.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1/dist/face-api.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+      -webkit-tap-highlight-color: transparent; 
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    
     :root { 
-      --primary-color: #16e086; 
-      --primary-dark: #15a086; 
-      --secondary-color: #3498db; 
-      --danger-color: #e74c3c; 
-      --warning-color: #f39c12;
-      --dark-bg: #1a2b3c;
-      --darker-bg: #0d1824;
-      --text-primary: #ffffff;
-      --text-secondary: rgba(255, 255, 255, 0.7);
-      --border-color: rgba(255, 255, 255, 0.1);
-      --shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      --border-radius: 12px;
+      --primary: #16e086; 
+      --primary-dark: #0da85c; 
+      --secondary: #2e4a55; 
+      --dark: #0e1c22; 
+      --danger: #e74c3c; 
+      --warning: #f39c12; 
+      --success: #16e086;
+      --error: #e74c3c;
+      --text-secondary: rgba(255,255,255,0.7);
+      --bg-overlay: rgba(0, 0, 0, 0.85);
+      --card-bg: rgba(30, 41, 48, 0.95);
+      
+      /* Tamaños responsivos nativos */
+      --text-xs: clamp(0.7rem, 2vw, 0.8rem);
+      --text-sm: clamp(0.8rem, 2.5vw, 0.9rem);
+      --text-base: clamp(0.9rem, 3vw, 1rem);
+      --text-lg: clamp(1.1rem, 4vw, 1.2rem);
+      --text-xl: clamp(1.3rem, 5vw, 1.5rem);
+      --text-2xl: clamp(1.6rem, 6vw, 2rem);
+      --text-3xl: clamp(2rem, 8vw, 2.5rem);
+      
+      --spacing-xs: clamp(6px, 1.5vw, 8px);
+      --spacing-sm: clamp(8px, 2vw, 12px);
+      --spacing-md: clamp(12px, 3vw, 18px);
+      --spacing-lg: clamp(18px, 4vw, 24px);
+      --spacing-xl: clamp(24px, 5vw, 32px);
+      
+      --border-radius: clamp(16px, 5vw, 28px);
+      --border-radius-sm: clamp(10px, 3vw, 16px);
+      --border-radius-lg: clamp(24px, 6vw, 36px);
+      
+      --safe-area-inset-top: env(safe-area-inset-top, 0px);
+      --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
     }
     
     body { 
-      background: linear-gradient(135deg, var(--darker-bg), var(--dark-bg)); 
+      background: #000; 
       min-height: 100vh; 
       display: flex; 
       justify-content: center; 
       align-items: center; 
+      overflow: hidden; 
+      font-size: var(--text-base);
+      position: fixed;
+      width: 100%;
+      height: 100%;
+    }
+    
+    .fullscreen-container { 
+      position: relative; 
+      width: 100vw; 
+      height: 100vh; 
+      background: #000; 
       overflow: hidden;
     }
     
-    /* LOGIN SCREEN */
-    .login-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      background: linear-gradient(135deg, var(--darker-bg), var(--dark-bg));
-      padding: 20px;
-      width: 100%;
-    }
-
-    .login-card {
-      background: #233445;
-      border-radius: var(--border-radius);
-      padding: 30px;
-      width: 100%;
-      max-width: 400px;
-      box-shadow: var(--shadow);
-      text-align: center;
-      border: 1px solid rgba(22, 224, 134, 0.2);
-    }
-
-    .logo {
-      width: 60px;
-      height: 60px;
-      background: #ffffff;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      color: var(--primary-color);
-      margin: 0 auto 15px;
-    }
-
-    .login-card h1 {
-      color: var(--primary-color);
-      margin-bottom: 10px;
-      font-size: 20px;
-    }
-
-    .login-card p {
-      color: var(--text-secondary);
-      margin-bottom: 25px;
-      font-size: 14px;
-    }
-
-    .form-input {
-      width: 100%;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1.5px solid var(--border-color);
-      border-radius: 8px;
-      padding: 12px;
-      color: var(--text-primary);
-      font-size: 14px;
-      outline: none;
-      margin-bottom: 15px;
-    }
-
-    .form-input:focus {
-      border-color: var(--primary-color);
-      background: rgba(255, 255, 255, 0.12);
-    }
-
-    .btn {
-      width: 100%;
-      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-      border: none;
-      border-radius: 8px;
-      padding: 14px;
-      color: white;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    .btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 15px rgba(22, 224, 134, 0.3);
-    }
-
-    .alert {
-      padding: 12px 16px;
-      border-radius: 8px;
-      margin-top: 15px;
-      display: flex;
-      align-items: center;
-      border-left: 4px solid;
-      font-size: 14px;
-    }
-
-    .alert-error {
-      background-color: rgba(231, 76, 60, 0.15);
-      border-left-color: var(--danger-color);
-    }
-
-    /* PANTALLA DE CÁMARA */
-    .camera-container {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: #000;
-      flex-direction: column;
-    }
-    
-    .camera-header {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 20;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 15px 20px;
-      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-      box-shadow: var(--shadow);
-    }
-    
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    
-    .user-avatar {
-      width: 40px;
-      height: 40px;
-      background: #ffffff;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--primary-color);
-    }
-    
-    #displayName {
-      font-weight: bold;
-      color: white;
-    }
-    
-    .logout-btn {
-      background: rgba(255,255,255,0.1);
-      border: none;
-      color: white;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-    
-    .logout-btn:hover {
-      background: rgba(255,255,255,0.2);
+    .camera-full { 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      z-index: 1; 
     }
     
     #videoFacial { 
       width: 100%; 
       height: 100%; 
       object-fit: cover; 
-      /* SIN INVERTIR */
+      transform: scaleX(-1); 
     }
     
+    .overlay-content { 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      z-index: 10; 
+      display: flex; 
+      flex-direction: column; 
+      justify-content: space-between; 
+      padding: var(--spacing-md); 
+      padding-top: max(var(--spacing-md), var(--safe-area-inset-top));
+      padding-bottom: max(var(--spacing-md), var(--safe-area-inset-bottom));
+      pointer-events: none; 
+    }
+    
+    .overlay-content * { 
+      pointer-events: auto; 
+    }
+    
+    /* Top bar mejorada - estilo más nativo */
+    .top-bar { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      background: var(--card-bg);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      padding: var(--spacing-sm) var(--spacing-md); 
+      border-radius: var(--border-radius-lg); 
+      border: 1px solid rgba(22, 224, 134, 0.3); 
+      color: white; 
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+      transition: all 0.3s ease;
+    }
+    
+    .title { 
+      display: flex; 
+      align-items: center; 
+      gap: var(--spacing-xs); 
+    }
+    
+    .title i {
+      font-size: var(--text-xl);
+      color: var(--primary);
+      text-shadow: 0 0 10px rgba(22, 224, 134, 0.5);
+    }
+    
+    .title h1 { 
+      font-size: var(--text-lg); 
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+    
+    /* Menú de usuario elegante */
+    .menu-container {
+      position: relative;
+    }
+    
+    .menu-button {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 30px;
+      padding: var(--spacing-xs) var(--spacing-sm);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .menu-button:hover,
+    .menu-button:active {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .user-name-short {
+      font-weight: 600;
+      max-width: 100px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: var(--text-sm);
+    }
+    
+    .menu-button i {
+      font-size: var(--text-base);
+      color: var(--primary);
+    }
+    
+    /* Modal de menú elegante */
+    .menu-modal {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      background: var(--card-bg);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-radius: var(--border-radius);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      min-width: 220px;
+      padding: var(--spacing-sm);
+      z-index: 100;
+      display: none;
+      transform-origin: top right;
+      animation: menuAppear 0.2s ease;
+    }
+    
+    @keyframes menuAppear {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    
+    .menu-modal.show {
+      display: block;
+    }
+    
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-md);
+      border-radius: var(--border-radius-sm);
+      color: white;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      width: 100%;
+      font-size: var(--text-base);
+    }
+    
+    .menu-item:hover,
+    .menu-item:active {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .menu-item i {
+      width: 24px;
+      font-size: var(--text-lg);
+    }
+    
+    .menu-item.logout {
+      color: var(--danger);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: var(--spacing-xs);
+    }
+    
+    .menu-item.logout i {
+      color: var(--danger);
+    }
+    
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 30px;
+      padding: var(--spacing-xs) var(--spacing-sm);
+    }
+    
+    .status-led { 
+      width: clamp(10px, 2vw, 12px); 
+      height: clamp(10px, 2vw, 12px); 
+      background: var(--primary); 
+      border-radius: 50%; 
+      display: inline-block; 
+      animation: pulse 2s infinite;
+      box-shadow: 0 0 10px var(--primary);
+    }
+    
+    @keyframes pulse { 
+      0% { opacity: 1; transform: scale(1); } 
+      50% { opacity: 0.6; transform: scale(0.95); } 
+      100% { opacity: 1; transform: scale(1); } 
+    }
+    
+    .status-text {
+      font-size: var(--text-xs);
+      color: var(--text-secondary);
+    }
+    
+    .user-info {
+      display: none; /* Ocultamos la versión anterior */
+    }
+    
+    #companyName {
+      font-size: var(--text-sm);
+      color: var(--primary);
+      font-weight: 500;
+    }
+    
+    /* ===== NUEVO INDICADOR DE ESTADO ===== */
+    /* Reemplaza los iconos flotantes eliminados */
+    .status-indicator-large {
+      position: absolute;
+      bottom: max(var(--spacing-xl), var(--safe-area-inset-bottom));
+      left: 50%;
+      transform: translateX(-50%);
+      width: clamp(70px, 15vw, 90px);
+      height: clamp(70px, 15vw, 90px);
+      border-radius: 50%;
+      background: var(--card-bg);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 40;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+    
+    .status-icon {
+      font-size: var(--text-3xl);
+      transition: all 0.3s ease;
+    }
+    
+    .status-icon.success {
+      color: var(--success);
+      filter: drop-shadow(0 0 15px var(--success));
+      animation: successPop 0.4s ease;
+    }
+    
+    .status-icon.error {
+      color: var(--error);
+      filter: drop-shadow(0 0 15px var(--error));
+      animation: errorShake 0.4s ease;
+    }
+    
+    .status-icon.idle {
+      color: rgba(255, 255, 255, 0.3);
+    }
+    
+    @keyframes successPop {
+      0% { transform: scale(0); opacity: 0; }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    
+    @keyframes errorShake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    
+    .status-label {
+      position: absolute;
+      bottom: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      font-size: var(--text-xs);
+      white-space: nowrap;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(5px);
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      opacity: 0.8;
+    }
+    
+    /* Modal de resultado mejorado */
     .resultado-flotante { 
       position: absolute; 
       top: 50%; 
       left: 50%; 
       transform: translate(-50%, -50%); 
       width: 90%; 
-      max-width: 450px; 
-      background: #233445; 
-      border-radius: var(--border-radius); 
-      padding: 25px; 
-      border: 2px solid var(--primary-color); 
+      max-width: 400px; 
+      background: var(--card-bg);
+      backdrop-filter: blur(25px) saturate(180%);
+      -webkit-backdrop-filter: blur(25px) saturate(180%);
+      border-radius: var(--border-radius-lg); 
+      padding: var(--spacing-xl); 
+      border: 1.5px solid var(--primary); 
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 0 2px rgba(22, 224, 134, 0.1) inset; 
       display: none; 
       flex-direction: column; 
-      gap: 15px; 
+      align-items: center;
+      gap: var(--spacing-lg); 
       z-index: 50; 
-      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      animation: modalAppear 0.3s ease;
     }
     
-    .resultado-header {
-      display: flex;
-      align-items: center;
-      gap: 20px;
+    @keyframes modalAppear {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -40%);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+      }
+    }
+    
+    .resultado-header { 
+      display: flex; 
+      flex-direction: column;
+      align-items: center; 
+      gap: var(--spacing-md); 
+      width: 100%;
     }
     
     .foto-colaborador { 
-      width: 80px; 
-      height: 80px; 
+      width: clamp(110px, 25vw, 140px); 
+      height: clamp(110px, 25vw, 140px); 
       border-radius: 50%; 
       object-fit: cover; 
-      border: 3px solid var(--primary-color); 
+      border: 4px solid var(--primary); 
+      box-shadow: 0 0 30px rgba(22, 224, 134, 0.4);
+    }
+    
+    .info-colaborador { 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center;
+      gap: var(--spacing-xs); 
+      width: 100%;
+      text-align: center;
     }
     
     .nombre-colaborador { 
       color: white; 
-      font-size: 1.5rem; 
-      font-weight: bold; 
+      font-size: var(--text-xl); 
+      font-weight: 700; 
+      line-height: 1.3;
+      letter-spacing: -0.5px;
+    }
+    
+    #codigoDisplay { 
+      color: var(--primary); 
+      font-size: var(--text-sm); 
+      opacity: 0.9;
     }
     
     .tipo-registro { 
       display: inline-block; 
-      padding: 5px 15px; 
+      padding: var(--spacing-xs) var(--spacing-lg); 
       border-radius: 40px; 
-      font-weight: bold; 
+      font-weight: 700; 
+      font-size: var(--text-sm);
+      letter-spacing: 0.5px;
     }
     
     .entrada { 
-      background: var(--primary-color); 
+      background: var(--primary); 
       color: #000; 
+      box-shadow: 0 0 15px var(--primary);
     }
     
     .salida { 
-      background: var(--danger-color); 
+      background: var(--danger); 
       color: white; 
+      box-shadow: 0 0 15px var(--danger);
     }
     
-    .codigo-input-container {
-      position: absolute;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 90%;
-      max-width: 500px;
-      background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(10px);
-      border-radius: 50px;
-      padding: 12px 20px;
-      border: 1px solid var(--primary-color);
-      display: flex;
-      gap: 10px;
-      z-index: 30;
+    .fecha-hora { 
+      color: rgba(255,255,255,0.7); 
+      font-size: var(--text-sm); 
+      background: rgba(0,0,0,0.3);
+      padding: var(--spacing-xs) var(--spacing-md);
+      border-radius: 30px;
+      width: fit-content;
     }
     
-    .codigo-input {
-      flex: 1;
-      background: rgba(255,255,255,0.1);
-      border: 1px solid var(--primary-color);
-      border-radius: 40px;
-      padding: 10px 15px;
-      color: white;
-      outline: none;
+    #parIdDisplay { 
+      color: var(--warning); 
+      font-size: var(--text-xs); 
+      background: rgba(243, 156, 18, 0.1);
+      padding: var(--spacing-xs) var(--spacing-sm);
+      border-radius: 30px;
     }
     
-    .btn-codigo {
-      background: var(--primary-color);
-      border: none;
-      border-radius: 40px;
-      padding: 10px 25px;
-      font-weight: bold;
-      cursor: pointer;
-      color: #000;
-    }
-    
+    /* Loading overlay mejorado */
     .loading-overlay { 
       position: fixed; 
       inset: 0; 
       background: rgba(0,0,0,0.95); 
-      display: flex; 
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: none; 
       flex-direction: column; 
       justify-content: center; 
       align-items: center; 
-      z-index: 100; 
+      z-index: 1000; 
+      padding: var(--spacing-lg);
     }
     
     .spinner { 
-      border: 4px solid rgba(255,255,255,0.1); 
-      border-top: 4px solid var(--primary-color); 
+      border: 3px solid rgba(22,224,134,0.1); 
+      border-top: 3px solid var(--primary); 
       border-radius: 50%; 
-      width: 50px; 
-      height: 50px; 
-      animation: spin 1s linear infinite; 
-      margin-bottom: 20px; 
+      width: clamp(45px, 10vw, 55px); 
+      height: clamp(45px, 10vw, 55px); 
+      animation: spin 0.8s linear infinite; 
+      margin-bottom: var(--spacing-md); 
     }
     
-    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes spin { 
+      0% { transform: rotate(0deg); } 
+      100% { transform: rotate(360deg); } 
+    }
     
+    /* Toast elegante */
     .toast { 
       position: fixed; 
-      bottom: 30px; 
+      bottom: max(calc(var(--spacing-xl) * 2.5), var(--safe-area-inset-bottom));
       left: 50%; 
       transform: translateX(-50%); 
-      padding: 12px 25px; 
-      border-radius: 50px; 
-      background: rgba(0,0,0,0.9); 
-      border: 1px solid var(--primary-color); 
+      padding: var(--spacing-sm) var(--spacing-xl); 
+      border-radius: 40px; 
+      background: var(--card-bg);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--primary); 
       color: white; 
       z-index: 200; 
       display: none; 
+      font-size: var(--text-sm);
+      max-width: 90%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      animation: toastAppear 0.2s ease;
     }
     
-    .admin-links {
-      position: absolute;
-      bottom: 100px;
-      right: 20px;
-      z-index: 30;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    @keyframes toastAppear {
+      from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
     }
     
-    .admin-link {
-      background: rgba(0,0,0,0.7);
-      color: white;
-      padding: 10px 20px;
-      border-radius: 50px;
-      border: 1px solid var(--primary-color);
-      text-decoration: none;
+    /* Login mejorado */
+    .login-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #0a1a20, #1a2f38);
       display: flex;
+      justify-content: center;
       align-items: center;
-      gap: 8px;
-      font-size: 0.9rem;
-      backdrop-filter: blur(10px);
+      z-index: 1000;
+    }
+    
+    .login-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-radius: var(--border-radius-lg);
+      padding: var(--spacing-xl);
+      width: 90%;
+      max-width: 380px;
+      border: 1px solid rgba(22, 224, 134, 0.3);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+    
+    .login-card h2 {
+      color: var(--primary);
+      text-align: center;
+      margin-bottom: var(--spacing-xl);
+      font-size: var(--text-xl);
+      font-weight: 600;
+    }
+    
+    .login-input {
+      width: 100%;
+      padding: var(--spacing-md);
+      margin-bottom: var(--spacing-md);
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--border-radius-sm);
+      color: white;
+      font-size: var(--text-base);
+      transition: all 0.2s ease;
+    }
+    
+    .login-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: rgba(0,0,0,0.5);
+    }
+    
+    .alert {
+      padding: var(--spacing-sm);
+      border-radius: var(--border-radius-sm);
+      margin-bottom: var(--spacing-md);
+      display: none;
+      font-size: var(--text-sm);
+      text-align: center;
+    }
+    
+    .alert-error { 
+      background: rgba(231,76,60,0.2); 
+      border: 1px solid var(--danger); 
+      color: white; 
+    }
+    
+    .btn {
+      background: var(--primary);
+      color: #000;
+      border: none;
+      padding: var(--spacing-md);
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: var(--text-base);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+    
+    .btn:hover,
+    .btn:active {
+      background: var(--primary-dark);
+      transform: scale(0.98);
+    }
+    
+    @media (max-width: 480px) {
+      .top-bar {
+        padding: var(--spacing-xs) var(--spacing-sm);
+      }
+      
+      .title h1 {
+        font-size: var(--text-base);
+      }
+      
+      .menu-button .user-name-short {
+        max-width: 70px;
+      }
+      
+      .status-indicator-large {
+        width: 60px;
+        height: 60px;
+      }
+      
+      .status-icon {
+        font-size: 2rem;
+      }
     }
   </style>
 </head>
 <body>
-  <!-- LOGIN SCREEN -->
+  <!-- Login Screen -->
   <div id="loginScreen" class="login-container">
     <div class="login-card">
-      <div class="logo">
-        <i class="fas fa-clock"></i>
-      </div>
-      <h1>PlusMoney Asistencia</h1>
-      <p>Sistema de Reconocimiento Facial</p>
-      
-      <input type="text" id="username" class="form-input" placeholder="Usuario">
-      <input type="password" id="password" class="form-input" placeholder="PIN / Contraseña">
-      <button id="loginBtn" class="btn">
-        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
-      </button>
-      
-      <div id="loginAlert" class="alert alert-error" style="display: none;">
-        <i class="fas fa-exclamation-circle"></i>
-        <div id="loginAlertMessage"></div>
-      </div>
+      <h2><i class="fas fa-building"></i> Acceso Empresa</h2>
+      <input type="text" id="username" class="login-input" placeholder="Usuario" autocomplete="off">
+      <input type="password" id="password" class="login-input" placeholder="PIN (8 dígitos)" inputmode="numeric" pattern="[0-9]*">
+      <div id="loginAlert" class="alert alert-error"></div>
+      <button id="loginBtn" class="btn">Ingresar</button>
     </div>
   </div>
 
-  <!-- PANTALLA DE CÁMARA -->
-  <div id="cameraScreen" class="camera-container">
-    <div class="camera-header">
-      <div class="user-info">
-        <div class="user-avatar">
-          <i class="fas fa-user"></i>
+  <!-- Main App -->
+  <div id="appScreen" style="display: none;">
+    <div class="fullscreen-container">
+      <div class="camera-full">
+        <video id="videoFacial" autoplay muted playsinline></video>
+      </div>
+
+      <div class="overlay-content">
+        <!-- Top bar mejorada -->
+        <div class="top-bar">
+          <div class="title">
+            <i class="fas fa-user-shield"></i>
+            <h1>Asistencia</h1>
+          </div>
+          
+          <!-- Menú elegante (contiene REGISTRAR y REPORTES) -->
+          <div class="menu-container">
+            <div class="menu-button" id="menuButton">
+              <span class="user-name-short" id="companyName"></span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            
+            <!-- Modal del menú -->
+            <div class="menu-modal" id="menuModal">
+              <!-- Status indicator integrado -->
+              <div class="menu-item" style="pointer-events: none; opacity: 0.7;">
+                <div class="status-led"></div>
+                <span>Sistema activo</span>
+              </div>
+              
+              <div class="menu-item" id="menuUserInfo">
+                <i class="fas fa-user-circle"></i>
+                <span id="menuUserName">Usuario</span>
+              </div>
+              
+              <div class="menu-item" id="menuRegister">
+                <i class="fas fa-user-plus"></i>
+                <span>Registrar empleado</span>
+              </div>
+              
+              <div class="menu-item" id="menuReports">
+                <i class="fas fa-chart-bar"></i>
+                <span>Ver reportes</span>
+              </div>
+              
+              <button class="menu-item logout" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Cerrar sesión</span>
+              </button>
+            </div>
+          </div>
         </div>
-        <div>
-          <div style="font-size: 12px; opacity: 0.8;">COLABORADOR</div>
-          <div id="displayName" style="font-weight: bold;"></div>
+
+        <!-- Modal de resultado facial (se mantiene igual) -->
+        <div id="resultadoFlotante" class="resultado-flotante">
+          <div class="resultado-header">
+            <img id="fotoColaborador" class="foto-colaborador" src="" alt="Foto">
+            <div class="info-colaborador">
+              <div id="nombreDisplay" class="nombre-colaborador">---</div>
+              <div id="codigoDisplay">---</div>
+              <div id="tipoDisplay" class="tipo-registro">---</div>
+              <div id="fechaHoraDisplay" class="fecha-hora">---</div>
+              <div id="parIdDisplay">---</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- NUEVO INDICADOR VISUAL (reemplaza los iconos flotantes eliminados) -->
+        <div class="status-indicator-large" id="statusIndicator">
+          <div class="status-icon idle" id="statusIcon">
+            <i class="fas fa-circle"></i>
+          </div>
+          <div class="status-label" id="statusLabel">Esperando...</div>
         </div>
       </div>
       
-      <button class="logout-btn" id="logoutBtn">
-        <i class="fas fa-sign-out-alt"></i>
-      </button>
-    </div>
-    
-    <!-- CÁMARA SIN INVERTIR -->
-    <video id="videoFacial" autoplay muted playsinline></video>
-    
-    <div id="resultadoFlotante" class="resultado-flotante">
-      <div class="resultado-header">
-        <img id="fotoColaborador" class="foto-colaborador" src="">
-        <div>
-          <div id="nombreDisplay" class="nombre-colaborador">---</div>
-          <div id="codigoDisplay" style="color: var(--primary-color);">---</div>
-          <div id="tipoDisplay" class="tipo-registro">---</div>
-          <div id="fechaHoraDisplay" style="color: rgba(255,255,255,0.7); font-size: 0.8rem; margin-top: 5px;">---</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="codigo-input-container">
-      <input type="text" id="codigoInput" class="codigo-input" placeholder="Código empleado" autocomplete="off">
-      <button id="btnRegistrarPorCodigo" class="btn-codigo">REGISTRAR</button>
-    </div>
-    
-    <div class="admin-links">
-      <a href="registro_empleados.html" class="admin-link"><i class="fas fa-cog"></i> ADMIN</a>
-      <a href="reportes.html" class="admin-link"><i class="fas fa-chart-bar"></i> REPORTES</a>
+      <!-- ICONOS FLOTANTES ELIMINADOS COMPLETAMENTE -->
     </div>
   </div>
 
-  <!-- LOADING OVERLAY -->
+  <!-- Toast Notification -->
+  <div class="toast" id="toastNotification"></div>
+  
+  <!-- Loading Overlay -->
   <div class="loading-overlay" id="loadingOverlay">
     <div class="spinner"></div>
-    <div id="loadingText">Cargando TensorFlow.js...</div>
-    <div id="loadingSubtext">Inicializando sistema</div>
+    <div id="loadingText">Cargando...</div>
   </div>
-
-  <!-- TOAST -->
-  <div class="toast" id="toastNotification"></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
@@ -448,9 +761,11 @@
       where, 
       orderBy, 
       limit, 
-      Timestamp
+      Timestamp,
+      onSnapshot
     } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
+    // Configuración de Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAMTWJr3mISmNiP-e_KjCO9BdBPi7Uuug4",
       authDomain: "formulario-2-8929a.firebaseapp.com",
@@ -463,81 +778,357 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Elementos DOM
+    // ============= VARIABLES GLOBALES =============
+    let faceMatcher = null;
+    let labeledFaceDescriptors = [];
+    let employeesData = new Map();
+    let isProcessing = false;
+    let videoStarted = false;
+    let detectionInterval = null;
+    let modelosCargados = false;
+    let currentUser = null;
+    
+    const CONFIG = {
+      UMBRAL_PRECISION: 0.5,
+      DETECTION_INTERVAL: 2500,
+      COOLDOWN_SEGUNDOS: 60,
+      MIN_CONFIDENCE: 0.4,
+      MODEL_URL: 'https://raw.githubusercontent.com/vladmandic/face-api/master/model/'
+    };
+
+    // ============= ELEMENTOS DOM =============
+    const video = document.getElementById('videoFacial');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const loadingText = document.getElementById('loadingText');
+    const toast = document.getElementById('toastNotification');
+    const resultadoFlotante = document.getElementById('resultadoFlotante');
     const loginScreen = document.getElementById('loginScreen');
-    const cameraScreen = document.getElementById('cameraScreen');
+    const appScreen = document.getElementById('appScreen');
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
     const loginBtn = document.getElementById('loginBtn');
     const loginAlert = document.getElementById('loginAlert');
-    const loginAlertMessage = document.getElementById('loginAlertMessage');
     const logoutBtn = document.getElementById('logoutBtn');
-    const displayName = document.getElementById('displayName');
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    const loadingText = document.getElementById('loadingText');
-    const loadingSubtext = document.getElementById('loadingSubtext');
-    const toast = document.getElementById('toastNotification');
-    const resultadoFlotante = document.getElementById('resultadoFlotante');
+    const companyNameSpan = document.getElementById('companyName');
+    const menuButton = document.getElementById('menuButton');
+    const menuModal = document.getElementById('menuModal');
+    const menuUserName = document.getElementById('menuUserName');
+    const menuRegister = document.getElementById('menuRegister');
+    const menuReports = document.getElementById('menuReports');
     
-    // Variables
-    let currentUser = null;
-    let isProcessing = false;
-    let videoStarted = false;
-    let detectionInterval = null;
-    let model = null;
-    let employeesData = [];
-    const video = document.getElementById('videoFacial');
-    
-    const COOLDOWN_SEGUNDOS = 60;
+    // Nuevos elementos del indicador de estado
+    const statusIndicator = document.getElementById('statusIndicator');
+    const statusIcon = document.getElementById('statusIcon');
+    const statusLabel = document.getElementById('statusLabel');
 
+    // ============= FUNCIONES UTILERÍA =============
     function showToast(message, type = 'success') {
       toast.textContent = message;
       toast.style.background = type === 'success' ? 'rgba(22,224,134,0.2)' : 'rgba(231,76,60,0.2)';
+      toast.style.borderColor = type === 'success' ? 'var(--primary)' : 'var(--danger)';
       toast.style.display = 'block';
       setTimeout(() => { toast.style.display = 'none'; }, 3000);
     }
 
-    function updateLoading(message, submessage = '') {
+    function showLoading(message = 'Cargando...') {
       loadingText.textContent = message;
-      loadingSubtext.textContent = submessage;
+      loadingOverlay.style.display = 'flex';
     }
 
-    function showLoginAlert(message) {
-      loginAlertMessage.textContent = message;
-      loginAlert.style.display = 'flex';
+    function hideLoading() {
+      loadingOverlay.style.display = 'none';
     }
 
-    function hideLoginAlert() {
+    // Función para actualizar el indicador de estado
+    function updateStatusIndicator(type, message) {
+      if (!statusIcon || !statusLabel) return;
+      
+      // Remover clases anteriores
+      statusIcon.className = 'status-icon';
+      
+      if (type === 'success') {
+        statusIcon.classList.add('success');
+        statusIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
+        statusLabel.textContent = message || 'Registro exitoso';
+      } else if (type === 'error') {
+        statusIcon.classList.add('error');
+        statusIcon.innerHTML = '<i class="fas fa-times-circle"></i>';
+        statusLabel.textContent = message || 'Error en registro';
+      } else {
+        statusIcon.classList.add('idle');
+        statusIcon.innerHTML = '<i class="fas fa-circle"></i>';
+        statusLabel.textContent = message || 'Esperando...';
+      }
+      
+      // Auto-revertir a idle después de 3 segundos
+      if (type !== 'idle') {
+        setTimeout(() => {
+          statusIcon.className = 'status-icon idle';
+          statusIcon.innerHTML = '<i class="fas fa-circle"></i>';
+          statusLabel.textContent = 'Esperando...';
+        }, 3000);
+      }
+    }
+
+    // Cerrar menú al hacer clic fuera
+    document.addEventListener('click', (e) => {
+      if (menuModal && menuButton && !menuButton.contains(e.target) && !menuModal.contains(e.target)) {
+        menuModal.classList.remove('show');
+      }
+    });
+
+    // Toggle del menú
+    if (menuButton) {
+      menuButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        menuModal.classList.toggle('show');
+      });
+    }
+
+    // ============= LOGIN CON SESIÓN PERMANENTE =============
+    async function authenticateUser(username, pin) {
+      try {
+        showLoading('Verificando credenciales...');
+        
+        const q = query(
+          collection(db, "Collaborators"),
+          where("username", "==", username),
+          where("pin", "==", pin)
+        );
+        
+        const snapshot = await getDocs(q);
+        
+        if (snapshot.empty) {
+          throw new Error('Usuario o PIN incorrectos');
+        }
+        
+        const userDoc = snapshot.docs[0];
+        const userData = userDoc.data();
+        
+        const user = {
+          uid: userDoc.id,
+          username: userData.username,
+          name: userData.companyName || `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || username
+        };
+        
+        // Guardar sesión en localStorage
+        localStorage.setItem('currentUserAsistencia', JSON.stringify(user));
+        
+        return user;
+        
+      } catch (error) {
+        console.error('Login error:', error);
+        throw error;
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function loadSavedSession() {
+      const saved = localStorage.getItem('currentUserAsistencia');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch {
+          return null;
+        }
+      }
+      return null;
+    }
+
+    async function initWithUser(user) {
+      currentUser = user;
+      companyNameSpan.textContent = user.name.split(' ')[0]; // Solo primer nombre para el botón
+      if (menuUserName) {
+        menuUserName.textContent = user.name;
+      }
+      
+      loginScreen.style.display = 'none';
+      appScreen.style.display = 'block';
+      
+      await cargarModelos();
+      await iniciarCamara();
+      iniciarEscuchaEmpleados(); // Tiempo real
+      iniciarDeteccion();
+      
+      passwordInput.value = '';
       loginAlert.style.display = 'none';
+      
+      // Resetear indicador
+      updateStatusIndicator('idle');
     }
 
-    // ============ TENSORFLOW.JS ============
-    async function cargarModeloTensorFlow() {
-      updateLoading('Cargando TensorFlow.js...');
-      model = await blazeface.load();
-      return true;
+    // Verificar sesión al cargar
+    const savedUser = loadSavedSession();
+    if (savedUser) {
+      initWithUser(savedUser);
+    }
+
+    loginBtn.addEventListener('click', async () => {
+      const username = usernameInput.value.trim();
+      const pin = passwordInput.value.trim();
+      
+      if (!username || !pin) {
+        loginAlert.textContent = 'Complete todos los campos';
+        loginAlert.style.display = 'block';
+        return;
+      }
+      
+      try {
+        const userData = await authenticateUser(username, pin);
+        await initWithUser(userData);
+      } catch (error) {
+        loginAlert.textContent = error.message;
+        loginAlert.style.display = 'block';
+        updateStatusIndicator('error', 'Error de login');
+      }
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('currentUserAsistencia');
+      currentUser = null;
+      appScreen.style.display = 'none';
+      loginScreen.style.display = 'flex';
+      usernameInput.value = '';
+      passwordInput.value = '';
+      menuModal.classList.remove('show');
+      
+      if (detectionInterval) clearInterval(detectionInterval);
+      if (video.srcObject) {
+        video.srcObject.getTracks().forEach(track => track.stop());
+      }
+      
+      updateStatusIndicator('idle');
+    });
+
+    // Menú items
+    if (menuRegister) {
+      menuRegister.addEventListener('click', () => {
+        window.location.href = 'registro_empleado.html';
+      });
+    }
+    
+    if (menuReports) {
+      menuReports.addEventListener('click', () => {
+        window.location.href = 'reportes.html';
+      });
+    }
+
+    usernameInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') passwordInput.focus();
+    });
+    
+    passwordInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') loginBtn.click();
+    });
+
+    // ============= CARGAR MODELOS =============
+    async function cargarModelos() {
+      try {
+        showLoading('Cargando modelos faciales...');
+        await faceapi.nets.ssdMobilenetv1.loadFromUri(CONFIG.MODEL_URL);
+        await faceapi.nets.faceLandmark68Net.loadFromUri(CONFIG.MODEL_URL);
+        await faceapi.nets.faceRecognitionNet.loadFromUri(CONFIG.MODEL_URL);
+        modelosCargados = true;
+        hideLoading();
+      } catch (error) {
+        console.error('Error cargando modelos:', error);
+        showToast('Error cargando modelos', 'error');
+        updateStatusIndicator('error', 'Error cargando modelos');
+        hideLoading();
+      }
     }
 
     async function iniciarCamara() {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
-          facingMode: 'user',
-          width: { ideal: 640 },
-          height: { ideal: 480 }
-        } 
-      });
-      video.srcObject = stream;
-      return new Promise((resolve) => {
-        video.onloadedmetadata = () => { video.play(); videoStarted = true; resolve(); };
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            facingMode: 'user',
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          } 
+        });
+        video.srcObject = stream;
+        return new Promise((resolve) => {
+          video.onloadedmetadata = () => { 
+            video.play(); 
+            videoStarted = true; 
+            resolve(); 
+          };
+        });
+      } catch (error) {
+        console.error('Error cámara:', error);
+        showToast('Error al acceder a la cámara', 'error');
+        updateStatusIndicator('error', 'Error de cámara');
+      }
+    }
+
+    // ============= ESCUCHA EN TIEMPO REAL DE EMPLEADOS =============
+    function iniciarEscuchaEmpleados() {
+      if (!currentUser) return;
+      
+      const q = query(
+        collection(db, 'Ponche'),
+        where('collaboratorId', '==', currentUser.uid)
+      );
+      
+      onSnapshot(q, (snapshot) => {
+        const descriptors = [];
+        employeesData.clear();
+        
+        const promises = [];
+        
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          if (data.activo !== false && data.fotoBase64 && data.username) {
+            employeesData.set(data.username, {
+              id: doc.id,
+              firstName: data.firstName || '',
+              lastName: data.lastName || '',
+              fotoBase64: data.fotoBase64,
+              turnoHoras: data.turnoHoras || 8,
+              collaboratorId: data.collaboratorId
+            });
+            
+            // Cargar descriptor para reconocimiento
+            const img = new Image();
+            img.src = data.fotoBase64;
+            const promise = new Promise((resolve) => {
+              img.onload = async () => {
+                try {
+                  const detection = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+                  if (detection) {
+                    descriptors.push(new faceapi.LabeledFaceDescriptors(data.username, [detection.descriptor]));
+                  }
+                } catch (error) {
+                  console.error('Error detectando rostro:', error);
+                }
+                resolve();
+              };
+              img.onerror = resolve;
+            });
+            promises.push(promise);
+          }
+        });
+        
+        Promise.all(promises).then(() => {
+          if (descriptors.length > 0) {
+            faceMatcher = new faceapi.FaceMatcher(descriptors, CONFIG.UMBRAL_PRECISION);
+            console.log('✅ FaceMatcher actualizado con', descriptors.length, 'empleados');
+          }
+        });
       });
     }
 
     // ============= VERIFICAR COOLDOWN =============
     async function verificarCooldown(codigo) {
+      if (!currentUser) return false;
+      
       try {
         const q = query(
           collection(db, 'facialAttendance'),
           where('collaboratorCode', '==', codigo),
+          where('collaboratorId', '==', currentUser.uid),
           orderBy('timestamp', 'desc'),
           limit(1)
         );
@@ -549,35 +1140,39 @@
         const ahora = new Date();
         const diffSegundos = (ahora - lastTime) / 1000;
         
-        if (diffSegundos < COOLDOWN_SEGUNDOS) {
-          const segundosRestantes = Math.ceil(COOLDOWN_SEGUNDOS - diffSegundos);
+        if (diffSegundos < CONFIG.COOLDOWN_SEGUNDOS) {
+          const segundosRestantes = Math.ceil(CONFIG.COOLDOWN_SEGUNDOS - diffSegundos);
           showToast(`⏳ Espere ${segundosRestantes} segundos`, 'error');
           return false;
         }
         return true;
       } catch (error) {
+        console.error('Error cooldown:', error);
         return true;
       }
     }
 
     // ============= DETERMINAR TIPO CON PAR ID =============
     async function determinarTipoConPar(codigo) {
+      if (!currentUser) return { tipo: 'entry', parId: `PAR_${codigo}_${Date.now()}` };
+      
       try {
         const q = query(
           collection(db, 'facialAttendance'),
           where('collaboratorCode', '==', codigo),
-          orderBy('timestamp', 'desc')
+          where('collaboratorId', '==', currentUser.uid),
+          orderBy('timestamp', 'desc'),
+          limit(1)
         );
         
         const snapshot = await getDocs(q);
-        const registros = snapshot.docs.map(doc => doc.data());
         
-        if (registros.length === 0) {
+        if (snapshot.empty) {
           const nuevoParId = `PAR_${codigo}_${Date.now()}`;
           return { tipo: 'entry', parId: nuevoParId };
         }
         
-        const ultimoRegistro = registros[0];
+        const ultimoRegistro = snapshot.docs[0].data();
         
         if (ultimoRegistro.type === 'entry') {
           return { tipo: 'exit', parId: ultimoRegistro.parId };
@@ -587,35 +1182,30 @@
         return { tipo: 'entry', parId: nuevoParId };
         
       } catch (error) {
-        const nuevoParId = `PAR_${codigo}_${Date.now()}`;
-        return { tipo: 'entry', parId: nuevoParId };
+        console.error('Error tipo:', error);
+        return { tipo: 'entry', parId: `PAR_${codigo}_${Date.now()}` };
       }
     }
 
     // ============= PROCESAR REGISTRO =============
-    async function procesarRegistro(codigo, metodo = 'manual') {
-      if (isProcessing) return;
+    async function procesarRegistro(codigo, confianza = 1.0, metodo = 'facial') {
+      if (isProcessing || !currentUser) return;
       isProcessing = true;
 
       try {
-        const q = query(collection(db, 'employees'), where('username', '==', codigo));
-        const userSnap = await getDocs(q);
+        const userData = employeesData.get(codigo);
         
-        if (userSnap.empty) {
+        if (!userData) {
           showToast('❌ Empleado no encontrado', 'error');
-          return;
-        }
-
-        const userDoc = userSnap.docs[0];
-        const userData = userDoc.data();
-
-        if (userData.activo === false) {
-          showToast('❌ Empleado desactivado', 'error');
+          updateStatusIndicator('error', 'Empleado no encontrado');
           return;
         }
 
         const cooldownOk = await verificarCooldown(codigo);
-        if (!cooldownOk) return;
+        if (!cooldownOk) {
+          updateStatusIndicator('error', 'Cooldown activo');
+          return;
+        }
 
         const { tipo, parId } = await determinarTipoConPar(codigo);
         
@@ -633,15 +1223,16 @@
         const horaFormateada = `${hours}:${minutes}:${seconds}`;
 
         const attendanceData = {
-          collaboratorId: userDoc.id,
-          collaboratorName: `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || codigo,
+          collaboratorId: currentUser.uid,
+          collaboratorName: currentUser.name,
           collaboratorCode: codigo,
-          collaboratorEmail: userData.email || '',
+          employeeName: `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || codigo,
+          employeeId: userData.id,
           timestamp: ahora,
           fecha: fechaFormateada,
           hora: horaFormateada,
           type: tipo,
-          confidence: 1.0,
+          confidence: confianza,
           method: metodo,
           turnoHoras: userData.turnoHoras || 8,
           device: 'TensorFlow.js',
@@ -650,7 +1241,9 @@
         };
 
         await addDoc(collection(db, 'facialAttendance'), attendanceData);
+        console.log('✅ Registro guardado:', attendanceData);
 
+        // Actualizar UI del modal
         document.getElementById('nombreDisplay').textContent = `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || codigo;
         document.getElementById('codigoDisplay').textContent = `Código: ${codigo}`;
         if (userData.fotoBase64) document.getElementById('fotoColaborador').src = userData.fotoBase64;
@@ -660,126 +1253,63 @@
         tipoLabel.className = `tipo-registro ${tipo === 'entry' ? 'entrada' : 'salida'}`;
         
         document.getElementById('fechaHoraDisplay').textContent = `📅 ${fechaFormateada} ${horaFormateada}`;
+        document.getElementById('parIdDisplay').textContent = `Par: ${parId.slice(-6)}`;
         
         resultadoFlotante.style.display = 'flex';
         setTimeout(() => { resultadoFlotante.style.display = 'none'; }, 5000);
         
+        // Actualizar indicador visual con palomita (éxito)
+        updateStatusIndicator('success', tipo === 'entry' ? 'Entrada registrada' : 'Salida registrada');
         showToast(`✅ ${tipo === 'entry' ? 'ENTRADA' : 'SALIDA'} registrada`, 'success');
         
       } catch (error) {
-        console.error('❌ Error:', error);
+        console.error('❌ Error registro:', error);
         showToast('❌ Error al registrar', 'error');
+        updateStatusIndicator('error', 'Error en registro');
       } finally {
         isProcessing = false;
       }
     }
 
-    // ============ LOGIN ============
-    async function authenticateUser(username, pin) {
-      updateLoading('Verificando credenciales...');
+    // ============= DETECCIÓN AUTOMÁTICA =============
+    function iniciarDeteccion() {
+      if (detectionInterval) clearInterval(detectionInterval);
       
-      const q = query(
-        collection(db, "Collaborators"),
-        where("username", "==", username),
-        where("pin", "==", pin)
-      );
-      
-      const snapshot = await getDocs(q);
-      
-      if (snapshot.empty) {
-        throw new Error('Usuario o PIN incorrectos');
-      }
-      
-      const data = snapshot.docs[0].data();
-      return {
-        uid: snapshot.docs[0].id,
-        username: data.username,
-        name: `${data.firstName || ''} ${data.lastName || ''}`.trim() || username
-      };
+      detectionInterval = setInterval(async () => {
+        if (!faceMatcher || !videoStarted || !modelosCargados || isProcessing || !currentUser) return;
+
+        try {
+          const detection = await faceapi.detectSingleFace(video)
+            .withFaceLandmarks()
+            .withFaceDescriptor();
+            
+          if (detection) {
+            const match = faceMatcher.findBestMatch(detection.descriptor);
+            const confidence = 1 - match.distance;
+            
+            if (match.label !== 'unknown' && confidence >= CONFIG.MIN_CONFIDENCE) {
+              await procesarRegistro(match.label, confidence, 'facial');
+            }
+          }
+        } catch (error) {
+          // Silenciamos errores de detección
+        }
+      }, CONFIG.DETECTION_INTERVAL);
     }
 
-    loginBtn.addEventListener('click', async () => {
-      const username = usernameInput.value.trim();
-      const pin = passwordInput.value.trim();
-      
-      if (!username || !pin) {
-        showLoginAlert('Complete todos los campos');
-        return;
-      }
-      
+    async function init() {
       try {
-        currentUser = await authenticateUser(username, pin);
-        
-        displayName.textContent = currentUser.name;
-        
-        loginScreen.style.display = 'none';
-        cameraScreen.style.display = 'flex';
-        
-        sessionStorage.setItem('facial_currentUser', JSON.stringify(currentUser));
-        
-        updateLoading('Cargando TensorFlow.js...');
-        await cargarModeloTensorFlow();
         await iniciarCamara();
-        
-        loadingOverlay.style.display = 'none';
-        
-        passwordInput.value = '';
-        hideLoginAlert();
-        showToast(`Bienvenido ${currentUser.name}`);
-        
+        showToast('✅ Sistema activo');
+        updateStatusIndicator('idle');
       } catch (error) {
-        loadingOverlay.style.display = 'none';
-        showLoginAlert(error.message);
+        console.error('Error init:', error);
+        updateStatusIndicator('error', 'Error al iniciar');
       }
-    });
-
-    document.getElementById('btnRegistrarPorCodigo').addEventListener('click', async () => {
-      const codigo = document.getElementById('codigoInput').value.trim().toUpperCase();
-      if (!codigo) { showToast('❌ Ingrese código', 'error'); return; }
-      await procesarRegistro(codigo, 'manual');
-      document.getElementById('codigoInput').value = '';
-    });
-
-    logoutBtn.addEventListener('click', () => {
-      if (detectionInterval) clearInterval(detectionInterval);
-      if (video.srcObject) {
-        video.srcObject.getTracks().forEach(t => t.stop());
-      }
-      
-      currentUser = null;
-      sessionStorage.removeItem('facial_currentUser');
-      
-      cameraScreen.style.display = 'none';
-      loginScreen.style.display = 'flex';
-      usernameInput.value = '';
-      passwordInput.value = '';
-      hideLoginAlert();
-    });
-
-    usernameInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') passwordInput.focus();
-    });
+    }
     
-    passwordInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') loginBtn.click();
-    });
-
-    const savedUser = sessionStorage.getItem('facial_currentUser');
     if (savedUser) {
-      try {
-        currentUser = JSON.parse(savedUser);
-        displayName.textContent = currentUser.name;
-        loginScreen.style.display = 'none';
-        cameraScreen.style.display = 'flex';
-        
-        (async () => {
-          await cargarModeloTensorFlow();
-          await iniciarCamara();
-          loadingOverlay.style.display = 'none';
-        })();
-      } catch (e) {
-        sessionStorage.removeItem('facial_currentUser');
-      }
+      init();
     }
   </script>
 </body>
