@@ -6,6 +6,7 @@
   <title>Reportes de Asistencia - PlusMoney</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
+    /* (Mantengo todos los estilos igual que antes) */
     * {
       margin: 0;
       padding: 0;
@@ -20,6 +21,7 @@
       --secondary: #3498db;
       --danger: #e74c3c;
       --warning: #f39c12;
+      --success: #2ecc71;
       --dark-bg: #1a2b3c;
       --darker-bg: #0d1824;
       --card-bg: rgba(255,255,255,0.05);
@@ -36,11 +38,6 @@
       min-height: 100vh;
       padding: 10px;
       font-size: 13px;
-    }
-
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
     }
 
     /* LOGIN SCREEN */
@@ -130,6 +127,15 @@
       font-size: 12px;
     }
 
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+
+    .btn-success:hover {
+      box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
+    }
+
     .alert {
       padding: 10px;
       border-radius: 8px;
@@ -178,7 +184,7 @@
       font-weight: 600;
     }
 
-    .btn-logout, .btn-back {
+    .btn-logout, .btn-back, .btn-delete-all {
       background: transparent;
       border: 1px solid var(--danger);
       color: var(--danger);
@@ -195,20 +201,6 @@
     .btn-back {
       border-color: var(--primary);
       color: var(--primary);
-    }
-
-    .btn-delete-all {
-      background: transparent;
-      border: 1px solid var(--danger);
-      color: var(--danger);
-      padding: 6px 12px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-size: 12px;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
     }
 
     .btn-delete-all:hover {
@@ -324,7 +316,7 @@
       margin-top: 3px;
     }
 
-    /* TABLA PRINCIPAL - SIMPLIFICADA */
+    /* TABLA PRINCIPAL SIMPLIFICADA */
     .table-container {
       background: rgba(255,255,255,0.05);
       border-radius: var(--radius);
@@ -364,41 +356,6 @@
 
     tr:hover {
       background: rgba(255,255,255,0.1);
-    }
-
-    .fecha-small {
-      font-size: 9px;
-      color: var(--text-muted);
-      display: block;
-    }
-
-    .badge {
-      padding: 3px 6px;
-      border-radius: 12px;
-      font-size: 9px;
-      font-weight: bold;
-      display: inline-block;
-      white-space: nowrap;
-    }
-
-    .badge-entry {
-      background: var(--primary);
-      color: #000;
-    }
-
-    .badge-exit {
-      background: var(--danger);
-      color: white;
-    }
-
-    .badge-completo {
-      background: var(--secondary);
-      color: white;
-    }
-
-    .horas-normal {
-      color: var(--primary);
-      font-weight: 600;
     }
 
     .horas-extra {
@@ -569,6 +526,35 @@
       margin-left: 2px;
     }
 
+    /* Botón guardar en modal */
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 15px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+
+    .btn-save {
+      background: var(--success);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-save:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
+    }
+
     /* Loading y Toast */
     .loading-overlay {
       position: fixed;
@@ -655,7 +641,6 @@
   </style>
 </head>
 <body>
-  <!-- LOGIN SCREEN -->
   <div id="loginScreen" class="login-container">
     <div class="login-card">
       <div class="logo">
@@ -677,7 +662,6 @@
     </div>
   </div>
 
-  <!-- CONTENIDO PRINCIPAL -->
   <div id="reportContainer" class="report-container">
     <div class="header">
       <h1><i class="fas fa-chart-bar"></i> Reportes de Asistencia</h1>
@@ -734,7 +718,6 @@
       </div>
     </div>
 
-    <!-- TABLA PRINCIPAL SIMPLIFICADA: SOLO NOMBRE Y HORAS EXTRAS -->
     <div class="table-container">
       <table>
         <thead>
@@ -751,7 +734,6 @@
     </div>
   </div>
 
-  <!-- MODAL DE DETALLE - CON FORMATO AM/PM -->
   <div id="detalleModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -759,7 +741,6 @@
         <button class="close-modal" onclick="cerrarModal()"><i class="fas fa-times"></i></button>
       </div>
       <div class="modal-body">
-        <!-- Info básica -->
         <div class="info-grid">
           <div class="info-item">
             <div class="info-label">CÓDIGO</div>
@@ -771,12 +752,10 @@
           </div>
         </div>
 
-        <!-- Registros del día actual (con AM/PM) -->
-        <h3 style="color: var(--primary); font-size: 13px; margin: 10px 0;">Registro del Día</h3>
+        <h3 style="color: var(--primary); font-size: 13px; margin: 10px 0;">Último Registro</h3>
         <div id="modalRegistros"></div>
         <div class="total-row" id="modalTotales"></div>
 
-        <!-- Historial - UNA SOLA FILA POR DÍA (con AM/PM) -->
         <h3 style="color: var(--primary); font-size: 13px; margin: 20px 0 10px 0;">Historial por Día</h3>
         <div class="modal-table-container">
           <table class="modal-table">
@@ -790,22 +769,24 @@
                 <th>ESTADO</th>
               </tr>
             </thead>
-            <tbody id="modalTablaBody">
-              <!-- Se llena dinámicamente con UNA FILA POR DÍA -->
-            </tbody>
+            <tbody id="modalTablaBody"></tbody>
           </table>
         </div>
 
-        <!-- Totales del historial -->
         <div class="total-row" id="modalHistorialTotales">
           <span>Total días: 0</span>
           <span>Horas totales: 0h</span>
         </div>
       </div>
+      
+      <div class="modal-footer">
+        <button class="btn-save" id="btnGuardarRegistro">
+          <i class="fas fa-save"></i> Guardar Registro en Firebase
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- CONFIRMACIÓN ELIMINAR TODOS -->
   <div id="confirmDialog" class="confirm-dialog">
     <p>¿Estás seguro de eliminar TODOS los registros de asistencia?</p>
     <p style="font-size: 11px; color: var(--warning);">Esta acción no se puede deshacer</p>
@@ -815,13 +796,11 @@
     </div>
   </div>
 
-  <!-- LOADING OVERLAY -->
   <div class="loading-overlay" id="loadingOverlay">
     <div class="spinner"></div>
     <div id="loadingText">Cargando...</div>
   </div>
 
-  <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
   <script type="module">
@@ -833,7 +812,9 @@
       query, 
       where, 
       orderBy,
-      writeBatch
+      writeBatch,
+      addDoc,
+      serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -867,12 +848,14 @@
     const loadingText = document.getElementById('loadingText');
     const toast = document.getElementById('toast');
     const detalleModal = document.getElementById('detalleModal');
+    const btnGuardarRegistro = document.getElementById('btnGuardarRegistro');
 
     // Variables
     let currentAdmin = null;
     let todosLosRegistros = [];
     let empleadosMap = new Map();
     let todosLosPares = [];
+    let colaboradorActual = null;
 
     // ============ FUNCIÓN PARA CONVERTIR A FORMATO AM/PM ============
     function convertirA12H(hora24) {
@@ -883,7 +866,7 @@
       const ampm = hora >= 12 ? 'PM' : 'AM';
       
       hora = hora % 12;
-      hora = hora ? hora : 12; // la hora 0 se convierte a 12
+      hora = hora ? hora : 12;
       
       return `${hora.toString().padStart(2, '0')}:${minutos} <span class="ampm-badge">${ampm}</span>`;
     }
@@ -906,14 +889,21 @@
     }
 
     function calcularHoras(entrada, salida) {
-      if (!entrada || !salida) return 0;
+      if (!entrada || !salida || !entrada.hora || !salida.hora) return 0;
 
       try {
-        const entradaDate = new Date(`${entrada.fecha}T${entrada.hora}`);
-        const salidaDate = new Date(`${salida.fecha}T${salida.hora}`);
-        const diffMs = salidaDate - entradaDate;
+        const fechaE = entrada.fecha || '2000-01-01';
+        const fechaS = salida.fecha || fechaE;
+        const entradaDate = new Date(`${fechaE}T${entrada.hora}`);
+        const salidaDate = new Date(`${fechaS}T${salida.hora}`);
+        
+        // Si la salida es menor a la entrada, asumimos cambio de día
+        let diffMs = salidaDate - entradaDate;
+        if (diffMs < 0) diffMs += 24 * 60 * 60 * 1000;
+        
         return Math.round((diffMs / (1000 * 60 * 60)) * 100) / 100;
-      } catch {
+      } catch (e) {
+        console.error("Error calculando horas:", e);
         return 0;
       }
     }
@@ -1039,7 +1029,7 @@
           const data = doc.data();
           empleadosMap.set(data.username, {
             nombre: `${data.firstName || ''} ${data.lastName || ''}`.trim() || data.username,
-            turno: data.turnoHoras || 8
+            turno: parseFloat(data.turnoHoras) || 8
           });
         });
 
@@ -1168,14 +1158,13 @@
       actualizarEstadisticas(resultados);
     }
 
-    // ============ MOSTRAR TABLA SIMPLIFICADA (SOLO NOMBRE Y EXTRAS) ============
+    // ============ MOSTRAR TABLA SIMPLIFICADA ============
     function mostrarTabla(resultados) {
       if (resultados.length === 0) {
         tablaBody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 30px;">No hay registros</td></tr>';
         return;
       }
 
-      // Agrupar por colaborador para mostrar una sola fila por persona
       const colaboradoresMap = new Map();
       
       resultados.forEach(r => {
@@ -1188,7 +1177,8 @@
         }
         
         const horas = calcularHoras(r.entrada, r.salida);
-        const extras = horas > r.turno ? Math.round((horas - r.turno) * 100) / 100 : 0;
+        const turno = r.turno || 8;
+        const extras = horas > turno ? Math.round((horas - turno) * 100) / 100 : 0;
         
         const colaborador = colaboradoresMap.get(r.codigo);
         colaborador.totalExtras += extras;
@@ -1270,15 +1260,12 @@
       mostrarTabla(resultadosOrdenados);
     };
 
-    // ============ AGRUPAR REGISTROS POR DÍA ============
     function agruparRegistrosPorDia(registros) {
       const diasMap = new Map();
       
       registros.forEach(reg => {
         if (!reg.entrada) return;
-        
         const fecha = reg.entrada.fecha;
-        
         if (!diasMap.has(fecha)) {
           diasMap.set(fecha, {
             fecha: fecha,
@@ -1293,149 +1280,182 @@
       return Array.from(diasMap.values());
     }
 
-    // ============ MODAL DE DETALLE - CON FORMATO AM/PM ============
+    async function guardarRegistroEnFirebase(datosRegistro) {
+      try {
+        const docRef = await addDoc(collection(db, 'reportesGuardados'), {
+          ...datosRegistro,
+          guardadoPor: currentAdmin?.uid || 'unknown',
+          guardadoPorNombre: currentAdmin?.name || 'unknown',
+          fechaGuardado: serverTimestamp()
+        });
+        return { success: true, id: docRef.id };
+      } catch (error) {
+        console.error('Error al guardar:', error);
+        return { success: false, error: error.message };
+      }
+    }
+
+    // ============ MODAL DE DETALLE (CORREGIDO) ============
     window.verDetalle = (codigo) => {
-      // Obtener información del colaborador
+      colaboradorActual = codigo;
       const infoColaborador = empleadosMap.get(codigo) || { nombre: codigo, turno: 8 };
-      
-      // Encontrar el último registro para mostrar en la sección superior
       const paresColaborador = todosLosPares.filter(p => p.codigo === codigo);
-      const ultimoRegistro = paresColaborador.length > 0 ? paresColaborador[0] : null;
       
-      // PARTE 1: Información básica
+      paresColaborador.sort((a, b) => {
+        if (!a.entrada || !b.entrada) return 0;
+        return b.entrada.fecha.localeCompare(a.entrada.fecha);
+      });
+
       document.getElementById('modalTitulo').textContent = infoColaborador.nombre || codigo;
       document.getElementById('modalCodigo').textContent = codigo;
       document.getElementById('modalTurno').textContent = (infoColaborador.turno || 8) + ' horas';
 
-      // PARTE 2: Registros del día actual (con AM/PM)
+      // ===== CÁLCULO ÚLTIMO REGISTRO =====
+      const ultimoRegistro = paresColaborador.length > 0 ? paresColaborador[0] : null;
+      
       if (ultimoRegistro && ultimoRegistro.entrada) {
-        const registrosDelDia = todosLosRegistros.filter(r => 
-          r.collaboratorCode === codigo && 
-          r.fecha === ultimoRegistro.entrada.fecha
-        ).sort((a, b) => a.timestamp - b.timestamp);
+        const hTrabajadas = calcularHoras(ultimoRegistro.entrada, ultimoRegistro.salida);
+        const hTurno = infoColaborador.turno || 8;
+        const hExtras = hTrabajadas > hTurno ? hTrabajadas - hTurno : 0;
 
-        const primeraEntrada = registrosDelDia.find(r => r.type === 'entry');
-        const primeraSalida = registrosDelDia.find(r => r.type === 'exit');
+        let registrosHtml = `
+          <div class="detalle-row">
+            <span>Entrada</span>
+            <span>${ultimoRegistro.entrada.fecha} ${convertirA12H(ultimoRegistro.entrada.hora)}</span>
+          </div>
+        `;
 
-        let registrosHtml = '';
-        let totalHoras = 0;
-        let totalExtras = 0;
-
-        if (primeraEntrada) {
+        if (ultimoRegistro.salida) {
           registrosHtml += `
             <div class="detalle-row">
-              <span>Primera Entrada</span>
-              <span>${primeraEntrada.fecha} ${convertirA12H(primeraEntrada.hora)}</span>
+              <span>Salida</span>
+              <span>${ultimoRegistro.salida.fecha} ${convertirA12H(ultimoRegistro.salida.hora)}</span>
             </div>
           `;
+        } else {
+          registrosHtml += `<div class="detalle-row" style="color: var(--warning);"><span>Sin salida registrada</span></div>`;
         }
 
-        if (primeraSalida) {
-          const horas = calcularHoras(
-            { fecha: primeraEntrada?.fecha, hora: primeraEntrada?.hora },
-            { fecha: primeraSalida.fecha, hora: primeraSalida.hora }
-          );
-          totalHoras = horas;
-          totalExtras = horas > ultimoRegistro.turno ? horas - ultimoRegistro.turno : 0;
+        registrosHtml += `
+          <div class="detalle-row" style="color: var(--primary); margin-top: 10px;">
+            <span>Horas trabajadas</span>
+            <span>${hTrabajadas.toFixed(2)}h</span>
+          </div>
+          <div class="detalle-row" style="color: var(--warning);">
+            <span>Horas extras</span>
+            <span>${hExtras > 0 ? '+' : ''}${hExtras.toFixed(2)}h</span>
+          </div>
+        `;
 
-          registrosHtml += `
-            <div class="detalle-row">
-              <span>Primera Salida</span>
-              <span>${primeraSalida.fecha} ${convertirA12H(primeraSalida.hora)}</span>
-            </div>
-            <div class="detalle-row" style="color: var(--primary);">
-              <span>Horas trabajadas</span>
-              <span>${totalHoras.toFixed(2)}h</span>
-            </div>
-            <div class="detalle-row" style="color: var(--warning);">
-              <span>Horas extras</span>
-              <span>+${totalExtras.toFixed(2)}h</span>
-            </div>
-          `;
-        } else if (primeraEntrada) {
-          registrosHtml += `
-            <div class="detalle-row" style="color: var(--warning);">
-              <span>Sin salida registrada</span>
-            </div>
-          `;
-        }
-
-        document.getElementById('modalRegistros').innerHTML = registrosHtml || '<p style="text-align: center;">No hay registros para este día</p>';
+        document.getElementById('modalRegistros').innerHTML = registrosHtml;
         document.getElementById('modalTotales').innerHTML = `
-          <span>Total horas: ${totalHoras.toFixed(2)}h</span>
-          <span>Extras: +${totalExtras.toFixed(2)}h</span>
+          <span>Total día: ${hTrabajadas.toFixed(2)}h</span>
+          <span>Extras: ${hExtras > 0 ? '+' : ''}${hExtras.toFixed(2)}h</span>
         `;
       } else {
         document.getElementById('modalRegistros').innerHTML = '<p style="text-align: center;">No hay registros</p>';
         document.getElementById('modalTotales').innerHTML = '';
       }
 
-      // PARTE 3: Historial - UNA SOLA FILA POR DÍA (con AM/PM)
+      // ===== HISTORIAL COMPLETO =====
       const diasUnicos = agruparRegistrosPorDia(paresColaborador);
-      
       diasUnicos.sort((a, b) => b.fecha.localeCompare(a.fecha));
 
       let tablaHtml = '';
       let totalDias = 0;
-      let totalHorasColaborador = 0;
+      let totalHorasCol = 0;
 
       diasUnicos.forEach(dia => {
         const horas = calcularHoras(dia.entrada, dia.salida);
-        const turno = dia.turno;
-        const extras = horas > turno ? Math.round((horas - turno) * 100) / 100 : 0;
+        const turno = infoColaborador.turno || 8;
+        const extras = horas > turno ? (horas - turno) : 0;
         
-        totalHorasColaborador += horas;
+        totalHorasCol += horas;
         totalDias++;
 
         const estado = dia.completo ? 'Completo' : 'Incompleto';
         const estadoClass = dia.completo ? 'badge-completo' : 'badge-exit';
         
-        const entradaHora = dia.entrada ? convertirA12H(dia.entrada.hora) : '---';
-        const salidaHora = dia.salida ? convertirA12H(dia.salida.hora) : '---';
-
         tablaHtml += `
           <tr>
             <td>${dia.fecha}</td>
-            <td>${entradaHora}</td>
-            <td>${salidaHora}</td>
-            <td class="horas-normal">${horas > 0 ? horas + 'h' : '---'}</td>
-            <td class="extras-cell">${extras > 0 ? '+' + extras + 'h' : '0h'}</td>
-            <td><span class="badge ${estadoClass}">${estado}</span></td>
+            <td>${convertirA12H(dia.entrada.hora)}</td>
+            <td>${dia.salida ? convertirA12H(dia.salida.hora) : '---'}</td>
+            <td>${horas.toFixed(2)}h</td>
+            <td class="extras-cell">${extras > 0 ? '+' + extras.toFixed(2) + 'h' : '0h'}</td>
+            <td>${estado}</td>
           </tr>
         `;
       });
 
-      if (tablaHtml === '') {
-        tablaHtml = '<tr><td colspan="6" style="text-align: center; padding: 20px;">No hay registros para este colaborador</td></tr>';
-      }
-
-      document.getElementById('modalTablaBody').innerHTML = tablaHtml;
+      document.getElementById('modalTablaBody').innerHTML = tablaHtml || '<tr><td colspan="6" style="text-align: center;">Sin historial</td></tr>';
       document.getElementById('modalHistorialTotales').innerHTML = `
         <span>Total días: ${totalDias}</span>
-        <span>Horas totales: ${totalHorasColaborador.toFixed(2)}h</span>
+        <span>Horas totales: ${totalHorasCol.toFixed(2)}h</span>
       `;
 
       detalleModal.style.display = 'flex';
     };
 
-    window.cerrarModal = () => {
-      detalleModal.style.display = 'none';
-    };
+    // ============ BOTÓN GUARDAR REGISTRO ============
+    btnGuardarRegistro.addEventListener('click', async () => {
+      if (!colaboradorActual) {
+        showToast('No hay colaborador seleccionado', 'error');
+        return;
+      }
 
-    window.addEventListener('click', (e) => {
-      if (e.target === detalleModal) {
-        detalleModal.style.display = 'none';
+      showLoading('Guardando registro...');
+
+      try {
+        const paresColaborador = todosLosPares.filter(p => p.codigo === colaboradorActual);
+        const infoColaborador = empleadosMap.get(colaboradorActual) || { nombre: colaboradorActual, turno: 8 };
+        
+        let totalHorasGeneral = 0;
+        let totalExtrasGeneral = 0;
+        
+        paresColaborador.forEach(par => {
+          const horas = calcularHoras(par.entrada, par.salida);
+          const extras = horas > par.turno ? horas - par.turno : 0;
+          totalHorasGeneral += horas;
+          totalExtrasGeneral += extras;
+        });
+
+        const datosAGuardar = {
+          colaborador: {
+            codigo: colaboradorActual,
+            nombre: infoColaborador.nombre,
+            turno: infoColaborador.turno
+          },
+          totales: {
+            horasTotales: totalHorasGeneral,
+            extrasTotales: totalExtrasGeneral,
+            diasTrabajados: paresColaborador.length
+          },
+          fechaReporte: new Date().toISOString()
+        };
+
+        const resultado = await guardarRegistroEnFirebase(datosAGuardar);
+        if (resultado.success) showToast('Registro guardado exitosamente', 'success');
+        else showToast('Error al guardar: ' + resultado.error, 'error');
+      } catch (error) {
+        showToast('Error al guardar el registro', 'error');
+      } finally {
+        hideLoading();
       }
     });
 
-    // ============ ENTER PARA LOGIN ============
-    usernameInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') passwordInput.focus();
+    window.cerrarModal = () => {
+      detalleModal.style.display = 'none';
+      colaboradorActual = null;
+    };
+
+    window.addEventListener('click', (e) => {
+      if (e.target === detalleModal) cerrarModal();
     });
 
-    passwordInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') loginBtn.click();
-    });
+    // ============ ENTER PARA LOGIN ============
+    usernameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') passwordInput.focus(); });
+    passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') loginBtn.click(); });
 
     // ============ VERIFICAR SESIÓN GUARDADA ============
     const savedUser = sessionStorage.getItem('facial_currentUser');
