@@ -6,7 +6,7 @@
   <title>Reportes de Asistencia - PlusMoney</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
-    /* (Mantengo todos los estilos igual que antes) */
+    /* Los estilos se mantienen igual que antes */
     * {
       margin: 0;
       padding: 0;
@@ -40,7 +40,6 @@
       font-size: 13px;
     }
 
-    /* LOGIN SCREEN */
     .login-container {
       display: flex;
       justify-content: center;
@@ -122,11 +121,6 @@
       box-shadow: 0 4px 10px rgba(22,224,134,0.3);
     }
 
-    .btn-sm {
-      padding: 8px 12px;
-      font-size: 12px;
-    }
-
     .btn-success {
       background: var(--success);
       color: white;
@@ -148,7 +142,6 @@
       border-left-color: var(--danger);
     }
 
-    /* CONTENIDO PRINCIPAL */
     .report-container {
       display: none;
     }
@@ -213,7 +206,6 @@
       flex-wrap: wrap;
     }
 
-    /* FILTROS */
     .filters {
       background: rgba(255,255,255,0.05);
       padding: 12px;
@@ -288,7 +280,6 @@
       cursor: pointer;
     }
 
-    /* ESTADÍSTICAS */
     .stats {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -316,7 +307,6 @@
       margin-top: 3px;
     }
 
-    /* TABLA PRINCIPAL SIMPLIFICADA */
     .table-container {
       background: rgba(255,255,255,0.05);
       border-radius: var(--radius);
@@ -376,7 +366,6 @@
       gap: 3px;
     }
 
-    /* MODAL */
     .modal {
       display: none;
       position: fixed;
@@ -438,7 +427,7 @@
 
     .info-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 10px;
       margin-bottom: 15px;
     }
@@ -478,7 +467,6 @@
       margin-top: 10px;
     }
 
-    /* Tabla del modal */
     .modal-table-container {
       background: rgba(255,255,255,0.03);
       border-radius: 8px;
@@ -526,7 +514,6 @@
       margin-left: 2px;
     }
 
-    /* Botón guardar en modal */
     .modal-footer {
       display: flex;
       justify-content: flex-end;
@@ -555,7 +542,6 @@
       box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
     }
 
-    /* Loading y Toast */
     .loading-overlay {
       position: fixed;
       inset: 0;
@@ -594,7 +580,6 @@
       display: none;
     }
 
-    /* Diálogo de confirmación */
     .confirm-dialog {
       position: fixed;
       top: 50%;
@@ -641,6 +626,7 @@
   </style>
 </head>
 <body>
+  <!-- LOGIN SCREEN -->
   <div id="loginScreen" class="login-container">
     <div class="login-card">
       <div class="logo">
@@ -662,6 +648,7 @@
     </div>
   </div>
 
+  <!-- CONTENIDO PRINCIPAL -->
   <div id="reportContainer" class="report-container">
     <div class="header">
       <h1><i class="fas fa-chart-bar"></i> Reportes de Asistencia</h1>
@@ -750,6 +737,10 @@
             <div class="info-label">TURNO</div>
             <div class="info-value" id="modalTurno"></div>
           </div>
+          <div class="info-item">
+            <div class="info-label">TOTAL EXTRAS</div>
+            <div class="info-value" id="modalTotalExtras">0h</div>
+          </div>
         </div>
 
         <h3 style="color: var(--primary); font-size: 13px; margin: 10px 0;">Último Registro</h3>
@@ -776,6 +767,10 @@
         <div class="total-row" id="modalHistorialTotales">
           <span>Total días: 0</span>
           <span>Horas totales: 0h</span>
+        </div>
+        <div class="total-row" style="color: var(--warning);" id="modalExtrasTotales">
+          <span>Total horas extras:</span>
+          <span>0h</span>
         </div>
       </div>
       
@@ -857,18 +852,27 @@
     let todosLosPares = [];
     let colaboradorActual = null;
 
-    // ============ FUNCIÓN PARA CONVERTIR A FORMATO AM/PM ============
-    function convertirA12H(hora24) {
+    // Constantes
+    const UMBRAL_16_HORAS = 16;
+    const UMBRAL_5_MINUTOS = 5; // 5 minutos en minutos
+
+    // ============ FUNCIÓN PARA CONVERTIR A FORMATO AM/PM CON SEGUNDOS ============
+    function convertirA12HConSegundos(hora24) {
       if (!hora24) return '---';
       
-      const [horas, minutos] = hora24.split(':');
+      let horaCompleta = hora24;
+      if (horaCompleta.split(':').length === 2) {
+        horaCompleta = horaCompleta + ':00';
+      }
+      
+      const [horas, minutos, segundos] = horaCompleta.split(':');
       let hora = parseInt(horas);
       const ampm = hora >= 12 ? 'PM' : 'AM';
       
       hora = hora % 12;
       hora = hora ? hora : 12;
       
-      return `${hora.toString().padStart(2, '0')}:${minutos} <span class="ampm-badge">${ampm}</span>`;
+      return `${hora.toString().padStart(2, '0')}:${minutos}:${segundos} <span class="ampm-badge">${ampm}</span>`;
     }
 
     // ============ FUNCIONES UTILIDAD ============
@@ -892,18 +896,35 @@
       if (!entrada || !salida || !entrada.hora || !salida.hora) return 0;
 
       try {
+        const entradaHora = entrada.hora.includes(':') ? 
+          (entrada.hora.split(':').length === 2 ? entrada.hora + ':00' : entrada.hora) : 
+          entrada.hora + ':00';
+        const salidaHora = salida.hora.includes(':') ? 
+          (salida.hora.split(':').length === 2 ? salida.hora + ':00' : salida.hora) : 
+          salida.hora + ':00';
+        
         const fechaE = entrada.fecha || '2000-01-01';
         const fechaS = salida.fecha || fechaE;
-        const entradaDate = new Date(`${fechaE}T${entrada.hora}`);
-        const salidaDate = new Date(`${fechaS}T${salida.hora}`);
+        const entradaDate = new Date(`${fechaE}T${entradaHora}`);
+        const salidaDate = new Date(`${fechaS}T${salidaHora}`);
         
-        // Si la salida es menor a la entrada, asumimos cambio de día
         let diffMs = salidaDate - entradaDate;
         if (diffMs < 0) diffMs += 24 * 60 * 60 * 1000;
         
         return Math.round((diffMs / (1000 * 60 * 60)) * 100) / 100;
       } catch (e) {
         console.error("Error calculando horas:", e);
+        return 0;
+      }
+    }
+
+    function calcularDiferenciaHoras(fecha1, hora1, fecha2, hora2) {
+      try {
+        const date1 = new Date(`${fecha1}T${hora1}`);
+        const date2 = new Date(`${fecha2}T${hora2}`);
+        const diffMs = date2 - date1;
+        return diffMs / (1000 * 60 * 60);
+      } catch (e) {
         return 0;
       }
     }
@@ -1022,7 +1043,6 @@
       showLoading('Cargando registros...');
 
       try {
-        // Cargar empleados
         const empQuery = query(collection(db, 'employees'));
         const empSnapshot = await getDocs(empQuery);
         empSnapshot.forEach(doc => {
@@ -1033,7 +1053,6 @@
           });
         });
 
-        // Cargar registros de asistencia
         const q = query(
           collection(db, 'facialAttendance'),
           orderBy('timestamp', 'asc')
@@ -1056,7 +1075,7 @@
       }
     }
 
-    // ============ PROCESAR REGISTROS ============
+    // ============ PROCESAR REGISTROS - VERSIÓN ORIGINAL CON 5 MINUTOS ============
     function procesarYMostrar() {
       const colaboradores = new Map();
 
@@ -1078,10 +1097,11 @@
         let ultimaSalida = null;
 
         ordenados.forEach(reg => {
+          // LÓGICA DE 5 MINUTOS - Si hay entrada sin salida y pasa +5min, se registra salida automática
           if (ultimaEntrada && !ultimaSalida) {
             const diffMinutos = (reg.timestamp - ultimaEntrada.timestamp) / (1000 * 60);
             
-            if (diffMinutos >= 5) {
+            if (diffMinutos >= UMBRAL_5_MINUTOS) {
               resultados.push({
                 codigo,
                 nombre: empleadosMap.get(codigo)?.nombre || codigo,
@@ -1092,7 +1112,7 @@
                   timestamp: ultimaEntrada.timestamp
                 },
                 salida: {
-                  fecha: ultimaEntrada.fecha,
+                  fecha: reg.fecha,
                   hora: reg.hora,
                   timestamp: reg.timestamp
                 },
@@ -1103,6 +1123,7 @@
             }
           }
 
+          // Procesar según tipo
           if (reg.type === 'entry') {
             if (!ultimaEntrada) {
               ultimaEntrada = reg;
@@ -1110,6 +1131,7 @@
             }
           } 
           else if (reg.type === 'exit' && ultimaEntrada) {
+            // Hay una entrada pendiente y llega una salida
             resultados.push({
               codigo,
               nombre: empleadosMap.get(codigo)?.nombre || codigo,
@@ -1131,6 +1153,7 @@
           }
         });
 
+        // Entrada sin salida al final
         if (ultimaEntrada) {
           resultados.push({
             codigo,
@@ -1147,15 +1170,84 @@
         }
       });
 
-      todosLosPares = resultados;
+      // APLICAR REGLAS DE MEJORA SIN MODIFICAR LOS PARES ORIGINALES
+      const resultadosMejorados = aplicarReglasMejora(resultados);
+      todosLosPares = resultadosMejorados;
 
-      resultados.sort((a, b) => {
+      resultadosMejorados.sort((a, b) => {
         if (!a.entrada || !b.entrada) return 0;
         return b.entrada.fecha.localeCompare(a.entrada.fecha);
       });
 
-      mostrarTabla(resultados);
-      actualizarEstadisticas(resultados);
+      mostrarTabla(resultadosMejorados);
+      actualizarEstadisticas(resultadosMejorados);
+    }
+
+    // ============ FUNCIÓN PARA APLICAR REGLAS DE MEJORA ============
+    function aplicarReglasMejora(paresOriginales) {
+      const paresMejorados = [];
+      
+      // Ordenar por fecha ascendente para procesar secuencialmente
+      const paresOrdenados = [...paresOriginales].sort((a, b) => {
+        if (!a.entrada || !b.entrada) return 0;
+        return a.entrada.fecha.localeCompare(b.entrada.fecha);
+      });
+
+      for (let i = 0; i < paresOrdenados.length; i++) {
+        const parActual = { ...paresOrdenados[i] }; // Copia para no modificar el original
+        
+        // REGLA 1: Si falta salida del día anterior, el primer registro del día siguiente es su salida
+        if (i > 0) {
+          const parAnterior = paresMejorados[paresMejorados.length - 1];
+          
+          if (parAnterior && !parAnterior.salida && parActual.entrada) {
+            const fechaEntradaActual = new Date(parActual.entrada.fecha);
+            const fechaEntradaAnterior = new Date(parAnterior.entrada.fecha);
+            const diffDias = Math.floor((fechaEntradaActual - fechaEntradaAnterior) / (1000 * 60 * 60 * 24));
+            
+            if (diffDias >= 1) {
+              // La entrada actual se convierte en la salida del día anterior
+              parAnterior.salida = {
+                fecha: parActual.entrada.fecha,
+                hora: parActual.entrada.hora,
+                timestamp: parActual.entrada.timestamp
+              };
+              parAnterior.completo = true;
+              
+              // IMPORTANTE: Este parActual mantiene su entrada original
+              // No modificamos su entrada, solo se usó como salida del anterior
+              console.log(`Regla 1 aplicada: Entrada del ${parActual.entrada.fecha} usada como salida del día anterior`);
+            }
+          }
+        }
+        
+        // REGLA 2: Si pasaron más de 16 horas sin salida, marcar como incompleto
+        if (parActual.entrada && !parActual.salida) {
+          // Buscar si hay algún registro posterior que podría ser su salida
+          let salidaEncontrada = false;
+          for (let j = i + 1; j < paresOrdenados.length; j++) {
+            const parSiguiente = paresOrdenados[j];
+            if (parSiguiente.entrada) {
+              const horasDiff = calcularDiferenciaHoras(
+                parActual.entrada.fecha, parActual.entrada.hora,
+                parSiguiente.entrada.fecha, parSiguiente.entrada.hora
+              );
+              
+              if (horasDiff > UMBRAL_16_HORAS) {
+                // Han pasado más de 16 horas sin salida, marcar como incompleto
+                parActual.completo = false;
+                console.log(`Regla 2 aplicada: ${horasDiff.toFixed(2)}h sin salida - marcado incompleto`);
+                salidaEncontrada = true;
+                break;
+              }
+            }
+          }
+        }
+        
+        paresMejorados.push(parActual);
+      }
+      
+      return paresMejorados;
     }
 
     // ============ MOSTRAR TABLA SIMPLIFICADA ============
@@ -1295,7 +1387,7 @@
       }
     }
 
-    // ============ MODAL DE DETALLE (CORREGIDO) ============
+    // ============ MODAL DE DETALLE ============
     window.verDetalle = (codigo) => {
       colaboradorActual = codigo;
       const infoColaborador = empleadosMap.get(codigo) || { nombre: codigo, turno: 8 };
@@ -1310,7 +1402,20 @@
       document.getElementById('modalCodigo').textContent = codigo;
       document.getElementById('modalTurno').textContent = (infoColaborador.turno || 8) + ' horas';
 
-      // ===== CÁLCULO ÚLTIMO REGISTRO =====
+      // Calcular totales generales
+      let totalExtrasGeneral = 0;
+      let totalHorasGeneral = 0;
+      
+      paresColaborador.forEach(par => {
+        const horas = calcularHoras(par.entrada, par.salida);
+        const extras = horas > (par.turno || 8) ? horas - (par.turno || 8) : 0;
+        totalHorasGeneral += horas;
+        totalExtrasGeneral += extras;
+      });
+
+      document.getElementById('modalTotalExtras').textContent = totalExtrasGeneral.toFixed(2) + 'h';
+
+      // Último registro
       const ultimoRegistro = paresColaborador.length > 0 ? paresColaborador[0] : null;
       
       if (ultimoRegistro && ultimoRegistro.entrada) {
@@ -1321,7 +1426,7 @@
         let registrosHtml = `
           <div class="detalle-row">
             <span>Entrada</span>
-            <span>${ultimoRegistro.entrada.fecha} ${convertirA12H(ultimoRegistro.entrada.hora)}</span>
+            <span>${ultimoRegistro.entrada.fecha} ${convertirA12HConSegundos(ultimoRegistro.entrada.hora)}</span>
           </div>
         `;
 
@@ -1329,7 +1434,7 @@
           registrosHtml += `
             <div class="detalle-row">
               <span>Salida</span>
-              <span>${ultimoRegistro.salida.fecha} ${convertirA12H(ultimoRegistro.salida.hora)}</span>
+              <span>${ultimoRegistro.salida.fecha} ${convertirA12HConSegundos(ultimoRegistro.salida.hora)}</span>
             </div>
           `;
         } else {
@@ -1357,20 +1462,22 @@
         document.getElementById('modalTotales').innerHTML = '';
       }
 
-      // ===== HISTORIAL COMPLETO =====
+      // Historial completo
       const diasUnicos = agruparRegistrosPorDia(paresColaborador);
       diasUnicos.sort((a, b) => b.fecha.localeCompare(a.fecha));
 
       let tablaHtml = '';
       let totalDias = 0;
       let totalHorasCol = 0;
+      let totalExtrasCol = 0;
 
       diasUnicos.forEach(dia => {
         const horas = calcularHoras(dia.entrada, dia.salida);
-        const turno = infoColaborador.turno || 8;
+        const turno = dia.turno || 8;
         const extras = horas > turno ? (horas - turno) : 0;
         
         totalHorasCol += horas;
+        totalExtrasCol += extras;
         totalDias++;
 
         const estado = dia.completo ? 'Completo' : 'Incompleto';
@@ -1379,11 +1486,11 @@
         tablaHtml += `
           <tr>
             <td>${dia.fecha}</td>
-            <td>${convertirA12H(dia.entrada.hora)}</td>
-            <td>${dia.salida ? convertirA12H(dia.salida.hora) : '---'}</td>
+            <td>${convertirA12HConSegundos(dia.entrada.hora)}</td>
+            <td>${dia.salida ? convertirA12HConSegundos(dia.salida.hora) : '---'}</td>
             <td>${horas.toFixed(2)}h</td>
             <td class="extras-cell">${extras > 0 ? '+' + extras.toFixed(2) + 'h' : '0h'}</td>
-            <td>${estado}</td>
+            <td><span class="badge ${estadoClass}">${estado}</span></td>
           </tr>
         `;
       });
@@ -1392,6 +1499,10 @@
       document.getElementById('modalHistorialTotales').innerHTML = `
         <span>Total días: ${totalDias}</span>
         <span>Horas totales: ${totalHorasCol.toFixed(2)}h</span>
+      `;
+      document.getElementById('modalExtrasTotales').innerHTML = `
+        <span>Total horas extras:</span>
+        <span>${totalExtrasCol.toFixed(2)}h</span>
       `;
 
       detalleModal.style.display = 'flex';
@@ -1431,6 +1542,23 @@
             extrasTotales: totalExtrasGeneral,
             diasTrabajados: paresColaborador.length
           },
+          registrosPorDia: paresColaborador.map(par => ({
+            fecha: par.entrada?.fecha || par.salida?.fecha,
+            entrada: par.entrada ? {
+              fecha: par.entrada.fecha,
+              hora: par.entrada.hora,
+              hora12h: convertirA12HConSegundos(par.entrada.hora).replace(/<[^>]*>/g, '')
+            } : null,
+            salida: par.salida ? {
+              fecha: par.salida.fecha,
+              hora: par.salida.hora,
+              hora12h: convertirA12HConSegundos(par.salida.hora).replace(/<[^>]*>/g, '')
+            } : null,
+            horas: calcularHoras(par.entrada, par.salida),
+            extras: calcularHoras(par.entrada, par.salida) > (par.turno || 8) ? 
+              calcularHoras(par.entrada, par.salida) - (par.turno || 8) : 0,
+            completo: par.completo
+          })),
           fechaReporte: new Date().toISOString()
         };
 
@@ -1453,11 +1581,9 @@
       if (e.target === detalleModal) cerrarModal();
     });
 
-    // ============ ENTER PARA LOGIN ============
-    usernameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') passwordInput.focus(); });
+    usernameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') passwordInput.focus(); }); 
     passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') loginBtn.click(); });
 
-    // ============ VERIFICAR SESIÓN GUARDADA ============
     const savedUser = sessionStorage.getItem('facial_currentUser');
     if (savedUser) {
       try {
