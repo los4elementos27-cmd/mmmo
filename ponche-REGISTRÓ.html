@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Registro de Empleados - PlusMoney</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- TENSORFLOW.JS (NO FACEAPI) -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.11.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface@0.0.5/dist/blazeface.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    :root { 
+      --primary: #16e086; 
+      --primary-dark: #15a086; 
+      --secondary: #3498db; 
+      --danger: #e74c3c; 
+      --dark-bg: #1a2b3c;
+      --darker-bg: #0d1824;
+      --text: #ffffff;
+      --text-muted: rgba(255,255,255,0.7);
+      --border: rgba(255,255,255,0.1);
+      --radius: 12px;
+    }
+    
+    body { 
+      background: linear-gradient(135deg, var(--darker-bg), var(--dark-bg)); 
+      color: var(--text); 
+      min-height: 100vh; 
+      padding: 20px; 
+    }
+    
+    /* LOGIN ADMIN */
+    .login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .login-card {
+      background: #233445;
+      border-radius: var(--radius);
+      padding: 30px;
+      width: 100%;
+      max-width: 400px;
+      border: 1px solid rgba(22,224,134,0.2);
+      text-align: center;
+    }
+
+    .logo {
+      width: 60px;
+      height: 60px;
+      background: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: var(--primary);
+      margin: 0 auto 15px;
+    }
+
+    h1 { color: var(--primary); margin-bottom: 10px; font-size: 20px; }
+    p { color: var(--text-muted); margin-bottom: 25px; font-size: 14px; }
+
+    .input {
+      width: 100%;
+      background: rgba(255,255,255,0.08);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--text);
+      margin-bottom: 15px;
+      outline: none;
+    }
+
+    .input:focus { border-color: var(--primary); }
+
+    .btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border: none;
+      border-radius: 8px;
+      padding: 14px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.3s;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 15px rgba(22,224,134,0.3);
+    }
+
+    .alert {
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 15px;
+      display: none;
+      background: rgba(231,76,60,0.15);
+      border-left: 4px solid var(--danger);
+    }
+
+    /* PANEL PRINCIPAL */
+    .panel {
+      display: none;
+    }
+
+    .header {
+      background: rgba(255,255,255,0.05);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 30px;
+      border: 1px solid rgba(22,224,134,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .admin-badge {
+      background: rgba(22,224,134,0.1);
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      padding: 8px 15px;
+      border-radius: 25px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+
+    @media (max-width: 768px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: rgba(255,255,255,0.05);
+      border-radius: var(--radius);
+      padding: 25px;
+      border: 1px solid rgba(22,224,134,0.1);
+    }
+
+    .card h2 {
+      color: var(--primary);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* CÁMARA - SIN INVERTIR */
+    .camera-section {
+      margin-bottom: 20px;
+    }
+
+    .video-container {
+      position: relative;
+      width: 100%;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 2px solid var(--primary);
+      background: #000;
+    }
+
+    #videoFeed {
+      width: 100%;
+      height: auto;
+      display: block;
+      /* SIN TRANSFORM - IMAGEN NORMAL */
+    }
+
+    .camera-overlay {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.7);
+      color: var(--primary);
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      border: 1px solid var(--primary);
+    }
+
+    .detection-status {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.03);
+      text-align: center;
+    }
+
+    .detected-face {
+      margin-top: 15px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .detected-face canvas {
+      border-radius: 8px;
+      border: 2px solid var(--primary);
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+    }
+
+    /* FORMULARIO HORIZONTAL */
+    .form-row {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    .form-group {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .form-group label {
+      display: block;
+      color: var(--primary);
+      margin-bottom: 5px;
+      font-size: 13px;
+    }
+
+    .capture-btn {
+      background: var(--secondary);
+      margin-top: 15px;
+    }
+
+    /* TURNOS HORIZONTALES */
+    .turno-options {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .turno-option {
+      flex: 1;
+      min-width: 80px;
+    }
+
+    .turno-option input[type="radio"] {
+      display: none;
+    }
+
+    .turno-option label {
+      display: block;
+      text-align: center;
+      padding: 12px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: 500;
+    }
+
+    .turno-option input[type="radio"]:checked + label {
+      background: var(--primary);
+      color: #000;
+      border-color: var(--primary);
+    }
+
+    .employees-list {
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    .employee-item {
+      background: rgba(255,255,255,0.03);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 10px;
+      border: 1px solid rgba(22,224,134,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .employee-info h3 {
+      color: var(--primary);
+      margin-bottom: 5px;
+    }
+
+    .employee-info p {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .employee-actions button {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-left: 5px;
+    }
+
+    .employee-actions button:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .delete-btn:hover {
+      border-color: var(--danger) !important;
+      color: var(--danger) !important;
+    }
+
+    .loading {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.95);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(255,255,255,0.1);
+      border-top: 4px solid var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 25px;
+      border-radius: 50px;
+      background: rgba(0,0,0,0.9);
+      border: 1px solid var(--primary);
+      color: white;
+      z-index: 1100;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- LOGIN ADMIN -->
+  <div id="loginScreen" class="login-container">
+    <div class="login-card">
+      <div class="logo">
+        <i class="fas fa-user-tie"></i>
+      </div>
+      <h1>Registro de Empleados</h1>
+      <p>Inicia sesión como administrador</p>
+      
+      <input type="text" id="adminUser" class="input" placeholder="Usuario">
+      <input type="password" id="adminPass" class="input" placeholder="PIN">
+      <button id="loginBtn" class="btn">
+        <i class="fas fa-sign-in-alt"></i> Acceder
+      </button>
+      
+      <div id="loginAlert" class="alert">
+        <i class="fas fa-exclamation-circle"></i>
+        <span id="loginMessage"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL PRINCIPAL -->
+  <div id="mainPanel" class="panel">
+    <div class="header">
+      <h1><i class="fas fa-users"></i> <span id="companyName">Registro Facial</span></h1>
+      <div style="display: flex; gap: 15px; align-items: center;">
+        <span class="admin-badge" id="adminDisplay">Admin</span>
+        <button class="btn" id="logoutBtn" style="width: auto; padding: 8px 20px;">
+          <i class="fas fa-sign-out-alt"></i> Salir
+        </button>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- COLUMNA IZQUIERDA: CAPTURA FACIAL + FORMULARIO -->
+      <div class="card">
+        <h2><i class="fas fa-camera"></i> Capturar Rostro</h2>
+        
+        <div class="camera-section">
+          <div class="video-container">
+            <video id="videoFeed" autoplay muted playsinline></video>
+            <div class="camera-overlay">
+              <i class="fas fa-sync-alt"></i> TensorFlow.js
+            </div>
+          </div>
+
+          <div class="detection-status" id="detectionStatus">
+            <i class="fas fa-info-circle"></i> Inicializando...
+          </div>
+
+          <div class="detected-face" id="detectedFace"></div>
+
+          <button class="btn capture-btn" id="captureBtn" disabled>
+            <i class="fas fa-camera"></i> Capturar Rostro
+          </button>
+        </div>
+
+        <!-- FORMULARIO HORIZONTAL -->
+        <form id="employeeForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label><i class="fas fa-id-card"></i> Código</label>
+              <input type="text" id="empCode" class="input" placeholder="EMP001" required>
+            </div>
+
+            <div class="form-group">
+              <label><i class="fas fa-user"></i> Nombre</label>
+              <input type="text" id="empName" class="input" placeholder="Juan Pérez" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label><i class="fas fa-lock"></i> PIN</label>
+              <input type="text" id="empPin" class="input" placeholder="1234" required>
+            </div>
+
+            <div class="form-group">
+              <label><i class="fas fa-envelope"></i> Email</label>
+              <input type="email" id="empEmail" class="input" placeholder="correo@empresa.com">
+            </div>
+          </div>
+
+          <!-- TURNOS HORIZONTALES -->
+          <div class="form-group">
+            <label><i class="fas fa-clock"></i> Horas de Turno</label>
+            <div class="turno-options">
+              <div class="turno-option">
+                <input type="radio" name="turno" id="turno8" value="8" checked>
+                <label for="turno8">8 Horas</label>
+              </div>
+              <div class="turno-option">
+                <input type="radio" name="turno" id="turno12" value="12">
+                <label for="turno12">12 Horas</label>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- COLUMNA DERECHA: LISTA DE EMPLEADOS -->
+      <div class="card">
+        <h2><i class="fas fa-list"></i> Empleados Registrados</h2>
+        
+        <div class="employees-list" id="employeesList">
+          <div style="text-align: center; padding: 30px; color: var(--text-muted);">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>
+            <p>Cargando...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <div id="loadingText">Procesando...</div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      getDocs, 
+      addDoc, 
+      updateDoc,
+      deleteDoc,
+      doc,
+      query, 
+      where,
+      Timestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAMTWJr3mISmNiP-e_KjCO9BdBPi7Uuug4",
+      authDomain: "formulario-2-8929a.firebaseapp.com",
+      projectId: "formulario-2-8929a",
+      storageBucket: "formulario-2-8929a.appspot.com",
+      messagingSenderId: "136908102526",
+      appId: "1:136908102526:web:d0a3bc1e3cb91a3fcab12f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Elementos DOM
+    const loginScreen = document.getElementById('loginScreen');
+    const mainPanel = document.getElementById('mainPanel');
+    const adminUser = document.getElementById('adminUser');
+    const adminPass = document.getElementById('adminPass');
+    const loginBtn = document.getElementById('loginBtn');
+    const loginAlert = document.getElementById('loginAlert');
+    const loginMessage = document.getElementById('loginMessage');
+    const adminDisplay = document.getElementById('adminDisplay');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const employeesList = document.getElementById('employeesList');
+    const loading = document.getElementById('loading');
+    const loadingText = document.getElementById('loadingText');
+    const toast = document.getElementById('toast');
+    const video = document.getElementById('videoFeed');
+    const detectionStatus = document.getElementById('detectionStatus');
+    const detectedFace = document.getElementById('detectedFace');
+    const captureBtn = document.getElementById('captureBtn');
+    
+    // Variables
+    let currentAdmin = null;
+    let currentEmployees = [];
+    let model = null;
+    let videoStarted = false;
+    let detectionInterval = null;
+    let currentFaceData = null;
+
+    // ============ FUNCIONES UTILIDAD ============
+    function showLoading(msg) {
+      loadingText.textContent = msg;
+      loading.style.display = 'flex';
+    }
+
+    function hideLoading() {
+      loading.style.display = 'none';
+    }
+
+    function showToast(msg, type = 'success') {
+      toast.textContent = msg;
+      toast.style.background = type === 'success' ? 'rgba(22,224,134,0.95)' : 'rgba(231,76,60,0.95)';
+      toast.style.display = 'block';
+      setTimeout(() => toast.style.display = 'none', 3000);
+    }
+
+    // ============ TENSORFLOW.JS - CARGAR MODELO ============
+    async function cargarModeloTensorFlow() {
+      try {
+        detectionStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando TensorFlow.js...';
+        model = await blazeface.load();
+        detectionStatus.innerHTML = '<i class="fas fa-check-circle" style="color: var(--primary);"></i> Modelo listo';
+        return true;
+      } catch (error) {
+        console.error('Error cargando modelo:', error);
+        detectionStatus.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i> Error cargando modelo';
+        return false;
+      }
+    }
+
+    // ============ INICIAR CÁMARA ============
+    async function iniciarCamara() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            facingMode: 'user',
+            width: { ideal: 640 },
+            height: { ideal: 480 }
+          } 
+        });
+        video.srcObject = stream;
+        
+        return new Promise((resolve) => {
+          video.onloadedmetadata = () => {
+            video.play();
+            videoStarted = true;
+            resolve();
+          };
+        });
+      } catch (error) {
+        detectionStatus.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i> Error con la cámara';
+        throw error;
+      }
+    }
+
+    // ============ DETECCIÓN CON TENSORFLOW ============
+    async function detectarRostro() {
+      if (!model || !videoStarted || !video) return null;
+      
+      try {
+        const predictions = await model.estimateFaces(video, false);
+        
+        if (predictions.length > 0) {
+          const prediction = predictions[0];
+          const topLeft = prediction.topLeft;
+          const bottomRight = prediction.bottomRight;
+          
+          return {
+            box: {
+              x: topLeft[0],
+              y: topLeft[1],
+              width: bottomRight[0] - topLeft[0],
+              height: bottomRight[1] - topLeft[1]
+            },
+            confidence: prediction.probability[0]
+          };
+        }
+        return null;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    // ============ INICIAR DETECCIÓN CONTINUA ============
+    function iniciarDeteccion() {
+      if (detectionInterval) clearInterval(detectionInterval);
+      
+      detectionInterval = setInterval(async () => {
+        if (!model || !videoStarted) return;
+
+        const face = await detectarRostro();
+        
+        if (face && face.confidence > 0.8) {
+          currentFaceData = face;
+          captureBtn.disabled = false;
+          detectionStatus.innerHTML = '<i class="fas fa-check-circle" style="color: var(--primary);"></i> Rostro detectado!';
+          
+          const canvas = document.createElement('canvas');
+          canvas.width = 120;
+          canvas.height = 120;
+          const ctx = canvas.getContext('2d');
+          
+          ctx.drawImage(
+            video,
+            face.box.x, face.box.y, face.box.width, face.box.height,
+            0, 0, 120, 120
+          );
+          
+          ctx.strokeStyle = '#16e086';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(0, 0, 119, 119);
+          
+          detectedFace.innerHTML = '';
+          detectedFace.appendChild(canvas);
+        } else {
+          captureBtn.disabled = true;
+          detectionStatus.innerHTML = '<i class="fas fa-hourglass-half"></i> Buscando rostro...';
+          detectedFace.innerHTML = '';
+          currentFaceData = null;
+        }
+      }, 500);
+    }
+
+    // ============ LOGIN ADMIN ============
+    async function adminLogin(username, pin) {
+      showLoading('Verificando...');
+      
+      const q = query(
+        collection(db, "Collaborators"),
+        where("username", "==", username),
+        where("pin", "==", pin)
+      );
+      
+      const snapshot = await getDocs(q);
+      
+      if (snapshot.empty) {
+        throw new Error('Credenciales incorrectas');
+      }
+      
+      const data = snapshot.docs[0].data();
+      return {
+        uid: snapshot.docs[0].id,
+        username: data.username,
+        name: `${data.firstName || ''} ${data.lastName || ''}`.trim() || username,
+        company: data.company || 'Mi Empresa'
+      };
+    }
+
+    loginBtn.addEventListener('click', async () => {
+      const username = adminUser.value.trim();
+      const pin = adminPass.value.trim();
+      
+      if (!username || !pin) {
+        loginMessage.textContent = 'Complete todos los campos';
+        loginAlert.style.display = 'block';
+        return;
+      }
+      
+      try {
+        currentAdmin = await adminLogin(username, pin);
+        
+        adminDisplay.textContent = currentAdmin.name;
+        document.getElementById('companyName').textContent = currentAdmin.company;
+        
+        loginScreen.style.display = 'none';
+        mainPanel.style.display = 'block';
+        
+        showLoading('Cargando TensorFlow.js...');
+        const modeloOK = await cargarModeloTensorFlow();
+        
+        if (modeloOK) {
+          await iniciarCamara();
+          iniciarDeteccion();
+        }
+        
+        await cargarEmpleados();
+        
+        adminPass.value = '';
+        loginAlert.style.display = 'none';
+        hideLoading();
+        showToast(`Bienvenido ${currentAdmin.name}`);
+        
+      } catch (error) {
+        hideLoading();
+        loginMessage.textContent = error.message;
+        loginAlert.style.display = 'block';
+      }
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      if (detectionInterval) clearInterval(detectionInterval);
+      if (video.srcObject) {
+        video.srcObject.getTracks().forEach(t => t.stop());
+      }
+      
+      currentAdmin = null;
+      mainPanel.style.display = 'none';
+      loginScreen.style.display = 'flex';
+      adminUser.value = '';
+      adminPass.value = '';
+    });
+
+    // ============ CAPTURAR Y REGISTRAR ============
+    captureBtn.addEventListener('click', async () => {
+      if (!currentFaceData) {
+        showToast('No hay rostro detectado', 'error');
+        return;
+      }
+
+      const code = document.getElementById('empCode').value.trim();
+      const name = document.getElementById('empName').value.trim();
+      const pin = document.getElementById('empPin').value.trim();
+      const email = document.getElementById('empEmail').value.trim();
+      const turno = document.getElementById('turno8').checked ? 8 : 12;
+
+      if (!code || !name || !pin) {
+        showToast('Complete código, nombre y PIN', 'error');
+        return;
+      }
+
+      showLoading('Registrando empleado...');
+
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imageData = canvas.toDataURL('image/jpeg', 0.9);
+
+        const nombreParts = name.split(' ');
+        const firstName = nombreParts[0] || '';
+        const lastName = nombreParts.slice(1).join(' ') || '';
+
+        const employeeData = {
+          username: code,
+          pin: pin,
+          firstName: firstName,
+          lastName: lastName,
+          email: email || '',
+          turnoHoras: turno,
+          fotoBase64: imageData,
+          adminId: currentAdmin.uid,
+          adminName: currentAdmin.name,
+          activo: true,
+          createdAt: Timestamp.now()
+        };
+
+        await addDoc(collection(db, "employees"), employeeData);
+        
+        document.getElementById('empCode').value = '';
+        document.getElementById('empName').value = '';
+        document.getElementById('empPin').value = '';
+        document.getElementById('empEmail').value = '';
+        document.getElementById('turno8').checked = true;
+        detectedFace.innerHTML = '';
+        captureBtn.disabled = true;
+        
+        await cargarEmpleados();
+        showToast('Empleado registrado exitosamente');
+        
+      } catch (error) {
+        console.error('Error:', error);
+        showToast('Error al registrar: ' + error.message, 'error');
+      } finally {
+        hideLoading();
+      }
+    });
+
+    // ============ CARGAR EMPLEADOS ============
+    async function cargarEmpleados() {
+      if (!currentAdmin) return;
+      
+      try {
+        const q = query(
+          collection(db, "employees"),
+          where("adminId", "==", currentAdmin.uid)
+        );
+        
+        const snapshot = await getDocs(q);
+        currentEmployees = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        mostrarEmpleados();
+        
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+
+    function mostrarEmpleados() {
+      if (currentEmployees.length === 0) {
+        employeesList.innerHTML = `
+          <div style="text-align: center; padding: 30px; color: var(--text-muted);">
+            <i class="fas fa-users" style="font-size: 48px; opacity: 0.3;"></i>
+            <p>No hay empleados registrados</p>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      currentEmployees.sort((a, b) => (a.username || '').localeCompare(b.username || ''));
+
+      currentEmployees.forEach(emp => {
+        const turno = emp.turnoHoras || 8;
+        html += `
+          <div class="employee-item">
+            <div class="employee-info">
+              <h3>${emp.firstName || ''} ${emp.lastName || ''}</h3>
+              <p><i class="fas fa-id-card"></i> ${emp.username || 'N/A'} | <i class="fas fa-clock"></i> ${turno}h</p>
+            </div>
+            <div class="employee-actions">
+              <button onclick="window.editarEmpleado('${emp.id}')" title="Editar">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="delete-btn" onclick="window.confirmarEliminar('${emp.id}')" title="Eliminar">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      });
+
+      employeesList.innerHTML = html;
+    }
+
+    window.editarEmpleado = async (id) => {
+      const emp = currentEmployees.find(e => e.id === id);
+      if (!emp) return;
+
+      const nuevoNombre = prompt('Nuevo nombre completo:', `${emp.firstName || ''} ${emp.lastName || ''}`.trim());
+      if (nuevoNombre === null) return;
+
+      const nuevoPin = prompt('Nuevo PIN:', emp.pin || '');
+      if (nuevoPin === null) return;
+
+      showLoading('Actualizando...');
+
+      try {
+        const nombreParts = nuevoNombre.split(' ');
+        const firstName = nombreParts[0] || '';
+        const lastName = nombreParts.slice(1).join(' ') || '';
+
+        await updateDoc(doc(db, "employees", id), {
+          firstName: firstName,
+          lastName: lastName,
+          pin: nuevoPin,
+          updatedAt: Timestamp.now()
+        });
+
+        await cargarEmpleados();
+        showToast('Empleado actualizado');
+      } catch (error) {
+        showToast('Error al actualizar', 'error');
+      } finally {
+        hideLoading();
+      }
+    };
+
+    window.confirmarEliminar = (id) => {
+      if (confirm('¿Eliminar este empleado?')) {
+        eliminarEmpleado(id);
+      }
+    };
+
+    async function eliminarEmpleado(id) {
+      showLoading('Eliminando...');
+      
+      try {
+        await deleteDoc(doc(db, "employees", id));
+        await cargarEmpleados();
+        showToast('Empleado eliminado');
+      } catch (error) {
+        showToast('Error al eliminar', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    adminPass.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') loginBtn.click();
+    });
+  </script>
+</body>
+</html>
