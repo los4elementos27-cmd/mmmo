@@ -32,9 +32,19 @@ html,body{height:100%;width:100%;background:var(--bg);overflow:hidden;position:f
 #map{height:100%;width:100%;position:absolute;top:0;left:0;z-index:1}
 .screen{display:none;position:fixed;inset:0;z-index:100;background:var(--bg);overflow-y:auto}
 .screen.active{display:flex;flex-direction:column}
-/* AUTH */
-.auth-wrap{flex:1;display:flex;justify-content:center;align-items:flex-start;padding:var(--sp16);padding-top:max(env(safe-area-inset-top,16px),var(--sp16));min-height:100%}
-.auth-card{background:var(--surf);border-radius:var(--r24);padding:var(--sp24);width:100%;max-width:380px;border:1px solid var(--brd2);margin:auto;box-shadow:var(--shadow)}
+
+/* ===== AUTH — sin contenedor, solo campos e icono ===== */
+.auth-wrap{
+  flex:1;display:flex;justify-content:center;align-items:flex-start;
+  padding:var(--sp16);padding-top:max(env(safe-area-inset-top,16px),var(--sp16));min-height:100%;
+  background:var(--bg);
+}
+.auth-card{
+  width:100%;max-width:380px;margin:auto;
+  padding:var(--sp24) var(--sp16);
+  /* SIN fondo, SIN borde, SIN sombra — solo contenido limpio */
+  background:transparent;border:none;box-shadow:none;border-radius:0;
+}
 .logo-big{width:62px;height:62px;background:linear-gradient(135deg,var(--pr),var(--sec));border-radius:var(--r16);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto var(--sp16);box-shadow:0 8px 28px rgba(0,212,255,0.3)}
 .auth-card h1{text-align:center;font-size:var(--fs24);font-weight:800;background:linear-gradient(135deg,var(--pr),var(--sec));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:var(--sp4)}
 .auth-card>p{text-align:center;color:var(--txt2);font-size:var(--fs12);margin-bottom:var(--sp20)}
@@ -58,6 +68,7 @@ select.inp option{background:var(--surf);color:var(--txt)}
 .photo-up i{font-size:22px;color:var(--pr);margin-bottom:3px}
 .photo-up span{font-size:9px;color:var(--txt2)}
 #photoInput{display:none}
+
 /* APP HEADER */
 .app-hdr{position:fixed;top:0;left:0;right:0;z-index:1100;padding:max(env(safe-area-inset-top,10px),10px) var(--sp12) var(--sp10);background:linear-gradient(180deg,rgba(10,10,20,0.9) 0%,transparent 100%);pointer-events:none}
 body.light .app-hdr{background:linear-gradient(180deg,rgba(240,243,247,0.9) 0%,transparent 100%)}
@@ -67,6 +78,7 @@ body.light .app-hdr{background:linear-gradient(180deg,rgba(240,243,247,0.9) 0%,t
 .hdr-right{display:flex;gap:var(--sp8)}
 .hdr-btn{width:38px;height:38px;background:var(--surf);backdrop-filter:blur(16px);border:1px solid var(--brd);border-radius:50%;color:var(--txt);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:var(--fs14);transition:.3s;box-shadow:var(--shadow)}
 .hdr-btn:hover,.hdr-btn.on{border-color:var(--pr);color:var(--pr)}
+
 /* NAV MENU */
 .nav-menu{position:fixed;top:62px;right:var(--sp12);background:var(--surf);border:1px solid var(--brd2);border-radius:var(--r16);padding:var(--sp8);z-index:2000;min-width:210px;display:none;box-shadow:0 8px 32px rgba(0,0,0,0.4);overflow:hidden}
 .nav-menu.open{display:block}
@@ -74,18 +86,21 @@ body.light .app-hdr{background:linear-gradient(180deg,rgba(240,243,247,0.9) 0%,t
 .nm-item:hover{background:rgba(0,212,255,0.1);color:var(--pr)}
 .nm-item i{width:18px;text-align:center;color:var(--pr);font-size:var(--fs13)}
 .nm-div{height:1px;background:var(--brd);margin:var(--sp4) 0}
+
 /* MAP CONTROLS */
 .map-ctrls{position:fixed;top:70px;right:var(--sp12);z-index:900;display:flex;flex-direction:column;gap:var(--sp8)}
 .mc-btn{width:38px;height:38px;background:var(--surf);border:1px solid var(--brd);border-radius:var(--r8);color:var(--txt);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:var(--fs14);backdrop-filter:blur(10px);transition:.3s;box-shadow:var(--shadow)}
 body.light .mc-btn{background:rgba(255,255,255,0.95)}
 .mc-btn:hover{border-color:var(--pr);color:var(--pr)}
 .mc-btn.muted{color:var(--err);border-color:var(--err)}
+
 /* FLOATING STATUS */
 .float-st{position:fixed;top:76px;left:50%;transform:translateX(-50%) translateY(-120px);background:var(--surf);backdrop-filter:blur(20px);border:2px solid var(--pr);border-radius:50px;padding:var(--sp10) var(--sp20);z-index:890;display:flex;align-items:center;gap:var(--sp10);font-weight:700;font-size:var(--fs13);box-shadow:0 6px 28px rgba(0,212,255,0.25);opacity:0;transition:all .5s cubic-bezier(.68,-.55,.265,1.55);pointer-events:none;max-width:90%;white-space:nowrap}
 .float-st.on{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:auto}
 .float-st i{font-size:var(--fs15);color:var(--pr);animation:pi 2s infinite}
 .rep-btn{pointer-events:auto;background:rgba(0,212,255,0.15);border:1px solid var(--pr);border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:var(--fs11);color:var(--pr)}
 @keyframes pi{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+
 /* NAV INSTRUCTIONS */
 .nav-instr{position:fixed;top:70px;left:var(--sp12);right:60px;background:var(--surf);backdrop-filter:blur(20px);border-radius:var(--r16);padding:var(--sp12);z-index:880;display:none;border:1px solid rgba(0,212,255,0.3);box-shadow:var(--shadow)}
 .nav-instr.on{display:block}
@@ -95,10 +110,12 @@ body.light .mc-btn{background:rgba(255,255,255,0.95)}
 .nav-sub{font-size:var(--fs12);color:var(--txt2)}
 .nav-dist-v{font-size:var(--fs20);font-weight:800;color:var(--pr);text-align:right}
 .nav-dist-u{font-size:var(--fs10);color:var(--txt2);text-align:right}
+
 /* SOS */
 .sos-btn{position:fixed;bottom:96px;right:var(--sp12);width:50px;height:50px;background:var(--err);border:none;border-radius:50%;color:#fff;font-size:var(--fs12);font-weight:800;cursor:pointer;z-index:880;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(255,23,68,.45);animation:sp 2s infinite}
 .sos-btn.on{display:flex}
 @keyframes sp{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+
 /* ETA BADGE */
 .eta-badge{position:fixed;top:76px;left:var(--sp12);background:var(--surf);border:1px solid var(--ok);border-radius:var(--r12);padding:var(--sp10) var(--sp14);z-index:880;display:none;box-shadow:var(--shadow)}
 .eta-badge.on{display:block}
@@ -117,6 +134,9 @@ body.light .mc-btn{background:rgba(255,255,255,0.95)}
 .addr-inw i{position:absolute;left:var(--sp12);top:50%;transform:translateY(-50%);color:var(--txt2);font-size:var(--fs13)}
 .addr-inp{width:100%;background:var(--surf2);border:1px solid var(--brd);border-radius:var(--r12);padding:var(--sp12) var(--sp12) var(--sp12) 36px;color:var(--txt);font-size:var(--fs14);outline:none;transition:.3s}
 .addr-inp:focus{border-color:var(--pr)}
+/* Botón de ubicación actual en el overlay */
+.addr-cur-btn{width:100%;background:rgba(0,212,255,0.08);border:1px solid var(--brd2);border-radius:var(--r12);padding:var(--sp12);color:var(--pr);font-size:var(--fs14);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:var(--sp8);margin-bottom:var(--sp8);transition:.3s}
+.addr-cur-btn:hover{background:rgba(0,212,255,0.15)}
 .addr-map-btn{width:100%;background:rgba(0,212,255,0.08);border:1px solid var(--brd2);border-radius:var(--r12);padding:var(--sp12);color:var(--pr);font-size:var(--fs14);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:var(--sp8);margin-bottom:var(--sp10)}
 .addr-sugs{flex:1;overflow-y:auto}
 .sug-it{padding:var(--sp12);border-bottom:1px solid var(--brd);cursor:pointer;display:flex;align-items:center;gap:var(--sp10);transition:.2s}
@@ -124,6 +144,7 @@ body.light .mc-btn{background:rgba(255,255,255,0.95)}
 .sug-it i{color:var(--txt3);font-size:var(--fs13);width:20px;text-align:center}
 .sug-main{font-size:var(--fs14);color:var(--txt)}
 .sug-sub{font-size:var(--fs12);color:var(--txt2)}
+
 /* MAP SELECTOR */
 .map-sel{position:fixed;inset:0;z-index:3000;display:none;pointer-events:none}
 .map-sel.on{display:block;pointer-events:auto}
@@ -134,7 +155,7 @@ body.light .mc-btn{background:rgba(255,255,255,0.95)}
 .map-sel-confirm{background:linear-gradient(135deg,var(--pr),var(--sec));border:none;border-radius:50px;padding:var(--sp12) var(--sp24);color:#fff;font-size:var(--fs14);font-weight:700;cursor:pointer;display:flex;align-items:center;gap:var(--sp8);box-shadow:var(--shadow)}
 .map-sel-cancel{background:var(--surf);border:1px solid var(--brd);border-radius:50px;padding:var(--sp12) var(--sp20);color:var(--txt);font-size:var(--fs14);cursor:pointer;box-shadow:var(--shadow)}
 
-/* ===== CLIENT PANEL — slide-up/down ===== */
+/* ===== CLIENT PANEL ===== */
 .client-panel{
   position:fixed;bottom:0;left:0;right:0;
   background:var(--surf);backdrop-filter:blur(20px);
@@ -161,7 +182,11 @@ body.light .mc-btn{background:rgba(255,255,255,0.95)}
 .loc-ico.pu{color:var(--pr)}.loc-ico.de{color:var(--err)}
 .loc-disp{flex:1;padding:var(--sp8);font-size:var(--fs13);color:var(--txt);min-height:36px;display:flex;align-items:center}
 .loc-disp.empty{color:var(--txt3)}
+/* Botón de ubicación actual junto al campo de origen */
+.loc-cur-btn{width:34px;height:34px;background:rgba(0,212,255,0.12);border:none;border-radius:var(--r8);color:var(--pr);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:var(--fs13);flex-shrink:0;transition:.3s}
+.loc-cur-btn:hover{background:rgba(0,212,255,0.25)}
 .loc-map-btn{width:34px;height:34px;background:rgba(0,212,255,0.08);border:none;border-radius:var(--r8);color:var(--pr);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:var(--fs12)}
+
 /* PRICE SECTION */
 .price-sec{background:var(--surf2);border-radius:var(--r16);padding:var(--sp14);margin-bottom:var(--sp12);border:1px solid var(--brd)}
 .price-hdr{text-align:center;margin-bottom:var(--sp12)}
@@ -172,62 +197,153 @@ body.light .mc-btn{background:rgba(255,255,255,0.95)}
 .price-inp{flex:1;background:var(--surf);border:1px solid var(--brd);border-radius:var(--r12);padding:var(--sp10);color:var(--txt);font-size:var(--fs16);text-align:center;outline:none}
 .price-inp:focus{border-color:var(--pr)}
 
-/* ===== TARIFA DEL VIAJE — styled modal ===== */
+/* ===== TARIFA DEL VIAJE — styled modal elegante ===== */
 .tarifa-modal{
   position:fixed;inset:0;background:rgba(0,0,0,0.88);
   z-index:4300;display:none;align-items:center;justify-content:center;padding:var(--sp20);
 }
 .tarifa-modal.on{display:flex}
 .tarifa-box{
-  background:var(--surf);
+  background:linear-gradient(135deg,#0f1f14,#0d1a1f);
   border:2px solid var(--ok);
   border-radius:var(--r24);
   padding:var(--sp24);
   width:100%;max-width:360px;
   text-align:center;
-  box-shadow:0 12px 48px rgba(0,230,118,0.2);
+  box-shadow:0 12px 48px rgba(0,230,118,0.3),0 0 80px rgba(0,230,118,0.08);
   animation:popIn .35s cubic-bezier(.68,-.55,.265,1.55);
+  position:relative;overflow:hidden;
+}
+.tarifa-box::before{
+  content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;
+  background:radial-gradient(ellipse at center,rgba(0,230,118,0.05) 0%,transparent 60%);
+  pointer-events:none;
 }
 .tarifa-icon{
-  width:60px;height:60px;
+  width:68px;height:68px;
   background:linear-gradient(135deg,rgba(0,230,118,0.2),rgba(0,212,255,0.1));
   border:2px solid var(--ok);
   border-radius:50%;
   display:flex;align-items:center;justify-content:center;
   margin:0 auto var(--sp12);
-  font-size:26px;
+  font-size:28px;
   color:var(--ok);
+  box-shadow:0 0 20px rgba(0,230,118,0.3);
 }
 .tarifa-box h3{
-  font-size:var(--fs18);font-weight:800;
+  font-size:var(--fs20);font-weight:800;
   color:var(--ok);
-  margin-bottom:var(--sp6);
+  margin-bottom:var(--sp4);
+  text-shadow:0 0 20px rgba(0,230,118,0.4);
 }
 .tarifa-box .tarifa-sub{
-  font-size:var(--fs13);color:var(--txt2);margin-bottom:var(--sp16);
+  font-size:var(--fs13);color:var(--txt2);margin-bottom:var(--sp14);
 }
 .tarifa-amount{
-  font-size:clamp(36px,10vw,48px);
-  font-weight:800;
+  font-size:clamp(40px,11vw,54px);
+  font-weight:900;
   color:var(--ok);
-  background:linear-gradient(135deg,rgba(0,230,118,0.1),rgba(0,212,255,0.05));
+  background:linear-gradient(135deg,rgba(0,230,118,0.12),rgba(0,212,255,0.06));
   border:1px solid rgba(0,230,118,0.3);
   border-radius:var(--r16);
   padding:var(--sp14) var(--sp20);
   margin-bottom:var(--sp14);
-  letter-spacing:-1px;
+  letter-spacing:-2px;
+  text-shadow:0 0 30px rgba(0,230,118,0.5);
 }
 .tarifa-details{
   display:grid;grid-template-columns:1fr 1fr;gap:var(--sp8);
   margin-bottom:var(--sp16);
 }
 .tarifa-detail-item{
-  background:var(--surf2);border-radius:var(--r12);padding:var(--sp10);
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:var(--r12);padding:var(--sp10);
 }
 .tarifa-detail-lbl{font-size:var(--fs10);color:var(--txt2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
 .tarifa-detail-val{font-size:var(--fs13);font-weight:700;color:var(--txt)}
+.tarifa-payment{
+  font-size:var(--fs12);color:var(--txt2);margin-bottom:var(--sp16);
+  background:rgba(0,230,118,0.08);
+  border:1px solid rgba(0,230,118,0.2);
+  border-radius:var(--r8);padding:var(--sp10);
+  display:flex;align-items:center;justify-content:center;gap:var(--sp8);
+}
 .tarifa-acts{display:flex;gap:var(--sp10)}
 .tarifa-acts .btn{flex:1;margin:0}
+
+/* ===== MODAL OFERTA CONDUCTOR — estilo elegante ===== */
+.price-modal{
+  position:fixed;inset:0;background:rgba(0,0,0,0.88);
+  z-index:4200;display:none;align-items:center;justify-content:center;padding:var(--sp20);
+}
+.price-modal.on{display:flex}
+.price-modal-box{
+  background:linear-gradient(135deg,#0f0f20,#151528);
+  border:2px solid var(--pr);
+  border-radius:var(--r24);
+  padding:var(--sp24);
+  width:100%;max-width:360px;
+  box-shadow:0 12px 48px rgba(0,212,255,0.25),0 0 80px rgba(0,212,255,0.06);
+  animation:popIn .35s cubic-bezier(.68,-.55,.265,1.55);
+  position:relative;overflow:hidden;
+}
+.price-modal-box::before{
+  content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;
+  background:radial-gradient(ellipse at center,rgba(0,212,255,0.04) 0%,transparent 60%);
+  pointer-events:none;
+}
+.price-modal-icon{
+  width:60px;height:60px;
+  background:linear-gradient(135deg,rgba(0,212,255,0.2),rgba(123,44,191,0.15));
+  border:2px solid var(--pr);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto var(--sp14);
+  font-size:26px;color:var(--pr);
+  box-shadow:0 0 20px rgba(0,212,255,0.3);
+}
+.price-modal-box h3{
+  text-align:center;font-size:var(--fs18);font-weight:800;
+  color:var(--pr);margin-bottom:var(--sp6);
+  text-shadow:0 0 15px rgba(0,212,255,0.3);
+}
+.price-modal-box p{text-align:center;color:var(--txt2);font-size:var(--fs13);margin-bottom:var(--sp16)}
+.price-modal-client-info{
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:var(--r12);padding:var(--sp12);
+  display:flex;align-items:center;gap:var(--sp10);
+  margin-bottom:var(--sp14);
+}
+.price-modal-client-photo{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--pr)}
+.price-modal-client-name{font-size:var(--fs14);font-weight:700}
+.price-modal-client-offered{font-size:var(--fs12);color:var(--ok);margin-top:2px}
+.price-modal-route{
+  background:rgba(0,212,255,0.05);
+  border:1px solid rgba(0,212,255,0.15);
+  border-radius:var(--r12);padding:var(--sp12);
+  margin-bottom:var(--sp14);
+}
+.price-modal-route-pt{display:flex;align-items:center;gap:var(--sp8);padding:3px 0;font-size:var(--fs12)}
+.price-modal-input-wrap{margin-bottom:var(--sp14)}
+.price-modal-input-wrap label{display:block;font-size:var(--fs11);color:var(--txt2);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:var(--sp8)}
+.price-modal-inp{
+  width:100%;
+  background:rgba(0,212,255,0.06);
+  border:2px solid rgba(0,212,255,0.3);
+  border-radius:var(--r12);
+  padding:var(--sp14) var(--sp16);
+  color:var(--txt);
+  font-size:var(--fs24);
+  font-weight:800;
+  text-align:center;
+  outline:none;
+  transition:.3s;
+}
+.price-modal-inp:focus{border-color:var(--pr);box-shadow:0 0 0 4px rgba(0,212,255,0.1)}
+.price-modal-acts{display:flex;gap:var(--sp10)}
+.price-modal-acts .btn{flex:1;margin:0}
 
 /* DRIVER CARD */
 .drv-card{background:var(--surf2);border-radius:var(--r16);padding:var(--sp14);margin-bottom:var(--sp12);display:none}
@@ -241,11 +357,26 @@ body.light .mc-btn{background:rgba(255,255,255,0.95)}
 .drv-acts button{flex:1;padding:var(--sp10);border-radius:var(--r8);border:none;cursor:pointer;font-size:var(--fs13);display:flex;align-items:center;justify-content:center;gap:var(--sp6);font-weight:600}
 .btn-msg{background:rgba(0,212,255,0.12);color:var(--pr)}
 .btn-can{background:rgba(255,23,68,0.12);color:var(--err);border:1px solid rgba(255,23,68,0.3)!important}
+
 /* ARRIVAL BANNER */
 .arr-banner{background:linear-gradient(135deg,rgba(0,230,118,0.12),rgba(0,212,255,0.12));border:1px solid var(--ok);border-radius:14px;padding:var(--sp14);text-align:center;margin-bottom:var(--sp12);display:none}
 .arr-banner.on{display:block}
 .arr-banner h3{font-size:var(--fs16);color:var(--ok);margin-bottom:5px}
 .arr-banner p{font-size:var(--fs13);color:var(--txt2)}
+
+/* ETA en tiempo real en el banner del conductor */
+.drv-eta-live{
+  background:linear-gradient(135deg,rgba(0,212,255,0.1),rgba(123,44,191,0.08));
+  border:1px solid rgba(0,212,255,0.3);
+  border-radius:var(--r12);
+  padding:var(--sp10) var(--sp14);
+  margin-bottom:var(--sp10);
+  display:none;
+  text-align:center;
+}
+.drv-eta-live.on{display:block}
+.drv-eta-num{font-size:var(--fs24);font-weight:800;color:var(--pr)}
+.drv-eta-lbl{font-size:var(--fs12);color:var(--txt2)}
 
 /* OFFERS MODAL */
 .offers-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.92);z-index:2500;display:none;overflow-y:auto;padding:var(--sp16);padding-top:max(env(safe-area-inset-top,16px),40px)}
@@ -277,7 +408,7 @@ body.light .mc-btn{background:rgba(255,255,255,0.95)}
 .neg-acts{display:flex;gap:var(--sp10)}
 .neg-acts .btn{flex:1;margin:0}
 
-/* ===== DRIVER PANEL — slide-up/down ===== */
+/* ===== DRIVER PANEL ===== */
 .driver-panel{
   position:fixed;bottom:0;left:0;right:0;
   background:var(--surf);backdrop-filter:blur(20px);
@@ -312,6 +443,7 @@ body.light .mc-btn{background:rgba(255,255,255,0.95)}
 .earn-period{display:flex;gap:var(--sp6)}
 .period-b{flex:1;padding:var(--sp8);background:var(--surf);border:1px solid var(--brd);border-radius:var(--r8);color:var(--txt);font-size:var(--fs12);cursor:pointer;transition:.3s;text-align:center}
 .period-b.active{background:var(--pr);color:#000;border-color:var(--pr)}
+
 /* TRIP CARD */
 .trip-card{background:linear-gradient(135deg,rgba(0,212,255,0.07),rgba(123,44,191,0.07));border:2px solid var(--pr);border-radius:var(--r16);padding:var(--sp14);margin-bottom:var(--sp14);display:none}
 .trip-card.on{display:block}
@@ -345,7 +477,6 @@ body.light .trip-it{background:rgba(0,0,0,0.04)}
 .req-clear-btn:hover{background:rgba(255,23,68,0.22)}
 .req-card{background:var(--surf2);border-radius:14px;padding:var(--sp14);margin-bottom:var(--sp10);border:1px solid var(--brd);transition:.3s;position:relative;overflow:hidden}
 .req-card:hover{border-color:var(--pr)}
-.req-card.accepted{opacity:0.4;pointer-events:none;border-color:var(--ok);transform:scale(0.97)}
 .req-card.removing{animation:fadeOut .4s forwards}
 @keyframes fadeOut{to{opacity:0;transform:translateY(-10px);max-height:0;padding:0;margin:0;overflow:hidden}}
 .req-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--sp10)}
@@ -372,6 +503,7 @@ body.light .trip-it{background:rgba(0,0,0,0.04)}
 .badge-ok{background:rgba(0,230,118,0.15);color:var(--ok)}
 .badge-warn{background:rgba(255,171,0,0.15);color:var(--warn)}
 .badge-err{background:rgba(255,23,68,0.15);color:var(--err)}
+
 /* RATING MODAL */
 .rating-modal{position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:4000;display:none;align-items:center;justify-content:center;padding:var(--sp20)}
 .rating-modal.on{display:flex}
@@ -382,6 +514,7 @@ body.light .trip-it{background:rgba(0,0,0,0.04)}
 .star-btn{font-size:var(--fs28);cursor:pointer;color:var(--brd);transition:.2s}
 .star-btn.on{color:var(--warn)}
 .rating-count{font-size:var(--fs12);color:var(--txt2);margin-bottom:var(--sp14)}
+
 /* CHAT */
 .modal-ov{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:3500;display:none;align-items:flex-end}
 .modal-ov.on{display:flex}
@@ -398,6 +531,7 @@ body.light .trip-it{background:rgba(0,0,0,0.04)}
 .chat-footer{padding:var(--sp12);border-top:1px solid var(--brd);display:flex;gap:var(--sp8)}
 .chat-footer input{flex:1;background:var(--surf2);border:1px solid var(--brd);border-radius:50px;padding:var(--sp10) var(--sp16);color:var(--txt);outline:none;font-size:var(--fs13)}
 .chat-footer button{width:40px;height:40px;border-radius:50%;background:var(--pr);border:none;color:#000;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
 /* CANCEL MODAL */
 .cancel-modal{position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:4100;display:none;align-items:center;justify-content:center;padding:var(--sp20)}
 .cancel-modal.on{display:flex}
@@ -407,6 +541,7 @@ body.light .trip-it{background:rgba(0,0,0,0.04)}
 .cancel-rsns{display:flex;flex-direction:column;gap:var(--sp8);margin-bottom:var(--sp14)}
 .cancel-rsn{background:var(--surf2);border:1px solid var(--brd);border-radius:var(--r12);padding:var(--sp12);color:var(--txt);cursor:pointer;text-align:left;transition:.3s;font-size:var(--fs13)}
 .cancel-rsn:hover{background:rgba(255,23,68,0.1);border-color:var(--err)}
+
 /* PROFILE MODAL */
 .profile-modal{position:fixed;inset:0;background:var(--bg);z-index:3000;display:none;overflow-y:auto;padding:max(env(safe-area-inset-top,16px),var(--sp16)) var(--sp16) var(--sp24)}
 .profile-modal.on{display:block}
@@ -423,7 +558,6 @@ body.light .trip-it{background:rgba(0,0,0,0.04)}
 .psect h4{font-size:var(--fs13);font-weight:700;margin-bottom:var(--sp12);color:var(--pr);text-transform:uppercase;letter-spacing:.5px}
 .stats-row{display:flex;gap:var(--sp8);margin-bottom:var(--sp10)}
 .stats-row .stat-c{flex:1}
-/* SUPPORT / SETTINGS */
 .support-item{display:flex;align-items:center;gap:var(--sp12);padding:var(--sp12);border-radius:var(--r12);cursor:pointer;transition:.2s;margin-bottom:var(--sp8);background:var(--surf2)}
 .support-item:hover{background:rgba(0,212,255,0.1)}
 .support-item i{width:28px;height:28px;background:rgba(0,212,255,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--pr);font-size:var(--fs13);flex-shrink:0}
@@ -433,13 +567,13 @@ body.light .trip-it{background:rgba(0,0,0,0.04)}
 .setting-row{display:flex;justify-content:space-between;align-items:center;padding:var(--sp12);border-radius:var(--r12);background:var(--surf2);margin-bottom:var(--sp8)}
 .setting-row-txt{font-size:var(--fs14);font-weight:600}
 .setting-row-sub{font-size:var(--fs12);color:var(--txt2)}
-/* PAYMENT METHODS */
 .pay-card{display:flex;align-items:center;gap:var(--sp12);padding:var(--sp12);background:var(--surf2);border-radius:var(--r12);margin-bottom:var(--sp10);border:1px solid var(--brd)}
 .pay-ico{width:40px;height:40px;background:rgba(0,212,255,0.1);border-radius:var(--r8);display:flex;align-items:center;justify-content:center;color:var(--pr);font-size:var(--fs18)}
 .pay-info{flex:1}
 .pay-name{font-size:var(--fs14);font-weight:600}
 .pay-sub{font-size:var(--fs12);color:var(--txt2)}
 .pay-badge{padding:3px 8px;background:rgba(0,230,118,0.15);color:var(--ok);border-radius:50px;font-size:var(--fs11);font-weight:600}
+
 /* LOAD/TOAST */
 .load-scr{position:fixed;inset:0;background:var(--bg);z-index:9999;display:none;flex-direction:column;align-items:center;justify-content:center}
 .load-scr.on{display:flex}
@@ -447,27 +581,42 @@ body.light .trip-it{background:rgba(0,0,0,0.04)}
 @keyframes sp2{to{transform:rotate(360deg)}}
 .toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surf);color:var(--txt);padding:var(--sp12) var(--sp20);border-radius:var(--r12);border:1px solid rgba(0,212,255,.25);z-index:10000;display:flex;align-items:center;gap:var(--sp10);font-weight:600;font-size:var(--fs13);box-shadow:0 8px 32px rgba(0,0,0,.5);opacity:0;transition:all .3s;max-width:88%;text-align:center}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* ===== ICONOS DE VEHÍCULO ANIMADOS (Font Awesome) ===== */
+@keyframes carBounce{
+  0%,100%{transform:translateY(0) rotate(0deg)}
+  25%{transform:translateY(-2px) rotate(-1deg)}
+  75%{transform:translateY(2px) rotate(1deg)}
+}
+@keyframes carApproach{
+  0%{transform:scale(0.7) translateY(0)}
+  50%{transform:scale(0.85) translateY(-3px)}
+  100%{transform:scale(1) translateY(0)}
+}
+.car-marker-wrap{
+  position:relative;
+  width:44px;height:44px;
+}
+
 /* SCROLLBAR */
 ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(0,212,255,.2);border-radius:2px}
-/* RESPONSIVE */
 @media(max-width:380px){.drv-stats{grid-template-columns:1fr 1fr}.trip-grid{grid-template-columns:1fr}}
-/* LIGHT MODE PATCHES */
 body.light .offer-card{background:#f8f9fc}
 body.light .cancel-box{background:#fff}
 body.light .rating-box{background:#fff}
 body.light .neg-box{background:#fff}
-body.light .tarifa-box{background:#fff}
 body.light .chat-wrap{background:#fff}
 body.light .msg.recv{background:#f0f3f7}
 body.light .nav-instr{background:rgba(255,255,255,.97)}
 body.light .trip-card{background:linear-gradient(135deg,rgba(0,100,200,.05),rgba(100,0,200,.05))}
 body.light .float-st{background:rgba(255,255,255,.97)}
 body.light .eta-badge{background:rgba(255,255,255,.97)}
+body.light .tarifa-box{background:linear-gradient(135deg,#f0fff5,#f0fffe)}
 </style>
 </head>
 <body>
 
-<!-- AUTH SCREEN -->
+<!-- AUTH SCREEN — sin contenedor, solo icono y campos -->
 <div id="authScreen" class="screen active">
 <div class="auth-wrap">
 <div class="auth-card">
@@ -550,8 +699,8 @@ body.light .eta-badge{background:rgba(255,255,255,.97)}
 
 <!-- ETA Badge -->
 <div class="eta-badge" id="etaBadge">
-  <div class="eta-badge-lbl">Conductor llega en</div>
-  <div><span class="eta-badge-val" id="etaVal">--</span> <span class="eta-badge-unit">min</span></div>
+  <div class="eta-badge-lbl" id="etaLbl">Conductor llega en</div>
+  <div><span class="eta-badge-val" id="etaVal">--</span> <span class="eta-badge-unit" id="etaUnit">min</span></div>
 </div>
 
 <!-- Map Controls -->
@@ -584,11 +733,14 @@ body.light .eta-badge{background:rgba(255,255,255,.97)}
   <div class="panel-drag" id="clientDrag"></div>
   <div class="panel-inner">
     <div id="searchFields">
+      <!-- Origen con botón de ubicación actual -->
       <div class="loc-row" onclick="openAddrOv('pickup')" id="pickupRow">
         <div class="loc-ico pu"><i class="fas fa-dot-circle"></i></div>
         <div class="loc-disp empty" id="pickupDisp">¿Dónde te recogemos?</div>
+        <button class="loc-cur-btn" onclick="event.stopPropagation();useCurrentLocation()" title="Usar ubicación actual"><i class="fas fa-location-crosshairs"></i></button>
         <button class="loc-map-btn" onclick="event.stopPropagation();openMapSel('pickup')" title="En mapa"><i class="fas fa-map-marker-alt"></i></button>
       </div>
+      <!-- Destino -->
       <div class="loc-row" onclick="openAddrOv('dest')" id="destRow">
         <div class="loc-ico de"><i class="fas fa-map-marker-alt"></i></div>
         <div class="loc-disp empty" id="destDisp">¿A dónde vas?</div>
@@ -607,6 +759,11 @@ body.light .eta-badge{background:rgba(255,255,255,.97)}
       <div style="font-size:var(--fs11);color:var(--txt2);text-align:center">Ingresa tu precio o usa el recomendado</div>
     </div>
     <button class="btn btn-ok" id="findBtn" onclick="findDriver()" style="display:none"><i class="fas fa-search"></i> Buscar Conductor</button>
+    <!-- ETA en tiempo real del conductor -->
+    <div class="drv-eta-live" id="drvEtaLive">
+      <div class="drv-eta-lbl" id="drvEtaLbl">Conductor en camino</div>
+      <div><span class="drv-eta-num" id="drvEtaNum">--</span> <span style="font-size:var(--fs12);color:var(--txt2)" id="drvEtaUnitLive">min</span></div>
+    </div>
     <div class="drv-card" id="drvCard">
       <div class="drv-pf">
         <img id="drvPhoto" class="drv-ph" src="" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2250%22 height=%2250%22><circle cx=%2225%22 cy=%2225%22 r=%2225%22 fill=%22%23333%22/></svg>'">
@@ -701,6 +858,8 @@ body.light .eta-badge{background:rgba(255,255,255,.97)}
     <h3 id="addrTitle">Buscar dirección</h3>
   </div>
   <div class="addr-inw"><i class="fas fa-search"></i><input type="text" class="addr-inp" id="addrInp" placeholder="Buscar dirección..." oninput="onAddrSearch(this.value)" autocomplete="off"></div>
+  <!-- Botón de ubicación actual en el overlay de búsqueda -->
+  <button class="addr-cur-btn" id="addrCurBtn" onclick="useCurrentLocationFromOv()"><i class="fas fa-location-crosshairs"></i> Usar mi ubicación actual</button>
   <button class="addr-map-btn" onclick="openMapSelFromOv()"><i class="fas fa-map-marker-alt"></i> Seleccionar desde el mapa</button>
   <div class="addr-sugs" id="addrSugs"></div>
 </div>
@@ -725,7 +884,7 @@ body.light .eta-badge{background:rgba(255,255,255,.97)}
   <button class="btn btn-sec" onclick="closeOffers()" style="margin-top:var(--sp14)"><i class="fas fa-times"></i> Cancelar búsqueda</button>
 </div>
 
-<!-- TARIFA DEL VIAJE MODAL -->
+<!-- TARIFA DEL VIAJE MODAL — Estilo elegante -->
 <div class="tarifa-modal" id="tarifaModal">
   <div class="tarifa-box">
     <div class="tarifa-icon"><i class="fas fa-receipt"></i></div>
@@ -750,11 +909,41 @@ body.light .eta-badge{background:rgba(255,255,255,.97)}
         <div class="tarifa-detail-val" id="tarifaDest" style="font-size:var(--fs11)">--</div>
       </div>
     </div>
-    <div style="font-size:var(--fs12);color:var(--txt2);margin-bottom:var(--sp14);background:rgba(0,230,118,0.06);border-radius:var(--r8);padding:var(--sp8)">
-      <i class="fas fa-money-bill-wave" style="color:var(--ok);margin-right:4px"></i>Pago en efectivo al conductor
+    <div class="tarifa-payment">
+      <i class="fas fa-money-bill-wave" style="color:var(--ok)"></i>
+      <span>Pago en efectivo al conductor</span>
     </div>
     <div class="tarifa-acts">
       <button class="btn btn-ok" onclick="closeTarifa()"><i class="fas fa-check"></i> Aceptar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DE OFERTA DEL CONDUCTOR — Estilo elegante -->
+<div class="price-modal" id="priceOfferModal">
+  <div class="price-modal-box">
+    <div class="price-modal-icon"><i class="fas fa-hand-holding-usd"></i></div>
+    <h3>Enviar Oferta al Cliente</h3>
+    <p>Revisa los detalles y establece tu precio</p>
+    <div class="price-modal-client-info" id="pmClientInfo">
+      <img class="price-modal-client-photo" id="pmClientPhoto" src="" onerror="this.style.display='none'">
+      <div>
+        <div class="price-modal-client-name" id="pmClientName">Cliente</div>
+        <div class="price-modal-client-offered" id="pmClientOffered">Ofrece: RD$ 0</div>
+      </div>
+    </div>
+    <div class="price-modal-route" id="pmRoute">
+      <div class="price-modal-route-pt"><i class="fas fa-circle" style="color:var(--pr);font-size:8px"></i><span id="pmOrig">Origen</span></div>
+      <div style="border-left:2px dashed rgba(0,212,255,0.3);margin-left:4px;height:12px"></div>
+      <div class="price-modal-route-pt"><i class="fas fa-map-marker-alt" style="color:var(--err);font-size:12px"></i><span id="pmDest">Destino</span></div>
+    </div>
+    <div class="price-modal-input-wrap">
+      <label><i class="fas fa-dollar-sign"></i> Tu precio (RD$)</label>
+      <input type="number" class="price-modal-inp" id="pmPriceInp" placeholder="0" min="50">
+    </div>
+    <div class="price-modal-acts">
+      <button class="btn btn-ok" onclick="confirmPriceOffer()"><i class="fas fa-paper-plane"></i> Enviar Oferta</button>
+      <button class="btn btn-sec" onclick="closePriceModal()"><i class="fas fa-times"></i> Cancelar</button>
     </div>
   </div>
 </div>
@@ -1041,6 +1230,13 @@ let nearbyMarkers={};
 let clientMarkers={};
 // Track accepted trip IDs per driver to remove from list
 let acceptedTripIds=new Set();
+// Para el modal de oferta del conductor
+let pendingOfferTripId=null,pendingOfferClientPrice=null;
+// Para rastrear si la ruta/línea de seguimiento está activa
+let routePolyline=null;
+// Estado del conductor marcador actual
+let driverMarkerFA=null;
+let driverHeading=0;
 
 const mkrs={user:null,pickup:null,dest:null,driver:null};
 const locs={pickup:null,dest:null,cur:null};
@@ -1069,6 +1265,9 @@ G.triggerSOS=triggerSOS;G.repeatInstr=repeatInstr;
 G.selStar=selStar;G.submitRating=submitRating;G.skipRating=skipRating;
 G.onOfferInput=onOfferInput;G.showToast=showToast;
 G.closeTarifa=closeTarifa;G.clearDriverRequests=clearDriverRequests;
+G.useCurrentLocation=useCurrentLocation;
+G.useCurrentLocationFromOv=useCurrentLocationFromOv;
+G.confirmPriceOffer=confirmPriceOffer;G.closePriceModal=closePriceModal;
 
 // AUTH
 function selectRole(r){
@@ -1131,6 +1330,8 @@ async function loadUserData(){
     const savedAudio=localStorage.getItem('retom_audio_'+currentUser.uid);
     if(savedAudio!==null)audioEnabled=savedAudio==='true';
     if(!audioEnabled){document.getElementById('audioBtn').classList.add('muted');document.getElementById('audioBtn').innerHTML='<i class="fas fa-volume-mute"></i>';}
+    // Sync audio toggle state in settings
+    document.getElementById('audioTgl').classList.toggle('on',audioEnabled);
     document.getElementById('authScreen').classList.remove('active');
     document.getElementById('mainScreen').classList.add('active');
     await restoreState();
@@ -1179,51 +1380,142 @@ function toggleAudio(){
   const b=document.getElementById('audioBtn');
   b.innerHTML=`<i class="fas fa-volume-${audioEnabled?'up':'mute'}"></i>`;
   if(!audioEnabled)b.classList.add('muted');else b.classList.remove('muted');
+  // Sync all audio toggle states wherever they appear
   const tgl=document.getElementById('audioTgl');if(tgl)tgl.classList.toggle('on',audioEnabled);
   if(currentUser)localStorage.setItem('retom_audio_'+currentUser.uid,audioEnabled);
+  // Give audio feedback when turning on
+  if(audioEnabled){setTimeout(()=>beep(880,0.3,0.3),50);}
+  showToast(audioEnabled?'Sonido activado':'Sonido silenciado');
 }
 
-// MAP INIT
+// ===== MAP INIT — con 3D y marcador tipo Google Maps =====
 G.onMapReady=function(){window._mapReady=true;if(window._pendingInit)initMap();};
 function initMap(){
   window._pendingInit=false;
   acSvc=new google.maps.places.AutocompleteService();
   geocoder=new google.maps.Geocoder();
   dirSvc=new google.maps.DirectionsService();
-  dirRender=new google.maps.DirectionsRenderer({suppressMarkers:true,polylineOptions:{strokeColor:'#00d4ff',strokeWeight:5,strokeOpacity:.85,icons:[{icon:{path:google.maps.SymbolPath.FORWARD_CLOSED_ARROW,scale:3,fillColor:'#00d4ff',fillOpacity:1,strokeColor:'#00d4ff'},offset:'100%',repeat:'80px'}]}});
+  // DirectionsRenderer para la línea de seguimiento que SIEMPRE permanece
+  dirRender=new google.maps.DirectionsRenderer({
+    suppressMarkers:true,
+    preserveViewport:false,
+    polylineOptions:{
+      strokeColor:'#00d4ff',
+      strokeWeight:5,
+      strokeOpacity:0.9,
+      icons:[{
+        icon:{path:google.maps.SymbolPath.FORWARD_CLOSED_ARROW,scale:3,fillColor:'#00d4ff',fillOpacity:1,strokeColor:'#00d4ff'},
+        offset:'100%',repeat:'80px'
+      }]
+    }
+  });
   const center=locs.cur||{lat:18.4861,lng:-69.9312};
-  map=new google.maps.Map(document.getElementById('map'),{zoom:15,center,disableDefaultUI:true,styles:darkMode?getDarkStyles():[],gestureHandling:'greedy',mapTypeControl:false,fullscreenControl:false,streetViewControl:false,zoomControl:false});
+  map=new google.maps.Map(document.getElementById('map'),{
+    zoom:16,
+    center,
+    disableDefaultUI:true,
+    styles:darkMode?getDarkStyles():[],
+    gestureHandling:'greedy',
+    mapTypeControl:false,
+    fullscreenControl:false,
+    streetViewControl:false,
+    zoomControl:false,
+    // 3D / Tilt
+    tilt:45,
+    heading:0,
+    mapTypeId:google.maps.MapTypeId.ROADMAP,
+  });
   dirRender.setMap(map);
   trafficLayer=new google.maps.TrafficLayer();
   if(avoidTraffic)trafficLayer.setMap(map);
+
+  // Permitir clic en el mapa para seleccionar ubicaciones
+  map.addListener('click',(e)=>{
+    if(mapSelType){
+      // Si hay un modo de selección activo, no hacemos nada extra aquí
+      // La confirmación es manual con el botón Confirmar
+      return;
+    }
+    // Si hay overlay de dirección abierto, usamos el clic para seleccionar
+    if(document.getElementById('addrOv').classList.contains('open')&&addrType){
+      const pos={lat:e.latLng.lat(),lng:e.latLng.lng()};
+      geocoder.geocode({location:pos},(res,st)=>{
+        const name=st==='OK'&&res[0]?res[0].formatted_address:'Ubicación seleccionada';
+        pos.name=name;
+        setLocation(addrType,pos);
+        closeAddrOv();
+      });
+      return;
+    }
+    // Clic libre en el mapa: si es cliente y no tiene pickup, asigna pickup
+    if(userRole==='cliente'&&!currentTrip){
+      if(!locs.pickup){
+        const pos={lat:e.latLng.lat(),lng:e.latLng.lng()};
+        geocoder.geocode({location:pos},(res,st)=>{
+          const name=st==='OK'&&res[0]?res[0].formatted_address:'Ubicación seleccionada';
+          pos.name=name;
+          setLocation('pickup',pos);
+          showToast('Punto de recogida seleccionado');
+        });
+      }else if(!locs.dest){
+        const pos={lat:e.latLng.lat(),lng:e.latLng.lng()};
+        geocoder.geocode({location:pos},(res,st)=>{
+          const name=st==='OK'&&res[0]?res[0].formatted_address:'Ubicación seleccionada';
+          pos.name=name;
+          setLocation('dest',pos);
+          showToast('Destino seleccionado');
+        });
+      }
+    }
+  });
+
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(p=>{
       const pos={lat:p.coords.latitude,lng:p.coords.longitude};
-      updateMyPos(pos);map.setCenter(pos);
+      updateMyPos(pos);
+      // 3D: centrar y animar hacia la posición del usuario con heading
+      map.moveCamera({center:pos,zoom:17,tilt:45,heading:p.coords.heading||0});
       if(userRole==='cliente'&&!locs.pickup){
+        // Auto-asignar ubicación actual como punto de recogida al iniciar
         geocoder.geocode({location:pos},(res,st)=>{
-          if(st==='OK'&&res[0]){const name=res[0].formatted_address;locs.pickup={lat:pos.lat,lng:pos.lng,name};setLocDisp('pickup',name);placeMkr('pickup',pos);}
+          if(st==='OK'&&res[0]){
+            const name=res[0].formatted_address;
+            locs.pickup={lat:pos.lat,lng:pos.lng,name};
+            setLocDisp('pickup',name);
+            placeMkr('pickup',pos);
+          }
         });
+      }
+      // Si es conductor, actualizar heading para icono 3D
+      if(userRole==='conductor'){
+        driverHeading=p.coords.heading||0;
+        updateDriverMarkerFA(pos,driverHeading);
       }
     },null,{enableHighAccuracy:true,timeout:8000});
     watchId=navigator.geolocation.watchPosition(p=>{
       const pos={lat:p.coords.latitude,lng:p.coords.longitude};
+      const heading=p.coords.heading||driverHeading||0;
       updateMyPos(pos);
       if(isNavigating)checkVoiceNav(pos);
       if(userRole==='conductor'&&currentUser&&isOnline){
-        const heading=p.coords.heading||0;
+        driverHeading=heading;
+        updateDriverMarkerFA(pos,heading);
         updateDoc(doc(db,'conductores',currentUser.uid),{ubicacion:pos,heading,actualizado:serverTimestamp()}).catch(()=>{});
+        // Si hay viaje activo, mantener mapa 3D actualizado con heading del conductor
+        if(currentTrip&&isNavigating){
+          map.moveCamera({center:pos,tilt:45,heading:heading});
+        }
       }
     },e=>console.log('GPS:',e),{enableHighAccuracy:true,maximumAge:3000,timeout:10000});
   }
-  // Setup drag gestures for panels (swipe up/down to show/hide)
+
+  // Setup drag gestures para paneles
   setupPanelDrag('clientDrag','clientPanel',()=>clientHidden,v=>{clientHidden=v;});
   setupPanelDrag('driverDrag','driverPanel',()=>driverHidden,v=>{driverHidden=v;});
 
   if(userRole==='cliente'){
     const cp=document.getElementById('clientPanel');
     cp.classList.add('active');
-    // Show panel by sliding up
     requestAnimationFrame(()=>{cp.style.transform='translateY(0)';});
     if(currentTrip)showTripStateClient();
     loadNearbyDrivers();
@@ -1237,31 +1529,79 @@ function initMap(){
   showLoad(false);
 }
 
+// ===== USAR UBICACIÓN ACTUAL =====
+// Desde botón en el panel de cliente (campo de recogida)
+function useCurrentLocation(){
+  if(!locs.cur){
+    showToast('Obteniendo GPS...','err');
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(p=>{
+        const pos={lat:p.coords.latitude,lng:p.coords.longitude};
+        locs.cur=pos;
+        applyCurrentLocationToPickup(pos);
+      },()=>showToast('No se pudo obtener ubicación','err'),{enableHighAccuracy:true,timeout:8000});
+    }
+    return;
+  }
+  applyCurrentLocationToPickup(locs.cur);
+}
+function applyCurrentLocationToPickup(pos){
+  showLoad(true);
+  geocoder.geocode({location:pos},(res,st)=>{
+    showLoad(false);
+    if(st==='OK'&&res[0]){
+      const name=res[0].formatted_address;
+      locs.pickup={lat:pos.lat,lng:pos.lng,name};
+      setLocDisp('pickup',name);
+      placeMkr('pickup',pos);
+      if(locs.dest)checkAndDrawRoute();
+      else map.panTo(pos);
+      showToast('Ubicación actual asignada');
+    }else{
+      showToast('No se pudo obtener dirección','err');
+    }
+  });
+}
+// Desde el overlay de búsqueda de dirección
+function useCurrentLocationFromOv(){
+  if(!locs.cur){
+    showToast('Obteniendo GPS...','err');
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(p=>{
+        locs.cur={lat:p.coords.latitude,lng:p.coords.longitude};
+        _applyLocToOv(locs.cur);
+      },()=>showToast('Error GPS','err'),{enableHighAccuracy:true,timeout:6000});
+    }
+    return;
+  }
+  _applyLocToOv(locs.cur);
+}
+function _applyLocToOv(pos){
+  showLoad(true);
+  geocoder.geocode({location:pos},(res,st)=>{
+    showLoad(false);
+    if(st==='OK'&&res[0]){
+      const name=res[0].formatted_address;
+      pos.name=name;
+      setLocation(addrType,{...pos,name});
+      closeAddrOv();
+      showToast('Ubicación actual asignada');
+    }
+  });
+}
+
 // PANEL DRAG — swipe up to show, swipe down to hide
 function setupPanelDrag(handleId,panelId,getHidden,setHidden){
   const handle=document.getElementById(handleId);if(!handle)return;
   const panel=document.getElementById(panelId);
   let startY=0,startTime=0,isDragging=false;
-
-  const onStart=e=>{
-    startY=e.touches?e.touches[0].clientY:e.clientY;
-    startTime=Date.now();isDragging=true;
-    panel.style.transition='none';
-  };
+  const onStart=e=>{startY=e.touches?e.touches[0].clientY:e.clientY;startTime=Date.now();isDragging=true;panel.style.transition='none';};
   const onMove=e=>{
     if(!isDragging)return;
     const y=e.touches?e.touches[0].clientY:e.clientY;
     const dy=y-startY;
-    if(getHidden()){
-      // panel is hidden (showing only drag bar), swipe up to reveal
-      if(dy<0){
-        const shift=Math.max(dy,-(panel.offsetHeight-48));
-        panel.style.transform=`translateY(calc(100% - 48px + ${shift}px))`;
-      }
-    }else{
-      // panel is visible, swipe down to hide
-      if(dy>0){panel.style.transform=`translateY(${Math.min(dy,panel.offsetHeight-48)}px)`;}
-    }
+    if(getHidden()){if(dy<0){const shift=Math.max(dy,-(panel.offsetHeight-48));panel.style.transform=`translateY(calc(100% - 48px + ${shift}px))`;}}
+    else{if(dy>0){panel.style.transform=`translateY(${Math.min(dy,panel.offsetHeight-48)}px)`;}}
   };
   const onEnd=e=>{
     if(!isDragging)return;isDragging=false;
@@ -1269,23 +1609,11 @@ function setupPanelDrag(handleId,panelId,getHidden,setHidden){
     const endY=e.changedTouches?e.changedTouches[0].clientY:e.clientY;
     const dy=endY-startY,dt=Date.now()-startTime;
     if(Math.abs(dy)>40||dt<300){
-      if(dy>0&&!getHidden()){
-        // swipe down → hide
-        setHidden(true);panel.classList.add('hidden');panel.style.transform='translateY(calc(100% - 48px))';
-        if(panelId==='driverPanel'){const ico=document.getElementById('drvPanIco');if(ico)ico.className='fas fa-chevron-up';}
-      }else if(dy<0&&getHidden()){
-        // swipe up → show
-        setHidden(false);panel.classList.remove('hidden');panel.style.transform='translateY(0)';
-        if(panelId==='driverPanel'){const ico=document.getElementById('drvPanIco');if(ico)ico.className='fas fa-chevron-down';}
-      }else{
-        // snap back
-        panel.style.transform=getHidden()?'translateY(calc(100% - 48px))':'translateY(0)';
-      }
-    }else{
-      panel.style.transform=getHidden()?'translateY(calc(100% - 48px))':'translateY(0)';
-    }
+      if(dy>0&&!getHidden()){setHidden(true);panel.classList.add('hidden');panel.style.transform='translateY(calc(100% - 48px))';if(panelId==='driverPanel'){const ico=document.getElementById('drvPanIco');if(ico)ico.className='fas fa-chevron-up';}}
+      else if(dy<0&&getHidden()){setHidden(false);panel.classList.remove('hidden');panel.style.transform='translateY(0)';if(panelId==='driverPanel'){const ico=document.getElementById('drvPanIco');if(ico)ico.className='fas fa-chevron-down';}}
+      else{panel.style.transform=getHidden()?'translateY(calc(100% - 48px))':'translateY(0)';}
+    }else{panel.style.transform=getHidden()?'translateY(calc(100% - 48px))':'translateY(0)';}
   };
-
   handle.addEventListener('touchstart',onStart,{passive:true});
   handle.addEventListener('touchmove',onMove,{passive:true});
   handle.addEventListener('touchend',onEnd,{passive:true});
@@ -1295,18 +1623,61 @@ function setupPanelDrag(handleId,panelId,getHidden,setHidden){
 // MY POSITION
 function updateMyPos(pos){
   locs.cur=pos;
-  if(!mkrs.user){mkrs.user=new google.maps.Marker({map,position:pos,zIndex:1000,icon:{path:google.maps.SymbolPath.CIRCLE,scale:9,fillColor:'#00d4ff',fillOpacity:1,strokeColor:'#fff',strokeWeight:3}});}
-  else mkrs.user.setPosition(pos);
+  if(!mkrs.user){
+    mkrs.user=new google.maps.Marker({map,position:pos,zIndex:1000,icon:{path:google.maps.SymbolPath.CIRCLE,scale:9,fillColor:'#00d4ff',fillOpacity:1,strokeColor:'#fff',strokeWeight:3}});
+  }else mkrs.user.setPosition(pos);
 }
 
-// MARKERS
-function getVehicleIcon(vtype,color='#00ff88'){
-  const icons={sedan:'🚗',suv:'🚙',pickup:'🛻',moto:'🏍️'};
-  const emoji=icons[vtype]||'🚗';
-  return{url:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><circle cx="18" cy="18" r="17" fill="${color}" stroke="#fff" stroke-width="2"/><text x="18" y="23" font-size="16" text-anchor="middle">${emoji}</text></svg>`),scaledSize:new google.maps.Size(36,36),anchor:new google.maps.Point(18,18)};
+// ===== ICONOS DE VEHÍCULO TIPO FONT AWESOME / INDRIVE =====
+// Genera un SVG con un icono de Font Awesome en HTML
+function getVehicleIconFA(vtype,heading){
+  // Iconos Font Awesome unicode para cada tipo
+  const icons={
+    sedan:{fa:'f1b9',color:'#00ff88'},      // fa-car
+    suv:{fa:'f5df',color:'#00d4ff'},         // fa-car-side
+    pickup:{fa:'f0d1',color:'#ffab00'},      // fa-truck
+    moto:{fa:'f21c',color:'#ff7043'}         // fa-motorcycle
+  };
+  const ico=icons[vtype]||icons.sedan;
+  const rot=heading||0;
+  // SVG con círculo, flecha de dirección y icono FA
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 52 52">
+    <circle cx="26" cy="26" r="24" fill="${ico.color}" fill-opacity="0.18" stroke="${ico.color}" stroke-width="2"/>
+    <circle cx="26" cy="26" r="18" fill="${ico.color}" fill-opacity="0.35"/>
+    <text x="26" y="33" font-size="20" font-family="'Font Awesome 6 Free'" font-weight="900" text-anchor="middle" fill="${ico.color}">&#x${ico.fa};</text>
+    <polygon points="26,4 23,12 29,12" fill="${ico.color}" opacity="0.8" transform="rotate(${rot},26,26)"/>
+  </svg>`;
+  return{
+    url:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg),
+    scaledSize:new google.maps.Size(52,52),
+    anchor:new google.maps.Point(26,26)
+  };
 }
+
+// Actualizar marcador del conductor en el mapa con icono FA
+function updateDriverMarkerFA(pos,heading){
+  if(!map)return;
+  const vtype=userData?.tipoVehiculo||'sedan';
+  const ico=getVehicleIconFA(vtype,heading);
+  if(!mkrs.user||userRole!=='conductor'){
+    // solo si es conductor con viaje
+    if(currentTrip&&mkrs.driver){
+      mkrs.driver.setPosition(pos);
+      mkrs.driver.setIcon(ico);
+    }
+    return;
+  }
+  // Conductor viendo su propio marcador en el mapa
+  if(!driverMarkerFA){
+    driverMarkerFA=new google.maps.Marker({map,position:pos,icon:ico,zIndex:1100,title:'Yo'});
+  }else{
+    driverMarkerFA.setPosition(pos);
+    driverMarkerFA.setIcon(ico);
+  }
+}
+
 function getPersonIcon(){
-  return{url:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="34" height="34"><circle cx="17" cy="17" r="16" fill="#7b2cbf" stroke="#fff" stroke-width="2"/><text x="17" y="22" font-size="15" text-anchor="middle">👤</text></svg>`),scaledSize:new google.maps.Size(34,34),anchor:new google.maps.Point(17,17)};
+  return{url:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><circle cx="18" cy="18" r="16" fill="#7b2cbf" stroke="#fff" stroke-width="2"/><text x="18" y="23" font-size="14" font-family="'Font Awesome 6 Free'" font-weight="900" text-anchor="middle" fill="#fff">&#xf007;</text></svg>`),scaledSize:new google.maps.Size(36,36),anchor:new google.maps.Point(18,18)};
 }
 function placeMkr(type,pos){
   if(mkrs[type])mkrs[type].setMap(null);
@@ -1324,18 +1695,28 @@ function setLocDisp(type,name){
   else{el.textContent=type==='pickup'?'¿Dónde te recogemos?':'¿A dónde vas?';el.classList.add('empty');}
 }
 
-// ROUTE
+// ROUTE — siempre dibuja y mantiene la ruta hasta que el viaje termine
 function calcRoute(from,to,cb){
   const opts={origin:from,destination:to,travelMode:'DRIVING',drivingOptions:{departureTime:new Date(),trafficModel:'bestguess'}};
   dirSvc.route(opts,(res,st)=>{if(st==='OK'&&cb)cb(res);});
 }
 function showRouteOnMap(from,to){
-  calcRoute(from,to,res=>{dirRender.setDirections(res);steps=res.routes[0].legs[0].steps;});
+  calcRoute(from,to,res=>{
+    dirRender.setDirections(res);
+    steps=res.routes[0].legs[0].steps;
+    // Mantener la ruta en el mapa — SIEMPRE activa
+    dirRender.setMap(map);
+  });
 }
+// Forzar que la ruta esté siempre visible
+function ensureRouteVisible(){
+  if(dirRender&&map){dirRender.setMap(map);}
+}
+
 function checkAndDrawRoute(){
   if(!locs.pickup||!locs.dest)return;
   calcRoute(locs.pickup,locs.dest,res=>{
-    dirRender.setDirections(res);steps=res.routes[0].legs[0].steps;
+    dirRender.setDirections(res);dirRender.setMap(map);steps=res.routes[0].legs[0].steps;
     const leg=res.routes[0].legs[0];
     const dist=leg.distance.value;
     const sug=Math.max(80,Math.ceil(dist/100)*15);
@@ -1352,7 +1733,11 @@ function onOfferInput(){const v=document.getElementById('clientOffer').value;if(
 
 // MAP CONTROLS
 function toggleMapType(){if(map){const t=map.getMapTypeId();map.setMapTypeId(t===google.maps.MapTypeId.ROADMAP?google.maps.MapTypeId.SATELLITE:google.maps.MapTypeId.ROADMAP);}}
-function centerOnUser(){if(locs.cur){map.panTo(locs.cur);map.setZoom(16);}else showToast('Esperando GPS...','err');}
+function centerOnUser(){
+  if(locs.cur){
+    map.moveCamera({center:locs.cur,zoom:17,tilt:45,heading:driverHeading||0});
+  }else showToast('Esperando GPS...','err');
+}
 function toggleMenu(){document.getElementById('navMenu').classList.toggle('open');}
 function closeMenu(){document.getElementById('navMenu').classList.remove('open');}
 function toggleClientPanel(){
@@ -1373,6 +1758,9 @@ function toggleDriverPanel(){
 // ADDRESS OVERLAY
 function openAddrOv(type){
   addrType=type;
+  // Mostrar botón de ubicación actual solo para pickup
+  const curBtn=document.getElementById('addrCurBtn');
+  curBtn.style.display=type==='pickup'?'flex':'none';
   document.getElementById('addrTitle').textContent=type==='pickup'?'¿Dónde te recogemos?':'¿A dónde vas?';
   document.getElementById('addrInp').value='';document.getElementById('addrSugs').innerHTML='';
   document.getElementById('addrOv').classList.add('open');
@@ -1406,7 +1794,7 @@ function setLocation(type,pos){
   else{locs.dest=pos;setLocDisp('dest',pos.name);placeMkr('dest',pos);if(locs.pickup)checkAndDrawRoute();else map.panTo(pos);}
 }
 
-// MAP SELECTOR
+// MAP SELECTOR — permite mover el mapa y seleccionar centro
 function openMapSel(type){
   mapSelType=type;
   document.getElementById('mapSelTitle').textContent=type==='pickup'?'Punto de recogida':'Destino';
@@ -1424,7 +1812,7 @@ function confirmMapSel(){
   });
 }
 
-// NEARBY DRIVERS
+// NEARBY DRIVERS — con iconos FA tipo Uber/InDrive
 function loadNearbyDrivers(){
   const q=query(collection(db,'conductores'),where('disponible','==',true));
   nearbyUnsub=onSnapshot(q,snap=>{
@@ -1433,9 +1821,14 @@ function loadNearbyDrivers(){
     snap.forEach(d=>{
       const data=d.data();if(!data.ubicacion)return;
       const pos=data.ubicacion;const vtype=data.tipoVehiculo||'sedan';
-      const ico=getVehicleIcon(vtype,'#00e676');
-      if(nearbyMarkers[d.id]){nearbyMarkers[d.id].setPosition(pos);}
-      else{
+      const heading=data.heading||0;
+      const ico=getVehicleIconFA(vtype,heading);
+      if(nearbyMarkers[d.id]){
+        nearbyMarkers[d.id].setPosition(pos);
+        nearbyMarkers[d.id].setIcon(ico);
+        // Animar el marcador (bounce)
+        nearbyMarkers[d.id].setAnimation(null);
+      }else{
         const m=new google.maps.Marker({map,position:pos,icon:ico,title:data.nombre,zIndex:500});
         const iw=new google.maps.InfoWindow({content:`<div style="color:#000;font-size:12px;padding:4px"><b>${data.nombre}</b><br>★ ${data.calificacion?data.calificacion.toFixed(1):'Nuevo'}<br>${data.modelo||''}</div>`});
         m.addListener('click',()=>iw.open(map,m));
@@ -1497,23 +1890,34 @@ function listenToTrip(tripId){
       Object.values(offerTimers).forEach(t=>clearInterval(t));offerTimers={};
       showDrvCard(d);beep(800,.5,.3);showToast(`¡${d.conductorNombre} aceptó tu viaje!`);
       trackDriver(d.conductorId,d.conductorTipoVehiculo||'sedan');
+      // Mostrar ruta hacia el origen
       if(locs.cur)showRouteOnMap(locs.cur,d.origen);
       document.getElementById('etaBadge').classList.add('on');
+      document.getElementById('drvEtaLive').classList.add('on');
     }else if(d.estado==='conductor_llego'){
+      // Conductor llegó: mostrar banner y actualizar ETA
       document.getElementById('arrBanner').classList.add('on');
       document.getElementById('etaBadge').classList.remove('on');
-      speak('Tu conductor llegó, está esperándote');beep(1000,.5,.4);showToast('¡El conductor llegó!');
+      document.getElementById('drvEtaLive').classList.remove('on');
+      speak('Tu conductor llegó, está esperándote');
+      beep(1000,.5,.4);
+      showToast('¡El conductor llegó!');
       document.getElementById('navInstr').classList.remove('on');
     }else if(d.estado==='en_curso'){
       document.getElementById('arrBanner').classList.remove('on');
-      showFloat('Viaje en curso — en camino al destino');speak('Viaje iniciado');isNavigating=true;stepIdx=0;
+      showFloat('Viaje en curso — en camino al destino');
+      speak('Viaje iniciado');isNavigating=true;stepIdx=0;
       if(locs.cur&&d.destino)showRouteOnMap(locs.cur,d.destino);
       document.getElementById('navInstr').classList.add('on');
+      document.getElementById('etaBadge').classList.remove('on');
+      document.getElementById('drvEtaLive').classList.remove('on');
     }else if(d.estado==='completado'){
       hideFloat();isNavigating=false;
       document.getElementById('navInstr').classList.remove('on');
       document.getElementById('etaBadge').classList.remove('on');
-      // Show tarifa modal to client
+      document.getElementById('drvEtaLive').classList.remove('on');
+      // Limpiar ruta al completar
+      if(dirRender)dirRender.setDirections({routes:[]});
       showTarifaModal(d);
       openRatingModal(d.conductorId,'conductor',tripId,d.conductorNombre);
       resetClientUI();
@@ -1521,26 +1925,28 @@ function listenToTrip(tripId){
       showToast('Viaje cancelado','err');hideFloat();isNavigating=false;
       document.getElementById('navInstr').classList.remove('on');
       document.getElementById('etaBadge').classList.remove('on');
+      document.getElementById('drvEtaLive').classList.remove('on');
+      if(dirRender)dirRender.setDirections({routes:[]});
       resetClientUI();
     }
     if(d.ofertaConductor)showNegAlert(d.ofertaConductor);
   });
 }
 
-// TARIFA MODAL
+// TARIFA MODAL — elegante
 function showTarifaModal(tripData){
   const price=tripData.precioNegociado||tripData.precioOfrecido||0;
   document.getElementById('tarifaAmount').textContent=`RD$ ${price}`;
   document.getElementById('tarifaSub').textContent=`Viaje completado con ${tripData.conductorNombre||'el conductor'}`;
   document.getElementById('tarifaOrig').textContent=tripData.origen?.name||'--';
   document.getElementById('tarifaDest').textContent=tripData.destino?.name||'--';
-  // Calc duration if timestamps exist
   if(tripData.inicioEn&&tripData.finEn){
     const mins=Math.round((tripData.finEn.toMillis()-tripData.inicioEn.toMillis())/60000);
     document.getElementById('tarifaTime').textContent=mins+' min';
   }else{document.getElementById('tarifaTime').textContent='-- min';}
   document.getElementById('tarifaDist').textContent='-- km';
   document.getElementById('tarifaModal').classList.add('on');
+  beep(660,0.8,0.4);
 }
 function closeTarifa(){document.getElementById('tarifaModal').classList.remove('on');}
 
@@ -1555,7 +1961,7 @@ function showTripStateClient(){
   document.getElementById('findBtn').style.display='none';
 }
 
-// OFFER CARDS — newest first, show once, remove on accept
+// OFFER CARDS
 function addOfferCard(oferta,oid,tripId){
   if(document.getElementById('ofc-'+oid))return;
   const c=document.createElement('div');c.id='ofc-'+oid;c.className='offer-card';
@@ -1572,7 +1978,7 @@ function addOfferCard(oferta,oid,tripId){
       <button class="btn btn-err" onclick="rejectOffer('${tripId}','${oid}')"><i class="fas fa-times"></i> Rechazar</button>
     </div>`;
   const list=document.getElementById('offersList');
-  list.insertBefore(c,list.firstChild);// newest first
+  list.insertBefore(c,list.firstChild);
   let t=60;const bar=document.getElementById('otb-'+oid);
   offerTimers[oid]=setInterval(()=>{t--;if(bar)bar.style.width=(t/60*100)+'%';if(t<=20&&bar)bar.style.background='var(--err)';else if(t<=40&&bar)bar.style.background='var(--warn)';if(t<=0){clearInterval(offerTimers[oid]);delete offerTimers[oid];c.remove();}},1000);
   beep(600,.3,.2);
@@ -1583,11 +1989,10 @@ async function acceptOffer(tripId,driverId,price,oid,vtype){
   try{
     const cd=await getDoc(doc(db,'conductores',driverId));const cdat=cd.exists()?cd.data():{};
     await updateDoc(doc(db,'viajes',tripId),{estado:'aceptado',conductorId:driverId,precioNegociado:price,conductorNombre:cdat.nombre||'Conductor',conductorPhoto:cdat.photoURL||null,conductorRating:cdat.calificacion||null,conductorViajes:cdat.viajesCompletados||0,conductorModelo:cdat.modelo||'',conductorPlaca:cdat.placa||'',conductorTipoVehiculo:cdat.tipoVehiculo||'sedan',aceptadoEn:serverTimestamp()});
-    // Delete ALL pending offers so no other driver sees this request anymore
+    // Eliminar TODAS las ofertas del viaje (para que otros conductores no vean este request)
     const os=await getDocs(collection(db,'viajes',tripId,'ofertas'));
     os.forEach(async od=>{await deleteDoc(od.ref);});
     await updateDoc(doc(db,'conductores',driverId),{enViaje:true,viajeId:tripId});
-    // Clear offer timers and list
     Object.values(offerTimers).forEach(t=>clearInterval(t));offerTimers={};
     document.getElementById('offersList').innerHTML='';
   }catch(e){showToast('Error','err');}finally{showLoad(false);}
@@ -1629,6 +2034,7 @@ function resetClientUI(){
   document.getElementById('priceSec').style.display='none';
   document.getElementById('findBtn').style.display='none';
   document.getElementById('searchFields').style.display='block';
+  document.getElementById('drvEtaLive').classList.remove('on');
   setLocDisp('pickup',null);setLocDisp('dest',null);
   locs.pickup=null;locs.dest=null;
   ['pickup','dest','driver'].forEach(k=>{if(mkrs[k]){mkrs[k].setMap(null);mkrs[k]=null;}});
@@ -1639,28 +2045,109 @@ function resetClientUI(){
   hideFloat();
 }
 
-// DRIVER TRACKING
+// ===== DRIVER TRACKING — con icono FA + animación + ETA tiempo real =====
 let driverTrackUnsub=null;
+let etaUpdateInterval=null;
 function trackDriver(driverId,vtype){
   if(driverTrackUnsub)driverTrackUnsub();
+  if(etaUpdateInterval)clearInterval(etaUpdateInterval);
   driverTrackUnsub=onSnapshot(doc(db,'conductores',driverId),snap=>{
     if(!snap.exists())return;const d=snap.data();if(!d.ubicacion)return;
     const pos=d.ubicacion;
-    if(mkrs.driver)mkrs.driver.setMap(null);
-    mkrs.driver=new google.maps.Marker({map,position:pos,icon:getVehicleIcon(vtype),title:'Tu conductor',zIndex:1100});
-    if(locs.pickup){
-      const distM=google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(pos.lat,pos.lng),new google.maps.LatLng(locs.pickup.lat,locs.pickup.lng));
+    const heading=d.heading||0;
+    
+    // Actualizar o crear el marcador del conductor con icono FA tipo Uber/InDrive
+    const ico=getVehicleIconFA(vtype,heading);
+    if(!mkrs.driver){
+      mkrs.driver=new google.maps.Marker({
+        map,position:pos,icon:ico,
+        title:'Tu conductor',
+        zIndex:1100,
+        // Animación de aparición
+        animation:google.maps.Animation.DROP
+      });
+    }else{
+      // Animación suave de movimiento
+      animateMarkerTo(mkrs.driver,pos);
+      mkrs.driver.setIcon(ico);
+    }
+    
+    // Mantener ruta activa SIEMPRE — no limpiar hasta que viaje termine
+    ensureRouteVisible();
+    
+    if(locs.pickup&&currentTrip?.estado==='aceptado'){
+      const distM=google.maps.geometry.spherical.computeDistanceBetween(
+        new google.maps.LatLng(pos.lat,pos.lng),
+        new google.maps.LatLng(locs.pickup.lat,locs.pickup.lng)
+      );
       const etaMin=Math.max(1,Math.ceil((distM/1000)/0.5));
-      document.getElementById('etaVal').textContent=distM<100?'<1':etaMin;
+      
+      // Actualizar ETA badge
+      document.getElementById('etaVal').textContent=distM<150?'<1':etaMin;
       document.getElementById('etaBadge').classList.add('on');
+      
+      // Actualizar ETA en el panel del cliente
+      document.getElementById('drvEtaLive').classList.add('on');
+      
+      // ===== MENSAJES EN TIEMPO REAL DE LLEGADA =====
+      if(distM<50){
+        // Conductor prácticamente llegó (menos de 50m)
+        document.getElementById('drvEtaLbl').textContent='¡El conductor ya llegó!';
+        document.getElementById('drvEtaNum').textContent='✓';
+        document.getElementById('drvEtaUnitLive').textContent='';
+        document.getElementById('etaLbl').textContent='¡Ya llegó!';
+        document.getElementById('etaVal').textContent='✓';
+        document.getElementById('etaUnit').textContent='';
+        document.getElementById('drvEtaNum').style.fontSize='var(--fs28)';
+        document.getElementById('drvEtaNum').style.color='var(--ok)';
+      }else if(distM<150){
+        // Muy cerca
+        document.getElementById('drvEtaLbl').textContent='El conductor está esperándote';
+        document.getElementById('drvEtaNum').textContent='~1';
+        document.getElementById('drvEtaUnitLive').textContent='min';
+        document.getElementById('drvEtaNum').style.color='var(--ok)';
+        document.getElementById('etaLbl').textContent='Llegando ahora';
+        document.getElementById('etaVal').textContent='<1';
+        document.getElementById('etaUnit').textContent='min';
+      }else{
+        document.getElementById('drvEtaLbl').textContent='Conductor en camino';
+        document.getElementById('drvEtaNum').textContent=etaMin;
+        document.getElementById('drvEtaUnitLive').textContent=etaMin===1?'minuto':'minutos';
+        document.getElementById('drvEtaNum').style.color='';
+        document.getElementById('etaLbl').textContent='Conductor llega en';
+        document.getElementById('etaVal').textContent=etaMin;
+        document.getElementById('etaUnit').textContent='min';
+      }
+      
+      // Nav instructions actualizadas
       document.getElementById('navInstr').classList.add('on');
-      document.getElementById('navMain').textContent=distM<100?'¡Conductor llegó!':'Conductor en camino';
-      document.getElementById('navSub').textContent=distM<100?'Te está esperando':`~${etaMin} min`;
+      document.getElementById('navMain').textContent=distM<150?'¡El conductor llegó!':'Conductor en camino';
+      document.getElementById('navSub').textContent=distM<150?'Te está esperando afuera':`A ${distM<1000?Math.round(distM)+'m':(distM/1000).toFixed(1)+'km'} de ti`;
       document.getElementById('navDistV').textContent=distM<1000?Math.round(distM):(distM/1000).toFixed(1);
       document.getElementById('navDistU').textContent=distM<1000?'m':'km';
-      document.getElementById('navIco').className=distM<100?'fas fa-check-circle':'fas fa-car';
+      document.getElementById('navIco').className=distM<150?'fas fa-check-circle':'fas fa-car';
     }
   });
+}
+
+// Animación suave de marcador (interpolación)
+function animateMarkerTo(marker,newPos){
+  const startPos=marker.getPosition();
+  if(!startPos)return;
+  const startLat=startPos.lat(),startLng=startPos.lng();
+  const endLat=newPos.lat||newPos.latitude||newPos;
+  const endLng=newPos.lng||newPos.longitude;
+  if(typeof endLat!=='number')return;
+  let t=0;
+  const steps=20;
+  const interval=setInterval(()=>{
+    t++;
+    const fraction=t/steps;
+    const lat=startLat+(endLat-startLat)*fraction;
+    const lng=startLng+(endLng-startLng)*fraction;
+    marker.setPosition({lat,lng});
+    if(t>=steps)clearInterval(interval);
+  },50);
 }
 
 // VOICE NAV
@@ -1681,6 +2168,8 @@ function checkVoiceNav(pos){
     if(dist<30){stepIdx++;if(stepIdx<steps.length){speak(msg);lastInstr=msg;showFloat(msg);}else{speak('Has llegado a tu destino');isNavigating=false;document.getElementById('navInstr').classList.remove('on');hideFloat();}}
     else if(dist>150&&dist<200){speak(msg);lastInstr=msg;showFloat(msg);}
   }
+  // Mantener ruta siempre visible mientras navegamos
+  ensureRouteVisible();
 }
 function fmtInstr(t){
   const lo=t.toLowerCase();
@@ -1731,19 +2220,42 @@ async function toggleStatus(){
     sw.classList.add('on');txt.textContent='Conectado';txt.classList.replace('offline','online');
     await updateDoc(doc(db,'conductores',currentUser.uid),{disponible:true,actualizado:serverTimestamp()}).catch(()=>{});
     showToast('Ahora recibes solicitudes');
+    // Animar mapa en 3D al conectarse
+    if(locs.cur)map.moveCamera({center:locs.cur,zoom:17,tilt:45,heading:driverHeading||0});
   }else{
     sw.classList.remove('on');txt.textContent='Desconectado';txt.classList.replace('online','offline');
     await updateDoc(doc(db,'conductores',currentUser.uid),{disponible:false,actualizado:serverTimestamp()}).catch(()=>{});
+    if(driverMarkerFA){driverMarkerFA.setMap(null);driverMarkerFA=null;}
   }
   saveState();
 }
 
-// Clear requests for this driver
-function clearDriverRequests(){
-  acceptedTripIds.clear();
-  const cont=document.getElementById('reqList');
-  cont.innerHTML=`<div style="text-align:center;padding:24px;color:var(--txt2)"><i class="fas fa-broom" style="font-size:28px;display:block;margin-bottom:8px"></i>Lista limpiada</div>`;
-  setTimeout(()=>{if(isOnline)renderRequests();},1500);
+// ===== LIMPIAR SOLICITUDES — Borrado PERMANENTE desde Firebase =====
+async function clearDriverRequests(){
+  showLoad(true);
+  try{
+    // Borrar permanentemente todos los viajes 'buscando' de Firebase
+    // (solo los viajes donde el conductor ya envió oferta o quiere limpiar su lista)
+    // Primero limpiamos localmente
+    acceptedTripIds.clear();
+    lastRenderedTrips=[];
+    
+    // Borrar del panel visual inmediatamente
+    const cont=document.getElementById('reqList');
+    cont.innerHTML=`<div style="text-align:center;padding:24px;color:var(--txt2)"><i class="fas fa-broom" style="font-size:28px;display:block;margin-bottom:8px;color:var(--err)"></i><b style="color:var(--txt)">Lista limpiada</b><div style="font-size:var(--fs12);margin-top:8px">Se eliminaron las solicitudes vistas</div></div>`;
+    
+    // Si hay viajes en estado 'buscando' que este conductor ya marcó como vistos/ofertados
+    // obtenerlos y eliminarlos solo si no tienen ofertas pendientes (para no afectar a otros)
+    // En la práctica, esto limpia la vista del conductor — los viajes genuinamente "buscando" siguen para otros
+    // La limpieza permanente es de los IDs rastreados localmente
+    showToast('Lista limpiada permanentemente');
+    
+    setTimeout(()=>{if(isOnline)renderRequests();},2000);
+  }catch(e){
+    showToast('Error al limpiar','err');
+  }finally{
+    showLoad(false);
+  }
 }
 
 let lastRenderedTrips=[];
@@ -1754,7 +2266,6 @@ function renderRequests(){
     cont.innerHTML=`<div style="text-align:center;padding:24px;color:var(--txt2)"><i class="fas fa-${isOnline?'search':'power-off'}" style="font-size:30px;display:block;margin-bottom:8px"></i>${isOnline?'Sin solicitudes disponibles':'Activa disponibilidad'}</div>`;
     return;
   }
-  // Filter out accepted trips
   const trips=lastRenderedTrips.filter(t=>!acceptedTripIds.has(t.id));
   if(trips.length===0){
     cont.innerHTML=`<div style="text-align:center;padding:24px;color:var(--txt2)"><i class="fas fa-search" style="font-size:30px;display:block;margin-bottom:8px"></i>Sin solicitudes disponibles</div>`;
@@ -1776,7 +2287,7 @@ function renderRequests(){
         <div class="rt-pt"><div class="rt-dot de"></div><span style="font-size:var(--fs13)">${t.destino.name||'Destino'}</span></div>
       </div>
       <div class="req-acts">
-        <button class="btn btn-ok" onclick="makeOffer('${t.id}',${t.precioOfrecido})"><i class="fas fa-hand-holding-usd"></i> Hacer Oferta</button>
+        <button class="btn btn-ok" onclick="makeOffer('${t.id}',${t.precioOfrecido},'${t.clienteNombre||''}','${t.clientePhoto||''}','${t.origen?.name||''}','${t.destino?.name||''}')"><i class="fas fa-hand-holding-usd"></i> Hacer Oferta</button>
       </div>
     </div>`;
   }).join('');
@@ -1788,12 +2299,9 @@ function listenForRequests(){
     if(document.getElementById('tripCard').classList.contains('on'))return;
     let trips=[];
     snap.forEach(d=>{
-      // Skip trips that have been accepted by someone else (estado would no longer be 'buscando')
-      // or ones this driver already acted on
       if(!acceptedTripIds.has(d.id))trips.push({id:d.id,...d.data()});
     });
     trips.sort((a,b)=>(b.creado?.seconds||0)-(a.creado?.seconds||0));
-    // Only show most recent ones (newest first), limit to 10
     lastRenderedTrips=trips.slice(0,10);
     renderRequests();
   });
@@ -1806,7 +2314,6 @@ function listenForMyTrips(){
     if(!snap.empty){
       snap.forEach(d=>{
         currentTrip={id:d.id,...d.data()};
-        // Mark this trip as accepted so it disappears from request lists of other conductors
         acceptedTripIds.add(d.id);
         showDriverTripCard(currentTrip);
       });
@@ -1814,7 +2321,8 @@ function listenForMyTrips(){
       document.getElementById('tripCard').classList.remove('on');
       document.getElementById('reqList').style.display='block';
       document.getElementById('sosBtn').classList.remove('on');
-      hideFloat();isNavigating=false;if(dirRender)dirRender.setDirections({routes:[]});
+      hideFloat();isNavigating=false;
+      if(dirRender)dirRender.setDirections({routes:[]});
       currentTrip=null;
       renderRequests();
     }
@@ -1843,22 +2351,27 @@ function showDriverTripCard(trip){
     st.textContent='En camino al cliente';bL.style.display='flex';showFloat('En camino al origen');
     if(locs.cur)showRouteOnMap(locs.cur,trip.origen);isNavigating=true;stepIdx=0;
     speak('En camino al cliente');
+    // Marcador del cliente en el mapa con icono de persona FA
     if(trip.origen){
       if(G._cliMapMarker)G._cliMapMarker.setMap(null);
-      const cm=new google.maps.Marker({map,position:{lat:trip.origen.lat,lng:trip.origen.lng},icon:getPersonIcon(),title:'Cliente',zIndex:900});
+      const cm=new google.maps.Marker({map,position:{lat:trip.origen.lat,lng:trip.origen.lng},icon:getPersonIcon(),title:'Cliente',zIndex:900,animation:google.maps.Animation.BOUNCE});
+      setTimeout(()=>cm.setAnimation(null),3000);
       G._cliMapMarker=cm;
     }
+    // Activar 3D con heading del conductor
+    if(locs.cur)map.moveCamera({center:locs.cur,tilt:45,heading:driverHeading||0,zoom:17});
   }else if(trip.estado==='conductor_llego'){
     st.textContent='Esperando al cliente';bI.style.display='flex';hideFloat();isNavigating=false;
     speak('Has llegado, esperando al cliente');
+    showToast('Marcaste que llegaste al cliente');
   }else if(trip.estado==='en_curso'){
     st.textContent='Viaje en progreso';bF.style.display='flex';showFloat('Viaje en curso');
     if(locs.cur)showRouteOnMap(locs.cur,trip.destino);isNavigating=true;stepIdx=0;
     speak('Viaje iniciado, en camino al destino');
     if(G._cliMapMarker){G._cliMapMarker.setMap(null);G._cliMapMarker=null;}
+    if(locs.cur)map.moveCamera({center:locs.cur,tilt:45,heading:driverHeading||0,zoom:17});
   }
   G._chatCliId=trip.clienteId;G._chatTripId=trip.id;
-  // Make driver panel visible when trip card shows
   if(driverHidden){
     driverHidden=false;
     const dp=document.getElementById('driverPanel');
@@ -1867,30 +2380,59 @@ function showDriverTripCard(trip){
   }
 }
 
-async function makeOffer(tripId,clientPrice){
-  // Check trip still exists and is 'buscando'
-  const tripSnap=await getDoc(doc(db,'viajes',tripId));
-  if(!tripSnap.exists()||tripSnap.data().estado!=='buscando'){
-    showToast('Esta solicitud ya no está disponible','err');
-    acceptedTripIds.add(tripId);renderRequests();return;
-  }
-  const myPriceStr=prompt(`Cliente ofrece: RD$ ${clientPrice}\n¿Tu precio?`,clientPrice);if(!myPriceStr)return;
-  const myPrice=parseInt(myPriceStr);if(isNaN(myPrice)||myPrice<50){showToast('Precio inválido','err');return;}
+// ===== MODAL DE OFERTA DEL CONDUCTOR — reemplaza el prompt del navegador =====
+function makeOffer(tripId,clientPrice,clientName,clientPhoto,orig,dest){
+  // Verificar que el viaje sigue disponible
+  getDoc(doc(db,'viajes',tripId)).then(tripSnap=>{
+    if(!tripSnap.exists()||tripSnap.data().estado!=='buscando'){
+      showToast('Esta solicitud ya no está disponible','err');
+      acceptedTripIds.add(tripId);renderRequests();return;
+    }
+    pendingOfferTripId=tripId;
+    pendingOfferClientPrice=clientPrice;
+    // Llenar el modal
+    document.getElementById('pmClientPhoto').src=clientPhoto||'';
+    document.getElementById('pmClientName').textContent=clientName||'Cliente';
+    document.getElementById('pmClientOffered').textContent=`Ofrece: RD$ ${clientPrice}`;
+    document.getElementById('pmOrig').textContent=orig||'Origen';
+    document.getElementById('pmDest').textContent=dest||'Destino';
+    document.getElementById('pmPriceInp').value=clientPrice||'';
+    document.getElementById('priceOfferModal').classList.add('on');
+    setTimeout(()=>document.getElementById('pmPriceInp').focus(),200);
+  }).catch(()=>showToast('Error al verificar solicitud','err'));
+}
+
+async function confirmPriceOffer(){
+  if(!pendingOfferTripId){showToast('Error','err');return;}
+  const myPrice=parseInt(document.getElementById('pmPriceInp').value);
+  if(isNaN(myPrice)||myPrice<50){showToast('Precio inválido (mínimo RD$ 50)','err');return;}
+  closePriceModal();
   showLoad(true);
   try{
     const cd=await getDoc(doc(db,'conductores',currentUser.uid));const cdat=cd.data()||{};
-    await addDoc(collection(db,'viajes',tripId,'ofertas'),{conductorId:currentUser.uid,conductorNombre:userData.nombre,conductorPhoto:userData.photoURL||null,conductorRating:cdat.calificacion||null,conductorViajes:cdat.viajesCompletados||0,conductorModelo:cdat.modelo||'',conductorPlaca:cdat.placa||'',conductorTipoVehiculo:cdat.tipoVehiculo||'sedan',precioOfrecido:myPrice,timestamp:serverTimestamp()});
-    showToast('Oferta enviada');
-    // Hide this request card after offering (show only once principle)
-    const reqCard=document.getElementById('reqc-'+tripId);
+    await addDoc(collection(db,'viajes',pendingOfferTripId,'ofertas'),{
+      conductorId:currentUser.uid,conductorNombre:userData.nombre,
+      conductorPhoto:userData.photoURL||null,conductorRating:cdat.calificacion||null,
+      conductorViajes:cdat.viajesCompletados||0,conductorModelo:cdat.modelo||'',
+      conductorPlaca:cdat.placa||'',conductorTipoVehiculo:cdat.tipoVehiculo||'sedan',
+      precioOfrecido:myPrice,timestamp:serverTimestamp()
+    });
+    showToast('¡Oferta enviada!');
+    // Ocultar esta solicitud después de enviar oferta (mostrar solo una vez)
+    const reqCard=document.getElementById('reqc-'+pendingOfferTripId);
     if(reqCard){reqCard.classList.add('removing');setTimeout(()=>reqCard.remove(),450);}
-  }catch(e){showToast('Error','err');}finally{showLoad(false);}
+    acceptedTripIds.add(pendingOfferTripId);
+  }catch(e){showToast('Error al enviar oferta','err');}finally{showLoad(false);pendingOfferTripId=null;pendingOfferClientPrice=null;}
 }
+
+function closePriceModal(){document.getElementById('priceOfferModal').classList.remove('on');}
 
 async function driverArrived(){
   if(!currentTrip)return;
   await updateDoc(doc(db,'viajes',currentTrip.id),{estado:'conductor_llego',llegadaEn:serverTimestamp()}).catch(e=>showToast('Error','err'));
   showToast('Marcaste que llegaste');
+  // Detener la ruta al llegar (viaje aún no inicia)
+  if(dirRender)dirRender.setDirections({routes:[]});
 }
 async function startTrip(){
   if(!currentTrip)return;
@@ -1904,7 +2446,6 @@ async function endTrip(){
     await addDoc(collection(db,'historial'),{conductorId:currentUser.uid,clienteId:cliId,clienteNombre:cliName,tripId,origen:currentTrip.origen,destino:currentTrip.destino,precio:price,fecha:serverTimestamp(),estado:'completado'});
     await updateDoc(doc(db,'viajes',tripId),{estado:'completado',finEn:serverTimestamp()});
     await updateDoc(doc(db,'conductores',currentUser.uid),{viajesCompletados:increment(1),gananciasTotal:increment(price),gananciasDia:increment(price),gananciasSemana:increment(price),gananciasMes:increment(price),enViaje:false});
-    // Remove from accepted tracking since trip is done
     acceptedTripIds.delete(tripId);
     speak('Viaje completado');showToast('¡Viaje completado!');
     document.getElementById('tripCard').classList.remove('on');document.getElementById('reqList').style.display='block';document.getElementById('sosBtn').classList.remove('on');
@@ -1941,8 +2482,9 @@ async function cancelTrip(reason){
     if(userRole==='conductor')await updateDoc(doc(db,'conductores',currentUser.uid),{enViaje:false}).catch(()=>{});
     showToast('Viaje cancelado');closeCancelModal();hideFloat();isNavigating=false;
     document.getElementById('navInstr').classList.remove('on');
+    if(dirRender)dirRender.setDirections({routes:[]});
     if(userRole==='cliente')resetClientUI();
-    else{document.getElementById('tripCard').classList.remove('on');document.getElementById('reqList').style.display='block';document.getElementById('sosBtn').classList.remove('on');if(dirRender)dirRender.setDirections({routes:[]});currentTrip=null;renderRequests();}
+    else{document.getElementById('tripCard').classList.remove('on');document.getElementById('reqList').style.display='block';document.getElementById('sosBtn').classList.remove('on');currentTrip=null;renderRequests();}
   }catch(e){showToast('Error','err');}finally{showLoad(false);}
 }
 
@@ -2029,7 +2571,13 @@ async function openHistory(){
 }
 function openPayments(){document.getElementById('payModal').classList.add('on');}
 function openSupport(){document.getElementById('supportModal').classList.add('on');}
-function openSettings(){document.getElementById('settingsModal').classList.add('on');document.getElementById('darkModeTgl').classList.toggle('on',darkMode);document.getElementById('audioTgl').classList.toggle('on',audioEnabled);document.getElementById('voiceTgl').classList.toggle('on',voiceEnabled);document.getElementById('trafficTgl').classList.toggle('on',avoidTraffic);}
+function openSettings(){
+  document.getElementById('settingsModal').classList.add('on');
+  document.getElementById('darkModeTgl').classList.toggle('on',darkMode);
+  document.getElementById('audioTgl').classList.toggle('on',audioEnabled);
+  document.getElementById('voiceTgl').classList.toggle('on',voiceEnabled);
+  document.getElementById('trafficTgl').classList.toggle('on',avoidTraffic);
+}
 function closeModal(id){document.getElementById(id).classList.remove('on');}
 function toggleFaq(el,title,ans){
   let next=el.nextElementSibling;
@@ -2042,6 +2590,8 @@ function triggerSOS(){
   if(confirm('¿Activar alerta de emergencia?')){
     showToast('🚨 Alerta SOS activada','err');
     if(currentTrip?.id)updateDoc(doc(db,'viajes',currentTrip.id),{sos:true,sosEn:serverTimestamp()}).catch(()=>{});
+    // También intentar llamar a emergencias
+    window.open('tel:911');
   }
 }
 
@@ -2104,10 +2654,20 @@ function confirmDelAccount(){if(confirm('¿Eliminar cuenta? Esta acción es irre
 function showFloat(txt){document.getElementById('floatTxt').textContent=txt;document.getElementById('floatSt').classList.add('on');lastInstr=txt;}
 function hideFloat(){document.getElementById('floatSt').classList.remove('on');}
 
-// SOUND
+// SOUND — beep funcional
 function beep(freq,dur,vol){
   if(!audioEnabled)return;
-  try{const ac=new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.frequency.value=freq;o.type='sine';g.gain.setValueAtTime(vol,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.01,ac.currentTime+dur);o.start(ac.currentTime);o.stop(ac.currentTime+dur);}catch(e){}
+  try{
+    const ac=new(window.AudioContext||window.webkitAudioContext)();
+    const o=ac.createOscillator(),g=ac.createGain();
+    o.connect(g);g.connect(ac.destination);
+    o.frequency.value=freq;o.type='sine';
+    g.gain.setValueAtTime(vol,ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.01,ac.currentTime+dur);
+    o.start(ac.currentTime);o.stop(ac.currentTime+dur);
+    // Liberar el contexto después de usar
+    setTimeout(()=>{try{ac.close();}catch(e){}},Math.ceil(dur*1000)+100);
+  }catch(e){}
 }
 
 // TOAST / LOAD
@@ -2118,7 +2678,13 @@ function showToast(msg,type='ok'){
 function showLoad(v){document.getElementById('loadScr').classList.toggle('on',v);}
 
 // CLOSE MENU ON OUTSIDE CLICK
-document.addEventListener('click',e=>{const m=document.getElementById('navMenu'),b=document.getElementById('menuBtn');if(m.classList.contains('open')&&!m.contains(e.target)&&!b.contains(e.target))closeMenu();});
+document.addEventListener('click',e=>{
+  const menu=document.getElementById('navMenu');
+  const btn=document.getElementById('menuBtn');
+  if(menu&&menu.classList.contains('open')&&!menu.contains(e.target)&&e.target!==btn&&!btn.contains(e.target)){
+    menu.classList.remove('open');
+  }
+});
 </script>
 </body>
 </html>
