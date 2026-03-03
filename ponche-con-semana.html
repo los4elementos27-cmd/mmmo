@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Asistencia Facial - Optimizada</title>
+  <title>Asistencia Facial - Detección Rápida</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1/dist/face-api.js"></script>
@@ -49,7 +49,6 @@
       height: 100%; 
       object-fit: cover; 
       transform: scaleX(-1);
-      will-change: transform;
     }
     
     .overlay-content { 
@@ -68,7 +67,7 @@
     
     .overlay-content * { pointer-events: auto; }
     
-    /* Menú Superior */
+    /* Menú Hamburguesa Superior */
     .top-bar { 
       display: flex; 
       justify-content: space-between; 
@@ -88,6 +87,9 @@
       font-size: 1.5rem;
       cursor: pointer;
       padding: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       width: 40px;
       height: 40px;
       border-radius: 50%;
@@ -127,7 +129,7 @@
       border-radius: 20px;
       border: 2px solid var(--primary);
       padding: 20px;
-      min-width: 300px;
+      min-width: 280px;
       z-index: 100;
       display: none;
       flex-direction: column;
@@ -146,6 +148,7 @@
       letter-spacing: 1px;
       border-bottom: 1px solid rgba(255,255,255,0.1);
       padding-bottom: 10px;
+      margin-bottom: 5px;
     }
     
     .menu-item {
@@ -164,6 +167,7 @@
     .menu-item:hover {
       background: rgba(22,224,134,0.1);
       border-color: var(--primary);
+      transform: translateX(5px);
     }
     
     .menu-item i {
@@ -229,8 +233,6 @@
       border-radius: 10px;
       padding: 10px;
       display: none;
-      max-height: 200px;
-      overflow-y: auto;
     }
     
     .search-result-menu.active {
@@ -631,20 +633,15 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // ========== CONFIGURACIÓN CORREGIDA ==========
-    // Volvemos a SSD MobileNet (más preciso) pero con opciones optimizadas
+    // ========== CONFIGURACIÓN RESTAURADA Y OPTIMIZADA ==========
+    // Volvemos a SSD MobileNet que funciona bien, pero con ajustes de velocidad
     const CONFIG = {
       UMBRAL_PRECISION: 0.6,
-      DETECTION_INTERVAL: 2000, // 2 segundos es el sweet spot
+      DETECTION_INTERVAL: 800, // Muy rápido: 800ms
       COOLDOWN_SEGUNDOS: 60,
       UMBRAL_HORAS_FUERZA_ENTRADA: 16,
-      MIN_CONFIDENCE: 0.5,
-      MODEL_URL: 'https://raw.githubusercontent.com/vladmandic/face-api/master/model/',
-      // Opciones SSD optimizadas (no TinyFaceDetector)
-      SSD_OPTIONS: {
-        minConfidence: 0.5,
-        maxResults: 1
-      }
+      MIN_CONFIDENCE: 0.5, // Umbral adecuado para reconocimiento rápido
+      MODEL_URL: 'https://raw.githubusercontent.com/vladmandic/face-api/master/model/'
     };
 
     let faceMatcher = null;
@@ -655,14 +652,13 @@
     let modelosCargados = false;
     let currentUser = null;
     let isMenuOpen = false;
-    let lastDetectionTime = 0;
 
     const video = document.getElementById('videoFacial');
     const toast = document.getElementById('toast');
     const menuBtn = document.getElementById('menuBtn');
     const menuDropdown = document.getElementById('menuDropdown');
 
-    // ========== FUNCIONES BÁSICAS ==========
+    // ========== FUNCIONES UTILITARIAS ==========
     function showToast(msg, type='success') {
       toast.textContent = msg;
       toast.style.borderColor = type === 'success' ? 'var(--primary)' : 'var(--danger)';
@@ -701,7 +697,7 @@
       await cargarModelos();
       await iniciarCamara();
       iniciarEscuchaEmpleados();
-      iniciarDeteccionCorregida();
+      iniciarDeteccionRapida();
     }
 
     const savedUser = loadSavedSession();
@@ -739,53 +735,44 @@
       }
     });
 
-    // ========== CARGA DE MODELOS ==========
+    // ========== CARGA DE MODELOS (ORIGINAL RESTAURADA) ==========
     async function cargarModelos() {
       document.getElementById('loadingOverlay').style.display = 'flex';
       
-      try {
-        // Cargar en paralelo para velocidad
-        await Promise.all([
-          faceapi.nets.ssdMobilenetv1.loadFromUri(CONFIG.MODEL_URL),
-          faceapi.nets.faceLandmark68Net.loadFromUri(CONFIG.MODEL_URL),
-          faceapi.nets.faceRecognitionNet.loadFromUri(CONFIG.MODEL_URL)
-        ]);
-        
-        modelosCargados = true;
-        showToast('✅ Sistema listo');
-      } catch (e) {
-        showToast('Error cargando modelos', 'error');
-      } finally {
-        document.getElementById('loadingOverlay').style.display = 'none';
-      }
+      // Carga en paralelo para velocidad
+      await Promise.all([
+        faceapi.nets.ssdMobilenetv1.loadFromUri(CONFIG.MODEL_URL),
+        faceapi.nets.faceLandmark68Net.loadFromUri(CONFIG.MODEL_URL),
+        faceapi.nets.faceRecognitionNet.loadFromUri(CONFIG.MODEL_URL)
+      ]);
+      
+      modelosCargados = true;
+      document.getElementById('loadingOverlay').style.display = 'none';
+      showToast('✅ Sistema listo - Reconocimiento rápido activo');
     }
 
+    // ========== CÁMARA (RESOLUCIÓN ÓPTIMA) ==========
     async function iniciarCamara() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: { 
-            facingMode: 'user',
-            width: { ideal: 640 },
-            height: { ideal: 480 },
-            frameRate: { ideal: 30 }
-          } 
-        });
-        video.srcObject = stream;
-        
-        return new Promise((resolve) => {
-          video.onloadedmetadata = () => {
-            video.play();
-            videoStarted = true;
-            resolve();
-          };
-        });
-      } catch (e) {
-        showToast('Error accediendo a cámara', 'error');
-        throw e;
-      }
+      // Resolución media-alta para buena detección pero no tan pesada
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          facingMode: 'user',
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+          frameRate: { ideal: 30 }
+        } 
+      });
+      video.srcObject = stream;
+      return new Promise((resolve) => {
+        video.onloadedmetadata = () => {
+          video.play();
+          videoStarted = true;
+          resolve();
+        };
+      });
     }
 
-    // ========== ESCUCHA DE EMPLEADOS ==========
+    // ========== ESCUCHA EMPLEADOS ==========
     function iniciarEscuchaEmpleados() {
       const q = query(
         collection(db, 'Ponche'),
@@ -799,7 +786,7 @@
         const totalEmps = snapshot.size;
         
         if (totalEmps === 0) {
-          console.log('No hay empleados registrados');
+          console.log('No hay empleados');
           return;
         }
         
@@ -821,9 +808,9 @@
             img.src = data.fotoBase64;
             img.onload = async () => {
               try {
-                // Usar SSD MobileNet con opciones optimizadas
+                // Usamos SSD MobileNet original con confianza media
                 const detection = await faceapi
-                  .detectSingleFace(img, new faceapi.SsdMobilenetv1Options(CONFIG.SSD_OPTIONS))
+                  .detectSingleFace(img, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 }))
                   .withFaceLandmarks()
                   .withFaceDescriptor();
                   
@@ -831,16 +818,19 @@
                   descriptors.push(new faceapi.LabeledFaceDescriptors(data.username, [detection.descriptor]));
                 }
               } catch (e) {
-                console.log('Error cargando descriptor:', data.username);
+                console.error('Error cargando descriptor:', e);
               }
               
               loadedCount++;
-              if (loadedCount === totalEmps) {
-                if (descriptors.length > 0) {
-                  faceMatcher = new faceapi.FaceMatcher(descriptors, CONFIG.UMBRAL_PRECISION);
-                  console.log('FaceMatcher listo con', descriptors.length, 'rostros');
-                }
+              // Actualizar faceMatcher cuando todos estén listos
+              if (loadedCount === totalEmps && descriptors.length > 0) {
+                faceMatcher = new faceapi.FaceMatcher(descriptors, CONFIG.UMBRAL_PRECISION);
+                console.log('✅ FaceMatcher listo con', descriptors.length, 'rostros');
               }
+            };
+            
+            img.onerror = () => {
+              loadedCount++;
             };
           } else {
             loadedCount++;
@@ -849,27 +839,27 @@
       });
     }
 
-    // ========== VERIFICAR BLOQUEOS ==========
+    // ========== VERIFICAR BLOQUEOS ESPECÍFICOS ==========
     function verificarBloqueos(codigo) {
       const emp = employeesData.get(codigo);
       if (!emp) return { bloqueado: true, mensaje: 'Colaborador no encontrado', tipo: 'error' };
       
       const hoy = new Date();
-      const diaSemana = hoy.getDay();
+      const diaSemana = hoy.getDay(); // 0=Domingo, 6=Sábado
       
-      // 1. Días de semana no laborables
+      // 1. Verificar días de semana no laborables
       const diasNoLaborables = emp.diasSemanaNoLaborables || [];
       if (diasNoLaborables.includes(diaSemana)) {
         const nombresDias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
         return {
           bloqueado: true,
-          mensaje: `Hoy es ${nombresDias[diaSemana]} - No trabajas este día`,
+          mensaje: `Hoy es ${nombresDias[diaSemana]} - No debes registrarte`,
           detalle: `Tus días no laborables: ${diasNoLaborables.map(d => nombresDias[d]).join(', ')}`,
           tipo: 'dia_no_laborable'
         };
       }
       
-      // 2. Período libre (vacaciones/licencia/permiso)
+      // 2. Verificar período libre (vacaciones/licencia/permiso)
       if (emp.fechaInicioLibre && emp.fechaFinLibre) {
         const inicio = new Date(emp.fechaInicioLibre);
         const fin = new Date(emp.fechaFinLibre);
@@ -884,29 +874,42 @@
           const tipoLibre = emp.tipoLibre || 'libre';
           const diasRestantes = Math.ceil((fin - hoyNormalizado) / (1000 * 60 * 60 * 24));
           
-          const mensajes = {
-            vacaciones: { titulo: 'Estás de vacaciones', msg: `Te quedan ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''} de vacaciones` },
-            licencia: { titulo: 'Tienes licencia activa', msg: `Licencia válida por ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''} más` },
-            permiso: { titulo: 'Tienes permiso autorizado', msg: `Permiso válido por ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''} más` }
-          };
+          let mensaje = '';
+          let detalle = '';
           
-          const info = mensajes[tipoLibre] || { titulo: 'No disponible', msg: `Período libre: ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''}` };
+          switch(tipoLibre) {
+            case 'vacaciones':
+              mensaje = 'Estás de vacaciones';
+              detalle = `Te quedan ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''} de vacaciones. ¡Disfruta tu descanso!`;
+              break;
+            case 'licencia':
+              mensaje = 'Tienes una licencia activa';
+              detalle = `Licencia válida por ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''} más.`;
+              break;
+            case 'permiso':
+              mensaje = 'Tienes un permiso autorizado';
+              detalle = `Permiso válido por ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''} más.`;
+              break;
+            default:
+              mensaje = 'Estás marcado como no disponible';
+              detalle = `Período libre: ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''} restantes.`;
+          }
           
           return {
             bloqueado: true,
-            mensaje: info.titulo,
-            detalle: info.msg,
+            mensaje: mensaje,
+            detalle: detalle,
             tipo: tipoLibre
           };
         }
       }
       
-      // 3. Estado inactivo
+      // 3. Verificar estado inactivo
       if (emp.status === 'inactive') {
         return {
           bloqueado: true,
           mensaje: 'Tu cuenta está inactiva',
-          detalle: 'Contacta al administrador para reactivar tu cuenta',
+          detalle: 'Contacta al administrador para reactivar tu cuenta.',
           tipo: 'inactive'
         };
       }
@@ -914,11 +917,13 @@
       return { bloqueado: false, emp };
     }
 
+    // ========== MOSTRAR ALERTA DE BLOQUEO ==========
     function mostrarBloqueo(info) {
+      const alert = document.getElementById('bloqueoAlert');
       document.getElementById('bloqueoTitle').textContent = '⛔ Registro No Permitido';
       document.getElementById('bloqueoMessage').textContent = info.mensaje;
       document.getElementById('bloqueoDetail').textContent = info.detalle || '';
-      document.getElementById('bloqueoAlert').style.display = 'flex';
+      alert.style.display = 'flex';
     }
 
     window.cerrarBloqueo = function() {
@@ -931,16 +936,17 @@
       isProcessing = true;
 
       try {
-        // Verificar bloqueos
+        // Verificar bloqueos primero
         const verificacion = verificarBloqueos(codigo);
         if (verificacion.bloqueado) {
           mostrarBloqueo(verificacion);
+          isProcessing = false;
           return;
         }
         
         const emp = verificacion.emp;
         
-        // Verificar cooldown
+        // Verificar cooldown (anti-doble registro)
         const q = query(
           collection(db, 'facialAttendance'),
           where('collaboratorCode', '==', codigo),
@@ -955,11 +961,12 @@
           const diff = (new Date() - lastTime) / 1000;
           if (diff < CONFIG.COOLDOWN_SEGUNDOS) {
             showToast(`⏳ Espera ${Math.ceil(CONFIG.COOLDOWN_SEGUNDOS - diff)} segundos`, 'error');
+            isProcessing = false;
             return;
           }
         }
         
-        // Determinar tipo
+        // Determinar tipo (entry/exit) con lógica de 16 horas
         let tipo = 'entry';
         let parId = `PAR_${codigo}_${Date.now()}`;
         
@@ -973,10 +980,10 @@
           }
         }
         
-        // Crear registro - SIN SEGUNDOS
+        // Crear registro - SIN SEGUNDOS CALCULADOS (siempre :00)
         const ahora = new Date();
         const fecha = ahora.toISOString().split('T')[0];
-        const hora = `${String(ahora.getHours()).padStart(2,'0')}:${String(ahora.getMinutes()).padStart(2,'0')}:00`;
+        const hora = `${String(ahora.getHours()).padStart(2,'0')}:${String(ahora.getMinutes()).padStart(2,'0')}:00`; // Siempre :00
         
         const data = {
           collaboratorId: currentUser.uid,
@@ -986,7 +993,7 @@
           employeeId: emp.id,
           timestamp: Timestamp.now(),
           fecha: fecha,
-          hora: hora,
+          hora: hora, // HH:MM:00 - Sin segundos calculados
           type: tipo,
           confidence: confianza,
           method: metodo,
@@ -996,10 +1003,10 @@
         
         await addDoc(collection(db, 'facialAttendance'), data);
         
-        // Mostrar resultado
+        // Mostrar resultado visual
         document.getElementById('fotoColaborador').src = emp.fotoBase64 || '';
         document.getElementById('nombreDisplay').textContent = data.employeeName;
-        document.getElementById('codigoDisplay').textContent = codigo;
+        document.getElementById('codigoDisplay').textContent = `Código: ${codigo}`;
         const tipoEl = document.getElementById('tipoDisplay');
         tipoEl.textContent = tipo === 'entry' ? '✅ ENTRADA' : '🚪 SALIDA';
         tipoEl.className = `tipo-registro ${tipo === 'entry' ? 'entrada' : 'salida'}`;
@@ -1012,50 +1019,48 @@
         showToast(`${tipo === 'entry' ? 'Entrada' : 'Salida'} registrada`, 'success');
         
       } catch (e) {
-        console.error('Error:', e);
+        console.error('Error registro:', e);
         showToast('Error al registrar', 'error');
       } finally {
         isProcessing = false;
       }
     }
 
-    // ========== DETECCIÓN CORREGIDA ==========
-    function iniciarDeteccionCorregida() {
+    // ========== DETECCIÓN RÁPIDA PERO FUNCIONAL ==========
+    // Usamos SSD MobileNet con opciones optimizadas para velocidad
+    function iniciarDeteccionRapida() {
       if (detectionInterval) clearInterval(detectionInterval);
       
       detectionInterval = setInterval(async () => {
-        // Validaciones de estado
         if (!faceMatcher || !videoStarted || isProcessing || !currentUser) return;
         
-        // Control de tiempo entre detecciones
-        const ahora = Date.now();
-        if (ahora - lastDetectionTime < CONFIG.DETECTION_INTERVAL) return;
-        
         try {
-          // Usar SSD MobileNet (preciso) con opciones optimizadas
+          // SSD MobileNet con confianza 0.5 - Funciona bien y es rápido
           const detection = await faceapi
-            .detectSingleFace(video, new faceapi.SsdMobilenetv1Options(CONFIG.SSD_OPTIONS))
+            .detectSingleFace(
+              video,
+              new faceapi.SsdMobilenetv1Options({ 
+                minConfidence: 0.5,
+                maxResults: 1 // Solo el rostro más prominente
+              })
+            )
             .withFaceLandmarks()
             .withFaceDescriptor();
             
           if (detection && detection.descriptor) {
-            lastDetectionTime = Date.now();
-            
             const match = faceMatcher.findBestMatch(detection.descriptor);
             const confidence = 1 - match.distance;
             
+            // Umbral de confianza para reconocimiento inmediato
             if (match.label !== 'unknown' && confidence >= CONFIG.MIN_CONFIDENCE) {
-              console.log('Rostro detectado:', match.label, 'confianza:', confidence.toFixed(2));
+              console.log('Rostro detectado:', match.label, 'Confianza:', confidence);
               await procesarRegistro(match.label, confidence, 'facial');
             }
           }
         } catch (e) {
-          // Silenciar errores de detección para no saturar
-          if (e.message && !e.message.includes('landmarks')) {
-            console.log('Error detección:', e.message);
-          }
+          // Silenciar errores de detección para no afectar rendimiento
         }
-      }, 500); // Revisar cada 500ms pero respetar el intervalo mínimo de 2s
+      }, CONFIG.DETECTION_INTERVAL); // 800ms = muy rápido pero estable
     }
 
     // ========== BUSCADOR MANUAL ==========
@@ -1069,36 +1074,44 @@
       if (!codigo) return;
       
       const resultDiv = document.getElementById('searchResult');
-      let emp = employeesData.get(codigo);
       
-      // Búsqueda parcial si no encuentra exacto
-      if (!emp) {
-        for (const [key, value] of employeesData.entries()) {
+      // Buscar por código o nombre
+      let encontrado = null;
+      let keyEncontrada = null;
+      
+      // Búsqueda exacta primero
+      if (employeesData.has(codigo)) {
+        encontrado = employeesData.get(codigo);
+        keyEncontrada = codigo;
+      } else {
+        // Búsqueda parcial
+        for (const [key, emp] of employeesData) {
           if (key.toLowerCase().includes(codigo) || 
-              (value.firstName && value.firstName.toLowerCase().includes(codigo)) ||
-              (value.lastName && value.lastName.toLowerCase().includes(codigo))) {
-            emp = value;
+              (emp.firstName && emp.firstName.toLowerCase().includes(codigo)) ||
+              (emp.lastName && emp.lastName.toLowerCase().includes(codigo))) {
+            encontrado = emp;
+            keyEncontrada = key;
             break;
           }
         }
       }
       
-      if (emp) {
+      if (encontrado && keyEncontrada) {
         resultDiv.innerHTML = `
-          <div class="result-item" onclick="registrarManual('${emp.username}')">
-            <img src="${emp.fotoBase64 || 'https://via.placeholder.com/40'}" alt="">
+          <div class="result-item" onclick="registrarManual('${keyEncontrada}')">
+            <img src="${encontrado.fotoBase64 || ''}" alt="">
             <div class="result-info">
-              <div class="result-name">${emp.firstName || ''} ${emp.lastName || ''}</div>
-              <div class="result-code">${emp.username}</div>
+              <div class="result-name">${encontrado.firstName || ''} ${encontrado.lastName || ''}</div>
+              <div class="result-code">${keyEncontrada}</div>
             </div>
-            <button class="result-punch" onclick="event.stopPropagation(); registrarManual('${emp.username}')">
+            <button class="result-punch" onclick="event.stopPropagation(); registrarManual('${keyEncontrada}')">
               <i class="fas fa-fingerprint"></i>
             </button>
           </div>
         `;
         resultDiv.classList.add('active');
       } else {
-        resultDiv.innerHTML = '<div style="color: var(--danger); padding: 10px;">Colaborador no encontrado</div>';
+        resultDiv.innerHTML = '<div style="color: var(--danger); padding: 10px; text-align: center;">No encontrado</div>';
         resultDiv.classList.add('active');
       }
     }
@@ -1106,6 +1119,7 @@
     window.registrarManual = async function(codigo) {
       document.getElementById('searchInput').value = '';
       document.getElementById('searchResult').classList.remove('active');
+      document.getElementById('searchResult').innerHTML = '';
       menuDropdown.classList.remove('active');
       isMenuOpen = false;
       await procesarRegistro(codigo, 1.0, 'manual');
