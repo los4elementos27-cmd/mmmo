@@ -334,6 +334,11 @@
       color: rgba(255, 255, 255, 0.3);
     }
     
+    .status-icon.detecting {
+      color: var(--warning);
+      animation: pulse 1s infinite;
+    }
+    
     @keyframes successPop {
       0% { transform: scale(0); opacity: 0; }
       50% { transform: scale(1.2); }
@@ -765,7 +770,7 @@
       onSnapshot
     } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
-    // Configuración de Firebase
+    // Configuración de Firebase - TUS CREDENCIALES ORIGINALES INTACTAS
     const firebaseConfig = {
       apiKey: "AIzaSyAMTWJr3mISmNiP-e_KjCO9BdBPi7Uuug4",
       authDomain: "formulario-2-8929a.firebaseapp.com",
@@ -788,12 +793,27 @@
     let modelosCargados = false;
     let currentUser = null;
     
+    // OPTIMIZACIÓN: Sistema de bloqueo por colaborador (1 minuto)
+    let blockedEmployees = new Map(); // Mapa de códigos bloqueados con timestamp de desbloqueo
+    
+    // OPTIMIZACIÓN: Variables para detección ultra-rápida
+    let lastDetectionTime = 0;
+    let animationFrameId = null;
+    let lastDetectedFace = null;
+    let detectionStabilityCounter = 0;
+    let isFaceStable = false;
+    
     const CONFIG = {
-      UMBRAL_PRECISION: 0.5,
-      DETECTION_INTERVAL: 2500,
-      COOLDOWN_SEGUNDOS: 60,
-      MIN_CONFIDENCE: 0.4,
-      MODEL_URL: 'https://raw.githubusercontent.com/vladmandic/face-api/master/model/'
+      UMBRAL_PRECISION: 0.40, // Más permisivo para detectar rápido
+      DETECTION_INTERVAL: 50, // 50ms = 20 verificaciones por segundo
+      COOLDOWN_SEGUNDOS: 60, // 1 minuto de espera entre registros del mismo colaborador
+      MIN_CONFIDENCE: 0.30, // Confianza mínima reducida
+      STABILITY_THRESHOLD: 3, // Frames consecutivos para confirmar detección estable
+      MODEL_URL: 'https://raw.githubusercontent.com/vladmandic/face-api/master/model/',
+      DETECTION_OPTIONS: new faceapi.SsdMobilenetv1Options({ 
+        minConfidence: 0.2, // Muy permisivo para detectar al instante
+        maxResults: 1
+      })
     };
 
     // ============= ELEMENTOS DOM =============
@@ -843,7 +863,6 @@
     function updateStatusIndicator(type, message) {
       if (!statusIcon || !statusLabel) return;
       
-      // Remover clases anteriores
       statusIcon.className = 'status-icon';
       
       if (type === 'success') {
@@ -854,14 +873,17 @@
         statusIcon.classList.add('error');
         statusIcon.innerHTML = '<i class="fas fa-times-circle"></i>';
         statusLabel.textContent = message || 'Error en registro';
+      } else if (type === 'detecting') {
+        statusIcon.classList.add('detecting');
+        statusIcon.innerHTML = '<i class="fas fa-eye"></i>';
+        statusLabel.textContent = message || 'Detectando...';
       } else {
         statusIcon.classList.add('idle');
         statusIcon.innerHTML = '<i class="fas fa-circle"></i>';
         statusLabel.textContent = message || 'Esperando...';
       }
       
-      // Auto-revertir a idle después de 3 segundos
-      if (type !== 'idle') {
+      if (type !== 'idle' && type !== 'detecting') {
         setTimeout(() => {
           statusIcon.className = 'status-icon idle';
           statusIcon.innerHTML = '<i class="fas fa-circle"></i>';
@@ -911,7 +933,6 @@
           name: userData.companyName || `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || username
         };
         
-        // Guardar sesión en localStorage
         localStorage.setItem('currentUserAsistencia', JSON.stringify(user));
         
         return user;
@@ -938,7 +959,7 @@
 
     async function initWithUser(user) {
       currentUser = user;
-      companyNameSpan.textContent = user.name.split(' ')[0]; // Solo primer nombre para el botón
+      companyNameSpan.textContent = user.name.split(' ')[0];
       if (menuUserName) {
         menuUserName.textContent = user.name;
       }
@@ -948,17 +969,15 @@
       
       await cargarModelos();
       await iniciarCamara();
-      iniciarEscuchaEmpleados(); // Tiempo real
-      iniciarDeteccion();
+      iniciarEscuchaEmpleados();
+      iniciarDeteccionUltraRapida(); // NUEVO: Sistema ultra-rápido
       
       passwordInput.value = '';
       loginAlert.style.display = 'none';
       
-      // Resetear indicador
       updateStatusIndicator('idle');
     }
 
-    // Verificar sesión al cargar
     const savedUser = loadSavedSession();
     if (savedUser) {
       initWithUser(savedUser);
@@ -994,14 +1013,15 @@
       menuModal.classList.remove('show');
       
       if (detectionInterval) clearInterval(detectionInterval);
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
       if (video.srcObject) {
         video.srcObject.getTracks().forEach(track => track.stop());
       }
       
+      blockedEmployees.clear(); // Limpiar bloqueos al salir
       updateStatusIndicator('idle');
     });
 
-    // Menú items
     if (menuRegister) {
       menuRegister.addEventListener('click', () => {
         window.location.href = 'registro_empleado.html';
@@ -1026,9 +1046,13 @@
     async function cargarModelos() {
       try {
         showLoading('Cargando modelos faciales...');
-        await faceapi.nets.ssdMobilenetv1.loadFromUri(CONFIG.MODEL_URL);
-        await faceapi.nets.faceLandmark68Net.loadFromUri(CONFIG.MODEL_URL);
-        await faceapi.nets.faceRecognitionNet.loadFromUri(CONFIG.MODEL_URL);
+        
+        await Promise.all([
+          faceapi.nets.ssdMobilenetv1.loadFromUri(CONFIG.MODEL_URL),
+          faceapi.nets.faceLandmark68Net.loadFromUri(CONFIG.MODEL_URL),
+          faceapi.nets.faceRecognitionNet.loadFromUri(CONFIG.MODEL_URL)
+        ]);
+        
         modelosCargados = true;
         hideLoading();
       } catch (error) {
@@ -1044,11 +1068,16 @@
         const stream = await navigator.mediaDevices.getUserMedia({ 
           video: { 
             facingMode: 'user',
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          } 
+            width: { ideal: 640, max: 1280 },
+            height: { ideal: 480, max: 720 },
+            frameRate: { ideal: 30, max: 60 }
+          },
+          audio: false
         });
+        
         video.srcObject = stream;
+        video.style.willChange = 'transform';
+        
         return new Promise((resolve) => {
           video.onloadedmetadata = () => { 
             video.play(); 
@@ -1090,13 +1119,14 @@
               collaboratorId: data.collaboratorId
             });
             
-            // Cargar descriptor para reconocimiento
             const img = new Image();
             img.src = data.fotoBase64;
             const promise = new Promise((resolve) => {
               img.onload = async () => {
                 try {
-                  const detection = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+                  const detection = await faceapi.detectSingleFace(img, CONFIG.DETECTION_OPTIONS)
+                    .withFaceLandmarks()
+                    .withFaceDescriptor();
                   if (detection) {
                     descriptors.push(new faceapi.LabeledFaceDescriptors(data.username, [detection.descriptor]));
                   }
@@ -1120,36 +1150,48 @@
       });
     }
 
-    // ============= VERIFICAR COOLDOWN =============
-    async function verificarCooldown(codigo) {
-      if (!currentUser) return false;
+    // ============= SISTEMA DE BLOQUEO POR COLABORADOR =============
+    function isEmployeeBlocked(codigo) {
+      if (!blockedEmployees.has(codigo)) return false;
       
-      try {
-        const q = query(
-          collection(db, 'facialAttendance'),
-          where('collaboratorCode', '==', codigo),
-          where('collaboratorId', '==', currentUser.uid),
-          orderBy('timestamp', 'desc'),
-          limit(1)
-        );
-        
-        const last = await getDocs(q);
-        if (last.empty) return true;
-        
-        const lastTime = last.docs[0].data().timestamp.toDate();
-        const ahora = new Date();
-        const diffSegundos = (ahora - lastTime) / 1000;
-        
-        if (diffSegundos < CONFIG.COOLDOWN_SEGUNDOS) {
-          const segundosRestantes = Math.ceil(CONFIG.COOLDOWN_SEGUNDOS - diffSegundos);
-          showToast(`⏳ Espere ${segundosRestantes} segundos`, 'error');
-          return false;
-        }
-        return true;
-      } catch (error) {
-        console.error('Error cooldown:', error);
-        return true;
+      const unblockTime = blockedEmployees.get(codigo);
+      const now = Date.now();
+      
+      if (now >= unblockTime) {
+        blockedEmployees.delete(codigo); // Desbloquear automáticamente
+        return false;
       }
+      
+      return true;
+    }
+
+    function blockEmployee(codigo) {
+      // Bloquear por 60 segundos (1 minuto)
+      const unblockTime = Date.now() + (CONFIG.COOLDOWN_SEGUNDOS * 1000);
+      blockedEmployees.set(codigo, unblockTime);
+      
+      // Mostrar tiempo restante
+      const interval = setInterval(() => {
+        if (!blockedEmployees.has(codigo)) {
+          clearInterval(interval);
+          return;
+        }
+        
+        const remaining = Math.ceil((blockedEmployees.get(codigo) - Date.now()) / 1000);
+        if (remaining <= 0) {
+          blockedEmployees.delete(codigo);
+          clearInterval(interval);
+          updateStatusIndicator('idle', 'Listo para registrar');
+        } else {
+          updateStatusIndicator('detecting', `Espera ${remaining}s...`);
+        }
+      }, 1000);
+    }
+
+    function getRemainingBlockTime(codigo) {
+      if (!blockedEmployees.has(codigo)) return 0;
+      const remaining = Math.ceil((blockedEmployees.get(codigo) - Date.now()) / 1000);
+      return remaining > 0 ? remaining : 0;
     }
 
     // ============= DETERMINAR TIPO CON PAR ID =============
@@ -1190,6 +1232,15 @@
     // ============= PROCESAR REGISTRO =============
     async function procesarRegistro(codigo, confianza = 1.0, metodo = 'facial') {
       if (isProcessing || !currentUser) return;
+      
+      // VERIFICAR BLOQUEO LOCAL (1 minuto)
+      if (isEmployeeBlocked(codigo)) {
+        const remaining = getRemainingBlockTime(codigo);
+        showToast(`⏳ Espera ${remaining} segundos para volver a registrar`, 'error');
+        updateStatusIndicator('error', `Bloqueado: ${remaining}s`);
+        return;
+      }
+      
       isProcessing = true;
 
       try {
@@ -1198,12 +1249,7 @@
         if (!userData) {
           showToast('❌ Empleado no encontrado', 'error');
           updateStatusIndicator('error', 'Empleado no encontrado');
-          return;
-        }
-
-        const cooldownOk = await verificarCooldown(codigo);
-        if (!cooldownOk) {
-          updateStatusIndicator('error', 'Cooldown activo');
+          isProcessing = false;
           return;
         }
 
@@ -1243,6 +1289,9 @@
         await addDoc(collection(db, 'facialAttendance'), attendanceData);
         console.log('✅ Registro guardado:', attendanceData);
 
+        // BLOQUEAR COLABORADOR INMEDIATAMENTE DESPUÉS DEL REGISTRO
+        blockEmployee(codigo);
+
         // Actualizar UI del modal
         document.getElementById('nombreDisplay').textContent = `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || codigo;
         document.getElementById('codigoDisplay').textContent = `Código: ${codigo}`;
@@ -1258,7 +1307,6 @@
         resultadoFlotante.style.display = 'flex';
         setTimeout(() => { resultadoFlotante.style.display = 'none'; }, 5000);
         
-        // Actualizar indicador visual con palomita (éxito)
         updateStatusIndicator('success', tipo === 'entry' ? 'Entrada registrada' : 'Salida registrada');
         showToast(`✅ ${tipo === 'entry' ? 'ENTRADA' : 'SALIDA'} registrada`, 'success');
         
@@ -1271,15 +1319,29 @@
       }
     }
 
-    // ============= DETECCIÓN AUTOMÁTICA =============
-    function iniciarDeteccion() {
-      if (detectionInterval) clearInterval(detectionInterval);
+    // ============= DETECCIÓN ULTRA-RÁPIDA =============
+    function iniciarDeteccionUltraRapida() {
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
       
-      detectionInterval = setInterval(async () => {
-        if (!faceMatcher || !videoStarted || !modelosCargados || isProcessing || !currentUser) return;
+      async function detectFrame() {
+        if (!faceMatcher || !videoStarted || !modelosCargados || !currentUser) {
+          animationFrameId = requestAnimationFrame(detectFrame);
+          return;
+        }
 
+        const now = performance.now();
+        
+        // Control de frecuencia: máximo 20 detecciones por segundo
+        if (now - lastDetectionTime < CONFIG.DETECTION_INTERVAL) {
+          animationFrameId = requestAnimationFrame(detectFrame);
+          return;
+        }
+        
+        lastDetectionTime = now;
+        
         try {
-          const detection = await faceapi.detectSingleFace(video)
+          // Detección ultra-rápida con options optimizados
+          const detection = await faceapi.detectSingleFace(video, CONFIG.DETECTION_OPTIONS)
             .withFaceLandmarks()
             .withFaceDescriptor();
             
@@ -1287,14 +1349,61 @@
             const match = faceMatcher.findBestMatch(detection.descriptor);
             const confidence = 1 - match.distance;
             
+            // Si es el mismo rostro que antes, aumentar estabilidad
+            if (match.label !== 'unknown' && match.label === lastDetectedFace) {
+              detectionStabilityCounter++;
+            } else {
+              detectionStabilityCounter = 1;
+              lastDetectedFace = match.label;
+            }
+            
+            // Si confianza es alta O hay estabilidad suficiente, registrar inmediatamente
             if (match.label !== 'unknown' && confidence >= CONFIG.MIN_CONFIDENCE) {
-              await procesarRegistro(match.label, confidence, 'facial');
+              if (detectionStabilityCounter >= CONFIG.STABILITY_THRESHOLD || confidence > 0.45) {
+                // Verificar bloqueo antes de procesar
+                if (!isEmployeeBlocked(match.label)) {
+                  updateStatusIndicator('detecting', 'Registrando...');
+                  await procesarRegistro(match.label, confidence, 'facial');
+                  // Reset después de registro
+                  detectionStabilityCounter = 0;
+                  lastDetectedFace = null;
+                } else {
+                  const remaining = getRemainingBlockTime(match.label);
+                  updateStatusIndicator('detecting', `Espera ${remaining}s...`);
+                }
+              } else {
+                updateStatusIndicator('detecting', 'Acercate más...');
+              }
+            } else {
+              // Rostro detectado pero no reconocido o confianza baja
+              if (match.label === 'unknown') {
+                updateStatusIndicator('idle', 'Rostro no registrado');
+              }
+              detectionStabilityCounter = 0;
+              lastDetectedFace = null;
+            }
+          } else {
+            // No hay rostro
+            detectionStabilityCounter = 0;
+            lastDetectedFace = null;
+            if (!isProcessing) {
+              updateStatusIndicator('idle');
             }
           }
         } catch (error) {
-          // Silenciamos errores de detección
+          // Silenciar errores de detección
+          detectionStabilityCounter = 0;
         }
-      }, CONFIG.DETECTION_INTERVAL);
+        
+        animationFrameId = requestAnimationFrame(detectFrame);
+      }
+      
+      detectFrame();
+    }
+
+    // Mantener compatibilidad con función anterior
+    function iniciarDeteccion() {
+      iniciarDeteccionUltraRapida();
     }
 
     async function init() {
