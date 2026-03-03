@@ -2,13 +2,21 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Asistencia Facial - Detección Rápida</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Asistencia Facial - TensorFlow.js</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1/dist/face-api.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+      -webkit-tap-highlight-color: transparent; 
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
     
     :root { 
       --primary: #16e086; 
@@ -17,15 +25,46 @@
       --dark: #0e1c22; 
       --danger: #e74c3c; 
       --warning: #f39c12; 
-      --info: #3498db;
-      --purple: #9b59b6;
+      --success: #16e086;
+      --error: #e74c3c;
       --text-secondary: rgba(255,255,255,0.7);
+      --bg-overlay: rgba(0, 0, 0, 0.85);
+      --card-bg: rgba(30, 41, 48, 0.95);
+      
+      /* Tamaños responsivos nativos */
+      --text-xs: clamp(0.7rem, 2vw, 0.8rem);
+      --text-sm: clamp(0.8rem, 2.5vw, 0.9rem);
+      --text-base: clamp(0.9rem, 3vw, 1rem);
+      --text-lg: clamp(1.1rem, 4vw, 1.2rem);
+      --text-xl: clamp(1.3rem, 5vw, 1.5rem);
+      --text-2xl: clamp(1.6rem, 6vw, 2rem);
+      --text-3xl: clamp(2rem, 8vw, 2.5rem);
+      
+      --spacing-xs: clamp(6px, 1.5vw, 8px);
+      --spacing-sm: clamp(8px, 2vw, 12px);
+      --spacing-md: clamp(12px, 3vw, 18px);
+      --spacing-lg: clamp(18px, 4vw, 24px);
+      --spacing-xl: clamp(24px, 5vw, 32px);
+      
+      --border-radius: clamp(16px, 5vw, 28px);
+      --border-radius-sm: clamp(10px, 3vw, 16px);
+      --border-radius-lg: clamp(24px, 6vw, 36px);
+      
+      --safe-area-inset-top: env(safe-area-inset-top, 0px);
+      --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
     }
     
     body { 
       background: #000; 
       min-height: 100vh; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
       overflow: hidden; 
+      font-size: var(--text-base);
+      position: fixed;
+      width: 100%;
+      height: 100%;
     }
     
     .fullscreen-container { 
@@ -33,6 +72,7 @@
       width: 100vw; 
       height: 100vh; 
       background: #000; 
+      overflow: hidden;
     }
     
     .camera-full { 
@@ -48,7 +88,7 @@
       width: 100%; 
       height: 100%; 
       object-fit: cover; 
-      transform: scaleX(-1);
+      transform: scaleX(-1); 
     }
     
     .overlay-content { 
@@ -61,443 +101,402 @@
       display: flex; 
       flex-direction: column; 
       justify-content: space-between; 
-      padding: 15px; 
+      padding: var(--spacing-md); 
+      padding-top: max(var(--spacing-md), var(--safe-area-inset-top));
+      padding-bottom: max(var(--spacing-md), var(--safe-area-inset-bottom));
       pointer-events: none; 
     }
     
-    .overlay-content * { pointer-events: auto; }
+    .overlay-content * { 
+      pointer-events: auto; 
+    }
     
-    /* Menú Hamburguesa Superior */
+    /* Top bar mejorada - estilo más nativo */
     .top-bar { 
       display: flex; 
       justify-content: space-between; 
       align-items: center; 
-      background: rgba(0,0,0,0.8); 
-      backdrop-filter: blur(10px); 
-      padding: 10px 15px; 
-      border-radius: 50px; 
-      border: 1px solid var(--primary); 
-      color: white;
-    }
-    
-    .menu-btn {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 1.5rem;
-      cursor: pointer;
-      padding: 5px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
+      background: var(--card-bg);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      padding: var(--spacing-sm) var(--spacing-md); 
+      border-radius: var(--border-radius-lg); 
+      border: 1px solid rgba(22, 224, 134, 0.3); 
+      color: white; 
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
       transition: all 0.3s ease;
-    }
-    
-    .menu-btn:hover {
-      background: rgba(255,255,255,0.1);
     }
     
     .title { 
       display: flex; 
       align-items: center; 
-      gap: 8px; 
-      font-size: 1rem;
+      gap: var(--spacing-xs); 
     }
     
-    .status-led { 
-      width: 8px; 
-      height: 8px; 
-      background: var(--primary); 
-      border-radius: 50%; 
-      animation: pulse 2s infinite; 
+    .title i {
+      font-size: var(--text-xl);
+      color: var(--primary);
+      text-shadow: 0 0 10px rgba(22, 224, 134, 0.5);
     }
     
-    @keyframes pulse { 
-      0%, 100% { opacity: 1; } 
-      50% { opacity: 0.3; } 
+    .title h1 { 
+      font-size: var(--text-lg); 
+      font-weight: 600;
+      letter-spacing: -0.3px;
     }
     
-    /* Menú Desplegable */
-    .menu-dropdown {
+    /* Menú de usuario elegante */
+    .menu-container {
+      position: relative;
+    }
+    
+    .menu-button {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 30px;
+      padding: var(--spacing-xs) var(--spacing-sm);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .menu-button:hover,
+    .menu-button:active {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .user-name-short {
+      font-weight: 600;
+      max-width: 100px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: var(--text-sm);
+    }
+    
+    .menu-button i {
+      font-size: var(--text-base);
+      color: var(--primary);
+    }
+    
+    /* Modal de menú elegante */
+    .menu-modal {
       position: absolute;
-      top: 70px;
-      right: 15px;
-      background: rgba(0,0,0,0.95);
-      border-radius: 20px;
-      border: 2px solid var(--primary);
-      padding: 20px;
-      min-width: 280px;
+      top: calc(100% + 8px);
+      right: 0;
+      background: var(--card-bg);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-radius: var(--border-radius);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      min-width: 220px;
+      padding: var(--spacing-sm);
       z-index: 100;
       display: none;
-      flex-direction: column;
-      gap: 15px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+      transform-origin: top right;
+      animation: menuAppear 0.2s ease;
     }
     
-    .menu-dropdown.active {
-      display: flex;
+    @keyframes menuAppear {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
     }
     
-    .menu-header {
-      color: var(--primary);
-      font-size: 0.9rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      padding-bottom: 10px;
-      margin-bottom: 5px;
+    .menu-modal.show {
+      display: block;
     }
     
     .menu-item {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 12px 15px;
-      background: rgba(255,255,255,0.05);
-      border-radius: 12px;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-md);
+      border-radius: var(--border-radius-sm);
       color: white;
       text-decoration: none;
-      transition: all 0.3s ease;
-      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      width: 100%;
+      font-size: var(--text-base);
     }
     
-    .menu-item:hover {
-      background: rgba(22,224,134,0.1);
-      border-color: var(--primary);
-      transform: translateX(5px);
+    .menu-item:hover,
+    .menu-item:active {
+      background: rgba(255, 255, 255, 0.1);
     }
     
     .menu-item i {
-      font-size: 1.2rem;
+      width: 24px;
+      font-size: var(--text-lg);
+    }
+    
+    .menu-item.logout {
+      color: var(--danger);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: var(--spacing-xs);
+    }
+    
+    .menu-item.logout i {
+      color: var(--danger);
+    }
+    
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 30px;
+      padding: var(--spacing-xs) var(--spacing-sm);
+    }
+    
+    .status-led { 
+      width: clamp(10px, 2vw, 12px); 
+      height: clamp(10px, 2vw, 12px); 
+      background: var(--primary); 
+      border-radius: 50%; 
+      display: inline-block; 
+      animation: pulse 2s infinite;
+      box-shadow: 0 0 10px var(--primary);
+    }
+    
+    @keyframes pulse { 
+      0% { opacity: 1; transform: scale(1); } 
+      50% { opacity: 0.6; transform: scale(0.95); } 
+      100% { opacity: 1; transform: scale(1); } 
+    }
+    
+    .status-text {
+      font-size: var(--text-xs);
+      color: var(--text-secondary);
+    }
+    
+    .user-info {
+      display: none; /* Ocultamos la versión anterior */
+    }
+    
+    #companyName {
+      font-size: var(--text-sm);
       color: var(--primary);
-      width: 25px;
-    }
-    
-    .menu-divider {
-      height: 1px;
-      background: rgba(255,255,255,0.1);
-      margin: 5px 0;
-    }
-    
-    /* Buscador en Menú */
-    .search-section {
-      background: rgba(255,255,255,0.05);
-      border-radius: 15px;
-      padding: 15px;
-      border: 1px solid var(--info);
-    }
-    
-    .search-title {
-      color: var(--info);
-      font-size: 0.85rem;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-    
-    .search-box-menu {
-      display: flex;
-      gap: 8px;
-    }
-    
-    .search-input-menu {
-      flex: 1;
-      padding: 10px 12px;
-      background: rgba(0,0,0,0.3);
-      border: 1px solid var(--info);
-      border-radius: 25px;
-      color: white;
-      font-size: 0.9rem;
-    }
-    
-    .search-btn-menu {
-      background: var(--info);
-      border: none;
-      color: white;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .search-result-menu {
-      margin-top: 10px;
-      background: rgba(0,0,0,0.3);
-      border-radius: 10px;
-      padding: 10px;
-      display: none;
-    }
-    
-    .search-result-menu.active {
-      display: block;
-    }
-    
-    .result-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    
-    .result-item:hover {
-      background: rgba(22,224,134,0.1);
-    }
-    
-    .result-item img {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid var(--primary);
-    }
-    
-    .result-info {
-      flex: 1;
-    }
-    
-    .result-name {
-      color: white;
-      font-size: 0.9rem;
       font-weight: 500;
     }
     
-    .result-code {
-      color: var(--text-secondary);
-      font-size: 0.75rem;
-    }
-    
-    .result-punch {
-      background: var(--primary);
-      border: none;
-      color: #000;
-      width: 35px;
-      height: 35px;
+    /* ===== NUEVO INDICADOR DE ESTADO ===== */
+    /* Reemplaza los iconos flotantes eliminados */
+    .status-indicator-large {
+      position: absolute;
+      bottom: max(var(--spacing-xl), var(--safe-area-inset-bottom));
+      left: 50%;
+      transform: translateX(-50%);
+      width: clamp(70px, 15vw, 90px);
+      height: clamp(70px, 15vw, 90px);
       border-radius: 50%;
-      cursor: pointer;
+      background: var(--card-bg);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 2px solid rgba(255, 255, 255, 0.2);
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
+      z-index: 40;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     }
     
-    /* Resultado Facial */
+    .status-icon {
+      font-size: var(--text-3xl);
+      transition: all 0.3s ease;
+    }
+    
+    .status-icon.success {
+      color: var(--success);
+      filter: drop-shadow(0 0 15px var(--success));
+      animation: successPop 0.4s ease;
+    }
+    
+    .status-icon.error {
+      color: var(--error);
+      filter: drop-shadow(0 0 15px var(--error));
+      animation: errorShake 0.4s ease;
+    }
+    
+    .status-icon.idle {
+      color: rgba(255, 255, 255, 0.3);
+    }
+    
+    @keyframes successPop {
+      0% { transform: scale(0); opacity: 0; }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    
+    @keyframes errorShake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    
+    .status-label {
+      position: absolute;
+      bottom: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      font-size: var(--text-xs);
+      white-space: nowrap;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(5px);
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      opacity: 0.8;
+    }
+    
+    /* Modal de resultado mejorado */
     .resultado-flotante { 
       position: absolute; 
       top: 50%; 
       left: 50%; 
       transform: translate(-50%, -50%); 
-      width: 85%; 
-      max-width: 350px; 
-      background: rgba(10,25,30,0.98); 
-      backdrop-filter: blur(20px); 
-      border-radius: 25px; 
-      padding: 25px; 
-      border: 3px solid var(--primary); 
-      box-shadow: 0 0 40px rgba(22,224,134,0.4); 
+      width: 90%; 
+      max-width: 400px; 
+      background: var(--card-bg);
+      backdrop-filter: blur(25px) saturate(180%);
+      -webkit-backdrop-filter: blur(25px) saturate(180%);
+      border-radius: var(--border-radius-lg); 
+      padding: var(--spacing-xl); 
+      border: 1.5px solid var(--primary); 
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 0 2px rgba(22, 224, 134, 0.1) inset; 
       display: none; 
       flex-direction: column; 
       align-items: center;
-      gap: 15px; 
+      gap: var(--spacing-lg); 
       z-index: 50; 
+      animation: modalAppear 0.3s ease;
+    }
+    
+    @keyframes modalAppear {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -40%);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+      }
+    }
+    
+    .resultado-header { 
+      display: flex; 
+      flex-direction: column;
+      align-items: center; 
+      gap: var(--spacing-md); 
+      width: 100%;
     }
     
     .foto-colaborador { 
-      width: 120px; 
-      height: 120px; 
+      width: clamp(110px, 25vw, 140px); 
+      height: clamp(110px, 25vw, 140px); 
       border-radius: 50%; 
       object-fit: cover; 
       border: 4px solid var(--primary); 
-      box-shadow: 0 0 25px rgba(22,224,134,0.4);
+      box-shadow: 0 0 30px rgba(22, 224, 134, 0.4);
+    }
+    
+    .info-colaborador { 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center;
+      gap: var(--spacing-xs); 
+      width: 100%;
+      text-align: center;
     }
     
     .nombre-colaborador { 
       color: white; 
-      font-size: 1.4rem; 
-      font-weight: bold; 
-      text-align: center;
+      font-size: var(--text-xl); 
+      font-weight: 700; 
+      line-height: 1.3;
+      letter-spacing: -0.5px;
     }
     
-    .codigo-display { 
+    #codigoDisplay { 
       color: var(--primary); 
-      font-size: 1rem; 
-      font-family: monospace;
+      font-size: var(--text-sm); 
+      opacity: 0.9;
     }
     
     .tipo-registro { 
-      padding: 10px 25px; 
-      border-radius: 30px; 
-      font-weight: bold; 
-      font-size: 1.1rem;
-      text-transform: uppercase;
+      display: inline-block; 
+      padding: var(--spacing-xs) var(--spacing-lg); 
+      border-radius: 40px; 
+      font-weight: 700; 
+      font-size: var(--text-sm);
+      letter-spacing: 0.5px;
     }
     
-    .entrada { background: var(--primary); color: #000; }
-    .salida { background: var(--danger); color: white; }
+    .entrada { 
+      background: var(--primary); 
+      color: #000; 
+      box-shadow: 0 0 15px var(--primary);
+    }
+    
+    .salida { 
+      background: var(--danger); 
+      color: white; 
+      box-shadow: 0 0 15px var(--danger);
+    }
     
     .fecha-hora { 
-      color: rgba(255,255,255,0.8); 
-      font-size: 0.9rem; 
-      text-align: center;
-    }
-    
-    /* Alerta de Bloqueo */
-    .bloqueo-alert {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 90%;
-      max-width: 400px;
-      background: linear-gradient(135deg, rgba(231,76,60,0.95), rgba(192,57,43,0.95));
-      border-radius: 25px;
-      padding: 30px;
-      border: 3px solid var(--danger);
-      box-shadow: 0 0 50px rgba(231,76,60,0.6);
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-      z-index: 60;
-      text-align: center;
-    }
-    
-    .bloqueo-icon {
-      font-size: 4rem;
-      color: white;
-    }
-    
-    .bloqueo-title {
-      color: white;
-      font-size: 1.5rem;
-      font-weight: bold;
-    }
-    
-    .bloqueo-message {
-      color: rgba(255,255,255,0.9);
-      font-size: 1.1rem;
-      line-height: 1.5;
-    }
-    
-    .bloqueo-detail {
+      color: rgba(255,255,255,0.7); 
+      font-size: var(--text-sm); 
       background: rgba(0,0,0,0.3);
-      padding: 15px 20px;
-      border-radius: 15px;
-      color: white;
-      font-size: 0.95rem;
-      width: 100%;
+      padding: var(--spacing-xs) var(--spacing-md);
+      border-radius: 30px;
+      width: fit-content;
     }
     
-    .bloqueo-close {
-      background: white;
-      border: none;
-      color: var(--danger);
-      padding: 12px 30px;
-      border-radius: 25px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 10px;
+    #parIdDisplay { 
+      color: var(--warning); 
+      font-size: var(--text-xs); 
+      background: rgba(243, 156, 18, 0.1);
+      padding: var(--spacing-xs) var(--spacing-sm);
+      border-radius: 30px;
     }
     
-    /* Toast */
-    .toast { 
-      position: fixed; 
-      bottom: 20px; 
-      left: 50%; 
-      transform: translateX(-50%); 
-      padding: 12px 25px; 
-      border-radius: 50px; 
-      background: rgba(0,0,0,0.95); 
-      border: 2px solid var(--primary); 
-      color: white; 
-      z-index: 200; 
-      display: none; 
-      font-size: 0.95rem;
-      max-width: 90%;
-      text-align: center;
-    }
-    
-    /* Login */
-    .login-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, #0e1c22, #1a2f38);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-    
-    .login-card {
-      background: rgba(255,255,255,0.1);
-      backdrop-filter: blur(10px);
-      border-radius: 25px;
-      padding: 40px;
-      width: 90%;
-      max-width: 380px;
-      border: 2px solid var(--primary);
-    }
-    
-    .login-card h2 {
-      color: var(--primary);
-      text-align: center;
-      margin-bottom: 30px;
-      font-size: 1.5rem;
-    }
-    
-    .login-input {
-      width: 100%;
-      padding: 15px;
-      margin-bottom: 15px;
-      background: rgba(0,0,0,0.3);
-      border: 2px solid var(--primary);
-      border-radius: 15px;
-      color: white;
-      font-size: 1rem;
-    }
-    
-    .login-btn {
-      width: 100%;
-      background: var(--primary);
-      color: #000;
-      border: none;
-      padding: 15px;
-      border-radius: 50px;
-      font-weight: bold;
-      font-size: 1.1rem;
-      cursor: pointer;
-    }
-    
-    /* Loading */
+    /* Loading overlay mejorado */
     .loading-overlay { 
       position: fixed; 
       inset: 0; 
-      background: rgba(0,0,0,0.98); 
+      background: rgba(0,0,0,0.95); 
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       display: none; 
       flex-direction: column; 
       justify-content: center; 
       align-items: center; 
-      z-index: 500; 
+      z-index: 1000; 
+      padding: var(--spacing-lg);
     }
     
     .spinner { 
-      border: 3px solid rgba(22,224,134,0.2); 
+      border: 3px solid rgba(22,224,134,0.1); 
       border-top: 3px solid var(--primary); 
       border-radius: 50%; 
-      width: 40px; 
-      height: 40px; 
+      width: clamp(45px, 10vw, 55px); 
+      height: clamp(45px, 10vw, 55px); 
       animation: spin 0.8s linear infinite; 
+      margin-bottom: var(--spacing-md); 
     }
     
     @keyframes spin { 
@@ -505,105 +504,250 @@
       100% { transform: rotate(360deg); } 
     }
     
-    .hidden { display: none !important; }
+    /* Toast elegante */
+    .toast { 
+      position: fixed; 
+      bottom: max(calc(var(--spacing-xl) * 2.5), var(--safe-area-inset-bottom));
+      left: 50%; 
+      transform: translateX(-50%); 
+      padding: var(--spacing-sm) var(--spacing-xl); 
+      border-radius: 40px; 
+      background: var(--card-bg);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--primary); 
+      color: white; 
+      z-index: 200; 
+      display: none; 
+      font-size: var(--text-sm);
+      max-width: 90%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      animation: toastAppear 0.2s ease;
+    }
+    
+    @keyframes toastAppear {
+      from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+    
+    /* Login mejorado */
+    .login-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #0a1a20, #1a2f38);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    
+    .login-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-radius: var(--border-radius-lg);
+      padding: var(--spacing-xl);
+      width: 90%;
+      max-width: 380px;
+      border: 1px solid rgba(22, 224, 134, 0.3);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+    
+    .login-card h2 {
+      color: var(--primary);
+      text-align: center;
+      margin-bottom: var(--spacing-xl);
+      font-size: var(--text-xl);
+      font-weight: 600;
+    }
+    
+    .login-input {
+      width: 100%;
+      padding: var(--spacing-md);
+      margin-bottom: var(--spacing-md);
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--border-radius-sm);
+      color: white;
+      font-size: var(--text-base);
+      transition: all 0.2s ease;
+    }
+    
+    .login-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: rgba(0,0,0,0.5);
+    }
+    
+    .alert {
+      padding: var(--spacing-sm);
+      border-radius: var(--border-radius-sm);
+      margin-bottom: var(--spacing-md);
+      display: none;
+      font-size: var(--text-sm);
+      text-align: center;
+    }
+    
+    .alert-error { 
+      background: rgba(231,76,60,0.2); 
+      border: 1px solid var(--danger); 
+      color: white; 
+    }
+    
+    .btn {
+      background: var(--primary);
+      color: #000;
+      border: none;
+      padding: var(--spacing-md);
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: var(--text-base);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+    
+    .btn:hover,
+    .btn:active {
+      background: var(--primary-dark);
+      transform: scale(0.98);
+    }
+    
+    @media (max-width: 480px) {
+      .top-bar {
+        padding: var(--spacing-xs) var(--spacing-sm);
+      }
+      
+      .title h1 {
+        font-size: var(--text-base);
+      }
+      
+      .menu-button .user-name-short {
+        max-width: 70px;
+      }
+      
+      .status-indicator-large {
+        width: 60px;
+        height: 60px;
+      }
+      
+      .status-icon {
+        font-size: 2rem;
+      }
+    }
   </style>
 </head>
 <body>
-  <!-- Login -->
+  <!-- Login Screen -->
   <div id="loginScreen" class="login-container">
     <div class="login-card">
       <h2><i class="fas fa-building"></i> Acceso Empresa</h2>
-      <input type="text" id="username" class="login-input" placeholder="Usuario">
-      <input type="password" id="password" class="login-input" placeholder="PIN">
-      <button id="loginBtn" class="login-btn">Ingresar</button>
+      <input type="text" id="username" class="login-input" placeholder="Usuario" autocomplete="off">
+      <input type="password" id="password" class="login-input" placeholder="PIN (8 dígitos)" inputmode="numeric" pattern="[0-9]*">
+      <div id="loginAlert" class="alert alert-error"></div>
+      <button id="loginBtn" class="btn">Ingresar</button>
     </div>
   </div>
 
-  <!-- App Principal -->
-  <div id="appScreen" class="hidden">
+  <!-- Main App -->
+  <div id="appScreen" style="display: none;">
     <div class="fullscreen-container">
       <div class="camera-full">
         <video id="videoFacial" autoplay muted playsinline></video>
       </div>
 
       <div class="overlay-content">
+        <!-- Top bar mejorada -->
         <div class="top-bar">
           <div class="title">
-            <div class="status-led"></div>
-            <span>Asistencia Facial</span>
+            <i class="fas fa-user-shield"></i>
+            <h1>Asistencia</h1>
           </div>
-          <button class="menu-btn" id="menuBtn" title="Menú">
-            <i class="fas fa-bars"></i>
-          </button>
-        </div>
-
-        <!-- Menú Desplegable -->
-        <div class="menu-dropdown" id="menuDropdown">
-          <div class="menu-header">Opciones Rápidas</div>
           
-          <a href="gestion_colaboradores.html" class="menu-item">
-            <i class="fas fa-user-cog"></i>
-            <span>Gestión Colaboradores</span>
-          </a>
-          
-          <a href="reportes.html" class="menu-item">
-            <i class="fas fa-chart-bar"></i>
-            <span>Reportes</span>
-          </a>
-          
-          <a href="subusuarios.html" class="menu-item">
-            <i class="fas fa-users-cog"></i>
-            <span>Sub-Usuarios</span>
-          </a>
-          
-          <div class="menu-divider"></div>
-          
-          <!-- Buscador Integrado -->
-          <div class="search-section">
-            <div class="search-title">
-              <i class="fas fa-search"></i> Buscar por Código
+          <!-- Menú elegante (contiene REGISTRAR y REPORTES) -->
+          <div class="menu-container">
+            <div class="menu-button" id="menuButton">
+              <span class="user-name-short" id="companyName"></span>
+              <i class="fas fa-chevron-down"></i>
             </div>
-            <div class="search-box-menu">
-              <input type="text" id="searchInput" class="search-input-menu" placeholder="Código...">
-              <button class="search-btn-menu" id="searchBtn">
-                <i class="fas fa-fingerprint"></i>
+            
+            <!-- Modal del menú -->
+            <div class="menu-modal" id="menuModal">
+              <!-- Status indicator integrado -->
+              <div class="menu-item" style="pointer-events: none; opacity: 0.7;">
+                <div class="status-led"></div>
+                <span>Sistema activo</span>
+              </div>
+              
+              <div class="menu-item" id="menuUserInfo">
+                <i class="fas fa-user-circle"></i>
+                <span id="menuUserName">Usuario</span>
+              </div>
+              
+              <div class="menu-item" id="menuRegister">
+                <i class="fas fa-user-plus"></i>
+                <span>Registrar empleado</span>
+              </div>
+              
+              <div class="menu-item" id="menuReports">
+                <i class="fas fa-chart-bar"></i>
+                <span>Ver reportes</span>
+              </div>
+              
+              <button class="menu-item logout" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Cerrar sesión</span>
               </button>
             </div>
-            <div class="search-result-menu" id="searchResult"></div>
           </div>
-          
-          <div class="menu-divider"></div>
-          
-          <a href="#" class="menu-item" id="logoutBtn" style="color: var(--danger);">
-            <i class="fas fa-sign-out-alt" style="color: var(--danger);"></i>
-            <span>Cerrar Sesión</span>
-          </a>
+        </div>
+
+        <!-- Modal de resultado facial (se mantiene igual) -->
+        <div id="resultadoFlotante" class="resultado-flotante">
+          <div class="resultado-header">
+            <img id="fotoColaborador" class="foto-colaborador" src="" alt="Foto">
+            <div class="info-colaborador">
+              <div id="nombreDisplay" class="nombre-colaborador">---</div>
+              <div id="codigoDisplay">---</div>
+              <div id="tipoDisplay" class="tipo-registro">---</div>
+              <div id="fechaHoraDisplay" class="fecha-hora">---</div>
+              <div id="parIdDisplay">---</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- NUEVO INDICADOR VISUAL (reemplaza los iconos flotantes eliminados) -->
+        <div class="status-indicator-large" id="statusIndicator">
+          <div class="status-icon idle" id="statusIcon">
+            <i class="fas fa-circle"></i>
+          </div>
+          <div class="status-label" id="statusLabel">Esperando...</div>
         </div>
       </div>
       
-      <!-- Resultado Facial -->
-      <div id="resultadoFlotante" class="resultado-flotante">
-        <img id="fotoColaborador" class="foto-colaborador" src="" alt="">
-        <div id="nombreDisplay" class="nombre-colaborador">---</div>
-        <div id="codigoDisplay" class="codigo-display">---</div>
-        <div id="tipoDisplay" class="tipo-registro">---</div>
-        <div id="fechaHoraDisplay" class="fecha-hora">---</div>
-      </div>
-      
-      <!-- Alerta de Bloqueo -->
-      <div id="bloqueoAlert" class="bloqueo-alert">
-        <i class="fas fa-ban bloqueo-icon"></i>
-        <div class="bloqueo-title" id="bloqueoTitle">Registro Bloqueado</div>
-        <div class="bloqueo-message" id="bloqueoMessage">---</div>
-        <div class="bloqueo-detail" id="bloqueoDetail">---</div>
-        <button class="bloqueo-close" onclick="cerrarBloqueo()">Entendido</button>
-      </div>
+      <!-- ICONOS FLOTANTES ELIMINADOS COMPLETAMENTE -->
     </div>
   </div>
 
-  <div class="toast" id="toast"></div>
+  <!-- Toast Notification -->
+  <div class="toast" id="toastNotification"></div>
+  
+  <!-- Loading Overlay -->
   <div class="loading-overlay" id="loadingOverlay">
     <div class="spinner"></div>
+    <div id="loadingText">Cargando...</div>
   </div>
 
   <script type="module">
@@ -621,6 +765,7 @@
       onSnapshot
     } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
+    // Configuración de Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAMTWJr3mISmNiP-e_KjCO9BdBPi7Uuug4",
       authDomain: "formulario-2-8929a.firebaseapp.com",
@@ -633,147 +778,295 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // ========== CONFIGURACIÓN RESTAURADA Y OPTIMIZADA ==========
-    // Volvemos a SSD MobileNet que funciona bien, pero con ajustes de velocidad
-    const CONFIG = {
-      UMBRAL_PRECISION: 0.6,
-      DETECTION_INTERVAL: 800, // Muy rápido: 800ms
-      COOLDOWN_SEGUNDOS: 60,
-      UMBRAL_HORAS_FUERZA_ENTRADA: 16,
-      MIN_CONFIDENCE: 0.5, // Umbral adecuado para reconocimiento rápido
-      MODEL_URL: 'https://raw.githubusercontent.com/vladmandic/face-api/master/model/'
-    };
-
+    // ============= VARIABLES GLOBALES =============
     let faceMatcher = null;
+    let labeledFaceDescriptors = [];
     let employeesData = new Map();
     let isProcessing = false;
     let videoStarted = false;
     let detectionInterval = null;
     let modelosCargados = false;
     let currentUser = null;
-    let isMenuOpen = false;
+    
+    const CONFIG = {
+      UMBRAL_PRECISION: 0.5,
+      DETECTION_INTERVAL: 2500,
+      COOLDOWN_SEGUNDOS: 60,
+      MIN_CONFIDENCE: 0.4,
+      MODEL_URL: 'https://raw.githubusercontent.com/vladmandic/face-api/master/model/'
+    };
 
+    // ============= ELEMENTOS DOM =============
     const video = document.getElementById('videoFacial');
-    const toast = document.getElementById('toast');
-    const menuBtn = document.getElementById('menuBtn');
-    const menuDropdown = document.getElementById('menuDropdown');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const loadingText = document.getElementById('loadingText');
+    const toast = document.getElementById('toastNotification');
+    const resultadoFlotante = document.getElementById('resultadoFlotante');
+    const loginScreen = document.getElementById('loginScreen');
+    const appScreen = document.getElementById('appScreen');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const loginBtn = document.getElementById('loginBtn');
+    const loginAlert = document.getElementById('loginAlert');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const companyNameSpan = document.getElementById('companyName');
+    const menuButton = document.getElementById('menuButton');
+    const menuModal = document.getElementById('menuModal');
+    const menuUserName = document.getElementById('menuUserName');
+    const menuRegister = document.getElementById('menuRegister');
+    const menuReports = document.getElementById('menuReports');
+    
+    // Nuevos elementos del indicador de estado
+    const statusIndicator = document.getElementById('statusIndicator');
+    const statusIcon = document.getElementById('statusIcon');
+    const statusLabel = document.getElementById('statusLabel');
 
-    // ========== FUNCIONES UTILITARIAS ==========
-    function showToast(msg, type='success') {
-      toast.textContent = msg;
+    // ============= FUNCIONES UTILERÍA =============
+    function showToast(message, type = 'success') {
+      toast.textContent = message;
+      toast.style.background = type === 'success' ? 'rgba(22,224,134,0.2)' : 'rgba(231,76,60,0.2)';
       toast.style.borderColor = type === 'success' ? 'var(--primary)' : 'var(--danger)';
       toast.style.display = 'block';
-      setTimeout(() => toast.style.display = 'none', 3000);
+      setTimeout(() => { toast.style.display = 'none'; }, 3000);
     }
 
-    // ========== LOGIN ==========
-    async function authenticateUser(username, pin) {
-      const q = query(
-        collection(db, "Collaborators"),
-        where("username", "==", username),
-        where("pin", "==", pin)
-      );
-      const snapshot = await getDocs(q);
-      if (snapshot.empty) throw new Error('Credenciales incorrectas');
+    function showLoading(message = 'Cargando...') {
+      loadingText.textContent = message;
+      loadingOverlay.style.display = 'flex';
+    }
+
+    function hideLoading() {
+      loadingOverlay.style.display = 'none';
+    }
+
+    // Función para actualizar el indicador de estado
+    function updateStatusIndicator(type, message) {
+      if (!statusIcon || !statusLabel) return;
       
-      const userDoc = snapshot.docs[0];
-      return {
-        uid: userDoc.id,
-        username: userDoc.data().username,
-        name: userDoc.data().companyName || username
-      };
+      // Remover clases anteriores
+      statusIcon.className = 'status-icon';
+      
+      if (type === 'success') {
+        statusIcon.classList.add('success');
+        statusIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
+        statusLabel.textContent = message || 'Registro exitoso';
+      } else if (type === 'error') {
+        statusIcon.classList.add('error');
+        statusIcon.innerHTML = '<i class="fas fa-times-circle"></i>';
+        statusLabel.textContent = message || 'Error en registro';
+      } else {
+        statusIcon.classList.add('idle');
+        statusIcon.innerHTML = '<i class="fas fa-circle"></i>';
+        statusLabel.textContent = message || 'Esperando...';
+      }
+      
+      // Auto-revertir a idle después de 3 segundos
+      if (type !== 'idle') {
+        setTimeout(() => {
+          statusIcon.className = 'status-icon idle';
+          statusIcon.innerHTML = '<i class="fas fa-circle"></i>';
+          statusLabel.textContent = 'Esperando...';
+        }, 3000);
+      }
+    }
+
+    // Cerrar menú al hacer clic fuera
+    document.addEventListener('click', (e) => {
+      if (menuModal && menuButton && !menuButton.contains(e.target) && !menuModal.contains(e.target)) {
+        menuModal.classList.remove('show');
+      }
+    });
+
+    // Toggle del menú
+    if (menuButton) {
+      menuButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        menuModal.classList.toggle('show');
+      });
+    }
+
+    // ============= LOGIN CON SESIÓN PERMANENTE =============
+    async function authenticateUser(username, pin) {
+      try {
+        showLoading('Verificando credenciales...');
+        
+        const q = query(
+          collection(db, "Collaborators"),
+          where("username", "==", username),
+          where("pin", "==", pin)
+        );
+        
+        const snapshot = await getDocs(q);
+        
+        if (snapshot.empty) {
+          throw new Error('Usuario o PIN incorrectos');
+        }
+        
+        const userDoc = snapshot.docs[0];
+        const userData = userDoc.data();
+        
+        const user = {
+          uid: userDoc.id,
+          username: userData.username,
+          name: userData.companyName || `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || username
+        };
+        
+        // Guardar sesión en localStorage
+        localStorage.setItem('currentUserAsistencia', JSON.stringify(user));
+        
+        return user;
+        
+      } catch (error) {
+        console.error('Login error:', error);
+        throw error;
+      } finally {
+        hideLoading();
+      }
     }
 
     function loadSavedSession() {
       const saved = localStorage.getItem('currentUserAsistencia');
-      return saved ? JSON.parse(saved) : null;
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch {
+          return null;
+        }
+      }
+      return null;
     }
 
     async function initWithUser(user) {
       currentUser = user;
-      document.getElementById('loginScreen').classList.add('hidden');
-      document.getElementById('appScreen').classList.remove('hidden');
+      companyNameSpan.textContent = user.name.split(' ')[0]; // Solo primer nombre para el botón
+      if (menuUserName) {
+        menuUserName.textContent = user.name;
+      }
+      
+      loginScreen.style.display = 'none';
+      appScreen.style.display = 'block';
       
       await cargarModelos();
       await iniciarCamara();
-      iniciarEscuchaEmpleados();
-      iniciarDeteccionRapida();
+      iniciarEscuchaEmpleados(); // Tiempo real
+      iniciarDeteccion();
+      
+      passwordInput.value = '';
+      loginAlert.style.display = 'none';
+      
+      // Resetear indicador
+      updateStatusIndicator('idle');
     }
 
+    // Verificar sesión al cargar
     const savedUser = loadSavedSession();
-    if (savedUser) initWithUser(savedUser);
+    if (savedUser) {
+      initWithUser(savedUser);
+    }
 
-    document.getElementById('loginBtn').addEventListener('click', async () => {
+    loginBtn.addEventListener('click', async () => {
+      const username = usernameInput.value.trim();
+      const pin = passwordInput.value.trim();
+      
+      if (!username || !pin) {
+        loginAlert.textContent = 'Complete todos los campos';
+        loginAlert.style.display = 'block';
+        return;
+      }
+      
       try {
-        const user = await authenticateUser(
-          document.getElementById('username').value.trim(),
-          document.getElementById('password').value.trim()
-        );
-        localStorage.setItem('currentUserAsistencia', JSON.stringify(user));
-        await initWithUser(user);
-      } catch (e) {
-        showToast(e.message, 'error');
+        const userData = await authenticateUser(username, pin);
+        await initWithUser(userData);
+      } catch (error) {
+        loginAlert.textContent = error.message;
+        loginAlert.style.display = 'block';
+        updateStatusIndicator('error', 'Error de login');
       }
     });
 
-    document.getElementById('logoutBtn').addEventListener('click', (e) => {
-      e.preventDefault();
+    logoutBtn.addEventListener('click', () => {
       localStorage.removeItem('currentUserAsistencia');
-      location.reload();
-    });
-
-    // ========== MENÚ ==========
-    menuBtn.addEventListener('click', () => {
-      isMenuOpen = !isMenuOpen;
-      menuDropdown.classList.toggle('active', isMenuOpen);
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!menuBtn.contains(e.target) && !menuDropdown.contains(e.target)) {
-        isMenuOpen = false;
-        menuDropdown.classList.remove('active');
+      currentUser = null;
+      appScreen.style.display = 'none';
+      loginScreen.style.display = 'flex';
+      usernameInput.value = '';
+      passwordInput.value = '';
+      menuModal.classList.remove('show');
+      
+      if (detectionInterval) clearInterval(detectionInterval);
+      if (video.srcObject) {
+        video.srcObject.getTracks().forEach(track => track.stop());
       }
+      
+      updateStatusIndicator('idle');
     });
 
-    // ========== CARGA DE MODELOS (ORIGINAL RESTAURADA) ==========
+    // Menú items
+    if (menuRegister) {
+      menuRegister.addEventListener('click', () => {
+        window.location.href = 'registro_empleado.html';
+      });
+    }
+    
+    if (menuReports) {
+      menuReports.addEventListener('click', () => {
+        window.location.href = 'reportes.html';
+      });
+    }
+
+    usernameInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') passwordInput.focus();
+    });
+    
+    passwordInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') loginBtn.click();
+    });
+
+    // ============= CARGAR MODELOS =============
     async function cargarModelos() {
-      document.getElementById('loadingOverlay').style.display = 'flex';
-      
-      // Carga en paralelo para velocidad
-      await Promise.all([
-        faceapi.nets.ssdMobilenetv1.loadFromUri(CONFIG.MODEL_URL),
-        faceapi.nets.faceLandmark68Net.loadFromUri(CONFIG.MODEL_URL),
-        faceapi.nets.faceRecognitionNet.loadFromUri(CONFIG.MODEL_URL)
-      ]);
-      
-      modelosCargados = true;
-      document.getElementById('loadingOverlay').style.display = 'none';
-      showToast('✅ Sistema listo - Reconocimiento rápido activo');
+      try {
+        showLoading('Cargando modelos faciales...');
+        await faceapi.nets.ssdMobilenetv1.loadFromUri(CONFIG.MODEL_URL);
+        await faceapi.nets.faceLandmark68Net.loadFromUri(CONFIG.MODEL_URL);
+        await faceapi.nets.faceRecognitionNet.loadFromUri(CONFIG.MODEL_URL);
+        modelosCargados = true;
+        hideLoading();
+      } catch (error) {
+        console.error('Error cargando modelos:', error);
+        showToast('Error cargando modelos', 'error');
+        updateStatusIndicator('error', 'Error cargando modelos');
+        hideLoading();
+      }
     }
 
-    // ========== CÁMARA (RESOLUCIÓN ÓPTIMA) ==========
     async function iniciarCamara() {
-      // Resolución media-alta para buena detección pero no tan pesada
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
-          facingMode: 'user',
-          width: { ideal: 640 },
-          height: { ideal: 480 },
-          frameRate: { ideal: 30 }
-        } 
-      });
-      video.srcObject = stream;
-      return new Promise((resolve) => {
-        video.onloadedmetadata = () => {
-          video.play();
-          videoStarted = true;
-          resolve();
-        };
-      });
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            facingMode: 'user',
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          } 
+        });
+        video.srcObject = stream;
+        return new Promise((resolve) => {
+          video.onloadedmetadata = () => { 
+            video.play(); 
+            videoStarted = true; 
+            resolve(); 
+          };
+        });
+      } catch (error) {
+        console.error('Error cámara:', error);
+        showToast('Error al acceder a la cámara', 'error');
+        updateStatusIndicator('error', 'Error de cámara');
+      }
     }
 
-    // ========== ESCUCHA EMPLEADOS ==========
+    // ============= ESCUCHA EN TIEMPO REAL DE EMPLEADOS =============
     function iniciarEscuchaEmpleados() {
+      if (!currentUser) return;
+      
       const q = query(
         collection(db, 'Ponche'),
         where('collaboratorId', '==', currentUser.uid)
@@ -782,171 +1075,56 @@
       onSnapshot(q, (snapshot) => {
         const descriptors = [];
         employeesData.clear();
-        let loadedCount = 0;
-        const totalEmps = snapshot.size;
         
-        if (totalEmps === 0) {
-          console.log('No hay empleados');
-          return;
-        }
+        const promises = [];
         
-        snapshot.forEach(docSnap => {
-          const data = docSnap.data();
+        snapshot.forEach(doc => {
+          const data = doc.data();
           if (data.activo !== false && data.fotoBase64 && data.username) {
             employeesData.set(data.username, {
-              id: docSnap.id,
-              ...data,
-              status: data.status || 'active',
-              diasSemanaNoLaborables: data.diasSemanaNoLaborables || [],
-              fechaInicioLibre: data.fechaInicioLibre || null,
-              fechaFinLibre: data.fechaFinLibre || null,
-              tipoLibre: data.tipoLibre || null
+              id: doc.id,
+              firstName: data.firstName || '',
+              lastName: data.lastName || '',
+              fotoBase64: data.fotoBase64,
+              turnoHoras: data.turnoHoras || 8,
+              collaboratorId: data.collaboratorId
             });
             
-            // Cargar descriptor facial
+            // Cargar descriptor para reconocimiento
             const img = new Image();
             img.src = data.fotoBase64;
-            img.onload = async () => {
-              try {
-                // Usamos SSD MobileNet original con confianza media
-                const detection = await faceapi
-                  .detectSingleFace(img, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 }))
-                  .withFaceLandmarks()
-                  .withFaceDescriptor();
-                  
-                if (detection && detection.descriptor) {
-                  descriptors.push(new faceapi.LabeledFaceDescriptors(data.username, [detection.descriptor]));
+            const promise = new Promise((resolve) => {
+              img.onload = async () => {
+                try {
+                  const detection = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+                  if (detection) {
+                    descriptors.push(new faceapi.LabeledFaceDescriptors(data.username, [detection.descriptor]));
+                  }
+                } catch (error) {
+                  console.error('Error detectando rostro:', error);
                 }
-              } catch (e) {
-                console.error('Error cargando descriptor:', e);
-              }
-              
-              loadedCount++;
-              // Actualizar faceMatcher cuando todos estén listos
-              if (loadedCount === totalEmps && descriptors.length > 0) {
-                faceMatcher = new faceapi.FaceMatcher(descriptors, CONFIG.UMBRAL_PRECISION);
-                console.log('✅ FaceMatcher listo con', descriptors.length, 'rostros');
-              }
-            };
-            
-            img.onerror = () => {
-              loadedCount++;
-            };
-          } else {
-            loadedCount++;
+                resolve();
+              };
+              img.onerror = resolve;
+            });
+            promises.push(promise);
+          }
+        });
+        
+        Promise.all(promises).then(() => {
+          if (descriptors.length > 0) {
+            faceMatcher = new faceapi.FaceMatcher(descriptors, CONFIG.UMBRAL_PRECISION);
+            console.log('✅ FaceMatcher actualizado con', descriptors.length, 'empleados');
           }
         });
       });
     }
 
-    // ========== VERIFICAR BLOQUEOS ESPECÍFICOS ==========
-    function verificarBloqueos(codigo) {
-      const emp = employeesData.get(codigo);
-      if (!emp) return { bloqueado: true, mensaje: 'Colaborador no encontrado', tipo: 'error' };
+    // ============= VERIFICAR COOLDOWN =============
+    async function verificarCooldown(codigo) {
+      if (!currentUser) return false;
       
-      const hoy = new Date();
-      const diaSemana = hoy.getDay(); // 0=Domingo, 6=Sábado
-      
-      // 1. Verificar días de semana no laborables
-      const diasNoLaborables = emp.diasSemanaNoLaborables || [];
-      if (diasNoLaborables.includes(diaSemana)) {
-        const nombresDias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-        return {
-          bloqueado: true,
-          mensaje: `Hoy es ${nombresDias[diaSemana]} - No debes registrarte`,
-          detalle: `Tus días no laborables: ${diasNoLaborables.map(d => nombresDias[d]).join(', ')}`,
-          tipo: 'dia_no_laborable'
-        };
-      }
-      
-      // 2. Verificar período libre (vacaciones/licencia/permiso)
-      if (emp.fechaInicioLibre && emp.fechaFinLibre) {
-        const inicio = new Date(emp.fechaInicioLibre);
-        const fin = new Date(emp.fechaFinLibre);
-        const ahora = new Date();
-        
-        inicio.setHours(0,0,0,0);
-        fin.setHours(23,59,59,999);
-        const hoyNormalizado = new Date(ahora);
-        hoyNormalizado.setHours(0,0,0,0);
-        
-        if (hoyNormalizado >= inicio && hoyNormalizado <= fin) {
-          const tipoLibre = emp.tipoLibre || 'libre';
-          const diasRestantes = Math.ceil((fin - hoyNormalizado) / (1000 * 60 * 60 * 24));
-          
-          let mensaje = '';
-          let detalle = '';
-          
-          switch(tipoLibre) {
-            case 'vacaciones':
-              mensaje = 'Estás de vacaciones';
-              detalle = `Te quedan ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''} de vacaciones. ¡Disfruta tu descanso!`;
-              break;
-            case 'licencia':
-              mensaje = 'Tienes una licencia activa';
-              detalle = `Licencia válida por ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''} más.`;
-              break;
-            case 'permiso':
-              mensaje = 'Tienes un permiso autorizado';
-              detalle = `Permiso válido por ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''} más.`;
-              break;
-            default:
-              mensaje = 'Estás marcado como no disponible';
-              detalle = `Período libre: ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''} restantes.`;
-          }
-          
-          return {
-            bloqueado: true,
-            mensaje: mensaje,
-            detalle: detalle,
-            tipo: tipoLibre
-          };
-        }
-      }
-      
-      // 3. Verificar estado inactivo
-      if (emp.status === 'inactive') {
-        return {
-          bloqueado: true,
-          mensaje: 'Tu cuenta está inactiva',
-          detalle: 'Contacta al administrador para reactivar tu cuenta.',
-          tipo: 'inactive'
-        };
-      }
-      
-      return { bloqueado: false, emp };
-    }
-
-    // ========== MOSTRAR ALERTA DE BLOQUEO ==========
-    function mostrarBloqueo(info) {
-      const alert = document.getElementById('bloqueoAlert');
-      document.getElementById('bloqueoTitle').textContent = '⛔ Registro No Permitido';
-      document.getElementById('bloqueoMessage').textContent = info.mensaje;
-      document.getElementById('bloqueoDetail').textContent = info.detalle || '';
-      alert.style.display = 'flex';
-    }
-
-    window.cerrarBloqueo = function() {
-      document.getElementById('bloqueoAlert').style.display = 'none';
-    };
-
-    // ========== PROCESAR REGISTRO ==========
-    async function procesarRegistro(codigo, confianza = 1.0, metodo = 'facial') {
-      if (isProcessing || !currentUser) return;
-      isProcessing = true;
-
       try {
-        // Verificar bloqueos primero
-        const verificacion = verificarBloqueos(codigo);
-        if (verificacion.bloqueado) {
-          mostrarBloqueo(verificacion);
-          isProcessing = false;
-          return;
-        }
-        
-        const emp = verificacion.emp;
-        
-        // Verificar cooldown (anti-doble registro)
         const q = query(
           collection(db, 'facialAttendance'),
           where('collaboratorCode', '==', codigo),
@@ -955,175 +1133,184 @@
           limit(1)
         );
         
-        const lastSnap = await getDocs(q);
-        if (!lastSnap.empty) {
-          const lastTime = lastSnap.docs[0].data().timestamp.toDate();
-          const diff = (new Date() - lastTime) / 1000;
-          if (diff < CONFIG.COOLDOWN_SEGUNDOS) {
-            showToast(`⏳ Espera ${Math.ceil(CONFIG.COOLDOWN_SEGUNDOS - diff)} segundos`, 'error');
-            isProcessing = false;
-            return;
-          }
-        }
+        const last = await getDocs(q);
+        if (last.empty) return true;
         
-        // Determinar tipo (entry/exit) con lógica de 16 horas
-        let tipo = 'entry';
-        let parId = `PAR_${codigo}_${Date.now()}`;
-        
-        if (!lastSnap.empty) {
-          const last = lastSnap.docs[0].data();
-          const horasDiff = (new Date() - last.timestamp.toDate()) / (1000 * 60 * 60);
-          
-          if (horasDiff < CONFIG.UMBRAL_HORAS_FUERZA_ENTRADA && last.type === 'entry') {
-            tipo = 'exit';
-            parId = last.parId;
-          }
-        }
-        
-        // Crear registro - SIN SEGUNDOS CALCULADOS (siempre :00)
+        const lastTime = last.docs[0].data().timestamp.toDate();
         const ahora = new Date();
-        const fecha = ahora.toISOString().split('T')[0];
-        const hora = `${String(ahora.getHours()).padStart(2,'0')}:${String(ahora.getMinutes()).padStart(2,'0')}:00`; // Siempre :00
+        const diffSegundos = (ahora - lastTime) / 1000;
         
-        const data = {
+        if (diffSegundos < CONFIG.COOLDOWN_SEGUNDOS) {
+          const segundosRestantes = Math.ceil(CONFIG.COOLDOWN_SEGUNDOS - diffSegundos);
+          showToast(`⏳ Espere ${segundosRestantes} segundos`, 'error');
+          return false;
+        }
+        return true;
+      } catch (error) {
+        console.error('Error cooldown:', error);
+        return true;
+      }
+    }
+
+    // ============= DETERMINAR TIPO CON PAR ID =============
+    async function determinarTipoConPar(codigo) {
+      if (!currentUser) return { tipo: 'entry', parId: `PAR_${codigo}_${Date.now()}` };
+      
+      try {
+        const q = query(
+          collection(db, 'facialAttendance'),
+          where('collaboratorCode', '==', codigo),
+          where('collaboratorId', '==', currentUser.uid),
+          orderBy('timestamp', 'desc'),
+          limit(1)
+        );
+        
+        const snapshot = await getDocs(q);
+        
+        if (snapshot.empty) {
+          const nuevoParId = `PAR_${codigo}_${Date.now()}`;
+          return { tipo: 'entry', parId: nuevoParId };
+        }
+        
+        const ultimoRegistro = snapshot.docs[0].data();
+        
+        if (ultimoRegistro.type === 'entry') {
+          return { tipo: 'exit', parId: ultimoRegistro.parId };
+        }
+        
+        const nuevoParId = `PAR_${codigo}_${Date.now()}`;
+        return { tipo: 'entry', parId: nuevoParId };
+        
+      } catch (error) {
+        console.error('Error tipo:', error);
+        return { tipo: 'entry', parId: `PAR_${codigo}_${Date.now()}` };
+      }
+    }
+
+    // ============= PROCESAR REGISTRO =============
+    async function procesarRegistro(codigo, confianza = 1.0, metodo = 'facial') {
+      if (isProcessing || !currentUser) return;
+      isProcessing = true;
+
+      try {
+        const userData = employeesData.get(codigo);
+        
+        if (!userData) {
+          showToast('❌ Empleado no encontrado', 'error');
+          updateStatusIndicator('error', 'Empleado no encontrado');
+          return;
+        }
+
+        const cooldownOk = await verificarCooldown(codigo);
+        if (!cooldownOk) {
+          updateStatusIndicator('error', 'Cooldown activo');
+          return;
+        }
+
+        const { tipo, parId } = await determinarTipoConPar(codigo);
+        
+        const ahora = Timestamp.now();
+        const fechaActual = ahora.toDate();
+        
+        const year = fechaActual.getFullYear();
+        const month = String(fechaActual.getMonth() + 1).padStart(2, '0');
+        const day = String(fechaActual.getDate()).padStart(2, '0');
+        const fechaFormateada = `${year}-${month}-${day}`;
+        
+        const hours = String(fechaActual.getHours()).padStart(2, '0');
+        const minutes = String(fechaActual.getMinutes()).padStart(2, '0');
+        const seconds = String(fechaActual.getSeconds()).padStart(2, '0');
+        const horaFormateada = `${hours}:${minutes}:${seconds}`;
+
+        const attendanceData = {
           collaboratorId: currentUser.uid,
           collaboratorName: currentUser.name,
           collaboratorCode: codigo,
-          employeeName: `${emp.firstName || ''} ${emp.lastName || ''}`.trim() || codigo,
-          employeeId: emp.id,
-          timestamp: Timestamp.now(),
-          fecha: fecha,
-          hora: hora, // HH:MM:00 - Sin segundos calculados
+          employeeName: `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || codigo,
+          employeeId: userData.id,
+          timestamp: ahora,
+          fecha: fechaFormateada,
+          hora: horaFormateada,
           type: tipo,
           confidence: confianza,
           method: metodo,
+          turnoHoras: userData.turnoHoras || 8,
+          device: 'TensorFlow.js',
           parId: parId,
           registroId: `${codigo}_${Date.now()}`
         };
-        
-        await addDoc(collection(db, 'facialAttendance'), data);
-        
-        // Mostrar resultado visual
-        document.getElementById('fotoColaborador').src = emp.fotoBase64 || '';
-        document.getElementById('nombreDisplay').textContent = data.employeeName;
+
+        await addDoc(collection(db, 'facialAttendance'), attendanceData);
+        console.log('✅ Registro guardado:', attendanceData);
+
+        // Actualizar UI del modal
+        document.getElementById('nombreDisplay').textContent = `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || codigo;
         document.getElementById('codigoDisplay').textContent = `Código: ${codigo}`;
-        const tipoEl = document.getElementById('tipoDisplay');
-        tipoEl.textContent = tipo === 'entry' ? '✅ ENTRADA' : '🚪 SALIDA';
-        tipoEl.className = `tipo-registro ${tipo === 'entry' ? 'entrada' : 'salida'}`;
-        document.getElementById('fechaHoraDisplay').textContent = `${fecha} ${hora}`;
+        if (userData.fotoBase64) document.getElementById('fotoColaborador').src = userData.fotoBase64;
         
-        const resultado = document.getElementById('resultadoFlotante');
-        resultado.style.display = 'flex';
-        setTimeout(() => resultado.style.display = 'none', 4000);
+        const tipoLabel = document.getElementById('tipoDisplay');
+        tipoLabel.textContent = tipo === 'entry' ? '✅ ENTRADA' : '🚪 SALIDA';
+        tipoLabel.className = `tipo-registro ${tipo === 'entry' ? 'entrada' : 'salida'}`;
         
-        showToast(`${tipo === 'entry' ? 'Entrada' : 'Salida'} registrada`, 'success');
+        document.getElementById('fechaHoraDisplay').textContent = `📅 ${fechaFormateada} ${horaFormateada}`;
+        document.getElementById('parIdDisplay').textContent = `Par: ${parId.slice(-6)}`;
         
-      } catch (e) {
-        console.error('Error registro:', e);
-        showToast('Error al registrar', 'error');
+        resultadoFlotante.style.display = 'flex';
+        setTimeout(() => { resultadoFlotante.style.display = 'none'; }, 5000);
+        
+        // Actualizar indicador visual con palomita (éxito)
+        updateStatusIndicator('success', tipo === 'entry' ? 'Entrada registrada' : 'Salida registrada');
+        showToast(`✅ ${tipo === 'entry' ? 'ENTRADA' : 'SALIDA'} registrada`, 'success');
+        
+      } catch (error) {
+        console.error('❌ Error registro:', error);
+        showToast('❌ Error al registrar', 'error');
+        updateStatusIndicator('error', 'Error en registro');
       } finally {
         isProcessing = false;
       }
     }
 
-    // ========== DETECCIÓN RÁPIDA PERO FUNCIONAL ==========
-    // Usamos SSD MobileNet con opciones optimizadas para velocidad
-    function iniciarDeteccionRapida() {
+    // ============= DETECCIÓN AUTOMÁTICA =============
+    function iniciarDeteccion() {
       if (detectionInterval) clearInterval(detectionInterval);
       
       detectionInterval = setInterval(async () => {
-        if (!faceMatcher || !videoStarted || isProcessing || !currentUser) return;
-        
+        if (!faceMatcher || !videoStarted || !modelosCargados || isProcessing || !currentUser) return;
+
         try {
-          // SSD MobileNet con confianza 0.5 - Funciona bien y es rápido
-          const detection = await faceapi
-            .detectSingleFace(
-              video,
-              new faceapi.SsdMobilenetv1Options({ 
-                minConfidence: 0.5,
-                maxResults: 1 // Solo el rostro más prominente
-              })
-            )
+          const detection = await faceapi.detectSingleFace(video)
             .withFaceLandmarks()
             .withFaceDescriptor();
             
-          if (detection && detection.descriptor) {
+          if (detection) {
             const match = faceMatcher.findBestMatch(detection.descriptor);
             const confidence = 1 - match.distance;
             
-            // Umbral de confianza para reconocimiento inmediato
             if (match.label !== 'unknown' && confidence >= CONFIG.MIN_CONFIDENCE) {
-              console.log('Rostro detectado:', match.label, 'Confianza:', confidence);
               await procesarRegistro(match.label, confidence, 'facial');
             }
           }
-        } catch (e) {
-          // Silenciar errores de detección para no afectar rendimiento
+        } catch (error) {
+          // Silenciamos errores de detección
         }
-      }, CONFIG.DETECTION_INTERVAL); // 800ms = muy rápido pero estable
+      }, CONFIG.DETECTION_INTERVAL);
     }
 
-    // ========== BUSCADOR MANUAL ==========
-    document.getElementById('searchBtn').addEventListener('click', buscarManual);
-    document.getElementById('searchInput').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') buscarManual();
-    });
-
-    function buscarManual() {
-      const codigo = document.getElementById('searchInput').value.trim().toLowerCase();
-      if (!codigo) return;
-      
-      const resultDiv = document.getElementById('searchResult');
-      
-      // Buscar por código o nombre
-      let encontrado = null;
-      let keyEncontrada = null;
-      
-      // Búsqueda exacta primero
-      if (employeesData.has(codigo)) {
-        encontrado = employeesData.get(codigo);
-        keyEncontrada = codigo;
-      } else {
-        // Búsqueda parcial
-        for (const [key, emp] of employeesData) {
-          if (key.toLowerCase().includes(codigo) || 
-              (emp.firstName && emp.firstName.toLowerCase().includes(codigo)) ||
-              (emp.lastName && emp.lastName.toLowerCase().includes(codigo))) {
-            encontrado = emp;
-            keyEncontrada = key;
-            break;
-          }
-        }
-      }
-      
-      if (encontrado && keyEncontrada) {
-        resultDiv.innerHTML = `
-          <div class="result-item" onclick="registrarManual('${keyEncontrada}')">
-            <img src="${encontrado.fotoBase64 || ''}" alt="">
-            <div class="result-info">
-              <div class="result-name">${encontrado.firstName || ''} ${encontrado.lastName || ''}</div>
-              <div class="result-code">${keyEncontrada}</div>
-            </div>
-            <button class="result-punch" onclick="event.stopPropagation(); registrarManual('${keyEncontrada}')">
-              <i class="fas fa-fingerprint"></i>
-            </button>
-          </div>
-        `;
-        resultDiv.classList.add('active');
-      } else {
-        resultDiv.innerHTML = '<div style="color: var(--danger); padding: 10px; text-align: center;">No encontrado</div>';
-        resultDiv.classList.add('active');
+    async function init() {
+      try {
+        await iniciarCamara();
+        showToast('✅ Sistema activo');
+        updateStatusIndicator('idle');
+      } catch (error) {
+        console.error('Error init:', error);
+        updateStatusIndicator('error', 'Error al iniciar');
       }
     }
-
-    window.registrarManual = async function(codigo) {
-      document.getElementById('searchInput').value = '';
-      document.getElementById('searchResult').classList.remove('active');
-      document.getElementById('searchResult').innerHTML = '';
-      menuDropdown.classList.remove('active');
-      isMenuOpen = false;
-      await procesarRegistro(codigo, 1.0, 'manual');
-    };
+    
+    if (savedUser) {
+      init();
+    }
   </script>
 </body>
 </html>
