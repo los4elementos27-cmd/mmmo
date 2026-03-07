@@ -322,7 +322,8 @@
     ================================================================= */
     let faceMatcher       = null;
     let employeesData     = new Map();
-    let isProcessing      = false;
+    let isProcessing      = false;      // bloqueo global (evita solapamiento de async)
+    let processingMap     = new Map();  // cooldown POR COLABORADOR: codigo → timestamp ultimo registro
     let videoStarted      = false;
     let detectionInterval = null;
     let modelosCargados   = false;
@@ -668,36 +669,30 @@
     window.cerrarBloqueo = function() { document.getElementById('bloqueoAlert').style.display = 'none'; };
 
     /* =================================================================
-       COOLDOWN — evitar doble registro accidental por detección facial
+       COOLDOWN POR COLABORADOR — en memoria local (Map)
+       -----------------------------------------------------------------
+       Cada colaborador tiene su propio temporizador independiente.
+       Si el colaborador A acaba de registrarse, solo ÉL debe esperar
+       los 60 segundos. El colaborador B puede registrarse de inmediato
+       sin ningún bloqueo.
+       El Map  processingMap  almacena:  codigo → Date del último registro.
     ================================================================= */
-    async function verificarCooldown(codigo) {
-      if (!currentUser) return false;
-      try {
-        /* Sin orderBy para evitar requerir índice compuesto en Firebase.
-           Se traen todos los registros del colaborador y se ordena en cliente. */
-        const q = query(
-          collection(db, 'facialAttendance'),
-          where('collaboratorCode', '==', codigo),
-          where('collaboratorId',   '==', currentUser.uid)
-        );
-        const snap = await getDocs(q);
-        if (snap.empty) return true;
+    function verificarCooldown(codigo) {
+      const ultimoRegistro = processingMap.get(codigo);
+      if (!ultimoRegistro) return true; // nunca se registró en esta sesión → OK
 
-        /* Obtener el timestamp más reciente en el cliente */
-        let lastTime = new Date(0);
-        snap.docs.forEach(d => {
-          const ts = d.data().timestamp?.toDate();
-          if (ts && ts > lastTime) lastTime = ts;
-        });
+      const diffSeg = (new Date() - ultimoRegistro) / 1000;
+      if (diffSeg < CONFIG.COOLDOWN_SEGUNDOS) {
+        const seg = Math.ceil(CONFIG.COOLDOWN_SEGUNDOS - diffSeg);
+        showToast(`⏳ ${seg}s para próximo registro`, 'error');
+        return false;
+      }
+      return true;
+    }
 
-        const diffSeg = (new Date() - lastTime) / 1000;
-        if (diffSeg < CONFIG.COOLDOWN_SEGUNDOS) {
-          const seg = Math.ceil(CONFIG.COOLDOWN_SEGUNDOS - diffSeg);
-          showToast(`⏳ Espere ${seg} segundos`, 'error');
-          return false;
-        }
-        return true;
-      } catch (error) { console.error('Error cooldown:', error); return true; }
+    /* Registrar timestamp en el Map después de guardar exitosamente */
+    function marcarCooldown(codigo) {
+      processingMap.set(codigo, new Date());
     }
 
     /* =================================================================
@@ -815,8 +810,8 @@
           return;
         }
 
-        /* 2. Verificar cooldown */
-        const cooldownOk = await verificarCooldown(codigo);
+        /* 2. Verificar cooldown SOLO para este colaborador específico */
+        const cooldownOk = verificarCooldown(codigo);
         if (!cooldownOk) {
           updateStatusIndicator('error', 'Cooldown activo');
           isProcessing = false;
@@ -865,6 +860,9 @@
         /* 5. Guardar en Firebase */
         await addDoc(collection(db, 'facialAttendance'), attendanceData);
         console.log('✅ Registro guardado:', tipo.toUpperCase(), codigo, fechaFormateada, horaFormateada);
+
+        /* Marcar cooldown solo para ESTE colaborador — los demás no se ven afectados */
+        marcarCooldown(codigo);
 
         /* 6. Actualizar UI del modal de resultado */
         document.getElementById('nombreDisplay').textContent  = `${userData.firstName||''} ${userData.lastName||''}`.trim() || codigo;
