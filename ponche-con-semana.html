@@ -8,902 +8,249 @@
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1/dist/face-api.js"></script>
   <style>
-    * { 
-      margin: 0; 
-      padding: 0; 
-      box-sizing: border-box; 
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-      -webkit-tap-highlight-color: transparent; 
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
-    
-    :root { 
-      --primary: #16e086; 
-      --primary-dark: #0da85c; 
-      --secondary: #2e4a55; 
-      --dark: #0e1c22; 
-      --danger: #e74c3c; 
-      --warning: #f39c12; 
-      --success: #16e086;
-      --error: #e74c3c;
-      --info: #3498db;
-      --purple: #9b59b6;
+    :root {
+      --primary: #16e086; --primary-dark: #0da85c; --secondary: #2e4a55;
+      --dark: #0e1c22; --danger: #e74c3c; --warning: #f39c12;
+      --success: #16e086; --error: #e74c3c;
       --text-secondary: rgba(255,255,255,0.7);
-      --bg-overlay: rgba(0, 0, 0, 0.85);
-      --card-bg: rgba(30, 41, 48, 0.95);
-      
-      --text-xs: clamp(0.7rem, 2vw, 0.8rem);
-      --text-sm: clamp(0.8rem, 2.5vw, 0.9rem);
-      --text-base: clamp(0.9rem, 3vw, 1rem);
-      --text-lg: clamp(1.1rem, 4vw, 1.2rem);
-      --text-xl: clamp(1.3rem, 5vw, 1.5rem);
-      --text-2xl: clamp(1.6rem, 6vw, 2rem);
-      --text-3xl: clamp(2rem, 8vw, 2.5rem);
-      
-      --spacing-xs: clamp(6px, 1.5vw, 8px);
-      --spacing-sm: clamp(8px, 2vw, 12px);
-      --spacing-md: clamp(12px, 3vw, 18px);
-      --spacing-lg: clamp(18px, 4vw, 24px);
-      --spacing-xl: clamp(24px, 5vw, 32px);
-      
-      --border-radius: clamp(16px, 5vw, 28px);
+      --card-bg: rgba(30,41,48,0.95);
+      --text-xs:   clamp(0.7rem,  2vw,   0.8rem);
+      --text-sm:   clamp(0.8rem,  2.5vw, 0.9rem);
+      --text-base: clamp(0.9rem,  3vw,   1rem);
+      --text-lg:   clamp(1.1rem,  4vw,   1.2rem);
+      --text-xl:   clamp(1.3rem,  5vw,   1.5rem);
+      --text-3xl:  clamp(2rem,    8vw,   2.5rem);
+      --spacing-xs: clamp(6px,  1.5vw, 8px);
+      --spacing-sm: clamp(8px,  2vw,   12px);
+      --spacing-md: clamp(12px, 3vw,   18px);
+      --spacing-lg: clamp(18px, 4vw,   24px);
+      --spacing-xl: clamp(24px, 5vw,   32px);
+      --border-radius:    clamp(16px, 5vw, 28px);
       --border-radius-sm: clamp(10px, 3vw, 16px);
       --border-radius-lg: clamp(24px, 6vw, 36px);
-      
-      --safe-area-inset-top: env(safe-area-inset-top, 0px);
+      --safe-area-inset-top:    env(safe-area-inset-top,    0px);
       --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
     }
-    
-    body { 
-      background: #000; 
-      min-height: 100vh; 
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-      overflow: hidden; 
-      font-size: var(--text-base);
-      position: fixed;
-      width: 100%;
-      height: 100%;
+    body {
+      background: #000; min-height: 100vh; display: flex;
+      justify-content: center; align-items: center; overflow: hidden;
+      font-size: var(--text-base); position: fixed; width: 100%; height: 100%;
     }
-    
-    .fullscreen-container { 
-      position: relative; 
-      width: 100vw; 
-      height: 100vh; 
-      background: #000; 
-      overflow: hidden;
-    }
-    
-    .camera-full { 
-      position: absolute; 
-      top: 0; 
-      left: 0; 
-      width: 100%; 
-      height: 100%; 
-      z-index: 1; 
-    }
-    
-    #videoFacial { 
-      width: 100%; 
-      height: 100%; 
-      object-fit: cover; 
-      transform: scaleX(-1); 
-    }
-    
-    .overlay-content { 
-      position: absolute; 
-      top: 0; 
-      left: 0; 
-      width: 100%; 
-      height: 100%; 
-      z-index: 10; 
-      display: flex; 
-      flex-direction: column; 
-      justify-content: space-between; 
-      padding: var(--spacing-md); 
-      padding-top: max(var(--spacing-md), var(--safe-area-inset-top));
-      padding-bottom: max(var(--spacing-md), var(--safe-area-inset-bottom));
-      pointer-events: none; 
-    }
-    
-    .overlay-content * { 
-      pointer-events: auto; 
-    }
-    
-    .top-bar { 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      background: var(--card-bg);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      padding: var(--spacing-sm) var(--spacing-md); 
-      border-radius: var(--border-radius-lg); 
-      border: 1px solid rgba(22, 224, 134, 0.3); 
-      color: white; 
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-      transition: all 0.3s ease;
-    }
-    
-    .title { 
-      display: flex; 
-      align-items: center; 
-      gap: var(--spacing-xs); 
-    }
-    
-    .title i {
-      font-size: var(--text-xl);
-      color: var(--primary);
-      text-shadow: 0 0 10px rgba(22, 224, 134, 0.5);
-    }
-    
-    .title h1 { 
-      font-size: var(--text-lg); 
-      font-weight: 600;
-      letter-spacing: -0.3px;
-    }
-    
-    .menu-container {
-      position: relative;
-    }
-    
-    .menu-button {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 30px;
-      padding: var(--spacing-xs) var(--spacing-sm);
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-xs);
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    
-    .menu-button:hover,
-    .menu-button:active {
-      background: rgba(255, 255, 255, 0.2);
-    }
-    
-    .user-name-short {
-      font-weight: 600;
-      max-width: 100px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      font-size: var(--text-sm);
-    }
-    
-    .menu-button i {
-      font-size: var(--text-base);
-      color: var(--primary);
-    }
-    
-    .menu-modal {
-      position: absolute;
-      top: calc(100% + 8px);
-      right: 0;
-      background: var(--card-bg);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      border-radius: var(--border-radius);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      min-width: 280px;
-      max-width: 320px;
-      padding: var(--spacing-sm);
-      z-index: 100;
-      display: none;
-      transform-origin: top right;
-      animation: menuAppear 0.2s ease;
-      max-height: 70vh;
-      overflow-y: auto;
-    }
-    
-    @keyframes menuAppear {
-      from {
-        opacity: 0;
-        transform: scale(0.95);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-    
-    .menu-modal.show {
-      display: block;
-    }
-    
-    .menu-item {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-sm);
+    .fullscreen-container { position: relative; width: 100vw; height: 100vh; background: #000; overflow: hidden; }
+    .camera-full { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+    #videoFacial { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+    .overlay-content {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10;
+      display: flex; flex-direction: column; justify-content: space-between;
       padding: var(--spacing-md);
-      border-radius: var(--border-radius-sm);
-      color: white;
-      text-decoration: none;
-      transition: all 0.2s ease;
-      cursor: pointer;
-      border: none;
-      background: transparent;
-      width: 100%;
-      font-size: var(--text-base);
+      padding-top:    max(var(--spacing-md), var(--safe-area-inset-top));
+      padding-bottom: max(var(--spacing-md), var(--safe-area-inset-bottom));
+      pointer-events: none;
     }
-    
-    .menu-item:hover,
-    .menu-item:active {
-      background: rgba(255, 255, 255, 0.1);
+    .overlay-content * { pointer-events: auto; }
+    .top-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--border-radius-lg);
+      border: 1px solid rgba(22,224,134,0.3); color: white;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4); transition: all 0.3s ease;
     }
-    
-    .menu-item i {
-      width: 24px;
-      font-size: var(--text-lg);
+    .title { display: flex; align-items: center; gap: var(--spacing-xs); }
+    .title i { font-size: var(--text-xl); color: var(--primary); text-shadow: 0 0 10px rgba(22,224,134,0.5); }
+    .title h1 { font-size: var(--text-lg); font-weight: 600; letter-spacing: -0.3px; }
+    .menu-container { position: relative; }
+    .menu-button {
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 30px; padding: var(--spacing-xs) var(--spacing-sm);
+      display: flex; align-items: center; gap: var(--spacing-xs);
+      cursor: pointer; transition: all 0.2s ease;
     }
-    
-    .menu-item.logout {
-      color: var(--danger);
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      margin-top: var(--spacing-xs);
+    .menu-button:hover, .menu-button:active { background: rgba(255,255,255,0.2); }
+    .user-name-short { font-weight: 600; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--text-sm); }
+    .menu-button i { font-size: var(--text-base); color: var(--primary); }
+    .menu-modal {
+      position: absolute; top: calc(100% + 8px); right: 0;
+      background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-radius: var(--border-radius); border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5); min-width: 280px; max-width: 320px;
+      padding: var(--spacing-sm); z-index: 100; display: none;
+      transform-origin: top right; animation: menuAppear 0.2s ease;
+      max-height: 70vh; overflow-y: auto;
     }
-    
-    .menu-item.logout i {
-      color: var(--danger);
+    @keyframes menuAppear { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
+    .menu-modal.show { display: block; }
+    .menu-item {
+      display: flex; align-items: center; gap: var(--spacing-sm);
+      padding: var(--spacing-md); border-radius: var(--border-radius-sm);
+      color: white; text-decoration: none; transition: all 0.2s ease;
+      cursor: pointer; border: none; background: transparent;
+      width: 100%; font-size: var(--text-base);
     }
-    
-    .menu-divider {
-      height: 1px;
-      background: rgba(255,255,255,0.1);
-      margin: var(--spacing-xs) 0;
-    }
-    
-    .menu-section-title {
-      color: var(--text-secondary);
-      font-size: var(--text-xs);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      padding: var(--spacing-xs) var(--spacing-md);
-      margin-top: var(--spacing-xs);
-    }
-    
-    .status-indicator {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-xs);
-      background: rgba(0, 0, 0, 0.3);
-      border-radius: 30px;
-      padding: var(--spacing-xs) var(--spacing-sm);
-    }
-    
-    .status-led { 
-      width: clamp(10px, 2vw, 12px); 
-      height: clamp(10px, 2vw, 12px); 
-      background: var(--primary); 
-      border-radius: 50%; 
-      display: inline-block; 
-      animation: pulse 2s infinite;
-      box-shadow: 0 0 10px var(--primary);
-    }
-    
-    @keyframes pulse { 
-      0% { opacity: 1; transform: scale(1); } 
-      50% { opacity: 0.6; transform: scale(0.95); } 
-      100% { opacity: 1; transform: scale(1); } 
-    }
-    
-    .status-text {
-      font-size: var(--text-xs);
-      color: var(--text-secondary);
-    }
-    
-    #companyName {
-      font-size: var(--text-sm);
-      color: var(--primary);
-      font-weight: 500;
-    }
-    
+    .menu-item:hover, .menu-item:active { background: rgba(255,255,255,0.1); }
+    .menu-item i { width: 24px; font-size: var(--text-lg); }
+    .menu-item.logout { color: var(--danger); border-top: 1px solid rgba(255,255,255,0.1); margin-top: var(--spacing-xs); }
+    .menu-item.logout i { color: var(--danger); }
+    .menu-divider { height: 1px; background: rgba(255,255,255,0.1); margin: var(--spacing-xs) 0; }
+    .menu-section-title { color: var(--text-secondary); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 1px; padding: var(--spacing-xs) var(--spacing-md); margin-top: var(--spacing-xs); }
+    .status-led { width: clamp(10px,2vw,12px); height: clamp(10px,2vw,12px); background: var(--primary); border-radius: 50%; display: inline-block; animation: pulse 2s infinite; box-shadow: 0 0 10px var(--primary); }
+    @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.6; transform:scale(0.95); } }
     .status-indicator-large {
       position: absolute;
       bottom: max(var(--spacing-xl), var(--safe-area-inset-bottom));
-      left: 50%;
-      transform: translateX(-50%);
-      width: clamp(70px, 15vw, 90px);
-      height: clamp(70px, 15vw, 90px);
-      border-radius: 50%;
-      background: var(--card-bg);
-      backdrop-filter: blur(20px) saturate(180%);
+      left: 50%; transform: translateX(-50%);
+      width: clamp(70px,15vw,90px); height: clamp(70px,15vw,90px); border-radius: 50%;
+      background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%);
       -webkit-backdrop-filter: blur(20px) saturate(180%);
-      border: 2px solid rgba(255, 255, 255, 0.2);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 40;
-      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border: 2px solid rgba(255,255,255,0.2); display: flex; justify-content: center; align-items: center;
+      z-index: 40; transition: all 0.3s cubic-bezier(0.175,0.885,0.32,1.275); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-    
-    .status-icon {
-      font-size: var(--text-3xl);
-      transition: all 0.3s ease;
-    }
-    
-    .status-icon.success {
-      color: var(--success);
-      filter: drop-shadow(0 0 15px var(--success));
-      animation: successPop 0.4s ease;
-    }
-    
-    .status-icon.error {
-      color: var(--error);
-      filter: drop-shadow(0 0 15px var(--error));
-      animation: errorShake 0.4s ease;
-    }
-    
-    .status-icon.idle {
-      color: rgba(255, 255, 255, 0.3);
-    }
-    
-    @keyframes successPop {
-      0% { transform: scale(0); opacity: 0; }
-      50% { transform: scale(1.2); }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    
-    @keyframes errorShake {
-      0%, 100% { transform: translateX(0); }
-      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-      20%, 40%, 60%, 80% { transform: translateX(5px); }
-    }
-    
+    .status-icon { font-size: var(--text-3xl); transition: all 0.3s ease; }
+    .status-icon.success { color: var(--success); filter: drop-shadow(0 0 15px var(--success)); animation: successPop 0.4s ease; }
+    .status-icon.error   { color: var(--error);   filter: drop-shadow(0 0 15px var(--error));   animation: errorShake 0.4s ease; }
+    .status-icon.idle    { color: rgba(255,255,255,0.3); }
+    @keyframes successPop { 0% { transform:scale(0); opacity:0; } 50% { transform:scale(1.2); } 100% { transform:scale(1); opacity:1; } }
+    @keyframes errorShake { 0%,100% { transform:translateX(0); } 10%,30%,50%,70%,90% { transform:translateX(-5px); } 20%,40%,60%,80% { transform:translateX(5px); } }
     .status-label {
-      position: absolute;
-      bottom: -25px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: white;
-      font-size: var(--text-xs);
-      white-space: nowrap;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(5px);
-      padding: 4px 12px;
-      border-radius: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      opacity: 0.8;
+      position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%);
+      color: white; font-size: var(--text-xs); white-space: nowrap;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+      padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); opacity: 0.8;
     }
-    
-    .resultado-flotante { 
-      position: absolute; 
-      top: 50%; 
-      left: 50%; 
-      transform: translate(-50%, -50%); 
-      width: 90%; 
-      max-width: 400px; 
-      background: var(--card-bg);
-      backdrop-filter: blur(25px) saturate(180%);
-      -webkit-backdrop-filter: blur(25px) saturate(180%);
-      border-radius: var(--border-radius-lg); 
-      padding: var(--spacing-xl); 
-      border: 1.5px solid var(--primary); 
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 0 2px rgba(22, 224, 134, 0.1) inset; 
-      display: none; 
-      flex-direction: column; 
-      align-items: center;
-      gap: var(--spacing-lg); 
-      z-index: 50; 
-      animation: modalAppear 0.3s ease;
+    .resultado-flotante {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      width: 90%; max-width: 400px; background: var(--card-bg);
+      backdrop-filter: blur(25px) saturate(180%); -webkit-backdrop-filter: blur(25px) saturate(180%);
+      border-radius: var(--border-radius-lg); padding: var(--spacing-xl);
+      border: 1.5px solid var(--primary);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 0 2px rgba(22,224,134,0.1) inset;
+      display: none; flex-direction: column; align-items: center; gap: var(--spacing-lg); z-index: 50; animation: modalAppear 0.3s ease;
     }
-    
-    @keyframes modalAppear {
-      from {
-        opacity: 0;
-        transform: translate(-50%, -40%);
-      }
-      to {
-        opacity: 1;
-        transform: translate(-50%, -50%);
-      }
-    }
-    
-    .resultado-header { 
-      display: flex; 
-      flex-direction: column;
-      align-items: center; 
-      gap: var(--spacing-md); 
-      width: 100%;
-    }
-    
-    .foto-colaborador { 
-      width: clamp(110px, 25vw, 140px); 
-      height: clamp(110px, 25vw, 140px); 
-      border-radius: 50%; 
-      object-fit: cover; 
-      border: 4px solid var(--primary); 
-      box-shadow: 0 0 30px rgba(22, 224, 134, 0.4);
-    }
-    
-    .info-colaborador { 
-      display: flex; 
-      flex-direction: column; 
-      align-items: center;
-      gap: var(--spacing-xs); 
-      width: 100%;
-      text-align: center;
-    }
-    
-    .nombre-colaborador { 
-      color: white; 
-      font-size: var(--text-xl); 
-      font-weight: 700; 
-      line-height: 1.3;
-      letter-spacing: -0.5px;
-    }
-    
-    #codigoDisplay { 
-      color: var(--primary); 
-      font-size: var(--text-sm); 
-      opacity: 0.9;
-    }
-    
-    .tipo-registro { 
-      display: inline-block; 
-      padding: var(--spacing-xs) var(--spacing-lg); 
-      border-radius: 40px; 
-      font-weight: 700; 
-      font-size: var(--text-sm);
-      letter-spacing: 0.5px;
-    }
-    
-    .entrada { 
-      background: var(--primary); 
-      color: #000; 
-      box-shadow: 0 0 15px var(--primary);
-    }
-    
-    .salida { 
-      background: var(--danger); 
-      color: white; 
-      box-shadow: 0 0 15px var(--danger);
-    }
-    
-    .fecha-hora { 
-      color: rgba(255,255,255,0.7); 
-      font-size: var(--text-sm); 
-      background: rgba(0,0,0,0.3);
-      padding: var(--spacing-xs) var(--spacing-md);
-      border-radius: 30px;
-      width: fit-content;
-    }
-    
-    #parIdDisplay { 
-      color: var(--warning); 
-      font-size: var(--text-xs); 
-      background: rgba(243, 156, 18, 0.1);
-      padding: var(--spacing-xs) var(--spacing-sm);
-      border-radius: 30px;
-    }
-    
-    /* ===== BUSCADOR EN MENÚ ===== */
-    .search-section-menu {
-      background: rgba(0,0,0,0.2);
-      border-radius: var(--border-radius-sm);
-      padding: var(--spacing-sm);
-      margin: var(--spacing-xs) 0;
-    }
-    
-    .search-box-menu {
-      display: flex;
-      gap: var(--spacing-xs);
-    }
-    
-    .search-input-menu {
-      flex: 1;
-      padding: 10px 12px;
-      background: rgba(0,0,0,0.3);
-      border: 1px solid var(--secondary);
-      border-radius: 20px;
-      color: white;
-      font-size: var(--text-sm);
-    }
-    
-    .search-input-menu:focus {
-      outline: none;
-      border-color: var(--primary);
-    }
-    
-    .search-btn-menu {
-      background: var(--primary);
-      border: none;
-      color: #000;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: var(--text-sm);
-    }
-    
-    .search-results-menu {
-      margin-top: var(--spacing-xs);
-      max-height: 200px;
-      overflow-y: auto;
-    }
-    
-    .search-result-item {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-sm);
-      padding: var(--spacing-sm);
-      border-radius: var(--border-radius-sm);
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    
-    .search-result-item:hover {
-      background: rgba(255,255,255,0.1);
-    }
-    
-    .search-result-item img {
-      width: 35px;
-      height: 35px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid var(--primary);
-    }
-    
-    .search-result-info {
-      flex: 1;
-    }
-    
-    .search-result-name {
-      font-size: var(--text-sm);
-      font-weight: 500;
-    }
-    
-    .search-result-code {
-      font-size: var(--text-xs);
-      color: var(--text-secondary);
-    }
-    
-    .search-result-punch {
-      background: var(--primary);
-      border: none;
-      color: #000;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    /* ===== ALERTA DE BLOQUEO ESPECÍFICA ===== */
+    @keyframes modalAppear { from { opacity:0; transform:translate(-50%,-40%); } to { opacity:1; transform:translate(-50%,-50%); } }
+    .resultado-header { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-md); width: 100%; }
+    .foto-colaborador { width: clamp(110px,25vw,140px); height: clamp(110px,25vw,140px); border-radius: 50%; object-fit: cover; border: 4px solid var(--primary); box-shadow: 0 0 30px rgba(22,224,134,0.4); }
+    .info-colaborador { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-xs); width: 100%; text-align: center; }
+    .nombre-colaborador { color: white; font-size: var(--text-xl); font-weight: 700; line-height: 1.3; letter-spacing: -0.5px; }
+    #codigoDisplay { color: var(--primary); font-size: var(--text-sm); opacity: 0.9; }
+    .tipo-registro { display: inline-block; padding: var(--spacing-xs) var(--spacing-lg); border-radius: 40px; font-weight: 700; font-size: var(--text-sm); letter-spacing: 0.5px; }
+    .entrada { background: var(--primary); color: #000; box-shadow: 0 0 15px var(--primary); }
+    .salida  { background: var(--danger);  color: white; box-shadow: 0 0 15px var(--danger); }
+    .fecha-hora { color: rgba(255,255,255,0.7); font-size: var(--text-sm); background: rgba(0,0,0,0.3); padding: var(--spacing-xs) var(--spacing-md); border-radius: 30px; width: fit-content; }
+    #parIdDisplay { color: var(--warning); font-size: var(--text-xs); background: rgba(243,156,18,0.1); padding: var(--spacing-xs) var(--spacing-sm); border-radius: 30px; }
+    .search-section-menu { background: rgba(0,0,0,0.2); border-radius: var(--border-radius-sm); padding: var(--spacing-sm); margin: var(--spacing-xs) 0; }
+    .search-box-menu { display: flex; gap: var(--spacing-xs); }
+    .search-input-menu { flex: 1; padding: 10px 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--secondary); border-radius: 20px; color: white; font-size: var(--text-sm); }
+    .search-input-menu:focus { outline: none; border-color: var(--primary); }
+    .search-btn-menu { background: var(--primary); border: none; color: #000; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: var(--text-sm); }
+    .search-results-menu { margin-top: var(--spacing-xs); max-height: 200px; overflow-y: auto; }
+    .search-result-item { display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm); border-radius: var(--border-radius-sm); cursor: pointer; transition: all 0.2s ease; }
+    .search-result-item:hover { background: rgba(255,255,255,0.1); }
+    .search-result-item img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); }
+    .search-result-info { flex: 1; }
+    .search-result-name { font-size: var(--text-sm); font-weight: 500; }
+    .search-result-code { font-size: var(--text-xs); color: var(--text-secondary); }
+    .search-result-punch { background: var(--primary); border: none; color: #000; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     .bloqueo-alert {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 90%;
-      max-width: 380px;
-      background: linear-gradient(135deg, rgba(231,76,60,0.98), rgba(192,57,43,0.98));
-      border-radius: var(--border-radius-lg);
-      padding: var(--spacing-xl);
-      border: 3px solid var(--danger);
-      box-shadow: 0 0 50px rgba(231,76,60,0.6), 0 20px 40px rgba(0,0,0,0.5);
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      gap: var(--spacing-md);
-      z-index: 60;
-      text-align: center;
-      animation: bloqueoAppear 0.3s ease;
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      width: 90%; max-width: 380px;
+      background: linear-gradient(135deg,rgba(231,76,60,0.98),rgba(192,57,43,0.98));
+      border-radius: var(--border-radius-lg); padding: var(--spacing-xl);
+      border: 3px solid var(--danger); box-shadow: 0 0 50px rgba(231,76,60,0.6),0 20px 40px rgba(0,0,0,0.5);
+      display: none; flex-direction: column; align-items: center; gap: var(--spacing-md); z-index: 60; text-align: center; animation: bloqueoAppear 0.3s ease;
     }
-    
-    @keyframes bloqueoAppear {
-      from {
-        opacity: 0;
-        transform: translate(-50%, -40%) scale(0.9);
-      }
-      to {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
-      }
-    }
-    
-    .bloqueo-icon {
-      font-size: 4rem;
-      color: white;
-      animation: bloqueoPulse 1.5s infinite;
-    }
-    
-    @keyframes bloqueoPulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-    }
-    
-    .bloqueo-title {
-      color: white;
-      font-size: var(--text-xl);
-      font-weight: bold;
-    }
-    
-    .bloqueo-message {
-      color: rgba(255,255,255,0.95);
-      font-size: var(--text-base);
-      line-height: 1.5;
-    }
-    
-    .bloqueo-detail {
-      background: rgba(0,0,0,0.3);
-      padding: var(--spacing-md);
-      border-radius: var(--border-radius-sm);
-      color: white;
-      font-size: var(--text-sm);
-      width: 100%;
-    }
-    
-    .bloqueo-close {
-      background: white;
-      border: none;
-      color: var(--danger);
-      padding: var(--spacing-sm) var(--spacing-xl);
-      border-radius: 30px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: var(--spacing-xs);
-      font-size: var(--text-base);
-    }
-    
-    .loading-overlay { 
-      position: fixed; 
-      inset: 0; 
-      background: rgba(0,0,0,0.95); 
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      display: none; 
-      flex-direction: column; 
-      justify-content: center; 
-      align-items: center; 
-      z-index: 1000; 
-      padding: var(--spacing-lg);
-    }
-    
-    .spinner { 
-      border: 3px solid rgba(22,224,134,0.1); 
-      border-top: 3px solid var(--primary); 
-      border-radius: 50%; 
-      width: clamp(45px, 10vw, 55px); 
-      height: clamp(45px, 10vw, 55px); 
-      animation: spin 0.8s linear infinite; 
-      margin-bottom: var(--spacing-md); 
-    }
-    
-    @keyframes spin { 
-      0% { transform: rotate(0deg); } 
-      100% { transform: rotate(360deg); } 
-    }
-    
-    .toast { 
-      position: fixed; 
-      bottom: max(calc(var(--spacing-xl) * 2.5), var(--safe-area-inset-bottom));
-      left: 50%; 
-      transform: translateX(-50%); 
-      padding: var(--spacing-sm) var(--spacing-xl); 
-      border-radius: 40px; 
-      background: var(--card-bg);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      border: 1px solid var(--primary); 
-      color: white; 
-      z-index: 200; 
-      display: none; 
-      font-size: var(--text-sm);
-      max-width: 90%;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      animation: toastAppear 0.2s ease;
-    }
-    
-    @keyframes toastAppear {
-      from {
-        opacity: 0;
-        transform: translateX(-50%) translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0);
-      }
-    }
-    
-    .login-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, #0a1a20, #1a2f38);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-    
-    .login-card {
-      background: var(--card-bg);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      border-radius: var(--border-radius-lg);
-      padding: var(--spacing-xl);
-      width: 90%;
-      max-width: 380px;
-      border: 1px solid rgba(22, 224, 134, 0.3);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-    }
-    
-    .login-card h2 {
-      color: var(--primary);
-      text-align: center;
-      margin-bottom: var(--spacing-xl);
-      font-size: var(--text-xl);
-      font-weight: 600;
-    }
-    
-    .login-input {
-      width: 100%;
-      padding: var(--spacing-md);
-      margin-bottom: var(--spacing-md);
-      background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: var(--border-radius-sm);
-      color: white;
-      font-size: var(--text-base);
-      transition: all 0.2s ease;
-    }
-    
-    .login-input:focus {
-      outline: none;
-      border-color: var(--primary);
-      background: rgba(0,0,0,0.5);
-    }
-    
-    .alert {
-      padding: var(--spacing-sm);
-      border-radius: var(--border-radius-sm);
-      margin-bottom: var(--spacing-md);
-      display: none;
-      font-size: var(--text-sm);
-      text-align: center;
-    }
-    
-    .alert-error { 
-      background: rgba(231,76,60,0.2); 
-      border: 1px solid var(--danger); 
-      color: white; 
-    }
-    
-    .btn {
-      background: var(--primary);
-      color: #000;
-      border: none;
-      padding: var(--spacing-md);
-      border-radius: 50px;
-      font-weight: 700;
-      font-size: var(--text-base);
-      cursor: pointer;
-      transition: all 0.2s ease;
-      width: 100%;
-    }
-    
-    .btn:hover,
-    .btn:active {
-      background: var(--primary-dark);
-      transform: scale(0.98);
-    }
-    
+    @keyframes bloqueoAppear { from { opacity:0; transform:translate(-50%,-40%) scale(0.9); } to { opacity:1; transform:translate(-50%,-50%) scale(1); } }
+    .bloqueo-icon { font-size: 4rem; color: white; animation: bloqueoPulse 1.5s infinite; }
+    @keyframes bloqueoPulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.1); } }
+    .bloqueo-title   { color: white; font-size: var(--text-xl); font-weight: bold; }
+    .bloqueo-message { color: rgba(255,255,255,0.95); font-size: var(--text-base); line-height: 1.5; }
+    .bloqueo-detail  { background: rgba(0,0,0,0.3); padding: var(--spacing-md); border-radius: var(--border-radius-sm); color: white; font-size: var(--text-sm); width: 100%; }
+    .bloqueo-close   { background: white; border: none; color: var(--danger); padding: var(--spacing-sm) var(--spacing-xl); border-radius: 30px; font-weight: bold; cursor: pointer; margin-top: var(--spacing-xs); font-size: var(--text-base); }
+    .loading-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; padding: var(--spacing-lg); }
+    .spinner { border: 3px solid rgba(22,224,134,0.1); border-top: 3px solid var(--primary); border-radius: 50%; width: clamp(45px,10vw,55px); height: clamp(45px,10vw,55px); animation: spin 0.8s linear infinite; margin-bottom: var(--spacing-md); }
+    @keyframes spin { 0% { transform:rotate(0deg); } 100% { transform:rotate(360deg); } }
+    .toast { position: fixed; bottom: max(calc(var(--spacing-xl) * 2.5),var(--safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); padding: var(--spacing-sm) var(--spacing-xl); border-radius: 40px; background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 1px solid var(--primary); color: white; z-index: 200; display: none; font-size: var(--text-sm); max-width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: toastAppear 0.2s ease; }
+    @keyframes toastAppear { from { opacity:0; transform:translateX(-50%) translateY(20px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
+    .login-container { position: fixed; top:0; left:0; width:100%; height:100%; background: linear-gradient(135deg,#0a1a20,#1a2f38); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+    .login-card { background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border-radius: var(--border-radius-lg); padding: var(--spacing-xl); width: 90%; max-width: 380px; border: 1px solid rgba(22,224,134,0.3); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+    .login-card h2 { color: var(--primary); text-align: center; margin-bottom: var(--spacing-xl); font-size: var(--text-xl); font-weight: 600; }
+    .login-input { width: 100%; padding: var(--spacing-md); margin-bottom: var(--spacing-md); background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--border-radius-sm); color: white; font-size: var(--text-base); transition: all 0.2s ease; }
+    .login-input:focus { outline: none; border-color: var(--primary); background: rgba(0,0,0,0.5); }
+    .alert { padding: var(--spacing-sm); border-radius: var(--border-radius-sm); margin-bottom: var(--spacing-md); display: none; font-size: var(--text-sm); text-align: center; }
+    .alert-error { background: rgba(231,76,60,0.2); border: 1px solid var(--danger); color: white; }
+    .btn { background: var(--primary); color: #000; border: none; padding: var(--spacing-md); border-radius: 50px; font-weight: 700; font-size: var(--text-base); cursor: pointer; transition: all 0.2s ease; width: 100%; }
+    .btn:hover, .btn:active { background: var(--primary-dark); transform: scale(0.98); }
     @media (max-width: 480px) {
-      .top-bar {
-        padding: var(--spacing-xs) var(--spacing-sm);
-      }
-      
-      .title h1 {
-        font-size: var(--text-base);
-      }
-      
-      .menu-button .user-name-short {
-        max-width: 70px;
-      }
-      
-      .status-indicator-large {
-        width: 60px;
-        height: 60px;
-      }
-      
-      .status-icon {
-        font-size: 2rem;
-      }
-      
-      .menu-modal {
-        min-width: 260px;
-        right: -10px;
-      }
+      .top-bar { padding: var(--spacing-xs) var(--spacing-sm); }
+      .title h1 { font-size: var(--text-base); }
+      .menu-button .user-name-short { max-width: 70px; }
+      .status-indicator-large { width: 60px; height: 60px; }
+      .status-icon { font-size: 2rem; }
+      .menu-modal { min-width: 260px; right: -10px; }
     }
   </style>
 </head>
 <body>
-  <!-- Login Screen -->
+
+  <!-- LOGIN SCREEN -->
   <div id="loginScreen" class="login-container">
     <div class="login-card">
       <h2><i class="fas fa-building"></i> Acceso Empresa</h2>
-      <input type="text" id="username" class="login-input" placeholder="Usuario" autocomplete="off">
+      <input type="text"     id="username" class="login-input" placeholder="Usuario" autocomplete="off">
       <input type="password" id="password" class="login-input" placeholder="PIN (8 dígitos)" inputmode="numeric" pattern="[0-9]*">
       <div id="loginAlert" class="alert alert-error"></div>
       <button id="loginBtn" class="btn">Ingresar</button>
     </div>
   </div>
 
-  <!-- Main App -->
-  <div id="appScreen" style="display: none;">
+  <!-- APP PRINCIPAL -->
+  <div id="appScreen" style="display:none;">
     <div class="fullscreen-container">
       <div class="camera-full">
         <video id="videoFacial" autoplay muted playsinline></video>
       </div>
-
       <div class="overlay-content">
-        <!-- Top bar mejorada -->
+        <!-- TOP BAR -->
         <div class="top-bar">
           <div class="title">
             <i class="fas fa-user-shield"></i>
             <h1>Asistencia</h1>
           </div>
-          
-          <!-- Menú elegante -->
           <div class="menu-container">
             <div class="menu-button" id="menuButton">
               <span class="user-name-short" id="companyName"></span>
               <i class="fas fa-chevron-down"></i>
             </div>
-            
-            <!-- Modal del menú -->
             <div class="menu-modal" id="menuModal">
-              <!-- Status indicator integrado -->
-              <div class="menu-item" style="pointer-events: none; opacity: 0.7;">
+              <div class="menu-item" style="pointer-events:none;opacity:0.7;">
                 <div class="status-led"></div>
                 <span>Sistema activo</span>
               </div>
-              
               <div class="menu-item" id="menuUserInfo">
                 <i class="fas fa-user-circle"></i>
                 <span id="menuUserName">Usuario</span>
               </div>
-              
               <div class="menu-divider"></div>
-              
-              <!-- ===== BUSCADOR POR CÓDIGO ===== -->
-              <div class="menu-section-title">
-                <i class="fas fa-search"></i> Buscar Colaborador
-              </div>
+              <div class="menu-section-title"><i class="fas fa-search"></i> Buscar Colaborador</div>
               <div class="search-section-menu">
                 <div class="search-box-menu">
                   <input type="text" id="searchInput" class="search-input-menu" placeholder="Código o nombre...">
-                  <button class="search-btn-menu" id="searchBtn">
-                    <i class="fas fa-fingerprint"></i>
-                  </button>
+                  <button class="search-btn-menu" id="searchBtn"><i class="fas fa-fingerprint"></i></button>
                 </div>
                 <div class="search-results-menu" id="searchResults"></div>
               </div>
-              
               <div class="menu-divider"></div>
-              
               <div class="menu-item" id="menuReports">
                 <i class="fas fa-chart-bar"></i>
                 <span>Ver mis reportes</span>
               </div>
-              
               <button class="menu-item logout" id="logoutBtn">
                 <i class="fas fa-sign-out-alt"></i>
                 <span>Cerrar sesión</span>
@@ -912,46 +259,41 @@
           </div>
         </div>
 
-        <!-- Modal de resultado facial -->
+        <!-- MODAL RESULTADO FACIAL -->
         <div id="resultadoFlotante" class="resultado-flotante">
           <div class="resultado-header">
             <img id="fotoColaborador" class="foto-colaborador" src="" alt="Foto">
             <div class="info-colaborador">
-              <div id="nombreDisplay" class="nombre-colaborador">---</div>
+              <div id="nombreDisplay"    class="nombre-colaborador">---</div>
               <div id="codigoDisplay">---</div>
-              <div id="tipoDisplay" class="tipo-registro">---</div>
+              <div id="tipoDisplay"      class="tipo-registro">---</div>
               <div id="fechaHoraDisplay" class="fecha-hora">---</div>
               <div id="parIdDisplay">---</div>
             </div>
           </div>
         </div>
-        
-        <!-- ===== ALERTA DE BLOQUEO ESPECÍFICA ===== -->
+
+        <!-- ALERTA BLOQUEO -->
         <div id="bloqueoAlert" class="bloqueo-alert">
           <i class="fas fa-ban bloqueo-icon"></i>
-          <div class="bloqueo-title" id="bloqueoTitle">Registro Bloqueado</div>
+          <div class="bloqueo-title"   id="bloqueoTitle">Registro Bloqueado</div>
           <div class="bloqueo-message" id="bloqueoMessage">---</div>
-          <div class="bloqueo-detail" id="bloqueoDetail">---</div>
+          <div class="bloqueo-detail"  id="bloqueoDetail">---</div>
           <button class="bloqueo-close" onclick="cerrarBloqueo()">
             <i class="fas fa-check"></i> Entendido
           </button>
         </div>
 
-        <!-- Indicador de estado -->
+        <!-- INDICADOR ESTADO -->
         <div class="status-indicator-large" id="statusIndicator">
-          <div class="status-icon idle" id="statusIcon">
-            <i class="fas fa-circle"></i>
-          </div>
+          <div class="status-icon idle" id="statusIcon"><i class="fas fa-circle"></i></div>
           <div class="status-label" id="statusLabel">Esperando...</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Toast Notification -->
   <div class="toast" id="toastNotification"></div>
-  
-  <!-- Loading Overlay -->
   <div class="loading-overlay" id="loadingOverlay">
     <div class="spinner"></div>
     <div id="loadingText">Cargando...</div>
@@ -959,130 +301,123 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-    import { 
-      getFirestore, 
-      collection, 
-      getDocs, 
-      addDoc, 
-      query, 
-      where, 
-      orderBy, 
-      limit, 
-      Timestamp,
-      onSnapshot
+    import {
+      getFirestore, collection, getDocs, addDoc,
+      query, where, Timestamp, onSnapshot
     } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyAMTWJr3mISmNiP-e_KjCO9BdBPi7Uuug4",
-      authDomain: "formulario-2-8929a.firebaseapp.com",
-      projectId: "formulario-2-8929a",
-      storageBucket: "formulario-2-8929a.appspot.com",
+      apiKey:            "AIzaSyAMTWJr3mISmNiP-e_KjCO9BdBPi7Uuug4",
+      authDomain:        "formulario-2-8929a.firebaseapp.com",
+      projectId:         "formulario-2-8929a",
+      storageBucket:     "formulario-2-8929a.appspot.com",
       messagingSenderId: "136908102526",
-      appId: "1:136908102526:web:d0a3bc1e3cb91a3fcab12f"
+      appId:             "1:136908102526:web:d0a3bc1e3cb91a3fcab12f"
     };
-
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const db  = getFirestore(app);
 
-    // ============= VARIABLES GLOBALES =============
-    let faceMatcher = null;
-    let labeledFaceDescriptors = [];
-    let employeesData = new Map();
-    let isProcessing = false;
-    let videoStarted = false;
+    /* =================================================================
+       VARIABLES GLOBALES
+    ================================================================= */
+    let faceMatcher       = null;
+    let employeesData     = new Map();
+    let isProcessing      = false;
+    let videoStarted      = false;
     let detectionInterval = null;
-    let modelosCargados = false;
-    let currentUser = null;
-    
+    let modelosCargados   = false;
+    let currentUser       = null;
+
     const CONFIG = {
-      UMBRAL_PRECISION: 0.5,
+      UMBRAL_PRECISION:   0.5,
       DETECTION_INTERVAL: 2500,
-      COOLDOWN_SEGUNDOS: 60,
-      MIN_CONFIDENCE: 0.4,
+      COOLDOWN_SEGUNDOS:  60,
+      MIN_CONFIDENCE:     0.4,
       MODEL_URL: 'https://raw.githubusercontent.com/vladmandic/face-api/master/model/'
     };
 
-    // Nombres de días para mensajes
-    const NOMBRES_DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    /*
+     * LÍMITE DE HORAS DE TURNO (16 h):
+     *   - Si el último registro del colaborador en Firebase es type='entry'
+     *     y ocurrió hace MENOS de 16 h → el nuevo es type='exit' (SALIDA).
+     *   - Si hace MÁS de 16 h, o el último fue type='exit' → type='entry' (ENTRADA).
+     */
+    const LIMITE_HORAS_TURNO = 16;
 
-    // ============= ELEMENTOS DOM =============
-    const video = document.getElementById('videoFacial');
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    const loadingText = document.getElementById('loadingText');
-    const toast = document.getElementById('toastNotification');
+    const NOMBRES_DIAS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+
+    /* =================================================================
+       DOM
+    ================================================================= */
+    const video             = document.getElementById('videoFacial');
+    const loadingOverlay    = document.getElementById('loadingOverlay');
+    const loadingText       = document.getElementById('loadingText');
+    const toast             = document.getElementById('toastNotification');
     const resultadoFlotante = document.getElementById('resultadoFlotante');
-    const loginScreen = document.getElementById('loginScreen');
-    const appScreen = document.getElementById('appScreen');
-    const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
-    const loginBtn = document.getElementById('loginBtn');
-    const loginAlert = document.getElementById('loginAlert');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const companyNameSpan = document.getElementById('companyName');
-    const menuButton = document.getElementById('menuButton');
-    const menuModal = document.getElementById('menuModal');
-    const menuUserName = document.getElementById('menuUserName');
-    const menuReports = document.getElementById('menuReports');
-    const searchInput = document.getElementById('searchInput');
-    const searchBtn = document.getElementById('searchBtn');
-    const searchResults = document.getElementById('searchResults');
-    const statusIndicator = document.getElementById('statusIndicator');
-    const statusIcon = document.getElementById('statusIcon');
-    const statusLabel = document.getElementById('statusLabel');
+    const loginScreen       = document.getElementById('loginScreen');
+    const appScreen         = document.getElementById('appScreen');
+    const usernameInput     = document.getElementById('username');
+    const passwordInput     = document.getElementById('password');
+    const loginBtn          = document.getElementById('loginBtn');
+    const loginAlert        = document.getElementById('loginAlert');
+    const logoutBtn         = document.getElementById('logoutBtn');
+    const companyNameSpan   = document.getElementById('companyName');
+    const menuButton        = document.getElementById('menuButton');
+    const menuModal         = document.getElementById('menuModal');
+    const menuUserName      = document.getElementById('menuUserName');
+    const menuReports       = document.getElementById('menuReports');
+    const searchInput       = document.getElementById('searchInput');
+    const searchBtn         = document.getElementById('searchBtn');
+    const searchResults     = document.getElementById('searchResults');
+    const statusIcon        = document.getElementById('statusIcon');
+    const statusLabel       = document.getElementById('statusLabel');
 
-    // ============= FUNCIONES UTILERÍA =============
+    /* =================================================================
+       UTILIDADES
+    ================================================================= */
     function showToast(message, type = 'success') {
-      toast.textContent = message;
-      toast.style.background = type === 'success' ? 'rgba(22,224,134,0.2)' : 'rgba(231,76,60,0.2)';
-      toast.style.borderColor = type === 'success' ? 'var(--primary)' : 'var(--danger)';
-      toast.style.display = 'block';
+      toast.textContent       = message;
+      toast.style.background  = type === 'success' ? 'rgba(22,224,134,0.2)' : 'rgba(231,76,60,0.2)';
+      toast.style.borderColor = type === 'success' ? 'var(--primary)'       : 'var(--danger)';
+      toast.style.display     = 'block';
       setTimeout(() => { toast.style.display = 'none'; }, 3000);
     }
-
-    function showLoading(message = 'Cargando...') {
-      loadingText.textContent = message;
-      loadingOverlay.style.display = 'flex';
-    }
-
-    function hideLoading() {
-      loadingOverlay.style.display = 'none';
-    }
+    function showLoading(msg = 'Cargando...') { loadingText.textContent = msg; loadingOverlay.style.display = 'flex'; }
+    function hideLoading()                    { loadingOverlay.style.display = 'none'; }
 
     function updateStatusIndicator(type, message) {
       if (!statusIcon || !statusLabel) return;
       statusIcon.className = 'status-icon';
-      
       if (type === 'success') {
         statusIcon.classList.add('success');
-        statusIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
+        statusIcon.innerHTML    = '<i class="fas fa-check-circle"></i>';
         statusLabel.textContent = message || 'Registro exitoso';
       } else if (type === 'error') {
         statusIcon.classList.add('error');
-        statusIcon.innerHTML = '<i class="fas fa-times-circle"></i>';
+        statusIcon.innerHTML    = '<i class="fas fa-times-circle"></i>';
         statusLabel.textContent = message || 'Error en registro';
       } else {
         statusIcon.classList.add('idle');
-        statusIcon.innerHTML = '<i class="fas fa-circle"></i>';
+        statusIcon.innerHTML    = '<i class="fas fa-circle"></i>';
         statusLabel.textContent = message || 'Esperando...';
       }
-      
       if (type !== 'idle') {
         setTimeout(() => {
-          statusIcon.className = 'status-icon idle';
-          statusIcon.innerHTML = '<i class="fas fa-circle"></i>';
+          statusIcon.className    = 'status-icon idle';
+          statusIcon.innerHTML    = '<i class="fas fa-circle"></i>';
           statusLabel.textContent = 'Esperando...';
         }, 3000);
       }
     }
 
-    // Cerrar menú al hacer clic fuera
+    /* =================================================================
+       MENÚ
+    ================================================================= */
     document.addEventListener('click', (e) => {
       if (menuModal && menuButton && !menuButton.contains(e.target) && !menuModal.contains(e.target)) {
         menuModal.classList.remove('show');
       }
     });
-
-    // Toggle del menú
     if (menuButton) {
       menuButton.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -1090,39 +425,27 @@
       });
     }
 
-    // ============= LOGIN CON SESIÓN PERMANENTE =============
+    /* =================================================================
+       LOGIN / LOGOUT
+    ================================================================= */
     async function authenticateUser(username, pin) {
+      showLoading('Verificando credenciales...');
       try {
-        showLoading('Verificando credenciales...');
-        
-        // Buscar en la colección de administradores (Collaborators)
         const q = query(
-          collection(db, "Collaborators"),
-          where("username", "==", username),
-          where("pin", "==", pin)
+          collection(db, 'Collaborators'),
+          where('username', '==', username),
+          where('pin',      '==', pin)
         );
-        
         const snapshot = await getDocs(q);
-        
-        if (snapshot.empty) {
-          throw new Error('Usuario o PIN incorrectos');
-        }
-        
-        const userDoc = snapshot.docs[0];
+        if (snapshot.empty) throw new Error('Usuario o PIN incorrectos');
+        const userDoc  = snapshot.docs[0];
         const userData = userDoc.data();
-        
-        const user = {
-          uid: userDoc.id,
+        return {
+          uid:      userDoc.id,
           username: userData.username,
-          name: userData.companyName || `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || username,
-          tipo: 'admin'
+          name:     userData.companyName || `${userData.firstName||''} ${userData.lastName||''}`.trim() || username,
+          tipo:     'admin'
         };
-        
-        // Guardar en localStorage para sesión persistente
-        localStorage.setItem('currentUserAsistencia', JSON.stringify(user));
-        
-        return user;
-        
       } catch (error) {
         console.error('Login error:', error);
         throw error;
@@ -1133,59 +456,43 @@
 
     function loadSavedSession() {
       const saved = localStorage.getItem('currentUserAsistencia');
-      if (saved) {
-        try {
-          return JSON.parse(saved);
-        } catch {
-          return null;
-        }
-      }
+      if (saved) { try { return JSON.parse(saved); } catch { return null; } }
       return null;
     }
 
     async function initWithUser(user) {
       currentUser = user;
       companyNameSpan.textContent = user.name.split(' ')[0];
-      if (menuUserName) {
-        menuUserName.textContent = user.name;
-      }
-      
+      if (menuUserName) menuUserName.textContent = user.name;
       loginScreen.style.display = 'none';
-      appScreen.style.display = 'block';
-      
+      appScreen.style.display   = 'block';
       await cargarModelos();
       await iniciarCamara();
       await iniciarEscuchaEmpleados();
       iniciarDeteccion();
-      
-      passwordInput.value = '';
+      passwordInput.value      = '';
       loginAlert.style.display = 'none';
-      
       updateStatusIndicator('idle');
       showToast(`Bienvenido, ${user.name}`, 'success');
     }
 
-    // Cargar sesión guardada al iniciar
     const savedUser = loadSavedSession();
-    if (savedUser) {
-      initWithUser(savedUser);
-    }
+    if (savedUser) { initWithUser(savedUser); }
 
     loginBtn.addEventListener('click', async () => {
       const username = usernameInput.value.trim();
-      const pin = passwordInput.value.trim();
-      
+      const pin      = passwordInput.value.trim();
       if (!username || !pin) {
-        loginAlert.textContent = 'Complete todos los campos';
+        loginAlert.textContent   = 'Complete todos los campos';
         loginAlert.style.display = 'block';
         return;
       }
-      
       try {
         const userData = await authenticateUser(username, pin);
+        localStorage.setItem('currentUserAsistencia', JSON.stringify(userData));
         await initWithUser(userData);
       } catch (error) {
-        loginAlert.textContent = error.message;
+        loginAlert.textContent   = error.message;
         loginAlert.style.display = 'block';
         updateStatusIndicator('error', 'Error de login');
       }
@@ -1193,73 +500,52 @@
 
     logoutBtn.addEventListener('click', () => {
       localStorage.removeItem('currentUserAsistencia');
-      currentUser = null;
-      appScreen.style.display = 'none';
+      currentUser               = null;
+      appScreen.style.display   = 'none';
       loginScreen.style.display = 'flex';
-      usernameInput.value = '';
-      passwordInput.value = '';
+      usernameInput.value       = '';
+      passwordInput.value       = '';
       menuModal.classList.remove('show');
-      
       if (detectionInterval) clearInterval(detectionInterval);
-      if (video.srcObject) {
-        video.srcObject.getTracks().forEach(track => track.stop());
-      }
-      
+      if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
       updateStatusIndicator('idle');
     });
 
-    // Redirigir a reportes con el usuario actual
     if (menuReports) {
       menuReports.addEventListener('click', () => {
-        if (currentUser) {
-          window.location.href = 'reportes.html';
-        } else {
-          showToast('Debe iniciar sesión primero', 'error');
-        }
+        if (currentUser) { window.location.href = 'reportes.html'; }
+        else { showToast('Debe iniciar sesión primero', 'error'); }
       });
     }
 
-    usernameInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') passwordInput.focus();
-    });
-    
-    passwordInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') loginBtn.click();
-    });
+    usernameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') passwordInput.focus(); });
+    passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') loginBtn.click(); });
 
-    // ============= CARGAR MODELOS =============
+    /* =================================================================
+       MODELOS Y CÁMARA
+    ================================================================= */
     async function cargarModelos() {
+      showLoading('Cargando modelos faciales...');
       try {
-        showLoading('Cargando modelos faciales...');
         await faceapi.nets.ssdMobilenetv1.loadFromUri(CONFIG.MODEL_URL);
         await faceapi.nets.faceLandmark68Net.loadFromUri(CONFIG.MODEL_URL);
         await faceapi.nets.faceRecognitionNet.loadFromUri(CONFIG.MODEL_URL);
         modelosCargados = true;
-        hideLoading();
       } catch (error) {
         console.error('Error cargando modelos:', error);
         showToast('Error cargando modelos', 'error');
         updateStatusIndicator('error', 'Error cargando modelos');
-        hideLoading();
-      }
+      } finally { hideLoading(); }
     }
 
     async function iniciarCamara() {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: { 
-            facingMode: 'user',
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          } 
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
         });
         video.srcObject = stream;
         return new Promise((resolve) => {
-          video.onloadedmetadata = () => { 
-            video.play(); 
-            videoStarted = true; 
-            resolve(); 
-          };
+          video.onloadedmetadata = () => { video.play(); videoStarted = true; resolve(); };
         });
       } catch (error) {
         console.error('Error cámara:', error);
@@ -1268,42 +554,35 @@
       }
     }
 
-    // ============= ESCUCHA EN TIEMPO REAL DE EMPLEADOS (SOLO DEL USUARIO ACTUAL) =============
+    /* =================================================================
+       ESCUCHA EN TIEMPO REAL EMPLEADOS (solo del admin logueado)
+    ================================================================= */
     function iniciarEscuchaEmpleados() {
       if (!currentUser) return;
-      
-      // Escuchar SOLO empleados de este colaborador (admin)
-      const q = query(
-        collection(db, 'Ponche'),
-        where('collaboratorId', '==', currentUser.uid)
-      );
-      
+      const q = query(collection(db, 'Ponche'), where('collaboratorId', '==', currentUser.uid));
       onSnapshot(q, (snapshot) => {
         const descriptors = [];
         employeesData.clear();
-        
         const promises = [];
-        
-        snapshot.forEach(doc => {
-          const data = doc.data();
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
           if (data.fotoBase64 && data.username) {
-            // Guardar TODOS los empleados (activos e inactivos) para búsqueda
+            /* Guardar todos los empleados (activos e inactivos) para búsqueda */
             employeesData.set(data.username, {
-              id: doc.id,
-              firstName: data.firstName || '',
-              lastName: data.lastName || '',
-              fotoBase64: data.fotoBase64,
-              turnoHoras: data.turnoHoras || 8,
-              collaboratorId: data.collaboratorId,
-              activo: data.activo !== false,
-              status: data.status || 'active',
+              id:                     docSnap.id,
+              firstName:              data.firstName              || '',
+              lastName:               data.lastName               || '',
+              fotoBase64:             data.fotoBase64,
+              turnoHoras:             data.turnoHoras             || 8,
+              collaboratorId:         data.collaboratorId,
+              activo:                 data.activo !== false,
+              status:                 data.status                 || 'active',
               diasSemanaNoLaborables: data.diasSemanaNoLaborables || [],
-              tipoLibre: data.tipoLibre || null,
-              fechaInicioLibre: data.fechaInicioLibre || null,
-              fechaFinLibre: data.fechaFinLibre || null
+              tipoLibre:              data.tipoLibre              || null,
+              fechaInicioLibre:       data.fechaInicioLibre       || null,
+              fechaFinLibre:          data.fechaFinLibre          || null
             });
-            
-            // Solo cargar descriptores para activos (para reconocimiento facial)
+            /* Solo cargar descriptores faciales para empleados activos */
             if (data.activo !== false) {
               const img = new Image();
               img.src = data.fotoBase64;
@@ -1314,9 +593,7 @@
                     if (detection) {
                       descriptors.push(new faceapi.LabeledFaceDescriptors(data.username, [detection.descriptor]));
                     }
-                  } catch (error) {
-                    console.error('Error detectando rostro:', error);
-                  }
+                  } catch (err) { console.error('Error detectando rostro:', err); }
                   resolve();
                 };
                 img.onerror = resolve;
@@ -1325,7 +602,6 @@
             }
           }
         });
-        
         Promise.all(promises).then(() => {
           if (descriptors.length > 0) {
             faceMatcher = new faceapi.FaceMatcher(descriptors, CONFIG.UMBRAL_PRECISION);
@@ -1335,186 +611,203 @@
       });
     }
 
-    // ============= VERIFICAR BLOQUEOS ESPECÍFICOS =============
+    /* =================================================================
+       VERIFICAR BLOQUEOS (inactivo / día no laborable / período libre)
+    ================================================================= */
     function verificarBloqueos(codigo) {
       const emp = employeesData.get(codigo);
       if (!emp) {
-        return { 
-          bloqueado: true, 
-          mensaje: 'Colaborador no encontrado', 
-          detalle: 'Verifica el código ingresado',
-          tipo: 'no_encontrado' 
-        };
+        return { bloqueado: true, mensaje: 'Colaborador no encontrado', detalle: 'Verifica el código ingresado.', tipo: 'no_encontrado' };
       }
-      
-      const hoy = new Date();
+      const hoy       = new Date();
       const diaSemana = hoy.getDay();
-      
-      // 1. Verificar si está inactivo
+
+      /* 1. Inactivo */
       if (emp.activo === false || emp.status === 'inactive') {
+        return { bloqueado: true, mensaje: 'Tu cuenta está inactiva', detalle: 'Contacta al administrador para reactivarla.', tipo: 'inactivo' };
+      }
+
+      /* 2. Día no laborable */
+      const diasNoLab = emp.diasSemanaNoLaborables || [];
+      if (diasNoLab.includes(diaSemana)) {
         return {
           bloqueado: true,
-          mensaje: 'Tu cuenta está inactiva',
-          detalle: 'Contacta al administrador para reactivar tu cuenta.',
-          tipo: 'inactivo'
+          mensaje:   `Hoy es ${NOMBRES_DIAS[diaSemana]} - No debes registrarte`,
+          detalle:   `Días no laborables: ${diasNoLab.map(d => NOMBRES_DIAS[d]).join(', ')}`,
+          tipo:      'dia_no_laborable'
         };
       }
-      
-      // 2. Verificar días de semana no laborables
-      const diasNoLaborables = emp.diasSemanaNoLaborables || [];
-      if (diasNoLaborables.includes(diaSemana)) {
-        return {
-          bloqueado: true,
-          mensaje: `Hoy es ${NOMBRES_DIAS[diaSemana]} - No debes registrarte`,
-          detalle: `Tus días no laborables: ${diasNoLaborables.map(d => NOMBRES_DIAS[d]).join(', ')}`,
-          tipo: 'dia_no_laborable'
-        };
-      }
-      
-      // 3. Verificar período libre (vacaciones/licencia/permiso)
+
+      /* 3. Período libre (vacaciones / licencia / permiso) */
       if (emp.fechaInicioLibre && emp.fechaFinLibre && emp.tipoLibre) {
         const inicio = new Date(emp.fechaInicioLibre);
-        const fin = new Date(emp.fechaFinLibre);
-        const ahora = new Date();
-        
-        inicio.setHours(0,0,0,0);
-        fin.setHours(23,59,59,999);
-        const hoyNormalizado = new Date(ahora);
-        hoyNormalizado.setHours(0,0,0,0);
-        
-        if (hoyNormalizado >= inicio && hoyNormalizado <= fin) {
-          const diasRestantes = Math.ceil((fin - hoyNormalizado) / (1000 * 60 * 60 * 24));
-          
-          let mensaje = '';
-          let detalle = '';
-          
-          switch(emp.tipoLibre) {
-            case 'vacaciones':
-              mensaje = 'Estás de vacaciones';
-              detalle = `Te quedan ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''} de vacaciones. Disfruta tu descanso.`;
-              break;
-            case 'licencia':
-              mensaje = 'Tienes una licencia activa';
-              detalle = `Licencia válida por ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''} más.`;
-              break;
-            case 'permiso':
-              mensaje = 'Tienes un permiso autorizado';
-              detalle = `Permiso válido por ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''} más.`;
-              break;
-            default:
-              mensaje = 'Estás marcado como no disponible';
-              detalle = `Período libre: ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''} restantes.`;
-          }
-          
-          return {
-            bloqueado: true,
-            mensaje: mensaje,
-            detalle: detalle,
-            tipo: emp.tipoLibre
+        const fin    = new Date(emp.fechaFinLibre);
+        inicio.setHours(0,0,0,0); fin.setHours(23,59,59,999);
+        const hoyN = new Date(hoy); hoyN.setHours(0,0,0,0);
+        if (hoyN >= inicio && hoyN <= fin) {
+          const dias = Math.ceil((fin - hoyN) / (1000*60*60*24));
+          const textos = {
+            vacaciones: { mensaje: 'Estás de vacaciones',          detalle: `Te quedan ${dias} día${dias!==1?'s':''} de vacaciones.` },
+            licencia:   { mensaje: 'Tienes una licencia activa',   detalle: `Licencia por ${dias} día${dias!==1?'s':''} más.` },
+            permiso:    { mensaje: 'Tienes un permiso autorizado', detalle: `Permiso por ${dias} día${dias!==1?'s':''} más.` }
           };
+          const info = textos[emp.tipoLibre] || { mensaje: 'No disponible', detalle: `${dias} día${dias!==1?'s':''} restantes.` };
+          return { bloqueado: true, ...info, tipo: emp.tipoLibre };
         }
       }
-      
       return { bloqueado: false, emp };
     }
 
-    // ============= MOSTRAR/CERRAR ALERTA DE BLOQUEO =============
     function mostrarBloqueo(info) {
-      const alert = document.getElementById('bloqueoAlert');
-      document.getElementById('bloqueoTitle').textContent = '⛔ Registro No Permitido';
+      document.getElementById('bloqueoTitle').textContent   = '⛔ Registro No Permitido';
       document.getElementById('bloqueoMessage').textContent = info.mensaje;
-      document.getElementById('bloqueoDetail').textContent = info.detalle || '';
-      alert.style.display = 'flex';
+      document.getElementById('bloqueoDetail').textContent  = info.detalle || '';
+      document.getElementById('bloqueoAlert').style.display = 'flex';
       updateStatusIndicator('error', 'Registro bloqueado');
     }
+    window.cerrarBloqueo = function() { document.getElementById('bloqueoAlert').style.display = 'none'; };
 
-    window.cerrarBloqueo = function() {
-      document.getElementById('bloqueoAlert').style.display = 'none';
-    };
-
-    // ============= VERIFICAR COOLDOWN =============
+    /* =================================================================
+       COOLDOWN — evitar doble registro accidental por detección facial
+    ================================================================= */
     async function verificarCooldown(codigo) {
       if (!currentUser) return false;
-      
       try {
+        /* Sin orderBy para evitar requerir índice compuesto en Firebase.
+           Se traen todos los registros del colaborador y se ordena en cliente. */
         const q = query(
           collection(db, 'facialAttendance'),
           where('collaboratorCode', '==', codigo),
-          where('collaboratorId', '==', currentUser.uid),
-          orderBy('timestamp', 'desc'),
-          limit(1)
+          where('collaboratorId',   '==', currentUser.uid)
         );
-        
-        const last = await getDocs(q);
-        if (last.empty) return true;
-        
-        const lastTime = last.docs[0].data().timestamp.toDate();
-        const ahora = new Date();
-        const diffSegundos = (ahora - lastTime) / 1000;
-        
-        if (diffSegundos < CONFIG.COOLDOWN_SEGUNDOS) {
-          const segundosRestantes = Math.ceil(CONFIG.COOLDOWN_SEGUNDOS - diffSegundos);
-          showToast(`⏳ Espere ${segundosRestantes} segundos`, 'error');
+        const snap = await getDocs(q);
+        if (snap.empty) return true;
+
+        /* Obtener el timestamp más reciente en el cliente */
+        let lastTime = new Date(0);
+        snap.docs.forEach(d => {
+          const ts = d.data().timestamp?.toDate();
+          if (ts && ts > lastTime) lastTime = ts;
+        });
+
+        const diffSeg = (new Date() - lastTime) / 1000;
+        if (diffSeg < CONFIG.COOLDOWN_SEGUNDOS) {
+          const seg = Math.ceil(CONFIG.COOLDOWN_SEGUNDOS - diffSeg);
+          showToast(`⏳ Espere ${seg} segundos`, 'error');
           return false;
         }
         return true;
-      } catch (error) {
-        console.error('Error cooldown:', error);
-        return true;
-      }
+      } catch (error) { console.error('Error cooldown:', error); return true; }
     }
 
-    // ============= DETERMINAR TIPO CON PAR ID =============
-    async function determinarTipoConPar(codigo) {
+    /* =================================================================
+       DETERMINAR TIPO: ENTRADA ('entry') o SALIDA ('exit')
+       -----------------------------------------------------------------
+       Se consulta Firebase para obtener el ÚLTIMO registro del
+       colaborador específico (collaboratorCode + collaboratorId).
+
+       REGLA:
+         1. Sin registros anteriores               → ENTRADA (nuevo parId)
+         2. Último type='entry', diff ≤ 16 h       → SALIDA  (mismo parId)
+         3. Último type='entry', diff >  16 h       → ENTRADA (nuevo parId, turno expiró)
+         4. Último type='exit'                      → ENTRADA (nuevo parId)
+
+       El campo 'parId' vincula cada entrada con su salida para que el
+       código de reportes pueda emparejarlos directamente.
+    ================================================================= */
+    async function determinarTipoRegistro(codigo) {
       if (!currentUser) return { tipo: 'entry', parId: `PAR_${codigo}_${Date.now()}` };
-      
       try {
+        /*
+         * IMPORTANTE: Se evita usar orderBy() junto con where() en campos distintos
+         * porque Firebase requiere un índice compuesto que puede no existir y hace
+         * que la query falle silenciosamente retornando siempre 'entry'.
+         *
+         * En su lugar se traen los últimos registros solo con where() y se
+         * ordena manualmente en el cliente para obtener el más reciente.
+         */
         const q = query(
           collection(db, 'facialAttendance'),
           where('collaboratorCode', '==', codigo),
-          where('collaboratorId', '==', currentUser.uid),
-          orderBy('timestamp', 'desc'),
-          limit(1)
+          where('collaboratorId',   '==', currentUser.uid)
         );
-        
         const snapshot = await getDocs(q);
-        
+
+        /* Caso 1: Sin registros previos → primera ENTRADA */
         if (snapshot.empty) {
-          const nuevoParId = `PAR_${codigo}_${Date.now()}`;
-          return { tipo: 'entry', parId: nuevoParId };
+          const parId = `PAR_${codigo}_${Date.now()}`;
+          console.log(`[${codigo}] Sin registros → ENTRADA | parId:${parId}`);
+          return { tipo: 'entry', parId };
         }
-        
-        const ultimoRegistro = snapshot.docs[0].data();
-        
-        if (ultimoRegistro.type === 'entry') {
-          return { tipo: 'exit', parId: ultimoRegistro.parId };
+
+        /* Ordenar en el cliente por timestamp DESC y tomar el más reciente */
+        const docs = snapshot.docs
+          .map(d => ({ ...d.data(), _ts: d.data().timestamp?.toDate() || new Date(0) }))
+          .sort((a, b) => b._ts - a._ts);
+
+        const ultimo      = docs[0];
+        const ultimoTipo  = ultimo.type;    /* 'entry' | 'exit' | undefined */
+        const ultimoParId = ultimo.parId;
+        const ultimoTime  = ultimo._ts;
+        const diffHoras   = (new Date() - ultimoTime) / 3600000;
+
+        console.log(`[${codigo}] Último: tipo=${ultimoTipo}, hace ${diffHoras.toFixed(2)}h | parId=${ultimoParId}`);
+
+        /* Caso 2: Último fue ENTRADA y dentro del turno (≤ 16 h) → SALIDA */
+        if (ultimoTipo === 'entry' && diffHoras <= LIMITE_HORAS_TURNO) {
+          console.log(`[${codigo}] → SALIDA (entrada activa hace ${diffHoras.toFixed(2)}h)`);
+          return { tipo: 'exit', parId: ultimoParId };
         }
-        
-        const nuevoParId = `PAR_${codigo}_${Date.now()}`;
-        return { tipo: 'entry', parId: nuevoParId };
-        
+
+        /* Caso 3: Último fue ENTRADA pero hace más de 16 h → nueva ENTRADA */
+        if (ultimoTipo === 'entry' && diffHoras > LIMITE_HORAS_TURNO) {
+          const parId = `PAR_${codigo}_${Date.now()}`;
+          console.log(`[${codigo}] → ENTRADA (turno anterior expiró: ${diffHoras.toFixed(2)}h)`);
+          return { tipo: 'entry', parId };
+        }
+
+        /* Caso 4: Último fue SALIDA → nueva ENTRADA */
+        if (ultimoTipo === 'exit') {
+          const parId = `PAR_${codigo}_${Date.now()}`;
+          console.log(`[${codigo}] → ENTRADA (tras salida completada)`);
+          return { tipo: 'entry', parId };
+        }
+
+        /*
+         * Caso 5: Registro sin campo 'type' (datos legacy anteriores a esta versión).
+         * Se aplica la misma lógica: si hace ≤ 16 h → SALIDA, si no → ENTRADA.
+         */
+        if (diffHoras <= LIMITE_HORAS_TURNO) {
+          console.log(`[${codigo}] → SALIDA (registro legacy sin type, hace ${diffHoras.toFixed(2)}h)`);
+          return { tipo: 'exit', parId: ultimoParId || `PAR_${codigo}_${Date.now()}` };
+        }
+
+        /* Fallback final → ENTRADA */
+        const parId = `PAR_${codigo}_${Date.now()}`;
+        console.log(`[${codigo}] → ENTRADA (fallback)`);
+        return { tipo: 'entry', parId };
+
       } catch (error) {
-        console.error('Error tipo:', error);
+        console.error('Error determinando tipo de registro:', error);
         return { tipo: 'entry', parId: `PAR_${codigo}_${Date.now()}` };
       }
     }
 
-    // ============= PROCESAR REGISTRO =============
+    /* =================================================================
+       PROCESAR REGISTRO (detección facial y búsqueda manual)
+    ================================================================= */
     async function procesarRegistro(codigo, confianza = 1.0, metodo = 'facial') {
       if (isProcessing || !currentUser) return;
       isProcessing = true;
-
       try {
-        // Verificar bloqueos primero
+        /* 1. Verificar bloqueos */
         const verificacion = verificarBloqueos(codigo);
         if (verificacion.bloqueado) {
           mostrarBloqueo(verificacion);
           isProcessing = false;
           return;
         }
-        
         const userData = verificacion.emp;
-        
         if (!userData) {
           showToast('❌ Empleado no encontrado', 'error');
           updateStatusIndicator('error', 'Empleado no encontrado');
@@ -1522,6 +815,7 @@
           return;
         }
 
+        /* 2. Verificar cooldown */
         const cooldownOk = await verificarCooldown(codigo);
         if (!cooldownOk) {
           updateStatusIndicator('error', 'Cooldown activo');
@@ -1529,61 +823,65 @@
           return;
         }
 
-        const { tipo, parId } = await determinarTipoConPar(codigo);
-        
-        const ahora = Timestamp.now();
-        const fechaActual = ahora.toDate();
-        
-        const year = fechaActual.getFullYear();
-        const month = String(fechaActual.getMonth() + 1).padStart(2, '0');
-        const day = String(fechaActual.getDate()).padStart(2, '0');
-        const fechaFormateada = `${year}-${month}-${day}`;
-        
-        const hours = String(fechaActual.getHours()).padStart(2, '0');
-        const minutes = String(fechaActual.getMinutes()).padStart(2, '0');
-        const horaFormateada = `${hours}:${minutes}:00`;
+        /* 3. Determinar ENTRADA o SALIDA consultando Firebase */
+        const { tipo, parId } = await determinarTipoRegistro(codigo);
 
+        /* 4. Preparar datos del registro */
+        const ahora       = Timestamp.now();
+        const fechaActual = ahora.toDate();
+        const year    = fechaActual.getFullYear();
+        const month   = String(fechaActual.getMonth() + 1).padStart(2,'0');
+        const day     = String(fechaActual.getDate()).padStart(2,'0');
+        const hours   = String(fechaActual.getHours()).padStart(2,'0');
+        const minutes = String(fechaActual.getMinutes()).padStart(2,'0');
+        const seconds = String(fechaActual.getSeconds()).padStart(2,'0');
+        const fechaFormateada = `${year}-${month}-${day}`;
+        const horaFormateada  = `${hours}:${minutes}:${seconds}`;
+
+        /*
+         * CAMPO 'type' → 'entry' = ENTRADA | 'exit' = SALIDA
+         * Este campo es el que lee el código de reportes para
+         * saber si el registro es entrada o salida, sin necesidad
+         * de inferirlo por posición alternada.
+         */
         const attendanceData = {
-          collaboratorId: currentUser.uid,
+          collaboratorId:   currentUser.uid,
           collaboratorName: currentUser.name,
           collaboratorCode: codigo,
-          employeeName: `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || codigo,
-          employeeId: userData.id,
-          timestamp: ahora,
-          fecha: fechaFormateada,
-          hora: horaFormateada,
-          type: tipo,
-          confidence: confianza,
-          method: metodo,
-          turnoHoras: userData.turnoHoras || 8,
-          device: 'TensorFlow.js',
-          parId: parId,
-          registroId: `${codigo}_${Date.now()}`
+          employeeName:     `${userData.firstName||''} ${userData.lastName||''}`.trim() || codigo,
+          employeeId:       userData.id,
+          timestamp:        ahora,
+          fecha:            fechaFormateada,
+          hora:             horaFormateada,
+          type:             tipo,      /* 'entry' | 'exit' */
+          confidence:       confianza,
+          method:           metodo,
+          turnoHoras:       userData.turnoHoras || 8,
+          device:           'TensorFlow.js',
+          parId:            parId,
+          registroId:       `${codigo}_${Date.now()}`
         };
 
+        /* 5. Guardar en Firebase */
         await addDoc(collection(db, 'facialAttendance'), attendanceData);
-        console.log('✅ Registro guardado:', attendanceData);
+        console.log('✅ Registro guardado:', tipo.toUpperCase(), codigo, fechaFormateada, horaFormateada);
 
-        // Actualizar UI del modal
-        document.getElementById('nombreDisplay').textContent = `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || codigo;
-        document.getElementById('codigoDisplay').textContent = `Código: ${codigo}`;
+        /* 6. Actualizar UI del modal de resultado */
+        document.getElementById('nombreDisplay').textContent  = `${userData.firstName||''} ${userData.lastName||''}`.trim() || codigo;
+        document.getElementById('codigoDisplay').textContent  = `Código: ${codigo}`;
         if (userData.fotoBase64) document.getElementById('fotoColaborador').src = userData.fotoBase64;
-        
         const tipoLabel = document.getElementById('tipoDisplay');
         tipoLabel.textContent = tipo === 'entry' ? '✅ ENTRADA' : '🚪 SALIDA';
-        tipoLabel.className = `tipo-registro ${tipo === 'entry' ? 'entrada' : 'salida'}`;
-        
+        tipoLabel.className   = `tipo-registro ${tipo === 'entry' ? 'entrada' : 'salida'}`;
         document.getElementById('fechaHoraDisplay').textContent = `📅 ${fechaFormateada} ${horaFormateada}`;
-        document.getElementById('parIdDisplay').textContent = `Par: ${parId.slice(-6)}`;
-        
+        document.getElementById('parIdDisplay').textContent     = `Par: ${parId.slice(-8)}`;
         resultadoFlotante.style.display = 'flex';
         setTimeout(() => { resultadoFlotante.style.display = 'none'; }, 5000);
-        
         updateStatusIndicator('success', tipo === 'entry' ? 'Entrada registrada' : 'Salida registrada');
         showToast(`✅ ${tipo === 'entry' ? 'ENTRADA' : 'SALIDA'} registrada`, 'success');
-        
+
       } catch (error) {
-        console.error('❌ Error registro:', error);
+        console.error('❌ Error al registrar:', error);
         showToast('❌ Error al registrar', 'error');
         updateStatusIndicator('error', 'Error en registro');
       } finally {
@@ -1591,35 +889,33 @@
       }
     }
 
-    // ============= BUSCADOR POR CÓDIGO =============
+    /* =================================================================
+       BUSCADOR MANUAL EN MENÚ
+    ================================================================= */
     function realizarBusqueda() {
       const termino = searchInput.value.trim().toLowerCase();
-      if (!termino) {
-        searchResults.innerHTML = '';
-        return;
-      }
-      
+      if (!termino) { searchResults.innerHTML = ''; return; }
       const resultados = [];
       employeesData.forEach((emp, codigo) => {
-        const nombreCompleto = `${emp.firstName || ''} ${emp.lastName || ''}`.toLowerCase();
-        if (codigo.toLowerCase().includes(termino) || nombreCompleto.includes(termino)) {
+        const nombre = `${emp.firstName||''} ${emp.lastName||''}`.toLowerCase();
+        if (codigo.toLowerCase().includes(termino) || nombre.includes(termino)) {
           resultados.push({ codigo, ...emp });
         }
       });
-      
       if (resultados.length === 0) {
-        searchResults.innerHTML = '<div style="padding: 10px; color: var(--text-secondary); text-align: center;">No encontrado</div>';
+        searchResults.innerHTML = '<div style="padding:10px;color:var(--text-secondary);text-align:center;">No encontrado</div>';
         return;
       }
-      
       searchResults.innerHTML = resultados.map(emp => `
         <div class="search-result-item" onclick="seleccionarResultado('${emp.codigo}')">
           <img src="${emp.fotoBase64 || 'https://via.placeholder.com/35'}" alt="">
           <div class="search-result-info">
-            <div class="search-result-name">${emp.firstName || ''} ${emp.lastName || ''}</div>
+            <div class="search-result-name">${emp.firstName||''} ${emp.lastName||''}</div>
             <div class="search-result-code">${emp.codigo}</div>
           </div>
-          <button class="search-result-punch" onclick="event.stopPropagation(); registrarDesdeBusqueda('${emp.codigo}')" title="Registrar">
+          <button class="search-result-punch"
+                  onclick="event.stopPropagation(); registrarDesdeBusqueda('${emp.codigo}')"
+                  title="Registrar">
             <i class="fas fa-fingerprint"></i>
           </button>
         </div>
@@ -1627,46 +923,38 @@
     }
 
     window.seleccionarResultado = function(codigo) {
-      searchInput.value = codigo;
+      searchInput.value       = codigo;
       searchResults.innerHTML = '';
     };
 
     window.registrarDesdeBusqueda = async function(codigo) {
       menuModal.classList.remove('show');
-      searchInput.value = '';
+      searchInput.value       = '';
       searchResults.innerHTML = '';
       await procesarRegistro(codigo, 1.0, 'manual');
     };
 
-    searchBtn.addEventListener('click', realizarBusqueda);
-    searchInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') realizarBusqueda();
-    });
-    searchInput.addEventListener('input', realizarBusqueda);
+    searchBtn.addEventListener('click',   realizarBusqueda);
+    searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') realizarBusqueda(); });
+    searchInput.addEventListener('input',  realizarBusqueda);
 
-    // ============= DETECCIÓN AUTOMÁTICA =============
+    /* =================================================================
+       DETECCIÓN FACIAL AUTOMÁTICA
+    ================================================================= */
     function iniciarDeteccion() {
       if (detectionInterval) clearInterval(detectionInterval);
-      
       detectionInterval = setInterval(async () => {
         if (!faceMatcher || !videoStarted || !modelosCargados || isProcessing || !currentUser) return;
-
         try {
-          const detection = await faceapi.detectSingleFace(video)
-            .withFaceLandmarks()
-            .withFaceDescriptor();
-            
+          const detection = await faceapi.detectSingleFace(video).withFaceLandmarks().withFaceDescriptor();
           if (detection) {
-            const match = faceMatcher.findBestMatch(detection.descriptor);
+            const match      = faceMatcher.findBestMatch(detection.descriptor);
             const confidence = 1 - match.distance;
-            
             if (match.label !== 'unknown' && confidence >= CONFIG.MIN_CONFIDENCE) {
               await procesarRegistro(match.label, confidence, 'facial');
             }
           }
-        } catch (error) {
-          // Silenciamos errores de detección
-        }
+        } catch (error) { /* silenciar errores de detección */ }
       }, CONFIG.DETECTION_INTERVAL);
     }
 
@@ -1680,10 +968,8 @@
         updateStatusIndicator('error', 'Error al iniciar');
       }
     }
-    
-    if (savedUser) {
-      init();
-    }
+
+    if (savedUser) { init(); }
   </script>
 </body>
 </html>
