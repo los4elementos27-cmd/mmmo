@@ -3,499 +3,518 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>Registro de Empleados - PlusMoney</title>
+  <title>PlusMoney - Reportes de Asistencia</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <!-- TENSORFLOW.JS (NO FACEAPI) -->
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.11.0/dist/tf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface@0.0.5/dist/blazeface.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-    :root { 
-      --primary: #16e086; 
-      --primary-dark: #15a086; 
-      --secondary: #3498db; 
-      --danger: #e74c3c; 
-      --dark-bg: #1a2b3c;
-      --darker-bg: #0d1824;
-      --text: #ffffff;
-      --text-muted: rgba(255,255,255,0.7);
-      --border: rgba(255,255,255,0.1);
-      --radius: 12px;
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      -webkit-tap-highlight-color: transparent;
     }
-    
-    body { 
-      background: linear-gradient(135deg, var(--darker-bg), var(--dark-bg)); 
-      color: var(--text); 
-      min-height: 100vh; 
-      padding: 20px; 
+    :root {
+      --win-bg: #f0f0f0;
+      --win-border: #d4d4d4;
+      --win-header: #0078d4;
+      --win-header-dark: #005a9e;
+      --win-text: #323130;
+      --win-text-light: #605e5c;
+      --win-white: #ffffff;
+      --win-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      --win-shadow-heavy: 0 4px 8px rgba(0,0,0,0.15);
+      --primary: #0078d4;
+      --success: #107c10;
+      --warning: #ffc107;
+      --danger: #d13438;
+      --radius: 4px;
+      --header-height: 48px;
+      --footer-height: 56px;
     }
-    
-    /* LOGIN ADMIN */
+    body { background: var(--win-bg); color: var(--win-text); min-height: 100vh; font-size: 12px; }
+    body.logged-in { padding-bottom: var(--footer-height); }
+
+    /* ===== LOGIN ===== */
     .login-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      display: flex; justify-content: center; align-items: center;
       min-height: 100vh;
+      background: linear-gradient(135deg, #0078d4 0%, #005a9e 100%);
       padding: 20px;
+      position: fixed; inset: 0; z-index: 9999;
     }
-
+    .login-container.hidden { display: none; }
     .login-card {
-      background: #233445;
-      border-radius: var(--radius);
-      padding: 30px;
-      width: 100%;
-      max-width: 400px;
-      border: 1px solid rgba(22,224,134,0.2);
-      text-align: center;
+      background: var(--win-white); border-radius: 8px; padding: 24px;
+      width: 100%; max-width: 360px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);
     }
-
     .logo {
-      width: 60px;
-      height: 60px;
-      background: white;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      color: var(--primary);
-      margin: 0 auto 15px;
+      width: 56px; height: 56px; background: var(--primary); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; color: white; margin: 0 auto 16px;
+    }
+    .login-card h1 { font-size: 20px; margin-bottom: 4px; text-align: center; }
+    .login-card p  { font-size: 12px; color: var(--win-text-light); margin-bottom: 20px; text-align: center; }
+
+    /* ===== HEADER — oculto hasta sesión ===== */
+    .app-header {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: var(--header-height);
+      background: var(--win-white); border-bottom: 1px solid var(--win-border);
+      display: none; align-items: center; padding: 0 16px;
+      z-index: 100; box-shadow: var(--win-shadow);
+    }
+    body.logged-in .app-header { display: flex; }
+    .header-menu { display: flex; gap: 16px; margin-right: auto; }
+    .menu-icon {
+      width: 32px; height: 32px; display: flex; align-items: center;
+      justify-content: center; border-radius: var(--radius);
+      color: var(--win-text); text-decoration: none; font-size: 18px;
+      transition: all 0.2s; background: transparent; border: none; cursor: pointer;
+    }
+    .menu-icon:hover  { background: #f3f2f1; color: var(--primary); }
+    .menu-icon.active { background: var(--primary); color: white; }
+    .header-info { display: flex; align-items: center; gap: 20px; font-size: 12px; }
+    .header-datetime { display: flex; align-items: center; gap: 12px; color: var(--win-text-light); }
+    .header-datetime i { margin-right: 4px; }
+    .user-badge { background: #e6f2ff; color: var(--primary); padding: 4px 12px; border-radius: 16px; font-weight: 600; }
+
+    /* ===== FOOTER — oculto hasta sesión ===== */
+    .app-footer {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      height: var(--footer-height); background: var(--win-white);
+      border-top: 1px solid var(--win-border);
+      display: none; align-items: center; justify-content: space-around;
+      padding: 0 16px; z-index: 100; box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+    }
+    body.logged-in .app-footer { display: flex; }
+    .footer-icon {
+      display: flex; flex-direction: column; align-items: center;
+      color: var(--win-text-light); text-decoration: none; font-size: 11px;
+      gap: 2px; cursor: pointer; background: transparent; border: none; padding: 4px 8px; transition: all 0.2s;
+    }
+    .footer-icon i { font-size: 16px; }
+    .footer-icon:hover { color: var(--primary); }
+    .footer-icon.calendar-btn { position: relative; }
+    .calendar-badge {
+      position: absolute; top: -4px; right: -4px;
+      background: var(--danger); color: white; font-size: 9px;
+      padding: 2px 4px; border-radius: 10px; min-width: 16px; text-align: center;
     }
 
-    h1 { color: var(--primary); margin-bottom: 10px; font-size: 20px; }
-    p { color: var(--text-muted); margin-bottom: 25px; font-size: 14px; }
-
-    .input {
-      width: 100%;
-      background: rgba(255,255,255,0.08);
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      padding: 12px;
-      color: var(--text);
-      margin-bottom: 15px;
-      outline: none;
+    /* ===== MAIN — oculto hasta sesión ===== */
+    .main-container {
+      margin-top: var(--header-height); padding: 16px;
+      max-width: 1400px; margin-left: auto; margin-right: auto;
+      display: none;
     }
+    body.logged-in .main-container { display: block; }
 
-    .input:focus { border-color: var(--primary); }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ===== CARDS ===== */
+    .card {
+      background: var(--win-white); border-radius: 8px; padding: 16px;
+      margin-bottom: 16px; box-shadow: var(--win-shadow); border: 1px solid var(--win-border);
+    }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .card-header h2 { font-size: 16px; font-weight: 600; }
+    .card-header h3 { font-size: 14px; font-weight: 600; }
+
+    .grid-2, .grid-3, .grid-4 { display: grid; gap: 12px; }
+    .grid-2 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+    .grid-4 { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 11px; font-weight: 600; color: var(--win-text-light); margin-bottom: 4px; }
+    .form-control { width: 100%; padding: 8px 10px; font-size: 12px; border: 1px solid var(--win-border); border-radius: var(--radius); }
 
     .btn {
-      width: 100%;
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      border: none;
-      border-radius: 8px;
-      padding: 14px;
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all 0.3s;
+      padding: 10px 16px; font-size: 13px; border: none; border-radius: var(--radius);
+      font-weight: 600; cursor: pointer; display: inline-flex;
+      align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--win-header-dark); }
+
+    .table-container { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--win-border); }
+    table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    th { background: #f3f2f1; padding: 8px; font-weight: 600; text-align: left; white-space: nowrap; }
+    td { padding: 8px; border-bottom: 1px solid var(--win-border); white-space: nowrap; }
+
+    .stats-compact { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-bottom: 16px; }
+    .stat-item { background: var(--win-white); padding: 12px; border-radius: var(--radius); border: 1px solid var(--win-border); text-align: center; }
+    .stat-number { font-size: 18px; font-weight: 700; color: var(--primary); }
+    .stat-label  { font-size: 10px; color: var(--win-text-light); }
+
+    .badge { padding: 2px 6px; border-radius: 12px; font-size: 10px; font-weight: 600; }
+    .badge-success { background: #dff6dd; color: var(--success); }
+    .badge-danger  { background: #fde7e9; color: var(--danger); }
+    .badge-warning { background: #fff3cd; color: #856404; }
+
+    .falta-row { background-color: #ffebee !important; }
+    .falta-row td { background-color: #ffebee; color: var(--danger); }
+
+    /* ===== MODAL FULLSCREEN ===== */
+    .modal-fullscreen {
+      display: none; position: fixed; top:0; left:0; width:100%; height:100%;
+      background: rgba(0,0,0,0.5); z-index: 2000;
+      justify-content: center; align-items: center; padding: 20px;
+    }
+    .modal-fullscreen .modal-content {
+      background: var(--win-white); border-radius: 8px;
+      width: 100%; max-width: 1400px; height: 90vh;
+      display: flex; flex-direction: column; box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+    }
+    .modal-fullscreen .modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 20px; border-bottom: 1px solid var(--win-border); background: #f3f2f1;
+    }
+    .modal-fullscreen .modal-header h3 { font-size: 16px; font-weight: 600; }
+    .modal-fullscreen .modal-body { flex: 1; overflow-y: auto; padding: 20px; }
+    .modal-fullscreen .modal-footer {
+      padding: 16px 20px; border-top: 1px solid var(--win-border);
+      display: flex; justify-content: flex-end; gap: 12px; background: #f9f9f9;
     }
 
-    .btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 15px rgba(22,224,134,0.3);
+    /* ===== MODAL NORMAL ===== */
+    .modal {
+      display: none; position: fixed; top:0; left:0; width:100%; height:100%;
+      background: rgba(0,0,0,0.5); z-index: 1500;
+      justify-content: center; align-items: center; padding: 16px;
     }
-
-    .alert {
-      padding: 12px;
-      border-radius: 8px;
-      margin-top: 15px;
-      display: none;
-      background: rgba(231,76,60,0.15);
-      border-left: 4px solid var(--danger);
+    .modal .modal-content {
+      background: var(--win-white); border-radius: 8px;
+      width: 100%; max-width: 500px; max-height: 80vh; overflow-y: auto;
     }
-
-    /* PANEL PRINCIPAL */
-    .panel {
-      display: none;
+    .modal .modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 20px; border-bottom: 1px solid var(--win-border); background: #f3f2f1;
     }
+    .modal .modal-body   { padding: 16px 20px; }
+    .modal .modal-footer { padding: 16px 20px; border-top: 1px solid var(--win-border); display: flex; justify-content: flex-end; gap: 12px; }
+    .close-modal { background: transparent; border: none; font-size: 18px; cursor: pointer; width: 32px; height: 32px; border-radius: var(--radius); }
+    .close-modal:hover { background: #e1dfdd; }
 
-    .header {
-      background: rgba(255,255,255,0.05);
-      border-radius: var(--radius);
-      padding: 20px;
-      margin-bottom: 30px;
-      border: 1px solid rgba(22,224,134,0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    /* ===== CALENDARIO ===== */
+    .calendar-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; margin-top: 8px; }
+    .calendar-day {
+      aspect-ratio: 1; background: #f9f9f9; border: 1px solid var(--win-border);
+      border-radius: var(--radius); display: flex; flex-direction: column;
+      align-items: center; justify-content: center; font-size: 11px; cursor: pointer; transition: all 0.2s;
     }
+    .calendar-day:hover { background: #e6f2ff; border-color: var(--primary); }
+    .calendar-day.has-registros { background: #e6f2ff; font-weight: 600; }
+    .calendar-day .day-number { font-size: 12px; font-weight: 600; }
+    .calendar-day .day-count  { font-size: 9px; color: var(--win-text-light); }
 
-    .admin-badge {
-      background: rgba(22,224,134,0.1);
-      border: 1px solid var(--primary);
-      color: var(--primary);
-      padding: 8px 15px;
-      border-radius: 25px;
+    /* ===== TOAST / LOADING ===== */
+    .toast {
+      position: fixed; bottom: calc(var(--footer-height) + 16px); right: 16px;
+      padding: 12px 20px; background: var(--win-white);
+      border-left: 4px solid var(--success); border-radius: var(--radius);
+      font-size: 12px; z-index: 2500; display: none; box-shadow: var(--win-shadow-heavy);
     }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 30px;
+    .toast.error { border-left-color: var(--danger); }
+    .loading-overlay {
+      position: fixed; inset: 0; background: rgba(255,255,255,0.9);
+      display: none; justify-content: center; align-items: center;
+      z-index: 3000; flex-direction: column; gap: 12px;
     }
-
-    @media (max-width: 768px) {
-      .grid-2 { grid-template-columns: 1fr; }
-    }
-
-    .card {
-      background: rgba(255,255,255,0.05);
-      border-radius: var(--radius);
-      padding: 25px;
-      border: 1px solid rgba(22,224,134,0.1);
-    }
-
-    .card h2 {
-      color: var(--primary);
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    /* CÁMARA - SIN INVERTIR */
-    .camera-section {
-      margin-bottom: 20px;
-    }
-
-    .video-container {
-      position: relative;
-      width: 100%;
-      border-radius: var(--radius);
-      overflow: hidden;
-      border: 2px solid var(--primary);
-      background: #000;
-    }
-
-    #videoFeed {
-      width: 100%;
-      height: auto;
-      display: block;
-      /* SIN TRANSFORM - IMAGEN NORMAL */
-    }
-
-    .camera-overlay {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: rgba(0,0,0,0.7);
-      color: var(--primary);
-      padding: 5px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-      border: 1px solid var(--primary);
-    }
-
-    .detection-status {
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 8px;
-      background: rgba(255,255,255,0.03);
-      text-align: center;
-    }
-
-    .detected-face {
-      margin-top: 15px;
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .detected-face canvas {
-      border-radius: 8px;
-      border: 2px solid var(--primary);
-      width: 120px;
-      height: 120px;
-      object-fit: cover;
-    }
-
-    /* FORMULARIO HORIZONTAL */
-    .form-row {
-      display: flex;
-      gap: 15px;
-      margin-bottom: 15px;
-      flex-wrap: wrap;
-    }
-
-    .form-group {
-      flex: 1;
-      min-width: 200px;
-    }
-
-    .form-group label {
-      display: block;
-      color: var(--primary);
-      margin-bottom: 5px;
-      font-size: 13px;
-    }
-
-    .capture-btn {
-      background: var(--secondary);
-      margin-top: 15px;
-    }
-
-    /* TURNOS HORIZONTALES */
-    .turno-options {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .turno-option {
-      flex: 1;
-      min-width: 80px;
-    }
-
-    .turno-option input[type="radio"] {
-      display: none;
-    }
-
-    .turno-option label {
-      display: block;
-      text-align: center;
-      padding: 12px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.3s;
-      font-weight: 500;
-    }
-
-    .turno-option input[type="radio"]:checked + label {
-      background: var(--primary);
-      color: #000;
-      border-color: var(--primary);
-    }
-
-    .employees-list {
-      max-height: 600px;
-      overflow-y: auto;
-    }
-
-    .employee-item {
-      background: rgba(255,255,255,0.03);
-      border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 10px;
-      border: 1px solid rgba(22,224,134,0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .employee-info h3 {
-      color: var(--primary);
-      margin-bottom: 5px;
-    }
-
-    .employee-info p {
-      color: var(--text-muted);
-      font-size: 13px;
-    }
-
-    .employee-actions button {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text);
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-left: 5px;
-    }
-
-    .employee-actions button:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-    }
-
-    .delete-btn:hover {
-      border-color: var(--danger) !important;
-      color: var(--danger) !important;
-    }
-
-    .loading {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.95);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      flex-direction: column;
-      gap: 20px;
-    }
-
     .spinner {
-      width: 50px;
-      height: 50px;
-      border: 4px solid rgba(255,255,255,0.1);
-      border-top: 4px solid var(--primary);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
+      width: 32px; height: 32px;
+      border: 3px solid var(--win-border); border-top: 3px solid var(--primary);
+      border-radius: 50%; animation: spin 1s linear infinite;
     }
-
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    .toast {
-      position: fixed;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 12px 25px;
-      border-radius: 50px;
-      background: rgba(0,0,0,0.9);
-      border: 1px solid var(--primary);
-      color: white;
-      z-index: 1100;
-      display: none;
+    /* ===== PRINT ===== */
+    @media print {
+      body * { visibility: hidden; }
+      .modal-fullscreen .modal-content, .modal-fullscreen .modal-content * { visibility: visible; }
+      .modal-fullscreen .modal-content { position:absolute;left:0;top:0;width:100%;height:auto;margin:0;padding:20px;box-shadow:none;border:none; }
+      @page { size: landscape; }
+      .modal-fullscreen .modal-header, .modal-fullscreen .modal-footer { display: none !important; }
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .header-info { display: none; }
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .stats-compact { grid-template-columns: repeat(2,1fr); }
+    }
+    @media (max-width: 480px) {
+      .stats-compact { grid-template-columns: 1fr; }
+      .menu-icon { width: 28px; height: 28px; font-size: 16px; }
     }
   </style>
 </head>
 <body>
-  <!-- LOGIN ADMIN -->
+
+  <!-- ============================================================
+       LOGIN  (siempre visible hasta que se autentique)
+  ============================================================ -->
   <div id="loginScreen" class="login-container">
     <div class="login-card">
-      <div class="logo">
-        <i class="fas fa-user-tie"></i>
-      </div>
-      <h1>Registro de Empleados</h1>
-      <p>Inicia sesión como administrador</p>
-      
-      <input type="text" id="adminUser" class="input" placeholder="Usuario">
-      <input type="password" id="adminPass" class="input" placeholder="PIN">
-      <button id="loginBtn" class="btn">
-        <i class="fas fa-sign-in-alt"></i> Acceder
+      <div class="logo"><i class="fas fa-chart-bar"></i></div>
+      <h1>PlusMoney</h1>
+      <p>Reportes de Asistencia</p>
+      <input type="text"     id="username" class="form-control" placeholder="Usuario"  style="margin-bottom:12px;">
+      <input type="password" id="password" class="form-control" placeholder="PIN"      style="margin-bottom:12px;">
+      <button id="loginBtn" class="btn btn-primary" style="width:100%;">
+        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
       </button>
-      
-      <div id="loginAlert" class="alert">
-        <i class="fas fa-exclamation-circle"></i>
-        <span id="loginMessage"></span>
+      <div id="loginAlert" style="display:none;margin-top:12px;padding:10px;
+           background:#fde7e9;border-radius:4px;color:var(--danger);font-size:12px;">
+        <i class="fas fa-exclamation-circle"></i> <span id="loginMessage"></span>
       </div>
     </div>
   </div>
 
-  <!-- PANEL PRINCIPAL -->
-  <div id="mainPanel" class="panel">
-    <div class="header">
-      <h1><i class="fas fa-users"></i> <span id="companyName">Registro Facial</span></h1>
-      <div style="display: flex; gap: 15px; align-items: center;">
-        <span class="admin-badge" id="adminDisplay">Admin</span>
-        <button class="btn" id="logoutBtn" style="width: auto; padding: 8px 20px;">
-          <i class="fas fa-sign-out-alt"></i> Salir
-        </button>
-      </div>
+  <!-- ============================================================
+       HEADER  (solo visible con body.logged-in)
+  ============================================================ -->
+  <header class="app-header">
+    <div class="header-menu">
+      <button class="menu-icon active" data-page="reportes"      title="Reportes"><i class="fas fa-chart-bar"></i></button>
+      <button class="menu-icon"        data-page="tarifas"       title="Tarifas"><i class="fas fa-dollar-sign"></i></button>
+      <button class="menu-icon"        data-page="configuracion" title="Configuración"><i class="fas fa-cog"></i></button>
+      <a href="index.html" class="menu-icon" title="Cámara"><i class="fas fa-camera"></i></a>
     </div>
+    <div class="header-info">
+      <div class="header-datetime">
+        <span><i class="far fa-calendar-alt"></i> <span id="fechaActual"></span></span>
+        <span><i class="far fa-clock"></i> <span id="horaActual"></span></span>
+      </div>
+      <span class="user-badge" id="adminName">Admin</span>
+      <button class="menu-icon" id="logoutBtn" title="Salir"><i class="fas fa-sign-out-alt"></i></button>
+    </div>
+  </header>
 
-    <div class="grid-2">
-      <!-- COLUMNA IZQUIERDA: CAPTURA FACIAL + FORMULARIO -->
+  <!-- ============================================================
+       FOOTER  (solo visible con body.logged-in)
+  ============================================================ -->
+  <footer class="app-footer">
+    <button class="footer-icon" onclick="mostrarPagina('reportes')"><i class="fas fa-chart-bar"></i><span>Reportes</span></button>
+    <button class="footer-icon" onclick="mostrarPagina('tarifas')"><i class="fas fa-dollar-sign"></i><span>Tarifas</span></button>
+    <button class="footer-icon calendar-btn" id="calendarFooterBtn">
+      <i class="fas fa-calendar-alt"></i><span>Calendario</span>
+      <span class="calendar-badge" id="calendarBadge" style="display:none;">0</span>
+    </button>
+    <button class="footer-icon" onclick="mostrarPagina('configuracion')"><i class="fas fa-cog"></i><span>Config</span></button>
+    <button class="footer-icon" id="logoutFooterBtn"><i class="fas fa-sign-out-alt"></i><span>Salir</span></button>
+  </footer>
+
+  <!-- ============================================================
+       CONTENIDO PRINCIPAL  (solo visible con body.logged-in)
+  ============================================================ -->
+  <div class="main-container">
+
+    <!-- PÁGINA REPORTES -->
+    <div id="pageReportes" class="page active">
       <div class="card">
-        <h2><i class="fas fa-camera"></i> Capturar Rostro</h2>
-        
-        <div class="camera-section">
-          <div class="video-container">
-            <video id="videoFeed" autoplay muted playsinline></video>
-            <div class="camera-overlay">
-              <i class="fas fa-sync-alt"></i> TensorFlow.js
-            </div>
-          </div>
-
-          <div class="detection-status" id="detectionStatus">
-            <i class="fas fa-info-circle"></i> Inicializando...
-          </div>
-
-          <div class="detected-face" id="detectedFace"></div>
-
-          <button class="btn capture-btn" id="captureBtn" disabled>
-            <i class="fas fa-camera"></i> Capturar Rostro
-          </button>
-        </div>
-
-        <!-- FORMULARIO HORIZONTAL -->
-        <form id="employeeForm">
-          <div class="form-row">
-            <div class="form-group">
-              <label><i class="fas fa-id-card"></i> Código</label>
-              <input type="text" id="empCode" class="input" placeholder="EMP001" required>
-            </div>
-
-            <div class="form-group">
-              <label><i class="fas fa-user"></i> Nombre</label>
-              <input type="text" id="empName" class="input" placeholder="Juan Pérez" required>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label><i class="fas fa-lock"></i> PIN</label>
-              <input type="text" id="empPin" class="input" placeholder="1234" required>
-            </div>
-
-            <div class="form-group">
-              <label><i class="fas fa-envelope"></i> Email</label>
-              <input type="email" id="empEmail" class="input" placeholder="correo@empresa.com">
-            </div>
-          </div>
-
-          <!-- TURNOS HORIZONTALES -->
+        <div class="card-header"><h2><i class="fas fa-filter"></i> Filtrar Registros</h2></div>
+        <div class="grid-2">
+          <div class="form-group"><label>FECHA INICIO</label><input type="date" id="fechaInicio" class="form-control"></div>
+          <div class="form-group"><label>FECHA FIN</label><input type="date" id="fechaFin" class="form-control"></div>
           <div class="form-group">
-            <label><i class="fas fa-clock"></i> Horas de Turno</label>
-            <div class="turno-options">
-              <div class="turno-option">
-                <input type="radio" name="turno" id="turno8" value="8" checked>
-                <label for="turno8">8 Horas</label>
-              </div>
-              <div class="turno-option">
-                <input type="radio" name="turno" id="turno12" value="12">
-                <label for="turno12">12 Horas</label>
-              </div>
-            </div>
+            <label>ESTADO</label>
+            <select id="filtroEstado" class="form-control">
+              <option value="todos">Todos</option>
+              <option value="completo">Completos</option>
+              <option value="incompleto">Incompletos</option>
+            </select>
           </div>
-        </form>
+          <div class="form-group" style="display:flex;gap:8px;align-items:flex-end;">
+            <button class="btn btn-primary" onclick="aplicarFiltros()"><i class="fas fa-check"></i> Aplicar</button>
+            <button class="btn" style="background:#f3f2f1;" onclick="limpiarFiltros()"><i class="fas fa-undo"></i> Limpiar</button>
+          </div>
+        </div>
       </div>
 
-      <!-- COLUMNA DERECHA: LISTA DE EMPLEADOS -->
       <div class="card">
-        <h2><i class="fas fa-list"></i> Empleados Registrados</h2>
-        
-        <div class="employees-list" id="employeesList">
-          <div style="text-align: center; padding: 30px; color: var(--text-muted);">
-            <i class="fas fa-spinner fa-spin fa-2x"></i>
-            <p>Cargando...</p>
+        <div class="card-header"><h2><i class="fas fa-download"></i> Exportar Datos</h2></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="exportarExcel()"><i class="fas fa-file-excel"></i> Excel</button>
+          <button class="btn" style="background:var(--danger);color:white;" onclick="exportarPDFGeneral()"><i class="fas fa-file-pdf"></i> PDF</button>
+          <button class="btn" style="background:var(--warning);" onclick="guardarTodosEnFirebase()"><i class="fas fa-cloud-upload-alt"></i> Guardar Todo</button>
+        </div>
+      </div>
+
+      <div class="stats-compact">
+        <div class="stat-item"><div class="stat-number" id="totalRegistros">0</div><div class="stat-label">Total Registros</div></div>
+        <div class="stat-item"><div class="stat-number" id="totalEntradas">0</div><div class="stat-label">Entradas</div></div>
+        <div class="stat-item"><div class="stat-number" id="totalSalidas">0</div><div class="stat-label">Salidas</div></div>
+        <div class="stat-item"><div class="stat-number" id="totalPares">0</div><div class="stat-label">Completos</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h2><i class="fas fa-users"></i> Colaboradores</h2></div>
+        <div class="table-container">
+          <table>
+            <thead><tr><th>COLABORADOR</th><th>HORAS EXTRAS</th><th>VALOR EXTRAS</th><th>ACCIÓN</th></tr></thead>
+            <tbody id="tablaBody">
+              <tr><td colspan="4" style="text-align:center;padding:24px;">
+                <i class="fas fa-inbox" style="font-size:32px;"></i><div>Inicia sesión para ver los reportes</div>
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PÁGINA TARIFAS -->
+    <div id="pageTarifas" class="page">
+      <div class="card">
+        <div class="card-header">
+          <h2><i class="fas fa-dollar-sign"></i> Tarifas por Hora Extra</h2>
+          <button class="btn btn-primary" onclick="guardarTarifas()"><i class="fas fa-save"></i> Guardar Todo</button>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead><tr><th>CÓDIGO</th><th>NOMBRE</th><th>TURNO</th><th>TARIFA/H EXTRA</th><th>TOTAL EXTRAS</th><th>TOTAL A PAGAR</th></tr></thead>
+            <tbody id="tablaTarifas"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PÁGINA CONFIGURACIÓN -->
+    <div id="pageConfiguracion" class="page">
+      <div class="card">
+        <div class="card-header"><h2><i class="fas fa-calendar-alt"></i> Configuración de Cierres de Quincena</h2></div>
+        <div class="grid-2">
+          <div class="form-group"><label>PRIMER CIERRE (DÍA)</label><input type="number" id="primerCierre" class="form-control" min="1" max="31" value="10"></div>
+          <div class="form-group"><label>SEGUNDO CIERRE (DÍA)</label><input type="number" id="segundoCierre" class="form-control" min="1" max="31" value="25"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:16px;">
+          <button class="btn btn-primary" onclick="guardarConfiguracionQuincena()"><i class="fas fa-save"></i> Guardar</button>
+          <button class="btn" onclick="calcularQuincenas()"><i class="fas fa-calculator"></i> Calcular</button>
+          <button class="btn" style="background:var(--danger);color:white;" onclick="exportarQuincenasPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+        </div>
+      </div>
+      <div id="quincenaSummary" class="card" style="display:none;">
+        <div class="card-header"><h3><i class="fas fa-chart-pie"></i> Resumen de Quincenas</h3></div>
+        <div id="quincenaGrid" class="grid-3"></div>
+        <div id="totalGeneralQuincenas" style="margin-top:16px;text-align:right;font-weight:700;"></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3><i class="fas fa-history"></i> Historial de Cierres</h3></div>
+        <div class="table-container">
+          <table>
+            <thead><tr><th>FECHA CIERRE</th><th>PERÍODO</th><th>TOTAL EXTRAS</th><th>VER</th></tr></thead>
+            <tbody id="tablaHistorialQuincenas"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main-container -->
+
+  <!-- ============================================================  MODALES  ============================================================ -->
+
+  <!-- DETALLE COLABORADOR -->
+  <div id="detalleModal" class="modal-fullscreen">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-user"></i> <span id="modalTitulo"></span></h3>
+        <button class="close-modal" onclick="cerrarModalFull('detalleModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="grid-3" style="margin-bottom:16px;">
+          <div class="stat-item"><div class="stat-label">CÓDIGO</div><div class="stat-number" id="modalCodigo">-</div></div>
+          <div class="stat-item"><div class="stat-label">TURNO</div><div class="stat-number" id="modalTurno">-</div></div>
+          <div class="stat-item"><div class="stat-label">TOTAL EXTRAS</div><div class="stat-number" id="modalTotalExtras">0h</div></div>
+        </div>
+        <div style="margin-bottom:16px;">
+          <h4 style="font-size:13px;margin-bottom:8px;">Último Registro</h4>
+          <div id="modalRegistros" style="background:#f9f9f9;padding:12px;border-radius:4px;"></div>
+        </div>
+        <div style="margin-bottom:16px;">
+          <h4 style="font-size:13px;margin-bottom:8px;">Historial Completo</h4>
+          <div class="table-container">
+            <table>
+              <thead><tr><th>FECHA</th><th>ENTRADA</th><th>SALIDA</th><th>HORAS</th><th>EXTRAS</th><th>ESTADO</th></tr></thead>
+              <tbody id="modalTablaBody"></tbody>
+            </table>
           </div>
+        </div>
+        <div>
+          <h4 style="font-size:13px;margin-bottom:8px;">Totales por Quincena</h4>
+          <div id="modalQuincenaGrid" class="grid-3"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="imprimirModal()"><i class="fas fa-print"></i> Imprimir</button>
+        <button class="btn" style="background:var(--success);color:white;" id="btnGuardarRegistro"><i class="fas fa-save"></i> Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CALENDARIO -->
+  <div id="calendarModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-calendar-alt"></i> Calendario de Asistencia</h3>
+        <button class="close-modal" onclick="cerrarModal('calendarModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <button class="btn" onclick="cambiarMes(-1)"><i class="fas fa-chevron-left"></i></button>
+          <span id="mesActual" style="font-weight:600;"></span>
+          <button class="btn" onclick="cambiarMes(1)"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETALLE DÍA -->
+  <div id="dayDetailModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-clock"></i> <span id="dayDetailTitle"></span></h3>
+        <button class="close-modal" onclick="cerrarModal('dayDetailModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="table-container">
+          <table>
+            <thead><tr><th>COLABORADOR</th><th>ENTRADA</th><th>SALIDA</th><th>HORAS</th><th>ESTADO</th></tr></thead>
+            <tbody id="dayDetailBody"></tbody>
+          </table>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- LOADING -->
-  <div class="loading" id="loading">
-    <div class="spinner"></div>
-    <div id="loadingText">Procesando...</div>
+  <!-- CONFIRM -->
+  <div id="confirmDialog" class="modal">
+    <div class="modal-content" style="max-width:400px;">
+      <div class="modal-header"><h3><i class="fas fa-exclamation-triangle" style="color:var(--danger);"></i> Confirmar</h3></div>
+      <div class="modal-body"><p id="confirmMessage">¿Estás seguro?</p></div>
+      <div class="modal-footer">
+        <button class="btn" id="confirmCancelBtn">Cancelar</button>
+        <button class="btn btn-primary" id="confirmAcceptBtn">Aceptar</button>
+      </div>
+    </div>
   </div>
 
-  <!-- TOAST -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div id="loadingText" style="font-size:13px;">Cargando...</div>
+  </div>
   <div class="toast" id="toast"></div>
 
+  <!-- ============================================================
+       JAVASCRIPT
+  ============================================================ -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-    import { 
-      getFirestore, 
-      collection, 
-      getDocs, 
-      addDoc, 
-      updateDoc,
-      deleteDoc,
-      doc,
-      query, 
-      where,
-      Timestamp
+    import {
+      getFirestore, collection, getDocs, query, where, orderBy,
+      writeBatch, addDoc, serverTimestamp, doc, setDoc, getDoc
     } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -506,423 +525,932 @@
       messagingSenderId: "136908102526",
       appId: "1:136908102526:web:d0a3bc1e3cb91a3fcab12f"
     };
-
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const db  = getFirestore(app);
 
-    // Elementos DOM
-    const loginScreen = document.getElementById('loginScreen');
-    const mainPanel = document.getElementById('mainPanel');
-    const adminUser = document.getElementById('adminUser');
-    const adminPass = document.getElementById('adminPass');
-    const loginBtn = document.getElementById('loginBtn');
-    const loginAlert = document.getElementById('loginAlert');
-    const loginMessage = document.getElementById('loginMessage');
-    const adminDisplay = document.getElementById('adminDisplay');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const employeesList = document.getElementById('employeesList');
-    const loading = document.getElementById('loading');
-    const loadingText = document.getElementById('loadingText');
-    const toast = document.getElementById('toast');
-    const video = document.getElementById('videoFeed');
-    const detectionStatus = document.getElementById('detectionStatus');
-    const detectedFace = document.getElementById('detectedFace');
-    const captureBtn = document.getElementById('captureBtn');
-    
-    // Variables
-    let currentAdmin = null;
-    let currentEmployees = [];
-    let model = null;
-    let videoStarted = false;
-    let detectionInterval = null;
-    let currentFaceData = null;
+    /* ---- Referencias DOM ---- */
+    const loginScreen    = document.getElementById('loginScreen');
+    const usernameInput  = document.getElementById('username');
+    const passwordInput  = document.getElementById('password');
+    const loginAlert     = document.getElementById('loginAlert');
+    const loginMessage   = document.getElementById('loginMessage');
+    const adminName      = document.getElementById('adminName');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const loadingText    = document.getElementById('loadingText');
+    const toastEl        = document.getElementById('toast');
+    const calendarBadge  = document.getElementById('calendarBadge');
 
-    // ============ FUNCIONES UTILIDAD ============
-    function showLoading(msg) {
-      loadingText.textContent = msg;
-      loading.style.display = 'flex';
-    }
+    /* ---- Estado global ---- */
+    let currentAdmin       = null;
+    let todosLosRegistros  = [];
+    let empleadosMap       = new Map();
+    let todosLosPares      = [];
+    let colaboradorActual  = null;
+    let tarifasMap         = new Map();
+    let configQuincena     = { primerCierre: 10, segundoCierre: 25 };
+    let currentMonth       = new Date();
+    let historialQuincenas = [];
 
-    function hideLoading() {
-      loading.style.display = 'none';
-    }
+    /* Umbral máximo de horas entre dos registros para que el 2º sea SALIDA del 1º */
+    const LIMITE_16H = 16;
+
+    /* ================================================================
+       UTILIDADES
+    ================================================================ */
+    const showLoading = msg => { loadingText.textContent = msg; loadingOverlay.style.display = 'flex'; };
+    const hideLoading = ()  => { loadingOverlay.style.display = 'none'; };
 
     function showToast(msg, type = 'success') {
-      toast.textContent = msg;
-      toast.style.background = type === 'success' ? 'rgba(22,224,134,0.95)' : 'rgba(231,76,60,0.95)';
-      toast.style.display = 'block';
-      setTimeout(() => toast.style.display = 'none', 3000);
+      toastEl.textContent = msg;
+      toastEl.className   = 'toast' + (type === 'error' ? ' error' : '');
+      toastEl.style.display = 'block';
+      setTimeout(() => toastEl.style.display = 'none', 3000);
     }
 
-    // ============ TENSORFLOW.JS - CARGAR MODELO ============
-    async function cargarModeloTensorFlow() {
-      try {
-        detectionStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando TensorFlow.js...';
-        model = await blazeface.load();
-        detectionStatus.innerHTML = '<i class="fas fa-check-circle" style="color: var(--primary);"></i> Modelo listo';
-        return true;
-      } catch (error) {
-        console.error('Error cargando modelo:', error);
-        detectionStatus.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i> Error cargando modelo';
-        return false;
-      }
-    }
-
-    // ============ INICIAR CÁMARA ============
-    async function iniciarCamara() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: { 
-            facingMode: 'user',
-            width: { ideal: 640 },
-            height: { ideal: 480 }
-          } 
-        });
-        video.srcObject = stream;
-        
-        return new Promise((resolve) => {
-          video.onloadedmetadata = () => {
-            video.play();
-            videoStarted = true;
-            resolve();
-          };
-        });
-      } catch (error) {
-        detectionStatus.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i> Error con la cámara';
-        throw error;
-      }
-    }
-
-    // ============ DETECCIÓN CON TENSORFLOW ============
-    async function detectarRostro() {
-      if (!model || !videoStarted || !video) return null;
-      
-      try {
-        const predictions = await model.estimateFaces(video, false);
-        
-        if (predictions.length > 0) {
-          const prediction = predictions[0];
-          const topLeft = prediction.topLeft;
-          const bottomRight = prediction.bottomRight;
-          
-          return {
-            box: {
-              x: topLeft[0],
-              y: topLeft[1],
-              width: bottomRight[0] - topLeft[0],
-              height: bottomRight[1] - topLeft[1]
-            },
-            confidence: prediction.probability[0]
-          };
-        }
-        return null;
-      } catch (error) {
-        return null;
-      }
-    }
-
-    // ============ INICIAR DETECCIÓN CONTINUA ============
-    function iniciarDeteccion() {
-      if (detectionInterval) clearInterval(detectionInterval);
-      
-      detectionInterval = setInterval(async () => {
-        if (!model || !videoStarted) return;
-
-        const face = await detectarRostro();
-        
-        if (face && face.confidence > 0.8) {
-          currentFaceData = face;
-          captureBtn.disabled = false;
-          detectionStatus.innerHTML = '<i class="fas fa-check-circle" style="color: var(--primary);"></i> Rostro detectado!';
-          
-          const canvas = document.createElement('canvas');
-          canvas.width = 120;
-          canvas.height = 120;
-          const ctx = canvas.getContext('2d');
-          
-          ctx.drawImage(
-            video,
-            face.box.x, face.box.y, face.box.width, face.box.height,
-            0, 0, 120, 120
-          );
-          
-          ctx.strokeStyle = '#16e086';
-          ctx.lineWidth = 2;
-          ctx.strokeRect(0, 0, 119, 119);
-          
-          detectedFace.innerHTML = '';
-          detectedFace.appendChild(canvas);
-        } else {
-          captureBtn.disabled = true;
-          detectionStatus.innerHTML = '<i class="fas fa-hourglass-half"></i> Buscando rostro...';
-          detectedFace.innerHTML = '';
-          currentFaceData = null;
-        }
-      }, 500);
-    }
-
-    // ============ LOGIN ADMIN ============
-    async function adminLogin(username, pin) {
-      showLoading('Verificando...');
-      
-      const q = query(
-        collection(db, "Collaborators"),
-        where("username", "==", username),
-        where("pin", "==", pin)
-      );
-      
-      const snapshot = await getDocs(q);
-      
-      if (snapshot.empty) {
-        throw new Error('Credenciales incorrectas');
-      }
-      
-      const data = snapshot.docs[0].data();
-      return {
-        uid: snapshot.docs[0].id,
-        username: data.username,
-        name: `${data.firstName || ''} ${data.lastName || ''}`.trim() || username,
-        company: data.company || 'Mi Empresa'
+    function showConfirm(message, onAccept) {
+      document.getElementById('confirmMessage').textContent = message;
+      document.getElementById('confirmDialog').style.display = 'flex';
+      document.getElementById('confirmAcceptBtn').onclick = () => {
+        document.getElementById('confirmDialog').style.display = 'none';
+        onAccept();
+      };
+      document.getElementById('confirmCancelBtn').onclick = () => {
+        document.getElementById('confirmDialog').style.display = 'none';
       };
     }
 
-    loginBtn.addEventListener('click', async () => {
-      const username = adminUser.value.trim();
-      const pin = adminPass.value.trim();
-      
-      if (!username || !pin) {
-        loginMessage.textContent = 'Complete todos los campos';
-        loginAlert.style.display = 'block';
-        return;
-      }
-      
+    window.cerrarModal     = id => document.getElementById(id).style.display = 'none';
+    window.cerrarModalFull = id => document.getElementById(id).style.display = 'none';
+
+    /* ---- Reloj ---- */
+    (function() {
+      const tick = () => {
+        const n = new Date();
+        document.getElementById('fechaActual').textContent =
+          n.toLocaleDateString('es-ES', {day:'2-digit', month:'2-digit', year:'numeric'});
+        document.getElementById('horaActual').textContent =
+          n.toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+      };
+      tick(); setInterval(tick, 1000);
+    })();
+
+    /* ---- Navegación ---- */
+    document.querySelectorAll('.menu-icon[data-page]').forEach(btn => {
+      btn.addEventListener('click', e => { e.preventDefault(); mostrarPagina(btn.dataset.page); });
+    });
+
+    window.mostrarPagina = pagina => {
+      if (!currentAdmin) return;
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(`page${pagina.charAt(0).toUpperCase() + pagina.slice(1)}`).classList.add('active');
+      document.querySelectorAll('.menu-icon[data-page]').forEach(b => b.classList.remove('active'));
+      document.querySelector(`.menu-icon[data-page="${pagina}"]`)?.classList.add('active');
+      if (pagina === 'tarifas')       cargarTarifas();
+      if (pagina === 'configuracion') cargarConfiguracionQuincena();
+    };
+
+    /* ---- Hora 12 h ---- */
+    function a12h(h24) {
+      if (!h24) return '---';
+      const [h, m] = h24.split(':');
+      let hh = parseInt(h);
+      const ap = hh >= 12 ? 'PM' : 'AM';
+      hh = hh % 12 || 12;
+      return `${String(hh).padStart(2,'0')}:${m} ${ap}`;
+    }
+
+    /* ---- Calcular horas: usa timestamps reales si existen, si no usa hora/fecha ---- */
+    function calcularHoras(entrada, salida) {
+      if (!entrada || !salida) return 0;
       try {
-        currentAdmin = await adminLogin(username, pin);
-        
-        adminDisplay.textContent = currentAdmin.name;
-        document.getElementById('companyName').textContent = currentAdmin.company;
-        
-        loginScreen.style.display = 'none';
-        mainPanel.style.display = 'block';
-        
-        showLoading('Cargando TensorFlow.js...');
-        const modeloOK = await cargarModeloTensorFlow();
-        
-        if (modeloOK) {
-          await iniciarCamara();
-          iniciarDeteccion();
+        // Maxima precision: usar timestamps reales
+        if (entrada.timestamp instanceof Date && salida.timestamp instanceof Date) {
+          const diff = salida.timestamp - entrada.timestamp;
+          return diff < 0 ? 0 : Math.round((diff / 3600000) * 100) / 100;
         }
-        
-        await cargarEmpleados();
-        
-        adminPass.value = '';
+        // Fallback: campos hora/fecha
+        if (!entrada.hora || !salida.hora) return 0;
+        const fe = entrada.fecha || '';
+        const fs = salida.fecha  || fe;
+        const de = new Date(`${fe}T${entrada.hora}`);
+        const ds = new Date(`${fs}T${salida.hora}`);
+        let diff = ds - de;
+        if (diff < 0) diff += 24 * 3600000;
+        return Math.round((diff / 3600000) * 100) / 100;
+      } catch { return 0; }
+    }
+
+    /* ================================================================
+       LOGIN / LOGOUT
+    ================================================================ */
+    async function authenticateUser(username, pin) {
+      showLoading('Verificando...');
+      const snap = await getDocs(query(
+        collection(db, 'Collaborators'),
+        where('username', '==', username),
+        where('pin',      '==', pin)
+      ));
+      if (snap.empty) throw new Error('Usuario o PIN incorrectos');
+      const d = snap.docs[0].data();
+      return {
+        uid: snap.docs[0].id,
+        username: d.username,
+        name: `${d.firstName||''} ${d.lastName||''}`.trim() || username
+      };
+    }
+
+    function activarSesion() {
+      adminName.textContent = currentAdmin.name;
+      loginScreen.classList.add('hidden');     // oculta el login
+      document.body.classList.add('logged-in'); // muestra header/footer/main
+    }
+
+    async function iniciarSesion(username, pin) {
+      try {
+        currentAdmin = await authenticateUser(username, pin);
+        sessionStorage.setItem('facial_currentUser', JSON.stringify(currentAdmin));
+        activarSesion();
+        await cargarConfiguracionQuincena();
+        await cargarRegistros();
+        await cargarTarifas();
         loginAlert.style.display = 'none';
         hideLoading();
-        showToast(`Bienvenido ${currentAdmin.name}`);
-        
-      } catch (error) {
+      } catch(err) {
         hideLoading();
-        loginMessage.textContent = error.message;
+        loginMessage.textContent = err.message;
         loginAlert.style.display = 'block';
       }
-    });
-
-    logoutBtn.addEventListener('click', () => {
-      if (detectionInterval) clearInterval(detectionInterval);
-      if (video.srcObject) {
-        video.srcObject.getTracks().forEach(t => t.stop());
-      }
-      
-      currentAdmin = null;
-      mainPanel.style.display = 'none';
-      loginScreen.style.display = 'flex';
-      adminUser.value = '';
-      adminPass.value = '';
-    });
-
-    // ============ CAPTURAR Y REGISTRAR ============
-    captureBtn.addEventListener('click', async () => {
-      if (!currentFaceData) {
-        showToast('No hay rostro detectado', 'error');
-        return;
-      }
-
-      const code = document.getElementById('empCode').value.trim();
-      const name = document.getElementById('empName').value.trim();
-      const pin = document.getElementById('empPin').value.trim();
-      const email = document.getElementById('empEmail').value.trim();
-      const turno = document.getElementById('turno8').checked ? 8 : 12;
-
-      if (!code || !name || !pin) {
-        showToast('Complete código, nombre y PIN', 'error');
-        return;
-      }
-
-      showLoading('Registrando empleado...');
-
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const imageData = canvas.toDataURL('image/jpeg', 0.9);
-
-        const nombreParts = name.split(' ');
-        const firstName = nombreParts[0] || '';
-        const lastName = nombreParts.slice(1).join(' ') || '';
-
-        const employeeData = {
-          username: code,
-          pin: pin,
-          firstName: firstName,
-          lastName: lastName,
-          email: email || '',
-          turnoHoras: turno,
-          fotoBase64: imageData,
-          adminId: currentAdmin.uid,
-          adminName: currentAdmin.name,
-          activo: true,
-          createdAt: Timestamp.now()
-        };
-
-        await addDoc(collection(db, "employees"), employeeData);
-        
-        document.getElementById('empCode').value = '';
-        document.getElementById('empName').value = '';
-        document.getElementById('empPin').value = '';
-        document.getElementById('empEmail').value = '';
-        document.getElementById('turno8').checked = true;
-        detectedFace.innerHTML = '';
-        captureBtn.disabled = true;
-        
-        await cargarEmpleados();
-        showToast('Empleado registrado exitosamente');
-        
-      } catch (error) {
-        console.error('Error:', error);
-        showToast('Error al registrar: ' + error.message, 'error');
-      } finally {
-        hideLoading();
-      }
-    });
-
-    // ============ CARGAR EMPLEADOS ============
-    async function cargarEmpleados() {
-      if (!currentAdmin) return;
-      
-      try {
-        const q = query(
-          collection(db, "employees"),
-          where("adminId", "==", currentAdmin.uid)
-        );
-        
-        const snapshot = await getDocs(q);
-        currentEmployees = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        
-        mostrarEmpleados();
-        
-      } catch (error) {
-        console.error('Error:', error);
-      }
     }
 
-    function mostrarEmpleados() {
-      if (currentEmployees.length === 0) {
-        employeesList.innerHTML = `
-          <div style="text-align: center; padding: 30px; color: var(--text-muted);">
-            <i class="fas fa-users" style="font-size: 48px; opacity: 0.3;"></i>
-            <p>No hay empleados registrados</p>
-          </div>
-        `;
-        return;
-      }
+    function logout() {
+      currentAdmin = null;
+      sessionStorage.removeItem('facial_currentUser');
+      document.body.classList.remove('logged-in'); // oculta header/footer/main
+      loginScreen.classList.remove('hidden');       // muestra login
+      usernameInput.value = ''; passwordInput.value = '';
+      todosLosRegistros = []; todosLosPares = [];
+      empleadosMap.clear(); tarifasMap.clear();
+      /* Resetear vista */
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById('pageReportes').classList.add('active');
+      document.querySelectorAll('.menu-icon[data-page]').forEach(b => b.classList.remove('active'));
+      document.querySelector('.menu-icon[data-page="reportes"]')?.classList.add('active');
+      document.getElementById('tablaBody').innerHTML =
+        '<tr><td colspan="4" style="text-align:center;">Inicia sesión para ver los datos</td></tr>';
+    }
 
-      let html = '';
-      currentEmployees.sort((a, b) => (a.username || '').localeCompare(b.username || ''));
+    document.getElementById('loginBtn').addEventListener('click', () => {
+      const u = usernameInput.value.trim(), p = passwordInput.value.trim();
+      if (!u || !p) { loginMessage.textContent = 'Complete todos los campos'; loginAlert.style.display = 'block'; return; }
+      iniciarSesion(u, p);
+    });
 
-      currentEmployees.forEach(emp => {
-        const turno = emp.turnoHoras || 8;
-        html += `
-          <div class="employee-item">
-            <div class="employee-info">
-              <h3>${emp.firstName || ''} ${emp.lastName || ''}</h3>
-              <p><i class="fas fa-id-card"></i> ${emp.username || 'N/A'} | <i class="fas fa-clock"></i> ${turno}h</p>
-            </div>
-            <div class="employee-actions">
-              <button onclick="window.editarEmpleado('${emp.id}')" title="Editar">
-                <i class="fas fa-edit"></i>
-              </button>
-              <button class="delete-btn" onclick="window.confirmarEliminar('${emp.id}')" title="Eliminar">
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
-          </div>
-        `;
+    ['logoutBtn','logoutFooterBtn'].forEach(id =>
+      document.getElementById(id)?.addEventListener('click', logout)
+    );
+
+    /* ================================================================
+       CONFIGURACIÓN QUINCENA
+    ================================================================ */
+    async function cargarConfiguracionQuincena() {
+      try {
+        const snap = await getDoc(doc(db,'configuracion','cierreQuincena'));
+        if (snap.exists()) {
+          configQuincena = snap.data();
+          document.getElementById('primerCierre').value  = configQuincena.primerCierre;
+          document.getElementById('segundoCierre').value = configQuincena.segundoCierre;
+        }
+      } catch(e) { console.error(e); }
+    }
+
+    window.guardarConfiguracionQuincena = async () => {
+      if (!currentAdmin) return;
+      const p1 = parseInt(document.getElementById('primerCierre').value);
+      const p2 = parseInt(document.getElementById('segundoCierre').value);
+      if (p1<1||p1>31||p2<1||p2>31) { showToast('Días inválidos','error'); return; }
+      showLoading('Guardando...');
+      try {
+        await setDoc(doc(db,'configuracion','cierreQuincena'),
+          { primerCierre:p1, segundoCierre:p2, actualizado:serverTimestamp(), guardadoPor:currentAdmin.uid });
+        configQuincena = { primerCierre:p1, segundoCierre:p2 };
+        showToast('Configuración guardada');
+      } catch { showToast('Error','error'); }
+      finally  { hideLoading(); }
+    };
+
+    /* ================================================================
+       CARGAR EMPLEADOS (desde colección Ponche)
+    ================================================================ */
+    async function cargarEmpleados() {
+      try {
+        const snap = await getDocs(query(collection(db,'Ponche'), where('collaboratorId','==',currentAdmin.uid)));
+        empleadosMap.clear();
+        snap.forEach(d => {
+          const data = d.data();
+          if (data.username) empleadosMap.set(data.username, {
+            nombre: `${data.firstName||''} ${data.lastName||''}`.trim() || data.username,
+            turnoHoras: parseFloat(data.turnoHoras) || 8
+          });
+        });
+        console.log(`Empleados cargados: ${empleadosMap.size}`);
+      } catch(e) { console.error(e); }
+    }
+
+    /* ================================================================
+       CARGAR REGISTROS DESDE FIREBASE
+    ================================================================ */
+    async function cargarRegistros() {
+      if (!currentAdmin) return;
+      showLoading('Cargando registros...');
+      try {
+        await cargarEmpleados();
+        const snap = await getDocs(query(collection(db,'facialAttendance'), orderBy('timestamp','asc')));
+
+        todosLosRegistros = snap.docs
+          .map(d => {
+            const data = d.data();
+            return {
+              id:               d.id,
+              ...data,
+              timestamp:        data.timestamp?.toDate() || new Date(),
+              /* Preservar explícitamente el campo type para procesarRegistros */
+              type:             data.type || null,
+              parId:            data.parId || null
+            };
+          })
+          .filter(r => r.collaboratorId === currentAdmin.uid);
+
+        console.log(`Registros del usuario: ${todosLosRegistros.length}`);
+        procesarRegistros();
+        await verificarCierreAutomatico();
+        await cargarHistorialQuincenas();
+      } catch(err) {
+        console.error(err);
+        showToast('Error al cargar: ' + err.message, 'error');
+      } finally { hideLoading(); }
+    }
+
+    /* ================================================================
+       EXTRAER HORA DESDE TIMESTAMP (siempre HH:MM:SS usando el Date real)
+       Garantiza que entrada y salida nunca muestren la misma hora aunque
+       el campo .hora del documento sea idéntico.
+    ================================================================ */
+    function horaDesdeTimestamp(ts) {
+      if (!ts || !(ts instanceof Date)) return null;
+      const h = String(ts.getHours()).padStart(2, '0');
+      const m = String(ts.getMinutes()).padStart(2, '0');
+      const s = String(ts.getSeconds()).padStart(2, '0');
+      return `${h}:${m}:${s}`;
+    }
+
+    function fechaDesdeTimestamp(ts) {
+      if (!ts || !(ts instanceof Date)) return null;
+      const y  = ts.getFullYear();
+      const mo = String(ts.getMonth() + 1).padStart(2, '0');
+      const d  = String(ts.getDate()).padStart(2, '0');
+      return `${y}-${mo}-${d}`;
+    }
+
+    /* ================================================================
+       PROCESAMIENTO DE REGISTROS — USANDO CAMPO 'type' DE FIREBASE
+       ---------------------------------------------------------------
+       El código de cámara (index.html) guarda en cada documento el
+       campo  type: 'entry' | 'exit'  determinado consultando Firebase
+       en el momento del registro.
+
+       ESTRATEGIA PRINCIPAL (cuando type está disponible):
+         Se agrupan los registros por collaboratorCode y se emparejan
+         usando el campo type:
+           - type='entry' → inicio de par (ENTRADA)
+           - type='exit'  → cierre del par más reciente sin salida (SALIDA)
+         Se usa el parId para emparejar exactamente entrada con salida.
+
+       ESTRATEGIA FALLBACK (registros sin campo type — datos legacy):
+         Si un registro no tiene type, se aplica la lógica alternada
+         original (posición impar = entrada, posición par = salida),
+         respetando el límite de 16 h entre dos registros consecutivos.
+    ================================================================ */
+    function procesarRegistros() {
+      /* 1. Agrupar por collaboratorCode */
+      const porColaborador = new Map();
+      todosLosRegistros.forEach(reg => {
+        if (!reg.collaboratorCode) return;
+        if (!porColaborador.has(reg.collaboratorCode))
+          porColaborador.set(reg.collaboratorCode, []);
+        porColaborador.get(reg.collaboratorCode).push(reg);
       });
 
-      employeesList.innerHTML = html;
+      const resultados = [];
+
+      porColaborador.forEach((registros, codigo) => {
+        /* 2. Ordenar cronológicamente */
+        const lista = [...registros].sort((a, b) => a.timestamp - b.timestamp);
+
+        const info   = empleadosMap.get(codigo) || { nombre: codigo, turnoHoras: 8 };
+        const turno  = parseFloat(info.turnoHoras) || 8;
+        const nombre = info.nombre || codigo;
+
+        /* Helper: construir objeto hora/fecha desde timestamp real */
+        function buildObj(reg) {
+          return {
+            fecha:     fechaDesdeTimestamp(reg.timestamp) || reg.fecha,
+            hora:      horaDesdeTimestamp(reg.timestamp)  || reg.hora,
+            timestamp: reg.timestamp
+          };
+        }
+
+        /* ── ESTRATEGIA A: todos los registros tienen campo 'type' ── */
+        const tienenType = lista.every(r => r.type === 'entry' || r.type === 'exit');
+
+        if (tienenType) {
+          /*
+           * Emparejar usando parId: cada 'entry' busca su 'exit' del mismo parId.
+           * Si no encuentra salida, queda como par pendiente.
+           */
+          const entradas = lista.filter(r => r.type === 'entry');
+          const salidas  = lista.filter(r => r.type === 'exit');
+
+          /* Mapa parId → registro de salida */
+          const salidaMap = new Map();
+          salidas.forEach(s => salidaMap.set(s.parId, s));
+
+          entradas.forEach(entrada => {
+            const entradaObj = buildObj(entrada);
+            const salidaReg  = salidaMap.get(entrada.parId);
+
+            if (salidaReg) {
+              const salidaObj  = buildObj(salidaReg);
+              const horasTrab  = (salidaReg.timestamp - entrada.timestamp) / 3600000;
+              resultados.push({
+                codigo, nombre, turno,
+                fecha:         entradaObj.fecha,
+                entrada:       entradaObj,
+                salida:        salidaObj,
+                completo:      true,
+                esFalta:       false,
+                turnoCompleto: horasTrab >= turno - 0.5
+              });
+            } else {
+              /* Entrada sin salida correspondiente → pendiente */
+              resultados.push({
+                codigo, nombre, turno,
+                fecha:         entradaObj.fecha,
+                entrada:       entradaObj,
+                salida:        null,
+                completo:      false,
+                esFalta:       false,
+                turnoCompleto: false
+              });
+            }
+          });
+
+        } else {
+          /* ── ESTRATEGIA B: fallback alternado para registros legacy sin 'type' ── */
+          let i = 0;
+          while (i < lista.length) {
+            const regA = lista[i];
+            const regB = lista[i + 1];
+            const entradaObj = buildObj(regA);
+
+            if (regB) {
+              const diffH = (regB.timestamp - regA.timestamp) / 3600000;
+              if (diffH <= LIMITE_16H) {
+                const salidaObj = buildObj(regB);
+                const horasTrab = diffH;
+                resultados.push({
+                  codigo, nombre, turno,
+                  fecha:         entradaObj.fecha,
+                  entrada:       entradaObj,
+                  salida:        salidaObj,
+                  completo:      true,
+                  esFalta:       false,
+                  turnoCompleto: horasTrab >= turno - 0.5
+                });
+                i += 2;
+              } else {
+                resultados.push({
+                  codigo, nombre, turno,
+                  fecha:         entradaObj.fecha,
+                  entrada:       entradaObj,
+                  salida:        null,
+                  completo:      false,
+                  esFalta:       false,
+                  turnoCompleto: false
+                });
+                i += 1;
+              }
+            } else {
+              resultados.push({
+                codigo, nombre, turno,
+                fecha:         entradaObj.fecha,
+                entrada:       entradaObj,
+                salida:        null,
+                completo:      false,
+                esFalta:       false,
+                turnoCompleto: false
+              });
+              i += 1;
+            }
+          }
+        }
+      });
+
+      /* 4. Ordenar DESC por timestamp de entrada */
+      todosLosPares = resultados.sort((a, b) => {
+        const tA = a.entrada?.timestamp || new Date(a.fecha);
+        const tB = b.entrada?.timestamp || new Date(b.fecha);
+        return tB - tA;
+      });
+
+      console.log(`Pares procesados: ${todosLosPares.length}`);
+      todosLosPares.slice(0, 5).forEach(p =>
+        console.log(`${p.nombre} | type=${p.entrada?.type||'legacy'} | E:${p.entrada?.hora} | S:${p.salida?.hora||'---'} | ${p.fecha}`)
+      );
+
+      mostrarTabla(todosLosPares);
+      actualizarEstadisticas(todosLosPares);
+      actualizarCalendario();
     }
 
-    window.editarEmpleado = async (id) => {
-      const emp = currentEmployees.find(e => e.id === id);
-      if (!emp) return;
-
-      const nuevoNombre = prompt('Nuevo nombre completo:', `${emp.firstName || ''} ${emp.lastName || ''}`.trim());
-      if (nuevoNombre === null) return;
-
-      const nuevoPin = prompt('Nuevo PIN:', emp.pin || '');
-      if (nuevoPin === null) return;
-
-      showLoading('Actualizando...');
-
-      try {
-        const nombreParts = nuevoNombre.split(' ');
-        const firstName = nombreParts[0] || '';
-        const lastName = nombreParts.slice(1).join(' ') || '';
-
-        await updateDoc(doc(db, "employees", id), {
-          firstName: firstName,
-          lastName: lastName,
-          pin: nuevoPin,
-          updatedAt: Timestamp.now()
-        });
-
-        await cargarEmpleados();
-        showToast('Empleado actualizado');
-      } catch (error) {
-        showToast('Error al actualizar', 'error');
-      } finally {
-        hideLoading();
+    /* ================================================================
+       MOSTRAR TABLA COLABORADORES
+    ================================================================ */
+    function mostrarTabla(resultados) {
+      if (!resultados || !resultados.length) {
+        document.getElementById('tablaBody').innerHTML =
+          '<tr><td colspan="4" style="text-align:center;">Sin datos</td></tr>';
+        return;
       }
-    };
 
-    window.confirmarEliminar = (id) => {
-      if (confirm('¿Eliminar este empleado?')) {
-        eliminarEmpleado(id);
-      }
-    };
+      const colMap = new Map();
+      resultados.forEach(r => {
+        if (!colMap.has(r.codigo))
+          colMap.set(r.codigo, { codigo:r.codigo, nombre:r.nombre, turno:r.turno, totalExtras:0 });
+        if (r.entrada && r.salida) {
+          const h = calcularHoras(r.entrada, r.salida);
+          colMap.get(r.codigo).totalExtras += Math.floor(Math.max(0, h - r.turno));
+        }
+      });
 
-    async function eliminarEmpleado(id) {
-      showLoading('Eliminando...');
-      
-      try {
-        await deleteDoc(doc(db, "employees", id));
-        await cargarEmpleados();
-        showToast('Empleado eliminado');
-      } catch (error) {
-        showToast('Error al eliminar', 'error');
-      } finally {
-        hideLoading();
-      }
+      let html = '';
+      colMap.forEach(col => {
+        const tarifa = tarifasMap.get(col.codigo) || 0;
+        html += `
+          <tr>
+            <td><strong>${col.nombre}</strong><br><small>${col.codigo}</small></td>
+            <td>${col.totalExtras > 0 ? '+'+col.totalExtras+'h' : '0h'}</td>
+            <td>$${(col.totalExtras * tarifa).toFixed(2)}</td>
+            <td><button class="btn btn-primary" style="padding:4px 8px;font-size:11px;"
+                onclick='verDetalle("${col.codigo}")'>
+                <i class="fas fa-eye"></i> Ver</button></td>
+          </tr>`;
+      });
+      document.getElementById('tablaBody').innerHTML = html;
     }
 
-    adminPass.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') loginBtn.click();
+    function actualizarEstadisticas(res) {
+      document.getElementById('totalRegistros').textContent = todosLosRegistros.length;
+      document.getElementById('totalEntradas').textContent  = res.filter(r => r.entrada).length;
+      document.getElementById('totalSalidas').textContent   = res.filter(r => r.salida).length;
+      document.getElementById('totalPares').textContent     = res.filter(r => r.completo).length;
+    }
+
+    /* ================================================================
+       TARIFAS
+    ================================================================ */
+    async function cargarTarifas() {
+      if (!currentAdmin) return;
+      try {
+        const snap = await getDocs(collection(db,'tarifasExtras'));
+        tarifasMap.clear();
+        snap.forEach(d => tarifasMap.set(d.id, d.data().tarifa));
+        mostrarTablaTarifas();
+      } catch(e) { console.error(e); }
+    }
+
+    function mostrarTablaTarifas() {
+      const colMap = new Map();
+      todosLosPares.forEach(r => {
+        if (!colMap.has(r.codigo))
+          colMap.set(r.codigo, { codigo:r.codigo, nombre:r.nombre, turno:r.turno, totalExtras:0 });
+        if (r.entrada && r.salida) {
+          const h = calcularHoras(r.entrada, r.salida);
+          colMap.get(r.codigo).totalExtras += Math.floor(Math.max(0, h - r.turno));
+        }
+      });
+      let html = '';
+      colMap.forEach(col => {
+        const tarifa = tarifasMap.get(col.codigo) || 0;
+        html += `
+          <tr>
+            <td>${col.codigo}</td><td>${col.nombre}</td><td>${col.turno}h</td>
+            <td><input type="number" class="form-control" style="width:100px;"
+                 value="${tarifa}" step="0.5" min="0"
+                 onchange="actualizarTarifa('${col.codigo}',this.value)"></td>
+            <td>${col.totalExtras}h</td>
+            <td>$${(col.totalExtras * tarifa).toFixed(2)}</td>
+          </tr>`;
+      });
+      document.getElementById('tablaTarifas').innerHTML = html;
+    }
+
+    window.actualizarTarifa = (cod, val) => tarifasMap.set(cod, parseFloat(val)||0);
+
+    window.guardarTarifas = async () => {
+      if (!currentAdmin) return;
+      showLoading('Guardando tarifas...');
+      try {
+        const batch = writeBatch(db);
+        tarifasMap.forEach((t, cod) =>
+          batch.set(doc(db,'tarifasExtras',cod),
+            { tarifa:t, actualizado:serverTimestamp(), guardadoPor:currentAdmin.uid })
+        );
+        await batch.commit();
+        showToast('Tarifas guardadas');
+        mostrarTablaTarifas();
+      } catch { showToast('Error','error'); }
+      finally  { hideLoading(); }
+    };
+
+    /* ================================================================
+       VER DETALLE COLABORADOR
+    ================================================================ */
+    window.verDetalle = codigo => {
+      if (!currentAdmin) return;
+      colaboradorActual = codigo;
+      const info = empleadosMap.get(codigo) || { nombre:codigo, turnoHoras:8 };
+      const regs = todosLosPares.filter(p => p.codigo === codigo)
+                                .sort((a,b) => b.fecha.localeCompare(a.fecha));
+
+      document.getElementById('modalTitulo').textContent    = info.nombre || codigo;
+      document.getElementById('modalCodigo').textContent    = codigo;
+      document.getElementById('modalTurno').textContent     = (info.turnoHoras||8)+'h';
+
+      let totalExtras = 0;
+      regs.forEach(r => {
+        if (r.entrada && r.salida) {
+          const h = calcularHoras(r.entrada, r.salida);
+          totalExtras += Math.floor(Math.max(0, h - r.turno));
+        }
+      });
+      document.getElementById('modalTotalExtras').textContent = totalExtras+'h';
+
+      /* Último registro */
+      const ult = regs[0];
+      if (ult) {
+        const h = ult.salida ? calcularHoras(ult.entrada, ult.salida) : 0;
+        document.getElementById('modalRegistros').innerHTML = `
+          <div><strong>Fecha:</strong> ${ult.fecha}</div>
+          <div><strong>Entrada:</strong> ${a12h(ult.entrada?.hora)}</div>
+          <div><strong>Salida:</strong> ${ult.salida ? a12h(ult.salida.hora) : 'Pendiente'}</div>
+          <div><strong>Horas:</strong> ${h.toFixed(2)}h</div>
+          <div><strong>Estado:</strong> ${ult.turnoCompleto?'Completo':ult.completo?'Incompleto':'Pendiente'}</div>`;
+      }
+
+      /* Historial */
+      let histHtml = '';
+      regs.forEach(r => {
+        const h   = r.salida ? calcularHoras(r.entrada, r.salida) : 0;
+        const ex  = Math.floor(Math.max(0, h - r.turno));
+        const est = r.turnoCompleto?'Completo':r.completo?'Incompleto':'Pendiente';
+        const cls = r.turnoCompleto?'badge-success':r.completo?'badge-warning':'badge-danger';
+        histHtml += `
+          <tr>
+            <td>${r.fecha}</td>
+            <td>${a12h(r.entrada?.hora)}</td>
+            <td>${r.salida ? a12h(r.salida.hora) : '---'}</td>
+            <td>${h.toFixed(2)}h</td><td>${ex}h</td>
+            <td><span class="badge ${cls}">${est}</span></td>
+          </tr>`;
+      });
+      document.getElementById('modalTablaBody').innerHTML = histHtml;
+
+      /* Quincenas del colaborador */
+      const qMap = new Map();
+      regs.forEach(r => {
+        if (!r.entrada || !r.salida) return;
+        const f=new Date(r.fecha), dia=f.getDate(), mes=f.getMonth()+1, año=f.getFullYear();
+        const h  = calcularHoras(r.entrada, r.salida);
+        const ex = Math.floor(Math.max(0, h - r.turno));
+        let per  = '';
+        if (dia > configQuincena.primerCierre && dia <= configQuincena.segundoCierre) {
+          per = `2ª Quin. ${mes}/${año}`;
+        } else {
+          let mq=dia<=configQuincena.primerCierre?mes:mes+1, aq=año;
+          if(mq>12){mq=1;aq++;}
+          per = `1ª Quin. ${mq}/${aq}`;
+        }
+        qMap.set(per, (qMap.get(per)||0) + ex);
+      });
+      let qHtml = '';
+      qMap.forEach((t,p) =>
+        qHtml += `<div class="stat-item"><div class="stat-label">${p}</div><div class="stat-number">${t}h</div></div>`
+      );
+      document.getElementById('modalQuincenaGrid').innerHTML = qHtml || '<p>Sin datos</p>';
+
+      document.getElementById('detalleModal').style.display = 'flex';
+    };
+
+    /* ================================================================
+       CALENDARIO
+    ================================================================ */
+    function actualizarCalendario() {
+      const hoy   = new Date().toISOString().split('T')[0];
+      const count = todosLosPares.filter(r => r.fecha === hoy).length;
+      calendarBadge.style.display = count > 0 ? 'block' : 'none';
+      calendarBadge.textContent   = count;
+    }
+
+    document.getElementById('calendarFooterBtn').addEventListener('click', () => {
+      if (!currentAdmin) return;
+      mostrarCalendario();
     });
+
+    function mostrarCalendario() {
+      const año = currentMonth.getFullYear(), mes = currentMonth.getMonth();
+      document.getElementById('mesActual').textContent =
+        currentMonth.toLocaleDateString('es-ES',{month:'long',year:'numeric'});
+
+      const inicio = new Date(año,mes,1).getDay();
+      const total  = new Date(año,mes+1,0).getDate();
+      const dias   = ['Do','Lu','Ma','Mi','Ju','Vi','Sa'];
+      let html = dias.map(d=>`<div style="text-align:center;font-weight:600;">${d}</div>`).join('');
+      for(let i=0;i<inicio;i++) html+='<div></div>';
+      for(let d=1;d<=total;d++){
+        const f=`${año}-${String(mes+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const c=todosLosPares.filter(r=>r.fecha===f).length;
+        html+=`<div class="calendar-day ${c>0?'has-registros':''}" onclick="verDia('${f}')">
+          <span class="day-number">${d}</span>${c>0?`<span class="day-count">${c}</span>`:''}
+        </div>`;
+      }
+      document.getElementById('calendarGrid').innerHTML = html;
+      document.getElementById('calendarModal').style.display = 'flex';
+    }
+
+    window.cambiarMes = d => { currentMonth.setMonth(currentMonth.getMonth()+d); mostrarCalendario(); };
+
+    window.verDia = fecha => {
+      const regs = todosLosPares.filter(r => r.fecha===fecha);
+      document.getElementById('dayDetailTitle').textContent = `Registros del ${fecha}`;
+      let html='';
+      regs.forEach(r=>{
+        const h=r.salida?calcularHoras(r.entrada,r.salida):0;
+        const est=r.turnoCompleto?'Completo':r.completo?'Incompleto':'Pendiente';
+        html+=`<tr>
+          <td>${r.nombre}</td>
+          <td>${a12h(r.entrada?.hora)}</td>
+          <td>${r.salida?a12h(r.salida.hora):'---'}</td>
+          <td>${h.toFixed(2)}h</td>
+          <td><span class="badge ${r.turnoCompleto?'badge-success':r.completo?'badge-warning':'badge-danger'}">${est}</span></td>
+        </tr>`;
+      });
+      document.getElementById('dayDetailBody').innerHTML = html||'<tr><td colspan="5">Sin registros</td></tr>';
+      document.getElementById('dayDetailModal').style.display='flex';
+      document.getElementById('calendarModal').style.display='none';
+    };
+
+    /* ================================================================
+       QUINCENAS
+    ================================================================ */
+    async function verificarCierreAutomatico() {
+      const hoy=new Date(), dia=hoy.getDate();
+      if(dia===configQuincena.primerCierre||dia===configQuincena.segundoCierre){
+        const f=hoy.toISOString().split('T')[0];
+        const snap=await getDocs(query(collection(db,'historialQuincenas'),where('fecha','==',f)));
+        if(snap.empty) await guardarCierreQuincena();
+      }
+    }
+
+    async function guardarCierreQuincena(){
+      const hoy=new Date(),dia=hoy.getDate(),mes=hoy.getMonth()+1,año=hoy.getFullYear();
+      let per='',fi='',ff=hoy.toISOString().split('T')[0];
+      if(dia===configQuincena.primerCierre){
+        per=`1ª Quincena ${mes}/${año}`;
+        fi=new Date(año,mes-1,configQuincena.segundoCierre+1).toISOString().split('T')[0];
+      } else {
+        per=`2ª Quincena ${mes}/${año}`;
+        fi=new Date(año,mes-1,configQuincena.primerCierre+1).toISOString().split('T')[0];
+      }
+      const extras=new Map();
+      todosLosPares.forEach(r=>{
+        if(r.fecha>=fi&&r.fecha<=ff&&r.entrada&&r.salida){
+          const h=calcularHoras(r.entrada,r.salida);
+          extras.set(r.codigo,(extras.get(r.codigo)||0)+Math.floor(Math.max(0,h-r.turno)));
+        }
+      });
+      try{
+        await addDoc(collection(db,'historialQuincenas'),{
+          fecha:ff,periodo:per,fechaInicio:fi,fechaFin:ff,
+          totalExtras:[...extras.values()].reduce((a,b)=>a+b,0),
+          colaboradores:Object.fromEntries(extras),
+          creado:serverTimestamp(),creadoPor:currentAdmin.uid
+        });
+        showToast(`Cierre de ${per} guardado`);
+        await cargarHistorialQuincenas();
+      } catch(e){ console.error(e); }
+    }
+
+    async function cargarHistorialQuincenas(){
+      try{
+        const snap=await getDocs(query(collection(db,'historialQuincenas'),orderBy('fecha','desc')));
+        historialQuincenas=snap.docs.map(d=>({id:d.id,...d.data()}));
+        let html='';
+        historialQuincenas.forEach(h=>{
+          html+=`<tr><td>${h.fecha}</td><td>${h.periodo}</td><td>${h.totalExtras}h</td>
+            <td><button class="btn btn-primary" style="padding:2px 6px;"
+                onclick="verDetalleQuincena('${h.id}')"><i class="fas fa-eye"></i></button></td></tr>`;
+        });
+        document.getElementById('tablaHistorialQuincenas').innerHTML=html||'<tr><td colspan="4">Sin historial</td></tr>';
+      } catch(e){ console.error(e); }
+    }
+
+    window.calcularQuincenas = () => {
+      if(!currentAdmin) return;
+      const qMap=new Map();
+      todosLosPares.forEach(r=>{
+        if(!r.entrada||!r.salida) return;
+        const f=new Date(r.fecha),dia=f.getDate(),mes=f.getMonth()+1,año=f.getFullYear();
+        const h=calcularHoras(r.entrada,r.salida),ex=Math.floor(Math.max(0,h-r.turno));
+        let per='';
+        if(dia>configQuincena.primerCierre&&dia<=configQuincena.segundoCierre){per=`2ª Quincena ${mes}/${año}`;}
+        else{let mq=dia<=configQuincena.primerCierre?mes:mes+1,aq=año;if(mq>12){mq=1;aq++;}per=`1ª Quincena ${mq}/${aq}`;}
+        qMap.set(per,(qMap.get(per)||0)+ex);
+      });
+      let html='',total=0;
+      qMap.forEach((t,p)=>{html+=`<div class="stat-item"><div class="stat-label">${p}</div><div class="stat-number">${t}h</div></div>`;total+=t;});
+      document.getElementById('quincenaGrid').innerHTML=html;
+      document.getElementById('totalGeneralQuincenas').innerHTML=`TOTAL GENERAL: ${total}h`;
+      document.getElementById('quincenaSummary').style.display='block';
+    };
+
+    window.exportarQuincenasPDF = async () => {
+      if(!currentAdmin||!todosLosPares.length){showToast('Sin datos','error');return;}
+      showLoading('Generando PDF...');
+      try{
+        const {jsPDF}=window.jspdf,pdoc=new jsPDF('l','mm','a4');
+        pdoc.setFontSize(18);pdoc.text('Reporte de Quincenas - PlusMoney',14,20);
+        pdoc.setFontSize(10);pdoc.text(`Generado: ${new Date().toLocaleString()}`,14,28);
+        pdoc.text(`Por: ${currentAdmin.name}`,14,34);
+        const qMap=new Map();
+        todosLosPares.forEach(r=>{
+          if(!r.entrada||!r.salida) return;
+          const f=new Date(r.fecha),dia=f.getDate(),mes=f.getMonth()+1,año=f.getFullYear();
+          const h=calcularHoras(r.entrada,r.salida),ex=Math.floor(Math.max(0,h-r.turno));
+          let per='';
+          if(dia>configQuincena.primerCierre&&dia<=configQuincena.segundoCierre){per=`2ª Quincena ${mes}/${año}`;}
+          else{let mq=dia<=configQuincena.primerCierre?mes:mes+1,aq=año;if(mq>12){mq=1;aq++;}per=`1ª Quincena ${mq}/${aq}`;}
+          if(!qMap.has(per)) qMap.set(per,new Map());
+          qMap.get(per).set(r.codigo,(qMap.get(per).get(r.codigo)||0)+ex);
+        });
+        let y=44;
+        qMap.forEach((cm,per)=>{
+          if(y>180){pdoc.addPage();y=20;}
+          pdoc.setFontSize(12);pdoc.setTextColor(0,120,212);pdoc.text(per,14,y);
+          const data=[];let tp=0;
+          cm.forEach((ex,cod)=>{data.push([cod,empleadosMap.get(cod)?.nombre||cod,ex+'h']);tp+=ex;});
+          data.push(['TOTAL','',tp+'h']);
+          pdoc.autoTable({startY:y+4,head:[['Código','Nombre','Horas Extras']],body:data,theme:'grid',headStyles:{fillColor:[0,120,212]},styles:{fontSize:9}});
+          y=pdoc.lastAutoTable.finalY+10;
+        });
+        pdoc.save(`Quincenas_${new Date().toISOString().split('T')[0]}.pdf`);
+        showToast('PDF generado');
+      } catch{showToast('Error','error');}
+      finally{hideLoading();}
+    };
+
+    /* ================================================================
+       EXPORTACIONES
+    ================================================================ */
+    window.exportarExcel = () => {
+      if(!currentAdmin||!todosLosPares.length){showToast('Sin datos','error');return;}
+      const datos=[];
+      todosLosPares.forEach(r=>{
+        const h=r.salida?calcularHoras(r.entrada,r.salida):0;
+        const ex=Math.floor(Math.max(0,h-r.turno));
+        datos.push({
+          Código:r.codigo,Nombre:r.nombre,Fecha:r.fecha,
+          Entrada:r.entrada?.hora||'---',Salida:r.salida?.hora||'---',
+          Horas:h.toFixed(2),Extras:ex,
+          Estado:r.turnoCompleto?'Completo':r.completo?'Incompleto':'Pendiente'
+        });
+      });
+      const ws=XLSX.utils.json_to_sheet(datos),wb=XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb,ws,'Asistencia');
+      XLSX.writeFile(wb,`Asistencia_${new Date().toISOString().split('T')[0]}.xlsx`);
+    };
+
+    window.exportarPDFGeneral = async () => {
+      if(!currentAdmin||!todosLosPares.length){showToast('Sin datos','error');return;}
+      showLoading('Generando PDF...');
+      try{
+        const {jsPDF}=window.jspdf,pdoc=new jsPDF('l','mm','a4');
+        pdoc.setFontSize(20);pdoc.text('Reporte de Asistencia - PlusMoney',14,20);
+        pdoc.setFontSize(10);pdoc.text(`Generado: ${new Date().toLocaleString()}`,14,28);
+        pdoc.text(`Por: ${currentAdmin.name}`,14,34);
+        const colMap=new Map();
+        todosLosPares.forEach(r=>{
+          if(!colMap.has(r.codigo)) colMap.set(r.codigo,{nombre:r.nombre,turno:r.turno,registros:[]});
+          colMap.get(r.codigo).registros.push(r);
+        });
+        let y=44;
+        colMap.forEach((col,cod)=>{
+          if(y>180){pdoc.addPage();y=20;}
+          pdoc.setFontSize(12);pdoc.setTextColor(0,120,212);
+          pdoc.text(`${col.nombre} (${cod}) - Turno: ${col.turno}h`,14,y);
+          const data=[];let te=0;
+          col.registros.sort((a,b)=>b.fecha.localeCompare(a.fecha)).forEach(r=>{
+            const h=r.salida?calcularHoras(r.entrada,r.salida):0;
+            const ex=Math.floor(Math.max(0,h-r.turno));te+=ex;
+            data.push([r.fecha,a12h(r.entrada?.hora),r.salida?a12h(r.salida.hora):'---',
+              h.toFixed(2)+'h',ex+'h',r.turnoCompleto?'Completo':r.completo?'Incompleto':'Pendiente']);
+          });
+          data.push(['TOTAL','','','',te+'h','']);
+          pdoc.autoTable({startY:y+4,head:[['Fecha','Entrada','Salida','Horas','Extras','Estado']],body:data,theme:'grid',headStyles:{fillColor:[0,120,212]},styles:{fontSize:8}});
+          y=pdoc.lastAutoTable.finalY+10;
+        });
+        pdoc.save(`Asistencia_${new Date().toISOString().split('T')[0]}.pdf`);
+        showToast('PDF generado');
+      } catch{showToast('Error','error');}
+      finally{hideLoading();}
+    };
+
+    window.imprimirModal = () => window.print();
+
+    window.guardarTodosEnFirebase = async () => {
+      if(!currentAdmin) return;
+      showConfirm('¿Guardar todos los registros?', async () => {
+        showLoading('Guardando...');
+        try{
+          await addDoc(collection(db,'reportesGuardados'),{
+            fecha:new Date().toISOString(),registros:todosLosPares,
+            totalRegistros:todosLosPares.length,
+            guardadoPor:currentAdmin.name,guardadoPorUid:currentAdmin.uid,
+            timestamp:serverTimestamp()
+          });
+          showToast('Guardado correctamente');
+        } catch{showToast('Error','error');}
+        finally{hideLoading();}
+      });
+    };
+
+    window.aplicarFiltros = () => {
+      if(!currentAdmin) return;
+      const fi=document.getElementById('fechaInicio').value;
+      const ff=document.getElementById('fechaFin').value;
+      const est=document.getElementById('filtroEstado').value;
+      let filtrados=[...todosLosPares];
+      if(fi) filtrados=filtrados.filter(r=>r.fecha>=fi);
+      if(ff) filtrados=filtrados.filter(r=>r.fecha<=ff);
+      if(est==='completo')   filtrados=filtrados.filter(r=>r.turnoCompleto);
+      if(est==='incompleto') filtrados=filtrados.filter(r=>r.completo&&!r.turnoCompleto);
+      mostrarTabla(filtrados);
+    };
+
+    window.limpiarFiltros = () => {
+      document.getElementById('fechaInicio').value='';
+      document.getElementById('fechaFin').value='';
+      document.getElementById('filtroEstado').value='todos';
+      mostrarTabla(todosLosPares);
+    };
+
+    document.getElementById('btnGuardarRegistro').addEventListener('click', async () => {
+      if(!currentAdmin||!colaboradorActual) return;
+      showConfirm('¿Guardar registro individual?', async () => {
+        showLoading('Guardando...');
+        try{
+          await addDoc(collection(db,'reportesGuardados'),{
+            tipo:'INDIVIDUAL',colaborador:colaboradorActual,
+            registros:todosLosPares.filter(p=>p.codigo===colaboradorActual),
+            fecha:new Date().toISOString(),
+            guardadoPor:currentAdmin.name,guardadoPorUid:currentAdmin.uid,
+            timestamp:serverTimestamp()
+          });
+          showToast('Guardado');
+        } catch{showToast('Error','error');}
+        finally{hideLoading();}
+      });
+    });
+
+    /* ================================================================
+       INICIALIZACIÓN — restaurar sesión si existe en sessionStorage
+    ================================================================ */
+    (async () => {
+      const saved = sessionStorage.getItem('facial_currentUser');
+      if (saved) {
+        try {
+          currentAdmin = JSON.parse(saved);
+          activarSesion();
+          await cargarConfiguracionQuincena();
+          await cargarRegistros();
+          await cargarTarifas();
+          await cargarHistorialQuincenas();
+        } catch {
+          sessionStorage.removeItem('facial_currentUser');
+          currentAdmin = null; 
+        }
+      }
+      hideLoading(); 
+    })();
   </script>
 </body>
-</html>
+</html> 
