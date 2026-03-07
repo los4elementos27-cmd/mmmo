@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PlusMoney — Gestión de Colaboradores</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LQ==" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;-webkit-tap-highlight-color:transparent;}
+    :root{
+      --win-bg:#f0f0f0;--win-border:#d4d4d4;--win-blue:#0078d4;--win-blue-dk:#005a9e;
+      --win-text:#323130;--win-muted:#605e5c;--win-white:#ffffff;
+      --win-sh:0 2px 4px rgba(0,0,0,.10);--win-sh-hv:0 4px 12px rgba(0,0,0,.15);
+      --primary:#0078d4;--success:#107c10;--warning:#c69500;--danger:#d13438;
+      --purple:#8764b8;--orange:#ca5010;--r:4px;
+    }
+    body{background:var(--win-bg);color:var(--win-text);min-height:100vh;font-size:12px;}
+    ::-webkit-scrollbar{width:6px;height:6px;}
+    ::-webkit-scrollbar-track{background:var(--win-bg);}
+    ::-webkit-scrollbar-thumb{background:var(--win-border);border-radius:3px;}
+
+    /* HEADER */
+    .app-hdr{position:sticky;top:0;height:48px;background:var(--win-white);border-bottom:1px solid var(--win-border);display:flex;align-items:center;padding:0 16px;gap:12px;z-index:200;box-shadow:var(--win-sh);}
+    .hdr-logo{display:flex;align-items:center;gap:8px;color:var(--primary);font-size:15px;font-weight:700;text-decoration:none;}
+    .hdr-logo i{font-size:18px;}
+    .hdr-sep{width:1px;height:22px;background:var(--win-border);}
+    .hdr-title{font-size:12px;color:var(--win-muted);font-weight:600;}
+    .hdr-sp{flex:1;}
+    .user-badge{background:#e6f2ff;color:var(--primary);padding:4px 12px;border-radius:16px;font-weight:700;font-size:11px;display:flex;align-items:center;gap:6px;}
+    .back-btn{display:flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--win-border);color:var(--win-muted);padding:6px 12px;border-radius:var(--r);font-size:12px;text-decoration:none;transition:.15s;font-weight:600;}
+    .back-btn:hover{background:#f3f2f1;border-color:var(--primary);color:var(--primary);}
+
+    /* TOOLBAR */
+    .toolbar{background:#f3f2f1;border-bottom:1px solid var(--win-border);padding:8px 16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+    .srch{position:relative;flex:1;min-width:200px;max-width:320px;}
+    .srch i{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--win-muted);font-size:12px;}
+    .srch input{width:100%;padding:7px 10px 7px 30px;border:1px solid var(--win-border);border-radius:var(--r);font-size:12px;background:var(--win-white);font-family:inherit;}
+    .srch input:focus{outline:none;border-color:var(--primary);}
+    .tb-sel{padding:7px 10px;border:1px solid var(--win-border);border-radius:var(--r);font-size:12px;background:var(--win-white);font-family:inherit;color:var(--win-text);}
+    .emp-cnt{margin-left:auto;font-size:11px;color:var(--win-muted);}
+
+    /* GRID */
+    .main{max-width:1400px;margin:0 auto;padding:16px;}
+    .g{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;}
+    .empty{grid-column:1/-1;text-align:center;padding:60px;color:var(--win-muted);}
+    .empty i{font-size:40px;display:block;margin-bottom:12px;color:var(--win-border);}
+
+    /* CARD */
+    .ec{background:var(--win-white);border:1px solid var(--win-border);border-radius:var(--r);box-shadow:var(--win-sh);overflow:hidden;transition:.15s;}
+    .ec:hover{box-shadow:var(--win-sh-hv);}
+    .ec.s-active    {border-left:4px solid var(--success);}
+    .ec.s-vac       {border-left:4px solid var(--warning);}
+    .ec.s-lic       {border-left:4px solid var(--purple);}
+    .ec.s-per       {border-left:4px solid var(--primary);}
+    .ec.s-libre     {border-left:4px solid var(--orange);}
+    .ec.s-inactive  {border-left:4px solid var(--danger);opacity:.82;}
+    .ctop{background:#f3f2f1;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--win-border);}
+    .cn{font-weight:700;font-size:13px;}
+    .cc{font-size:10px;color:var(--win-muted);font-family:monospace;margin-top:1px;}
+    .pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;}
+    .p-active  {background:#dff6dd;color:var(--success);}
+    .p-vac     {background:#fff3cd;color:#856404;}
+    .p-lic     {background:#f0e6ff;color:var(--purple);}
+    .p-per     {background:#e6f2ff;color:var(--primary);}
+    .p-libre   {background:#fde8d8;color:var(--orange);}
+    .p-inactive{background:#fde7e9;color:var(--danger);}
+    .cbody{padding:12px;}
+    .cpr{display:flex;gap:12px;align-items:center;margin-bottom:10px;}
+    .cph{width:54px;height:54px;border-radius:50%;object-fit:cover;border:2px solid var(--win-border);flex-shrink:0;}
+    .ec.s-active   .cph{border-color:var(--success);}
+    .ec.s-vac      .cph{border-color:var(--warning);}
+    .ec.s-lic      .cph{border-color:var(--purple);}
+    .ec.s-per      .cph{border-color:var(--primary);}
+    .ec.s-libre    .cph{border-color:var(--orange);}
+    .ec.s-inactive .cph{border-color:var(--danger);filter:grayscale(1);}
+    .cm{flex:1;}
+    .cmr{display:flex;justify-content:space-between;margin-bottom:3px;font-size:11px;}
+    .cml{color:var(--win-muted);}
+    .cmv{font-weight:700;}
+    .bnr{border-radius:var(--r);padding:7px 10px;margin-bottom:8px;font-size:11px;line-height:1.5;}
+    .bnr strong{display:block;margin-bottom:2px;font-size:10px;text-transform:uppercase;letter-spacing:.3px;}
+    .bv{background:#fff3cd;border-left:3px solid var(--warning);}
+    .bl{background:#f0e6ff;border-left:3px solid var(--purple);}
+    .bp{background:#e6f2ff;border-left:3px solid var(--primary);}
+    .bd{background:#fde8d8;border-left:3px solid var(--orange);}
+    .tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px;}
+    .tag{padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700;}
+    .ts{background:#fde7e9;color:var(--danger);border:1px solid #f4a7a9;}
+    .tl{background:#fde8d8;color:var(--orange);border:1px solid #f5b98e;}
+    .cact{padding:8px 12px;background:#fafafa;border-top:1px solid var(--win-border);display:flex;gap:6px;}
+
+    /* BOTONES */
+    .btn{padding:8px 14px;font-size:12px;border-radius:var(--r);border:1px solid transparent;cursor:pointer;font-family:inherit;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:.15s;line-height:1;}
+    .btn:active{transform:scale(.98);}
+    .btn-primary{background:var(--primary);color:white;border-color:var(--primary);}
+    .btn-primary:hover{background:var(--win-blue-dk);}
+    .btn-danger{background:var(--danger);color:white;border-color:var(--danger);}
+    .btn-danger:hover{background:#a4262c;}
+    .btn-default{background:var(--win-white);color:var(--win-text);border-color:var(--win-border);}
+    .btn-default:hover{background:#f3f2f1;}
+    .btn-sm{padding:5px 10px;font-size:11px;}
+
+    /* MODAL */
+    .ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:800;justify-content:center;align-items:flex-start;padding:30px 16px;overflow-y:auto;}
+    .ov.open{display:flex;}
+    .mw{background:var(--win-white);border:1px solid var(--win-border);border-radius:var(--r);box-shadow:0 8px 32px rgba(0,0,0,.22);width:100%;max-width:740px;margin:auto;overflow:hidden;}
+    .mtbar{background:var(--primary);color:white;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;}
+    .mtbar h3{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;}
+    .mclose{width:28px;height:28px;border-radius:2px;background:transparent;border:none;color:white;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:.15s;}
+    .mclose:hover{background:var(--danger);}
+
+    /* TABS */
+    .mtabs{display:flex;background:#f3f2f1;border-bottom:1px solid var(--win-border);padding:0 12px;overflow-x:auto;}
+    .tbtn{padding:10px 12px;background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;font-size:11px;font-weight:700;color:var(--win-muted);display:flex;align-items:center;gap:5px;white-space:nowrap;transition:.15s;margin-bottom:-1px;font-family:inherit;}
+    .tbtn:hover{color:var(--primary);}
+    .tbtn.on{color:var(--primary);border-bottom-color:var(--primary);background:var(--win-white);}
+    .tp{display:none;padding:18px 20px;}
+    .tp.on{display:block;}
+    .mfoot{padding:12px 18px;border-top:1px solid var(--win-border);display:flex;gap:8px;justify-content:flex-end;background:#f9f9f9;}
+
+    /* FORM */
+    .fg{margin-bottom:14px;}
+    .fg label{display:block;font-size:11px;font-weight:700;color:var(--win-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px;}
+    .fc{width:100%;padding:8px 10px;border:1px solid var(--win-border);border-radius:var(--r);font-size:12px;font-family:inherit;background:var(--win-white);color:var(--win-text);transition:border-color .15s;}
+    .fc:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px rgba(0,120,212,.12);}
+    .fhint{font-size:10px;color:var(--win-muted);margin-top:3px;}
+    .frow{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .shdr{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:var(--win-muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--win-border);}
+    .shdr i{color:var(--primary);font-size:13px;}
+    .ibox{background:#e6f2ff;border:1px solid #c7dfff;border-radius:var(--r);padding:9px 12px;font-size:11px;color:var(--primary);display:flex;gap:8px;align-items:flex-start;margin-top:8px;}
+    .ibox.warn{background:#fff3cd;border-color:#ffc107;color:#856404;}
+    .ibox.ok{background:#dff6dd;border-color:#92c98f;color:var(--success);}
+    .ibox.org{background:#fde8d8;border-color:#f5b98e;color:var(--orange);}
+    .ibox i{margin-top:1px;flex-shrink:0;}
+
+    /* DÍAS SEMANA */
+    .wdr{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+    .wdb{width:40px;height:40px;border-radius:50%;border:1px solid var(--win-border);background:var(--win-white);cursor:pointer;font-size:10px;font-weight:700;color:var(--win-muted);transition:.15s;display:flex;align-items:center;justify-content:center;font-family:inherit;}
+    .wdb:hover{border-color:var(--primary);color:var(--primary);background:#e6f2ff;}
+    .wdb.on{background:var(--danger);border-color:var(--danger);color:white;}
+
+    /* TIPO AUSENCIA */
+    .agrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px;}
+    .atc{border:1px solid var(--win-border);border-radius:var(--r);padding:12px 6px;text-align:center;cursor:pointer;transition:.15s;background:var(--win-white);user-select:none;}
+    .atc:hover{border-color:var(--primary);background:#e6f2ff;}
+    .atc.on{border-width:2px;}
+    .atc i{font-size:20px;display:block;margin-bottom:5px;}
+    .atc span{font-size:10px;font-weight:700;display:block;}
+    .atc[data-t="vacaciones"] i{color:var(--warning);}
+    .atc[data-t="licencia"] i{color:var(--purple);}
+    .atc[data-t="permiso"] i{color:var(--primary);}
+    .atc[data-t="diaslibres"] i{color:var(--orange);}
+    .atc[data-t="vacaciones"].on{border-color:var(--warning);background:#fff3cd;}
+    .atc[data-t="licencia"].on{border-color:var(--purple);background:#f0e6ff;}
+    .atc[data-t="permiso"].on{border-color:var(--primary);background:#e6f2ff;}
+    .atc[data-t="diaslibres"].on{border-color:var(--orange);background:#fde8d8;}
+
+    /* CONFIG AUSENCIA */
+    .acfg{background:#f9f9f9;border:1px solid var(--win-border);border-radius:var(--r);padding:14px;margin-top:10px;}
+
+    /* CALENDARIO */
+    .calw{border:1px solid var(--win-border);border-radius:var(--r);overflow:hidden;margin-top:8px;background:var(--win-white);}
+    .calh{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;color:white;}
+    .ch-v{background:#c69500;}.ch-l{background:var(--purple);}.ch-p{background:var(--primary);}.ch-d{background:var(--orange);}.ch-m{background:var(--orange);}
+    .calh span{font-size:12px;font-weight:700;}
+    .cnav{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);color:white;cursor:pointer;padding:3px 9px;border-radius:2px;font-size:13px;transition:.15s;font-family:inherit;}
+    .cnav:hover{background:rgba(255,255,255,.3);}
+    .cwkd-row{display:grid;grid-template-columns:repeat(7,1fr);background:#f3f2f1;}
+    .cwkd{text-align:center;font-size:10px;font-weight:700;color:var(--win-muted);padding:4px 0;}
+    .cgrid{display:grid;grid-template-columns:repeat(7,1fr);}
+    .cd{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;transition:.1s;border:1px solid transparent;position:relative;color:var(--win-text);}
+    .cd:hover{background:#e6f2ff;border-color:#c7dfff;}
+    .cd.other{color:#c0c0c0;pointer-events:none;background:#fafafa;}
+    .cd.today{color:var(--primary);font-weight:700;}
+    .cd.today::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--primary);}
+    .cd.ss{background:var(--primary);color:white;font-weight:700;border-radius:50% 0 0 50%;border-color:var(--primary);}
+    .cd.se{background:var(--primary);color:white;font-weight:700;border-radius:0 50% 50% 0;border-color:var(--primary);}
+    .cd.sr{background:#cce4f7;border-color:transparent;}
+    .cd.s1{background:var(--primary);color:white;font-weight:700;border-radius:50%;border-color:var(--primary);}
+    .cd.free{background:#fde8d8;color:var(--orange);font-weight:700;border-color:#f5b98e;border-radius:50%;}
+    .cd.free:hover{background:#f8c9a8;}
+
+    /* RESUMEN */
+    .resb{background:var(--win-white);border:1px solid var(--win-border);border-radius:var(--r);padding:10px 14px;margin-top:10px;display:flex;align-items:center;gap:14px;}
+    .resn{font-size:28px;font-weight:700;color:var(--primary);line-height:1;}
+    .rit{font-size:12px;font-weight:700;}
+    .ril{font-size:10px;color:var(--win-muted);}
+
+    /* MODO MENSUAL */
+    .mswitch{display:flex;border:1px solid var(--win-border);border-radius:var(--r);overflow:hidden;margin-top:6px;}
+    .mbtn{flex:1;padding:8px;border:none;background:var(--win-white);cursor:pointer;font-size:11px;font-weight:700;font-family:inherit;color:var(--win-muted);transition:.15s;display:flex;align-items:center;justify-content:center;gap:5px;}
+    .mbtn:not(:last-child){border-right:1px solid var(--win-border);}
+    .mbtn:hover{background:#f3f2f1;color:var(--primary);}
+    .mbtn.on{background:var(--primary);color:white;}
+
+    /* LISTA MENSUAL */
+    .mll{margin-top:10px;}
+    .mlr{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--win-border);}
+    .mlr:last-child{border-bottom:none;}
+    .mlb{width:30px;height:30px;border-radius:50%;background:var(--orange);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+    .mli{flex:1;font-size:11px;}
+    .mls{font-size:10px;color:var(--win-muted);}
+    .mld{width:22px;height:22px;border-radius:50%;background:#fde7e9;border:1px solid #f4a7a9;color:var(--danger);cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;transition:.15s;}
+    .mld:hover{background:var(--danger);color:white;}
+
+    /* TOAST / LOADING */
+    .toast{position:fixed;bottom:20px;right:20px;padding:12px 20px;background:var(--win-white);border-left:4px solid var(--success);border-radius:var(--r);font-size:12px;z-index:9999;display:none;box-shadow:var(--win-sh-hv);max-width:340px;font-family:inherit;font-weight:600;}
+    .toast.err{border-left-color:var(--danger);}
+    .toast.warn{border-left-color:var(--warning);}
+    .ldov{position:fixed;inset:0;background:rgba(255,255,255,.88);display:none;justify-content:center;align-items:center;z-index:8000;flex-direction:column;gap:12px;}
+    .ldov.on{display:flex;}
+    .spin{width:32px;height:32px;border:3px solid var(--win-border);border-top:3px solid var(--primary);border-radius:50%;animation:spin .9s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .ltxt{font-size:12px;color:var(--win-muted);font-weight:700;}
+    @media(max-width:600px){.agrid{grid-template-columns:repeat(2,1fr);}.frow{grid-template-columns:1fr;}.mtabs{overflow-x:auto;}.g{grid-template-columns:1fr;}.wdr{gap:4px;}.wdb{width:36px;height:36px;font-size:9px;}}
+  </style>
+</head>
+<body>
+
+<header class="app-hdr">
+  <a href="index.html" class="hdr-logo"><i class="fas fa-dollar-sign"></i> PlusMoney</a>
+  <div class="hdr-sep"></div>
+  <span class="hdr-title"><i class="fas fa-users-cog" style="margin-right:5px;color:var(--primary);"></i>Gestión de Colaboradores</span>
+  <div class="hdr-sp"></div>
+  <div class="user-badge"><i class="fas fa-user-circle"></i><span id="hdrUser">---</span></div>
+  <div class="hdr-sep"></div>
+  <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Volver</a>
+</header>
+
+<div class="toolbar">
+  <div class="srch"><i class="fas fa-search"></i><input type="text" id="srchIn" placeholder="Buscar nombre o código..."></div>
+  <select class="tb-sel" id="stFlt">
+    <option value="all"><i class="fas fa-list"></i> Todos los estados</option>
+    <option value="active">Activos</option>
+    <option value="vacaciones">Vacaciones</option>
+    <option value="licencia">Licencia médica</option>
+    <option value="permiso">Permiso</option>
+    <option value="diaslibres">Días libres</option>
+    <option value="libre">Día libre mensual hoy</option>
+    <option value="inactive">Inactivos</option>
+  </select>
+  <span class="emp-cnt" id="cntLbl"><i class="fas fa-spinner fa-spin"></i> Cargando...</span>
+</div>
+
+<div class="main"><div class="g" id="empGrid"><div class="empty"><i class="fas fa-spinner fa-spin"></i>Cargando...</div></div></div>
+
+<!-- MODAL -->
+<div class="ov" id="cfgMod">
+<div class="mw">
+  <div class="mtbar">
+    <h3><i class="fas fa-user-cog"></i> Configurar — <span id="mNm">---</span></h3>
+    <button class="mclose" onclick="closeMod()" title="Cerrar"><i class="fas fa-times"></i></button>
+  </div>
+
+  <div class="mtabs">
+    <button class="tbtn on" data-t="estado" onclick="sw('estado')"><i class="fas fa-toggle-on"></i> Estado</button>
+    <button class="tbtn" data-t="semana" onclick="sw('semana')"><i class="fas fa-calendar-week"></i> Días fijos</button>
+    <button class="tbtn" data-t="aus" onclick="sw('aus')"><i class="fas fa-umbrella-beach"></i> Ausencias</button>
+    <button class="tbtn" data-t="mens" onclick="sw('mens')"><i class="fas fa-rotate"></i> Días libres mensuales</button>
+  </div>
+
+  <!-- TAB ESTADO -->
+  <div class="tp on" id="tp-estado">
+    <div class="shdr"><i class="fas fa-power-off"></i> Estado General</div>
+    <div class="fg">
+      <label><i class="fas fa-circle-half-stroke" style="margin-right:4px;"></i>Estado del colaborador</label>
+      <select class="fc" id="estadoG">
+        <option value="active">🟢 Activo — Permite registros de asistencia</option>
+        <option value="inactive">🔴 Inactivo — Bloquea todos los registros permanentemente</option>
+      </select>
+      <div class="fhint"><i class="fas fa-info-circle"></i> "Inactivo" tiene prioridad sobre cualquier otra configuración.</div>
+    </div>
+    <div class="ibox"><i class="fas fa-circle-info"></i><span>Las ausencias, días libres y días no laborables se configuran en las demás pestañas. Este campo controla únicamente si el colaborador puede registrar asistencia.</span></div>
+  </div>
+
+  <!-- TAB SEMANA -->
+  <div class="tp" id="tp-semana">
+    <div class="shdr"><i class="fas fa-ban"></i> Días de Semana No Laborables</div>
+    <div class="fg">
+      <label><i class="fas fa-hand-pointer" style="margin-right:4px;"></i>Días que NO trabaja — clic para activar/desactivar (rojo = bloqueado)</label>
+      <div class="wdr" id="wdr">
+        <button class="wdb" data-d="1" onclick="togWd(1)" title="Lunes">LUN</button>
+        <button class="wdb" data-d="2" onclick="togWd(2)" title="Martes">MAR</button>
+        <button class="wdb" data-d="3" onclick="togWd(3)" title="Miércoles">MIÉ</button>
+        <button class="wdb" data-d="4" onclick="togWd(4)" title="Jueves">JUE</button>
+        <button class="wdb" data-d="5" onclick="togWd(5)" title="Viernes">VIE</button>
+        <button class="wdb" data-d="6" onclick="togWd(6)" title="Sábado">SÁB</button>
+        <button class="wdb" data-d="0" onclick="togWd(0)" title="Domingo">DOM</button>
+      </div>
+      <div class="fhint" id="wdHint"><i class="fas fa-circle-info"></i> Ningún día bloqueado.</div>
+    </div>
+    <div class="ibox"><i class="fas fa-rotate"></i><span>Los días marcados se bloquean automáticamente cada semana sin fecha de vencimiento. Sin límite de días seleccionables.</span></div>
+  </div>
+
+  <!-- TAB AUSENCIAS -->
+  <div class="tp" id="tp-aus">
+    <div class="shdr"><i class="fas fa-calendar-xmark"></i> Ausencia Temporal con Fechas</div>
+    <div class="fg">
+      <label><i class="fas fa-tags" style="margin-right:4px;"></i>Tipo de ausencia — cada tipo abre su propio calendario de color</label>
+      <div class="agrid">
+        <div class="atc" data-t="vacaciones" onclick="selAus('vacaciones')"><i class="fas fa-umbrella-beach"></i><span>Vacaciones</span></div>
+        <div class="atc" data-t="licencia" onclick="selAus('licencia')"><i class="fas fa-file-medical"></i><span>Lic. Médica</span></div>
+        <div class="atc" data-t="permiso" onclick="selAus('permiso')"><i class="fas fa-clock"></i><span>Permiso</span></div>
+        <div class="atc" data-t="diaslibres" onclick="selAus('diaslibres')"><i class="fas fa-sun"></i><span>Días libres</span></div>
+      </div>
+      <input type="hidden" id="tipoAus">
+    </div>
+
+    <div id="ausCfg" style="display:none;">
+      <div class="acfg">
+        <div class="frow">
+          <div class="fg"><label><i class="fas fa-calendar-day" style="margin-right:4px;"></i>Fecha de inicio</label><input type="date" class="fc" id="fIni" onchange="onIniC()"></div>
+          <div class="fg"><label><i class="fas fa-calendar-check" style="margin-right:4px;"></i>Fecha de fin</label><input type="date" class="fc" id="fFin" onchange="onFinC()"></div>
+        </div>
+        <div style="font-size:11px;font-weight:700;color:var(--win-muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px;">
+          <i class="fas fa-arrow-pointer" style="margin-right:4px;color:var(--primary);"></i>Selecciona el rango en el calendario — 1er clic inicio, 2do clic fin. Sin límite de días.
+        </div>
+        <div class="calw">
+          <div class="calh ch-v" id="calHdr">
+            <button class="cnav" onclick="cNav(-1)"><i class="fas fa-chevron-left"></i></button>
+            <span id="calLbl">---</span>
+            <button class="cnav" onclick="cNav(1)"><i class="fas fa-chevron-right"></i></button>
+          </div>
+          <div class="cwkd-row"><div class="cwkd">Do</div><div class="cwkd">Lu</div><div class="cwkd">Ma</div><div class="cwkd">Mi</div><div class="cwkd">Ju</div><div class="cwkd">Vi</div><div class="cwkd">Sá</div></div>
+          <div class="cgrid" id="cg"></div>
+        </div>
+        <div class="resb" id="resb" style="display:none;">
+          <div class="resn" id="resDias">0</div>
+          <div><div class="rit" id="resTipo">---</div><div class="ril">días de ausencia</div><div class="ril" id="resFechas" style="font-weight:700;margin-top:2px;">---</div></div>
+        </div>
+        <div class="fg" style="margin-top:12px;">
+          <label><i class="fas fa-pen" style="margin-right:4px;"></i>Motivo / Observaciones (opcional)</label>
+          <textarea class="fc" id="ausMotivo" rows="2" placeholder="Ej: Vacaciones anuales, licencia médica..."></textarea>
+        </div>
+        <button class="btn btn-danger btn-sm" style="margin-top:8px;" onclick="clearAus()"><i class="fas fa-trash-alt"></i> Eliminar ausencia</button>
+      </div>
+    </div>
+    <div id="sinAus" style="margin-top:10px;">
+      <div class="ibox ok"><i class="fas fa-check-circle"></i><span>Sin ausencia configurada. Selecciona un tipo arriba para abrir el calendario interactivo y marcar las fechas.</span></div>
+    </div>
+  </div>
+
+  <!-- TAB MENSUAL -->
+  <div class="tp" id="tp-mens">
+    <div class="shdr"><i class="fas fa-rotate"></i> Días Libres Mensuales Recurrentes</div>
+    <div class="fg">
+      <label><i class="fas fa-sliders" style="margin-right:4px;"></i>Modo de activación</label>
+      <div class="mswitch">
+        <button class="mbtn on" id="mAuto" onclick="setMode('auto')"><i class="fas fa-robot"></i> Automático</button>
+        <button class="mbtn" id="mManual" onclick="setMode('manual')"><i class="fas fa-hand-pointer"></i> Manual (yo lo reactivo)</button>
+      </div>
+    </div>
+    <div id="infoAuto" class="ibox org" style="margin-bottom:12px;">
+      <i class="fas fa-robot"></i>
+      <span><strong>Modo Automático:</strong> Los días seleccionados se activan solos cada mes cuando llega esa fecha y se desactivan al día siguiente. El sistema lo hace sin intervención manual.</span>
+    </div>
+    <div id="infoMan" class="ibox warn" style="display:none;margin-bottom:12px;">
+      <i class="fas fa-hand-pointer"></i>
+      <span><strong>Modo Manual:</strong> Cuando terminen los días libres de este mes, tú decides si volver a activarlos para el próximo período. El sistema no lo reactiva solo.</span>
+    </div>
+    <div class="fg">
+      <label><i class="fas fa-calendar-plus" style="margin-right:4px;"></i>Selecciona días del mes — sin límite. Naranja = seleccionado. Clic para marcar/desmarcar.</label>
+      <div class="calw">
+        <div class="calh ch-m"><span><i class="fas fa-rotate" style="margin-right:6px;"></i>Días del mes — recurrentes cada mes</span></div>
+        <div class="cwkd-row"><div class="cwkd">Do</div><div class="cwkd">Lu</div><div class="cwkd">Ma</div><div class="cwkd">Mi</div><div class="cwkd">Ju</div><div class="cwkd">Vi</div><div class="cwkd">Sá</div></div>
+        <div class="cgrid" id="cgMens"></div>
+      </div>
+    </div>
+    <div class="shdr" style="margin-top:14px;"><i class="fas fa-list-check"></i> Días configurados</div>
+    <div class="mll" id="mll"><div style="color:var(--win-muted);font-size:11px;padding:7px 0;"><i class="fas fa-info-circle"></i> Ningún día configurado. Haz clic en el calendario.</div></div>
+    <div class="ibox" style="margin-top:12px;">
+      <i class="fas fa-bolt"></i>
+      <span><strong>Automático:</strong> el sistema bloquea el día y lo libera al día siguiente sin acción manual. <strong>Manual:</strong> cuando quieras que el colaborador descanse ese día, tú activas el bloqueo.</span>
+    </div>
+  </div>
+
+  <div class="mfoot">
+    <button class="btn btn-default" onclick="closeMod()"><i class="fas fa-times"></i> Cancelar</button>
+    <button class="btn btn-primary" onclick="save()"><i class="fas fa-floppy-disk"></i> Guardar cambios</button>
+  </div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="ldov" id="ldov"><div class="spin"></div><div class="ltxt"><i class="fas fa-circle-notch fa-spin" style="margin-right:6px;"></i>Procesando...</div></div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+import{getFirestore,collection,getDocs,query,where,updateDoc,doc,Timestamp}from"https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+const fb=initializeApp({apiKey:"AIzaSyAMTWJr3mISmNiP-e_KjCO9BdBPi7Uuug4",authDomain:"formulario-2-8929a.firebaseapp.com",projectId:"formulario-2-8929a",storageBucket:"formulario-2-8929a.appspot.com",messagingSenderId:"136908102526",appId:"1:136908102526:web:d0a3bc1e3cb91a3fcab12f"});
+const db=getFirestore(fb);
+const raw=localStorage.getItem('currentUserAsistencia');
+if(!raw){window.location.href='index.html';}
+const CU=JSON.parse(raw);
+document.getElementById('hdrUser').textContent=CU.name||CU.username||'---';
+const DIAS=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+let emps=[],editing=null,wdays=[],mdays=[],menMode='auto',ausType='',ausStart=null,ausEnd=null,ausMonth=new Date();
+const $=id=>document.getElementById(id);
+const showLd=v=>$('ldov').classList.toggle('on',v);
+function toast(msg,type='ok'){const t=$('toast');t.innerHTML=msg;t.className=`toast${type==='err'?' err':type==='warn'?' warn':''}`;t.style.display='block';setTimeout(()=>t.style.display='none',3500);}
+function toISO(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function efecto(emp){
+  if(emp.status==='inactive')return'inactive';
+  const h=new Date();h.setHours(0,0,0,0);
+  const dm=h.getDate();
+  if(emp.menMode!=='manual'&&(emp.diasMensualesLibres||[]).includes(dm))return'libre';
+  if(emp.tipoLibre&&emp.fechaInicioLibre&&emp.fechaFinLibre){
+    const ini=new Date(emp.fechaInicioLibre+'T00:00:00'),fin=new Date(emp.fechaFinLibre+'T00:00:00');
+    if(h>=ini&&h<=fin)return emp.tipoLibre;
+  }
+  return'active';
+}
+async function loadEmps(){
+  showLd(true);
+  try{
+    const q=query(collection(db,'Ponche'),where('collaboratorId','==',CU.uid));
+    const sn=await getDocs(q);emps=[];
+    sn.forEach(d=>{const data=d.data();emps.push({id:d.id,...data,status:data.status||'active',activo:data.activo!==false,diasSemanaNoLaborables:data.diasSemanaNoLaborables||[],diasMensualesLibres:data.diasMensualesLibres||[],menMode:data.menMode||'auto',tipoLibre:data.tipoLibre||null,fechaInicioLibre:data.fechaInicioLibre||null,fechaFinLibre:data.fechaFinLibre||null,cantidadDiasLibre:data.cantidadDiasLibre||0,motivoLibre:data.motivoLibre||''});});
+    renderGrid();
+  }catch(e){console.error(e);toast('<i class="fas fa-circle-exclamation"></i> Error al cargar','err');}
+  finally{showLd(false);}
+}
+const ST={
+  active:    {cls:'s-active',   pill:'p-active',   ico:'fas fa-circle-check',  lbl:'Activo'},
+  inactive:  {cls:'s-inactive', pill:'p-inactive', ico:'fas fa-circle-xmark',  lbl:'Inactivo'},
+  vacaciones:{cls:'s-vac',      pill:'p-vac',       ico:'fas fa-umbrella-beach',lbl:'Vacaciones'},
+  licencia:  {cls:'s-lic',      pill:'p-lic',       ico:'fas fa-file-medical',  lbl:'Lic. Médica'},
+  permiso:   {cls:'s-per',      pill:'p-per',       ico:'fas fa-clock',         lbl:'Permiso'},
+  diaslibres:{cls:'s-libre',    pill:'p-libre',     ico:'fas fa-sun',           lbl:'Días libres'},
+  libre:     {cls:'s-libre',    pill:'p-libre',     ico:'fas fa-calendar-day',  lbl:'Día libre hoy'},
+};
+function renderGrid(){
+  const grid=$('empGrid'),srch=$('srchIn').value.toLowerCase(),flt=$('stFlt').value;
+  let list=emps.filter(e=>{
+    const n=`${e.firstName||''} ${e.lastName||''}`.toLowerCase();
+    if(!n.includes(srch)&&!(e.username||'').toLowerCase().includes(srch))return false;
+    if(flt==='all')return true;
+    return efecto(e)===flt;
+  });
+  $('cntLbl').innerHTML=`<i class="fas fa-users"></i> ${list.length} colaborador${list.length!==1?'es':''}`;
+  if(!list.length){grid.innerHTML='<div class="empty"><i class="fas fa-users-slash"></i>No se encontraron colaboradores</div>';return;}
+  const hoy=new Date();hoy.setHours(0,0,0,0);
+  grid.innerHTML=list.map(emp=>{
+    const ef=efecto(emp),cfg=ST[ef]||ST.active;
+    let dRest=0;
+    if(['vacaciones','licencia','permiso','diaslibres'].includes(ef)&&emp.fechaFinLibre){const fin=new Date(emp.fechaFinLibre+'T00:00:00');dRest=Math.max(0,Math.ceil((fin-hoy)/864e5)+1);}
+    const pillTxt=`<i class="${cfg.ico}"></i> ${cfg.lbl}${dRest?` (${dRest}d)`:''}`;
+    const BIco={vacaciones:'fas fa-umbrella-beach',licencia:'fas fa-file-medical',permiso:'fas fa-clock',diaslibres:'fas fa-sun'};
+    const BCls={vacaciones:'bv',licencia:'bl',permiso:'bp',diaslibres:'bd'};
+    let banner='';
+    if(['vacaciones','licencia','permiso','diaslibres'].includes(ef)){
+      banner=`<div class="bnr ${BCls[ef]}"><strong><i class="${BIco[ef]}"></i> ${ef.toUpperCase()} — ${dRest} día${dRest!==1?'s':''} restantes</strong><i class="fas fa-calendar-alt" style="margin-right:3px;"></i>${emp.fechaInicioLibre} → ${emp.fechaFinLibre}${emp.motivoLibre?`<br><i class="fas fa-sticky-note" style="margin-right:3px;"></i>${emp.motivoLibre}`:''}</div>`;
+    }else if(ef==='libre'){
+      banner=`<div class="bnr bd"><strong><i class="fas fa-calendar-day"></i> DÍA LIBRE MENSUAL HOY (día ${hoy.getDate()})</strong><i class="fas fa-rotate" style="margin-right:3px;"></i>Modo ${emp.menMode==='manual'?'Manual':'Automático'}</div>`;
+    }
+    const dsn=emp.diasSemanaNoLaborables||[];
+    const tagsSem=dsn.length?`<div class="tags">${dsn.map(d=>`<span class="tag ts"><i class="fas fa-ban" style="margin-right:2px;"></i>${DIAS[d].substring(0,3)}</span>`).join('')}</div>`:'';
+    const dml=emp.diasMensualesLibres||[];
+    const mIco=emp.menMode==='manual'?'fas fa-hand-pointer':'fas fa-robot';
+    const tagsMen=dml.length?`<div class="tags"><span class="tag" style="background:#fde8d8;color:var(--orange);border:1px solid #f5b98e;"><i class="${mIco}" style="margin-right:3px;"></i>${emp.menMode==='manual'?'Manual':'Auto'}</span>${dml.map(d=>`<span class="tag tl"><i class="fas fa-calendar-day" style="margin-right:2px;"></i>Día ${d}</span>`).join('')}</div>`:'';
+    return`<div class="ec ${cfg.cls}"><div class="ctop"><div><div class="cn">${emp.firstName||''} ${emp.lastName||''}</div><div class="cc"><i class="fas fa-id-badge" style="margin-right:3px;"></i>${emp.username||emp.id}</div></div><span class="pill ${cfg.pill}">${pillTxt}</span></div><div class="cbody"><div class="cpr"><img src="${emp.fotoBase64||'https://via.placeholder.com/54'}" class="cph" alt=""><div class="cm"><div class="cmr"><span class="cml"><i class="fas fa-clock"></i> Turno:</span><span class="cmv">${emp.turnoHoras||8}h</span></div><div class="cmr"><span class="cml"><i class="fas fa-ban"></i> Días fijos:</span><span class="cmv">${dsn.length?dsn.length+'d/sem':'Ninguno'}</span></div><div class="cmr"><span class="cml"><i class="fas fa-rotate"></i> Libres mens.:</span><span class="cmv">${dml.length?dml.length+' día'+(dml.length!==1?'s':''):'Ninguno'}</span></div></div></div>${banner}${tagsSem}${tagsMen}</div><div class="cact"><button class="btn btn-primary btn-sm" onclick="openMod('${emp.id}')"><i class="fas fa-gear"></i> Configurar</button></div></div>`;
+  }).join('');
+}
+$('srchIn').addEventListener('input',renderGrid);
+$('stFlt').addEventListener('change',renderGrid);
+window.openMod=function(id){
+  editing=emps.find(e=>e.id===id);if(!editing)return;
+  $('mNm').textContent=`${editing.firstName||''} ${editing.lastName||''}`.trim()||editing.username;
+  sw('estado');
+  $('estadoG').value=editing.status||'active';
+  wdays=[...(editing.diasSemanaNoLaborables||[])];syncWd();
+  mdays=[...(editing.diasMensualesLibres||[])];menMode=editing.menMode||'auto';
+  setMode(menMode);renderMCal();renderML();
+  ausType=editing.tipoLibre||'';
+  ausStart=editing.fechaInicioLibre?new Date(editing.fechaInicioLibre+'T00:00:00'):null;
+  ausEnd=editing.fechaFinLibre?new Date(editing.fechaFinLibre+'T00:00:00'):null;
+  ausMonth=ausStart?new Date(ausStart.getFullYear(),ausStart.getMonth(),1):new Date();
+  document.querySelectorAll('.atc').forEach(c=>c.classList.toggle('on',c.dataset.t===ausType));
+  $('tipoAus').value=ausType;
+  if(ausType){$('ausCfg').style.display='block';$('sinAus').style.display='none';$('fIni').value=editing.fechaInicioLibre||'';$('fFin').value=editing.fechaFinLibre||'';$('ausMotivo').value=editing.motivoLibre||'';updCalHdr();syncRes();}
+  else{$('ausCfg').style.display='none';$('sinAus').style.display='block';$('resb').style.display='none';}
+  renderCal();
+  $('cfgMod').classList.add('open');
+};
+window.closeMod=function(){$('cfgMod').classList.remove('open');editing=null;};
+$('cfgMod').addEventListener('click',e=>{if(e.target.id==='cfgMod')closeMod();});
+window.sw=function(tab){
+  document.querySelectorAll('.tbtn').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));
+  document.querySelectorAll('.tp').forEach(p=>p.classList.toggle('on',p.id===`tp-${tab}`));
+};
+window.togWd=function(d){const i=wdays.indexOf(d);i>-1?wdays.splice(i,1):wdays.push(d);syncWd();};
+function syncWd(){
+  document.querySelectorAll('.wdb').forEach(b=>b.classList.toggle('on',wdays.includes(parseInt(b.dataset.d))));
+  $('wdHint').innerHTML=wdays.length?`<i class="fas fa-ban" style="margin-right:4px;color:var(--danger);"></i>Bloqueados: ${wdays.map(d=>DIAS[d]).join(', ')}`:`<i class="fas fa-circle-info" style="margin-right:4px;"></i>Ningún día bloqueado.`;
+}
+window.selAus=function(tipo){
+  ausType=tipo;
+  document.querySelectorAll('.atc').forEach(c=>c.classList.toggle('on',c.dataset.t===tipo));
+  $('tipoAus').value=tipo;$('ausCfg').style.display='block';$('sinAus').style.display='none';
+  if(!$('fIni').value){const h=toISO(new Date());$('fIni').value=h;ausStart=new Date(h+'T00:00:00');ausEnd=null;$('fFin').value='';}
+  updCalHdr();renderCal();syncRes();
+};
+window.clearAus=function(){
+  ausType='';ausStart=null;ausEnd=null;
+  document.querySelectorAll('.atc').forEach(c=>c.classList.remove('on'));
+  $('tipoAus').value='';$('fIni').value='';$('fFin').value='';$('ausMotivo').value='';
+  $('ausCfg').style.display='none';$('sinAus').style.display='block';$('resb').style.display='none';
+  renderCal();
+};
+window.onIniC=function(){const v=$('fIni').value;ausStart=v?new Date(v+'T00:00:00'):null;if(ausStart)ausMonth=new Date(ausStart.getFullYear(),ausStart.getMonth(),1);if(ausStart&&ausEnd&&ausEnd<ausStart){ausEnd=null;$('fFin').value='';}updCalHdr();renderCal();syncRes();};
+window.onFinC=function(){const v=$('fFin').value;ausEnd=v?new Date(v+'T00:00:00'):null;renderCal();syncRes();};
+function syncRes(){
+  if(!ausStart||!ausEnd){$('resb').style.display='none';return;}
+  const dias=Math.round((ausEnd-ausStart)/864e5)+1;if(dias<=0){$('resb').style.display='none';return;}
+  const lbls={vacaciones:'☀ Vacaciones',licencia:'🏥 Lic. Médica',permiso:'⏱ Permiso',diaslibres:'🌟 Días libres'};
+  $('resDias').textContent=dias;$('resTipo').textContent=lbls[ausType]||'Ausencia';
+  $('resFechas').textContent=`📅 ${ausStart.toLocaleDateString('es-ES',{day:'2-digit',month:'short'})} → ${ausEnd.toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})}`;
+  $('resb').style.display='flex';
+}
+function updCalHdr(){const m={vacaciones:'ch-v',licencia:'ch-l',permiso:'ch-p',diaslibres:'ch-d'};$('calHdr').className=`calh ${m[ausType]||'ch-v'}`;}
+window.cNav=function(d){ausMonth=new Date(ausMonth.getFullYear(),ausMonth.getMonth()+d,1);renderCal();};
+function renderCal(){
+  const y=ausMonth.getFullYear(),m=ausMonth.getMonth();
+  $('calLbl').textContent=ausMonth.toLocaleDateString('es-ES',{month:'long',year:'numeric'});
+  const hoy=new Date();hoy.setHours(0,0,0,0);
+  const fd=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate(),dip=new Date(y,m,0).getDate();
+  let h='';
+  for(let i=fd-1;i>=0;i--)h+=`<div class="cd other">${dip-i}</div>`;
+  for(let d=1;d<=dim;d++){
+    const f=new Date(y,m,d);f.setHours(0,0,0,0);let c='cd';
+    if(f.getTime()===hoy.getTime())c+=' today';
+    if(ausStart&&ausEnd){const t=f.getTime();if(t===ausStart.getTime()&&t===ausEnd.getTime())c+=' s1';else if(t===ausStart.getTime())c+=' ss';else if(t===ausEnd.getTime())c+=' se';else if(f>ausStart&&f<ausEnd)c+=' sr';}
+    else if(ausStart&&f.getTime()===ausStart.getTime())c+=' s1';
+    h+=`<div class="${c}" onclick="cDay(${y},${m},${d})">${d}</div>`;
+  }
+  const rem=(fd+dim)%7===0?0:7-(fd+dim)%7;for(let i=1;i<=rem;i++)h+=`<div class="cd other">${i}</div>`;
+  $('cg').innerHTML=h;
+}
+window.cDay=function(y,m,d){
+  const f=new Date(y,m,d);f.setHours(0,0,0,0);const str=toISO(f);
+  if(!ausStart||(ausStart&&ausEnd)){ausStart=f;ausEnd=null;$('fIni').value=str;$('fFin').value='';}
+  else{if(f<ausStart){ausEnd=ausStart;ausStart=f;$('fFin').value=$('fIni').value;$('fIni').value=str;}else{ausEnd=f;$('fFin').value=str;}}
+  syncRes();renderCal();
+};
+window.setMode=function(mode){
+  menMode=mode;
+  $('mAuto').classList.toggle('on',mode==='auto');$('mManual').classList.toggle('on',mode==='manual');
+  $('infoAuto').style.display=mode==='auto'?'flex':'none';$('infoMan').style.display=mode==='manual'?'flex':'none';
+  renderML();
+};
+function renderMCal(){
+  const now=new Date(),y=now.getFullYear(),m=now.getMonth();
+  const fd=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate(),dip=new Date(y,m,0).getDate(),hd=now.getDate();
+  let h='';
+  for(let i=fd-1;i>=0;i--)h+=`<div class="cd other">${dip-i}</div>`;
+  for(let d=1;d<=dim;d++){let c='cd';if(d===hd)c+=' today';if(mdays.includes(d))c+=' free';h+=`<div class="${c}" onclick="togMD(${d})" title="Día ${d} — clic para marcar/desmarcar">${d}</div>`;}
+  const rem=(fd+dim)%7===0?0:7-(fd+dim)%7;for(let i=1;i<=rem;i++)h+=`<div class="cd other">${i}</div>`;
+  $('cgMens').innerHTML=h;
+}
+window.togMD=function(d){const i=mdays.indexOf(d);i>-1?mdays.splice(i,1):mdays.push(d);mdays.sort((a,b)=>a-b);renderMCal();renderML();};
+function renderML(){
+  const c=$('mll');
+  if(!mdays.length){c.innerHTML='<div style="color:var(--win-muted);font-size:11px;padding:7px 0;"><i class="fas fa-info-circle"></i> Ningún día configurado.</div>';return;}
+  const mi=menMode==='manual'?'fas fa-hand-pointer':'fas fa-robot',ml=menMode==='manual'?'Manual':'Automático';
+  c.innerHTML=`<div class="mll">${mdays.map(d=>`<div class="mlr"><div class="mlb">${d}</div><div class="mli"><div style="font-weight:700;"><i class="fas fa-calendar-day" style="margin-right:4px;color:var(--orange);"></i>Día ${d} de cada mes</div><div class="mls"><i class="${mi}" style="margin-right:3px;"></i>${ml} — ${menMode==='auto'?'se activa y desactiva solo':'requiere activación manual'}</div></div><button class="mld" onclick="togMD(${d})" title="Quitar"><i class="fas fa-xmark"></i></button></div>`).join('')}</div>`;
+}
+window.save=async function(){
+  if(!editing)return;
+  const estado=$('estadoG').value,tipo=$('tipoAus').value,fIni=$('fIni').value,fFin=$('fFin').value,motivo=$('ausMotivo').value;
+  if(tipo&&(!fIni||!fFin)){toast('<i class="fas fa-triangle-exclamation"></i> Selecciona fecha inicio y fin','err');sw('aus');return;}
+  if(tipo&&fFin<fIni){toast('<i class="fas fa-triangle-exclamation"></i> Fecha fin debe ser posterior al inicio','err');sw('aus');return;}
+  let dias=0;if(tipo&&fIni&&fFin)dias=Math.round((new Date(fFin+'T00:00:00')-new Date(fIni+'T00:00:00'))/864e5)+1;
+  const data={status:estado,activo:estado==='active',diasSemanaNoLaborables:wdays,diasMensualesLibres:mdays,menMode:menMode,tipoLibre:tipo||null,fechaInicioLibre:tipo?fIni:null,fechaFinLibre:tipo?fFin:null,cantidadDiasLibre:dias,motivoLibre:tipo?motivo:null,updatedAt:Timestamp.now(),updatedBy:CU.uid};
+  showLd(true);
+  try{await updateDoc(doc(db,'Ponche',editing.id),data);toast('<i class="fas fa-circle-check"></i> Configuración guardada');closeMod();await loadEmps();}
+  catch(e){console.error(e);toast(`<i class="fas fa-circle-exclamation"></i> Error: ${e.message}`,'err');}
+  finally{showLd(false);}
+};
+loadEmps();
+</script>
+</body>
+</html>
