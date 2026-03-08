@@ -158,6 +158,10 @@
     .search-result-name { font-size: var(--text-sm); font-weight: 500; }
     .search-result-code { font-size: var(--text-xs); color: var(--text-secondary); }
     .search-result-punch { background: var(--primary); border: none; color: #000; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+    /* ================================================================
+       ALERTA DE BLOQUEO — con icono y color según tipo de ausencia
+    ================================================================ */
     .bloqueo-alert {
       position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
       width: 90%; max-width: 380px;
@@ -166,13 +170,44 @@
       border: 3px solid var(--danger); box-shadow: 0 0 50px rgba(231,76,60,0.6),0 20px 40px rgba(0,0,0,0.5);
       display: none; flex-direction: column; align-items: center; gap: var(--spacing-md); z-index: 60; text-align: center; animation: bloqueoAppear 0.3s ease;
     }
+    .bloqueo-alert.tipo-vacaciones {
+      background: linear-gradient(135deg,rgba(198,149,0,0.98),rgba(160,120,0,0.98));
+      border-color: #c69500; box-shadow: 0 0 50px rgba(198,149,0,0.6),0 20px 40px rgba(0,0,0,0.5);
+    }
+    .bloqueo-alert.tipo-licencia {
+      background: linear-gradient(135deg,rgba(135,100,184,0.98),rgba(100,70,150,0.98));
+      border-color: #8764b8; box-shadow: 0 0 50px rgba(135,100,184,0.6),0 20px 40px rgba(0,0,0,0.5);
+    }
+    .bloqueo-alert.tipo-permiso {
+      background: linear-gradient(135deg,rgba(0,120,212,0.98),rgba(0,90,158,0.98));
+      border-color: #0078d4; box-shadow: 0 0 50px rgba(0,120,212,0.6),0 20px 40px rgba(0,0,0,0.5);
+    }
+    .bloqueo-alert.tipo-diaslibres {
+      background: linear-gradient(135deg,rgba(202,80,16,0.98),rgba(160,60,10,0.98));
+      border-color: #ca5010; box-shadow: 0 0 50px rgba(202,80,16,0.6),0 20px 40px rgba(0,0,0,0.5);
+    }
+    .bloqueo-alert.tipo-libre-mensual {
+      background: linear-gradient(135deg,rgba(202,80,16,0.98),rgba(160,60,10,0.98));
+      border-color: #ca5010; box-shadow: 0 0 50px rgba(202,80,16,0.6),0 20px 40px rgba(0,0,0,0.5);
+    }
+    .bloqueo-alert.tipo-dia-semana {
+      background: linear-gradient(135deg,rgba(60,60,60,0.98),rgba(30,30,30,0.98));
+      border-color: #888; box-shadow: 0 0 50px rgba(60,60,60,0.6),0 20px 40px rgba(0,0,0,0.5);
+    }
     @keyframes bloqueoAppear { from { opacity:0; transform:translate(-50%,-40%) scale(0.9); } to { opacity:1; transform:translate(-50%,-50%) scale(1); } }
     .bloqueo-icon { font-size: 4rem; color: white; animation: bloqueoPulse 1.5s infinite; }
     @keyframes bloqueoPulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.1); } }
     .bloqueo-title   { color: white; font-size: var(--text-xl); font-weight: bold; }
     .bloqueo-message { color: rgba(255,255,255,0.95); font-size: var(--text-base); line-height: 1.5; }
-    .bloqueo-detail  { background: rgba(0,0,0,0.3); padding: var(--spacing-md); border-radius: var(--border-radius-sm); color: white; font-size: var(--text-sm); width: 100%; }
+    .bloqueo-detail  { background: rgba(0,0,0,0.3); padding: var(--spacing-md); border-radius: var(--border-radius-sm); color: white; font-size: var(--text-sm); width: 100%; line-height: 1.6; }
     .bloqueo-close   { background: white; border: none; color: var(--danger); padding: var(--spacing-sm) var(--spacing-xl); border-radius: 30px; font-weight: bold; cursor: pointer; margin-top: var(--spacing-xs); font-size: var(--text-base); }
+    .bloqueo-alert.tipo-vacaciones  .bloqueo-close { color: #c69500; }
+    .bloqueo-alert.tipo-licencia    .bloqueo-close { color: #8764b8; }
+    .bloqueo-alert.tipo-permiso     .bloqueo-close { color: #0078d4; }
+    .bloqueo-alert.tipo-diaslibres  .bloqueo-close { color: #ca5010; }
+    .bloqueo-alert.tipo-libre-mensual .bloqueo-close { color: #ca5010; }
+    .bloqueo-alert.tipo-dia-semana  .bloqueo-close { color: #555; }
+
     .loading-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; padding: var(--spacing-lg); }
     .spinner { border: 3px solid rgba(22,224,134,0.1); border-top: 3px solid var(--primary); border-radius: 50%; width: clamp(45px,10vw,55px); height: clamp(45px,10vw,55px); animation: spin 0.8s linear infinite; margin-bottom: var(--spacing-md); }
     @keyframes spin { 0% { transform:rotate(0deg); } 100% { transform:rotate(360deg); } }
@@ -275,7 +310,7 @@
 
         <!-- ALERTA BLOQUEO -->
         <div id="bloqueoAlert" class="bloqueo-alert">
-          <i class="fas fa-ban bloqueo-icon"></i>
+          <i class="fas fa-ban bloqueo-icon" id="bloqueoIconEl"></i>
           <div class="bloqueo-title"   id="bloqueoTitle">Registro Bloqueado</div>
           <div class="bloqueo-message" id="bloqueoMessage">---</div>
           <div class="bloqueo-detail"  id="bloqueoDetail">---</div>
@@ -322,8 +357,8 @@
     ================================================================= */
     let faceMatcher       = null;
     let employeesData     = new Map();
-    let isProcessing      = false;      // bloqueo global (evita solapamiento de async)
-    let processingMap     = new Map();  // cooldown POR COLABORADOR: codigo → timestamp ultimo registro
+    let isProcessing      = false;
+    let processingMap     = new Map();    // cooldown por colaborador
     let videoStarted      = false;
     let detectionInterval = null;
     let modelosCargados   = false;
@@ -556,7 +591,20 @@
     }
 
     /* =================================================================
-       ESCUCHA EN TIEMPO REAL EMPLEADOS (solo del admin logueado)
+       ESCUCHA EN TIEMPO REAL EMPLEADOS — recupera TODOS los campos
+       de configuración desde la colección 'Ponche' (misma que usa
+       el módulo de gestión de colaboradores).
+
+       Campos recuperados y usados para bloqueos:
+         • status                  → 'active' | 'inactive'
+         • activo                  → boolean
+         • diasSemanaNoLaborables  → number[] (0=Dom … 6=Sáb)
+         • diasMensualesLibres     → number[] (días del mes, ej: [5,20])
+         • menMode                 → 'auto' | 'manual'
+         • tipoLibre               → 'vacaciones'|'licencia'|'permiso'|'diaslibres'|null
+         • fechaInicioLibre        → 'YYYY-MM-DD' | null
+         • fechaFinLibre           → 'YYYY-MM-DD' | null
+         • motivoLibre             → string | null
     ================================================================= */
     function iniciarEscuchaEmpleados() {
       if (!currentUser) return;
@@ -568,7 +616,8 @@
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
           if (data.fotoBase64 && data.username) {
-            /* Guardar todos los empleados (activos e inactivos) para búsqueda */
+
+            /* ── Guardar TODOS los campos de bloqueo del módulo de gestión ── */
             employeesData.set(data.username, {
               id:                     docSnap.id,
               firstName:              data.firstName              || '',
@@ -576,23 +625,40 @@
               fotoBase64:             data.fotoBase64,
               turnoHoras:             data.turnoHoras             || 8,
               collaboratorId:         data.collaboratorId,
+
+              /* Estado general */
               activo:                 data.activo !== false,
-              status:                 data.status                 || 'active',
+              status:                 data.status  || 'active',
+
+              /* Días fijos de semana no laborables (Pestaña "Días fijos") */
               diasSemanaNoLaborables: data.diasSemanaNoLaborables || [],
+
+              /* Días libres mensuales recurrentes (Pestaña "Días libres mensuales") */
+              diasMensualesLibres:    data.diasMensualesLibres    || [],
+              menMode:                data.menMode                || 'auto',
+
+              /* Ausencia temporal con fechas (Pestaña "Ausencias") */
               tipoLibre:              data.tipoLibre              || null,
               fechaInicioLibre:       data.fechaInicioLibre       || null,
-              fechaFinLibre:          data.fechaFinLibre          || null
+              fechaFinLibre:          data.fechaFinLibre          || null,
+              motivoLibre:            data.motivoLibre            || ''
             });
+
             /* Solo cargar descriptores faciales para empleados activos */
-            if (data.activo !== false) {
+            if (data.activo !== false && data.status !== 'inactive') {
               const img = new Image();
               img.src = data.fotoBase64;
               const promise = new Promise((resolve) => {
                 img.onload = async () => {
                   try {
-                    const detection = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+                    const detection = await faceapi
+                      .detectSingleFace(img)
+                      .withFaceLandmarks()
+                      .withFaceDescriptor();
                     if (detection) {
-                      descriptors.push(new faceapi.LabeledFaceDescriptors(data.username, [detection.descriptor]));
+                      descriptors.push(
+                        new faceapi.LabeledFaceDescriptors(data.username, [detection.descriptor])
+                      );
                     }
                   } catch (err) { console.error('Error detectando rostro:', err); }
                   resolve();
@@ -603,6 +669,7 @@
             }
           }
         });
+
         Promise.all(promises).then(() => {
           if (descriptors.length > 0) {
             faceMatcher = new faceapi.FaceMatcher(descriptors, CONFIG.UMBRAL_PRECISION);
@@ -613,60 +680,165 @@
     }
 
     /* =================================================================
-       VERIFICAR BLOQUEOS (inactivo / día no laborable / período libre)
+       VERIFICAR BLOQUEOS
+       -----------------------------------------------------------------
+       Orden de prioridad (igual al módulo de gestión):
+         1. Inactivo (status='inactive' o activo=false)
+         2. Día libre mensual automático (menMode='auto' y hoy está en diasMensualesLibres)
+         3. Ausencia temporal por fechas (vacaciones / licencia / permiso / diaslibres)
+         4. Día de semana no laborable (diasSemanaNoLaborables)
+
+       NOTA sobre días libres mensuales en modo MANUAL:
+         Si menMode='manual' el sistema NO bloquea automáticamente —
+         el administrador activa/desactiva manualmente cuando lo desee.
+         Por eso solo se bloquea cuando menMode !== 'manual'.
     ================================================================= */
     function verificarBloqueos(codigo) {
       const emp = employeesData.get(codigo);
       if (!emp) {
-        return { bloqueado: true, mensaje: 'Colaborador no encontrado', detalle: 'Verifica el código ingresado.', tipo: 'no_encontrado' };
+        return {
+          bloqueado: true,
+          mensaje:   'Colaborador no encontrado',
+          detalle:   'Verifica el código ingresado.',
+          tipo:      'no_encontrado'
+        };
       }
+
       const hoy       = new Date();
-      const diaSemana = hoy.getDay();
+      hoy.setHours(0, 0, 0, 0);
+      const diaSemana = hoy.getDay();   // 0=Dom, 1=Lun … 6=Sáb
+      const diaDelMes = hoy.getDate();  // 1-31
 
-      /* 1. Inactivo */
+      /* ── 1. Inactivo ─────────────────────────────────────────── */
       if (emp.activo === false || emp.status === 'inactive') {
-        return { bloqueado: true, mensaje: 'Tu cuenta está inactiva', detalle: 'Contacta al administrador para reactivarla.', tipo: 'inactivo' };
+        return {
+          bloqueado: true,
+          mensaje:   'Tu cuenta está inactiva',
+          detalle:   'Contacta al administrador para reactivarla.',
+          tipo:      'inactivo'
+        };
       }
 
-      /* 2. Día no laborable */
+      /* ── 2. Día libre mensual — solo en modo AUTOMÁTICO ─────── */
+      const diasMensuales = emp.diasMensualesLibres || [];
+      if (emp.menMode !== 'manual' && diasMensuales.includes(diaDelMes)) {
+        return {
+          bloqueado: true,
+          mensaje:   `Hoy es tu día libre mensual (día ${diaDelMes})`,
+          detalle:   `📅 Día ${diaDelMes} de cada mes — Modo automático\nNo necesitas registrar asistencia hoy.`,
+          tipo:      'libre-mensual'
+        };
+      }
+
+      /* ── 3. Ausencia temporal por fechas ─────────────────────── */
+      if (emp.tipoLibre && emp.fechaInicioLibre && emp.fechaFinLibre) {
+        const inicio = new Date(emp.fechaInicioLibre + 'T00:00:00');
+        const fin    = new Date(emp.fechaFinLibre    + 'T00:00:00');
+        inicio.setHours(0,  0,  0,   0);
+        fin.setHours(23, 59, 59, 999);
+
+        if (hoy >= inicio && hoy <= fin) {
+          const diasRestantes = Math.ceil((fin - hoy) / (1000 * 60 * 60 * 24));
+
+          /* Calcular días totales del período */
+          const diasTotales = Math.round(
+            (new Date(emp.fechaFinLibre + 'T00:00:00') - new Date(emp.fechaInicioLibre + 'T00:00:00'))
+            / (1000 * 60 * 60 * 24)
+          ) + 1;
+
+          const info = {
+            vacaciones: {
+              mensaje: '🏖 Estás de vacaciones',
+              detalle: `📅 ${emp.fechaInicioLibre} → ${emp.fechaFinLibre}\n` +
+                       `⏳ ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''} restantes de ${diasTotales} en total` +
+                       (emp.motivoLibre ? `\n📝 ${emp.motivoLibre}` : ''),
+              tipo:    'vacaciones'
+            },
+            licencia: {
+              mensaje: '🏥 Tienes una licencia médica activa',
+              detalle: `📅 ${emp.fechaInicioLibre} → ${emp.fechaFinLibre}\n` +
+                       `⏳ ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''} restantes de ${diasTotales} en total` +
+                       (emp.motivoLibre ? `\n📝 ${emp.motivoLibre}` : ''),
+              tipo:    'licencia'
+            },
+            permiso: {
+              mensaje: '⏱ Tienes un permiso autorizado',
+              detalle: `📅 ${emp.fechaInicioLibre} → ${emp.fechaFinLibre}\n` +
+                       `⏳ ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''} restantes de ${diasTotales} en total` +
+                       (emp.motivoLibre ? `\n📝 ${emp.motivoLibre}` : ''),
+              tipo:    'permiso'
+            },
+            diaslibres: {
+              mensaje: '☀ Tienes días libres asignados',
+              detalle: `📅 ${emp.fechaInicioLibre} → ${emp.fechaFinLibre}\n` +
+                       `⏳ ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''} restantes de ${diasTotales} en total` +
+                       (emp.motivoLibre ? `\n📝 ${emp.motivoLibre}` : ''),
+              tipo:    'diaslibres'
+            }
+          };
+
+          const datosBloq = info[emp.tipoLibre] || {
+            mensaje: '📵 No disponible hoy',
+            detalle: `${diasRestantes} día${diasRestantes !== 1 ? 's' : ''} restantes.`,
+            tipo:    'ausencia'
+          };
+
+          return { bloqueado: true, ...datosBloq };
+        }
+      }
+
+      /* ── 4. Día de semana no laborable ───────────────────────── */
       const diasNoLab = emp.diasSemanaNoLaborables || [];
       if (diasNoLab.includes(diaSemana)) {
         return {
           bloqueado: true,
-          mensaje:   `Hoy es ${NOMBRES_DIAS[diaSemana]} - No debes registrarte`,
-          detalle:   `Días no laborables: ${diasNoLab.map(d => NOMBRES_DIAS[d]).join(', ')}`,
-          tipo:      'dia_no_laborable'
+          mensaje:   `Hoy es ${NOMBRES_DIAS[diaSemana]} — día no laborable`,
+          detalle:   `🚫 Días no laborables configurados:\n${diasNoLab.map(d => NOMBRES_DIAS[d]).join(', ')}`,
+          tipo:      'dia-semana'
         };
       }
 
-      /* 3. Período libre (vacaciones / licencia / permiso) */
-      if (emp.fechaInicioLibre && emp.fechaFinLibre && emp.tipoLibre) {
-        const inicio = new Date(emp.fechaInicioLibre);
-        const fin    = new Date(emp.fechaFinLibre);
-        inicio.setHours(0,0,0,0); fin.setHours(23,59,59,999);
-        const hoyN = new Date(hoy); hoyN.setHours(0,0,0,0);
-        if (hoyN >= inicio && hoyN <= fin) {
-          const dias = Math.ceil((fin - hoyN) / (1000*60*60*24));
-          const textos = {
-            vacaciones: { mensaje: 'Estás de vacaciones',          detalle: `Te quedan ${dias} día${dias!==1?'s':''} de vacaciones.` },
-            licencia:   { mensaje: 'Tienes una licencia activa',   detalle: `Licencia por ${dias} día${dias!==1?'s':''} más.` },
-            permiso:    { mensaje: 'Tienes un permiso autorizado', detalle: `Permiso por ${dias} día${dias!==1?'s':''} más.` }
-          };
-          const info = textos[emp.tipoLibre] || { mensaje: 'No disponible', detalle: `${dias} día${dias!==1?'s':''} restantes.` };
-          return { bloqueado: true, ...info, tipo: emp.tipoLibre };
-        }
-      }
+      /* Sin bloqueo — el colaborador puede registrar */
       return { bloqueado: false, emp };
     }
 
+    /* =================================================================
+       MOSTRAR ALERTA DE BLOQUEO con estilos según tipo de ausencia
+    ================================================================= */
     function mostrarBloqueo(info) {
+      const alertEl   = document.getElementById('bloqueoAlert');
+      const iconEl    = document.getElementById('bloqueoIconEl');
+
+      /* Íconos según tipo */
+      const iconos = {
+        inactivo:       'fas fa-user-slash',
+        vacaciones:     'fas fa-umbrella-beach',
+        licencia:       'fas fa-file-medical',
+        permiso:        'fas fa-clock',
+        diaslibres:     'fas fa-sun',
+        'libre-mensual':'fas fa-rotate',
+        'dia-semana':   'fas fa-ban',
+        no_encontrado:  'fas fa-user-question'
+      };
+
+      /* Resetear clases de tipo anteriores */
+      alertEl.className = 'bloqueo-alert';
+      if (info.tipo) {
+        alertEl.classList.add(`tipo-${info.tipo}`);
+      }
+
+      iconEl.className = `${iconos[info.tipo] || 'fas fa-ban'} bloqueo-icon`;
+
       document.getElementById('bloqueoTitle').textContent   = '⛔ Registro No Permitido';
       document.getElementById('bloqueoMessage').textContent = info.mensaje;
       document.getElementById('bloqueoDetail').textContent  = info.detalle || '';
-      document.getElementById('bloqueoAlert').style.display = 'flex';
+      alertEl.style.display = 'flex';
       updateStatusIndicator('error', 'Registro bloqueado');
     }
-    window.cerrarBloqueo = function() { document.getElementById('bloqueoAlert').style.display = 'none'; };
+
+    window.cerrarBloqueo = function() {
+      document.getElementById('bloqueoAlert').style.display = 'none';
+    };
 
     /* =================================================================
        COOLDOWN POR COLABORADOR — en memoria local (Map)
@@ -675,12 +847,10 @@
        Si el colaborador A acaba de registrarse, solo ÉL debe esperar
        los 60 segundos. El colaborador B puede registrarse de inmediato
        sin ningún bloqueo.
-       El Map  processingMap  almacena:  codigo → Date del último registro.
     ================================================================= */
     function verificarCooldown(codigo) {
       const ultimoRegistro = processingMap.get(codigo);
-      if (!ultimoRegistro) return true; // nunca se registró en esta sesión → OK
-
+      if (!ultimoRegistro) return true;
       const diffSeg = (new Date() - ultimoRegistro) / 1000;
       if (diffSeg < CONFIG.COOLDOWN_SEGUNDOS) {
         const seg = Math.ceil(CONFIG.COOLDOWN_SEGUNDOS - diffSeg);
@@ -690,7 +860,6 @@
       return true;
     }
 
-    /* Registrar timestamp en el Map después de guardar exitosamente */
     function marcarCooldown(codigo) {
       processingMap.set(codigo, new Date());
     }
@@ -706,21 +875,10 @@
          2. Último type='entry', diff ≤ 16 h       → SALIDA  (mismo parId)
          3. Último type='entry', diff >  16 h       → ENTRADA (nuevo parId, turno expiró)
          4. Último type='exit'                      → ENTRADA (nuevo parId)
-
-       El campo 'parId' vincula cada entrada con su salida para que el
-       código de reportes pueda emparejarlos directamente.
     ================================================================= */
     async function determinarTipoRegistro(codigo) {
       if (!currentUser) return { tipo: 'entry', parId: `PAR_${codigo}_${Date.now()}` };
       try {
-        /*
-         * IMPORTANTE: Se evita usar orderBy() junto con where() en campos distintos
-         * porque Firebase requiere un índice compuesto que puede no existir y hace
-         * que la query falle silenciosamente retornando siempre 'entry'.
-         *
-         * En su lugar se traen los últimos registros solo con where() y se
-         * ordena manualmente en el cliente para obtener el más reciente.
-         */
         const q = query(
           collection(db, 'facialAttendance'),
           where('collaboratorCode', '==', codigo),
@@ -728,56 +886,48 @@
         );
         const snapshot = await getDocs(q);
 
-        /* Caso 1: Sin registros previos → primera ENTRADA */
         if (snapshot.empty) {
           const parId = `PAR_${codigo}_${Date.now()}`;
           console.log(`[${codigo}] Sin registros → ENTRADA | parId:${parId}`);
           return { tipo: 'entry', parId };
         }
 
-        /* Ordenar en el cliente por timestamp DESC y tomar el más reciente */
+        /* Ordenar en el cliente por timestamp DESC */
         const docs = snapshot.docs
           .map(d => ({ ...d.data(), _ts: d.data().timestamp?.toDate() || new Date(0) }))
           .sort((a, b) => b._ts - a._ts);
 
         const ultimo      = docs[0];
-        const ultimoTipo  = ultimo.type;    /* 'entry' | 'exit' | undefined */
+        const ultimoTipo  = ultimo.type;
         const ultimoParId = ultimo.parId;
         const ultimoTime  = ultimo._ts;
         const diffHoras   = (new Date() - ultimoTime) / 3600000;
 
         console.log(`[${codigo}] Último: tipo=${ultimoTipo}, hace ${diffHoras.toFixed(2)}h | parId=${ultimoParId}`);
 
-        /* Caso 2: Último fue ENTRADA y dentro del turno (≤ 16 h) → SALIDA */
         if (ultimoTipo === 'entry' && diffHoras <= LIMITE_HORAS_TURNO) {
           console.log(`[${codigo}] → SALIDA (entrada activa hace ${diffHoras.toFixed(2)}h)`);
           return { tipo: 'exit', parId: ultimoParId };
         }
 
-        /* Caso 3: Último fue ENTRADA pero hace más de 16 h → nueva ENTRADA */
         if (ultimoTipo === 'entry' && diffHoras > LIMITE_HORAS_TURNO) {
           const parId = `PAR_${codigo}_${Date.now()}`;
           console.log(`[${codigo}] → ENTRADA (turno anterior expiró: ${diffHoras.toFixed(2)}h)`);
           return { tipo: 'entry', parId };
         }
 
-        /* Caso 4: Último fue SALIDA → nueva ENTRADA */
         if (ultimoTipo === 'exit') {
           const parId = `PAR_${codigo}_${Date.now()}`;
           console.log(`[${codigo}] → ENTRADA (tras salida completada)`);
           return { tipo: 'entry', parId };
         }
 
-        /*
-         * Caso 5: Registro sin campo 'type' (datos legacy anteriores a esta versión).
-         * Se aplica la misma lógica: si hace ≤ 16 h → SALIDA, si no → ENTRADA.
-         */
+        /* Caso legacy sin campo 'type' */
         if (diffHoras <= LIMITE_HORAS_TURNO) {
           console.log(`[${codigo}] → SALIDA (registro legacy sin type, hace ${diffHoras.toFixed(2)}h)`);
           return { tipo: 'exit', parId: ultimoParId || `PAR_${codigo}_${Date.now()}` };
         }
 
-        /* Fallback final → ENTRADA */
         const parId = `PAR_${codigo}_${Date.now()}`;
         console.log(`[${codigo}] → ENTRADA (fallback)`);
         return { tipo: 'entry', parId };
@@ -789,13 +939,14 @@
     }
 
     /* =================================================================
-       PROCESAR REGISTRO (detección facial y búsqueda manual)
+       PROCESAR REGISTRO
+       (detección facial automática y búsqueda manual)
     ================================================================= */
     async function procesarRegistro(codigo, confianza = 1.0, metodo = 'facial') {
       if (isProcessing || !currentUser) return;
       isProcessing = true;
       try {
-        /* 1. Verificar bloqueos */
+        /* 1. Verificar TODOS los bloqueos configurados en gestión */
         const verificacion = verificarBloqueos(codigo);
         if (verificacion.bloqueado) {
           mostrarBloqueo(verificacion);
@@ -810,7 +961,7 @@
           return;
         }
 
-        /* 2. Verificar cooldown SOLO para este colaborador específico */
+        /* 2. Verificar cooldown SOLO para este colaborador */
         const cooldownOk = verificarCooldown(codigo);
         if (!cooldownOk) {
           updateStatusIndicator('error', 'Cooldown activo');
@@ -825,30 +976,24 @@
         const ahora       = Timestamp.now();
         const fechaActual = ahora.toDate();
         const year    = fechaActual.getFullYear();
-        const month   = String(fechaActual.getMonth() + 1).padStart(2,'0');
-        const day     = String(fechaActual.getDate()).padStart(2,'0');
-        const hours   = String(fechaActual.getHours()).padStart(2,'0');
-        const minutes = String(fechaActual.getMinutes()).padStart(2,'0');
-        const seconds = String(fechaActual.getSeconds()).padStart(2,'0');
+        const month   = String(fechaActual.getMonth() + 1).padStart(2, '0');
+        const day     = String(fechaActual.getDate()).padStart(2, '0');
+        const hours   = String(fechaActual.getHours()).padStart(2, '0');
+        const minutes = String(fechaActual.getMinutes()).padStart(2, '0');
+        const seconds = String(fechaActual.getSeconds()).padStart(2, '0');
         const fechaFormateada = `${year}-${month}-${day}`;
         const horaFormateada  = `${hours}:${minutes}:${seconds}`;
 
-        /*
-         * CAMPO 'type' → 'entry' = ENTRADA | 'exit' = SALIDA
-         * Este campo es el que lee el código de reportes para
-         * saber si el registro es entrada o salida, sin necesidad
-         * de inferirlo por posición alternada.
-         */
         const attendanceData = {
           collaboratorId:   currentUser.uid,
           collaboratorName: currentUser.name,
           collaboratorCode: codigo,
-          employeeName:     `${userData.firstName||''} ${userData.lastName||''}`.trim() || codigo,
+          employeeName:     `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || codigo,
           employeeId:       userData.id,
           timestamp:        ahora,
           fecha:            fechaFormateada,
           hora:             horaFormateada,
-          type:             tipo,      /* 'entry' | 'exit' */
+          type:             tipo,         /* 'entry' | 'exit' */
           confidence:       confianza,
           method:           metodo,
           turnoHoras:       userData.turnoHoras || 8,
@@ -861,11 +1006,11 @@
         await addDoc(collection(db, 'facialAttendance'), attendanceData);
         console.log('✅ Registro guardado:', tipo.toUpperCase(), codigo, fechaFormateada, horaFormateada);
 
-        /* Marcar cooldown solo para ESTE colaborador — los demás no se ven afectados */
         marcarCooldown(codigo);
 
         /* 6. Actualizar UI del modal de resultado */
-        document.getElementById('nombreDisplay').textContent  = `${userData.firstName||''} ${userData.lastName||''}`.trim() || codigo;
+        document.getElementById('nombreDisplay').textContent  =
+          `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || codigo;
         document.getElementById('codigoDisplay').textContent  = `Código: ${codigo}`;
         if (userData.fotoBase64) document.getElementById('fotoColaborador').src = userData.fotoBase64;
         const tipoLabel = document.getElementById('tipoDisplay');
@@ -895,29 +1040,38 @@
       if (!termino) { searchResults.innerHTML = ''; return; }
       const resultados = [];
       employeesData.forEach((emp, codigo) => {
-        const nombre = `${emp.firstName||''} ${emp.lastName||''}`.toLowerCase();
+        const nombre = `${emp.firstName || ''} ${emp.lastName || ''}`.toLowerCase();
         if (codigo.toLowerCase().includes(termino) || nombre.includes(termino)) {
           resultados.push({ codigo, ...emp });
         }
       });
       if (resultados.length === 0) {
-        searchResults.innerHTML = '<div style="padding:10px;color:var(--text-secondary);text-align:center;">No encontrado</div>';
+        searchResults.innerHTML =
+          '<div style="padding:10px;color:var(--text-secondary);text-align:center;">No encontrado</div>';
         return;
       }
-      searchResults.innerHTML = resultados.map(emp => `
-        <div class="search-result-item" onclick="seleccionarResultado('${emp.codigo}')">
-          <img src="${emp.fotoBase64 || 'https://via.placeholder.com/35'}" alt="">
-          <div class="search-result-info">
-            <div class="search-result-name">${emp.firstName||''} ${emp.lastName||''}</div>
-            <div class="search-result-code">${emp.codigo}</div>
+
+      /* Mostrar indicador de bloqueo en los resultados de búsqueda */
+      searchResults.innerHTML = resultados.map(emp => {
+        const blqCheck = verificarBloqueos(emp.codigo);
+        const blqBadge = blqCheck.bloqueado
+          ? `<span style="background:rgba(231,76,60,0.2);color:#e74c3c;font-size:10px;padding:2px 6px;border-radius:10px;border:1px solid rgba(231,76,60,0.4);">⛔ Bloqueado</span>`
+          : `<span style="background:rgba(22,224,134,0.15);color:#16e086;font-size:10px;padding:2px 6px;border-radius:10px;border:1px solid rgba(22,224,134,0.3);">✅ Activo</span>`;
+        return `
+          <div class="search-result-item">
+            <img src="${emp.fotoBase64 || 'https://via.placeholder.com/35'}" alt="">
+            <div class="search-result-info">
+              <div class="search-result-name">${emp.firstName || ''} ${emp.lastName || ''}</div>
+              <div class="search-result-code">${emp.codigo} &nbsp;${blqBadge}</div>
+            </div>
+            <button class="search-result-punch"
+                    onclick="event.stopPropagation(); registrarDesdeBusqueda('${emp.codigo}')"
+                    title="Registrar">
+              <i class="fas fa-fingerprint"></i>
+            </button>
           </div>
-          <button class="search-result-punch"
-                  onclick="event.stopPropagation(); registrarDesdeBusqueda('${emp.codigo}')"
-                  title="Registrar">
-            <i class="fas fa-fingerprint"></i>
-          </button>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     window.seleccionarResultado = function(codigo) {
@@ -944,7 +1098,10 @@
       detectionInterval = setInterval(async () => {
         if (!faceMatcher || !videoStarted || !modelosCargados || isProcessing || !currentUser) return;
         try {
-          const detection = await faceapi.detectSingleFace(video).withFaceLandmarks().withFaceDescriptor();
+          const detection = await faceapi
+            .detectSingleFace(video)
+            .withFaceLandmarks()
+            .withFaceDescriptor();
           if (detection) {
             const match      = faceMatcher.findBestMatch(detection.descriptor);
             const confidence = 1 - match.distance;
