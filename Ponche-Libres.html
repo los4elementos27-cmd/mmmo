@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PlusMoney — Gestión de Colaboradores</title>
+  <title>Vizo ID - Asignación de ausencias</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LQ==" crossorigin="anonymous" referrerpolicy="no-referrer">
   <style>
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;-webkit-tap-highlight-color:transparent;}
@@ -399,27 +399,67 @@ const $=id=>document.getElementById(id);
 const showLd=v=>$('ldov').classList.toggle('on',v);
 function toast(msg,type='ok'){const t=$('toast');t.innerHTML=msg;t.className=`toast${type==='err'?' err':type==='warn'?' warn':''}`;t.style.display='block';setTimeout(()=>t.style.display='none',3500);}
 function toISO(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+
+/* ============================================================
+   LÓGICA DE EFECTO — determina el estado real del colaborador
+   considerando: status, ausencias con fecha, días libres mensuales
+   (modo auto) y días de semana no laborables.
+   Esta misma lógica se replica en el módulo de asistencia facial.
+============================================================ */
 function efecto(emp){
+  // 1. Inactivo tiene máxima prioridad
   if(emp.status==='inactive')return'inactive';
-  const h=new Date();h.setHours(0,0,0,0);
+
+  const h=new Date();
+  h.setHours(0,0,0,0);
+  const diaSemana=h.getDay();
   const dm=h.getDate();
+
+  // 2. Día libre mensual automático — solo si menMode NO es 'manual'
   if(emp.menMode!=='manual'&&(emp.diasMensualesLibres||[]).includes(dm))return'libre';
+
+  // 3. Ausencia por fechas (vacaciones / licencia / permiso / diaslibres)
   if(emp.tipoLibre&&emp.fechaInicioLibre&&emp.fechaFinLibre){
-    const ini=new Date(emp.fechaInicioLibre+'T00:00:00'),fin=new Date(emp.fechaFinLibre+'T00:00:00');
+    const ini=new Date(emp.fechaInicioLibre+'T00:00:00');
+    const fin=new Date(emp.fechaFinLibre+'T00:00:00');
+    ini.setHours(0,0,0,0);
+    fin.setHours(23,59,59,999);
     if(h>=ini&&h<=fin)return emp.tipoLibre;
   }
+
+  // 4. Día de semana no laborable (para tarjeta solo informativo — el bloqueo real está en asistencia)
+  if((emp.diasSemanaNoLaborables||[]).includes(diaSemana))return'active'; // se muestra activo pero en asistencia queda bloqueado
+
   return'active';
 }
+
 async function loadEmps(){
   showLd(true);
   try{
     const q=query(collection(db,'Ponche'),where('collaboratorId','==',CU.uid));
     const sn=await getDocs(q);emps=[];
-    sn.forEach(d=>{const data=d.data();emps.push({id:d.id,...data,status:data.status||'active',activo:data.activo!==false,diasSemanaNoLaborables:data.diasSemanaNoLaborables||[],diasMensualesLibres:data.diasMensualesLibres||[],menMode:data.menMode||'auto',tipoLibre:data.tipoLibre||null,fechaInicioLibre:data.fechaInicioLibre||null,fechaFinLibre:data.fechaFinLibre||null,cantidadDiasLibre:data.cantidadDiasLibre||0,motivoLibre:data.motivoLibre||''});});
+    sn.forEach(d=>{
+      const data=d.data();
+      emps.push({
+        id:d.id,
+        ...data,
+        status:data.status||'active',
+        activo:data.activo!==false,
+        diasSemanaNoLaborables:data.diasSemanaNoLaborables||[],
+        diasMensualesLibres:data.diasMensualesLibres||[],
+        menMode:data.menMode||'auto',
+        tipoLibre:data.tipoLibre||null,
+        fechaInicioLibre:data.fechaInicioLibre||null,
+        fechaFinLibre:data.fechaFinLibre||null,
+        cantidadDiasLibre:data.cantidadDiasLibre||0,
+        motivoLibre:data.motivoLibre||''
+      });
+    });
     renderGrid();
   }catch(e){console.error(e);toast('<i class="fas fa-circle-exclamation"></i> Error al cargar','err');}
   finally{showLd(false);}
 }
+
 const ST={
   active:    {cls:'s-active',   pill:'p-active',   ico:'fas fa-circle-check',  lbl:'Activo'},
   inactive:  {cls:'s-inactive', pill:'p-inactive', ico:'fas fa-circle-xmark',  lbl:'Inactivo'},
@@ -429,6 +469,7 @@ const ST={
   diaslibres:{cls:'s-libre',    pill:'p-libre',     ico:'fas fa-sun',           lbl:'Días libres'},
   libre:     {cls:'s-libre',    pill:'p-libre',     ico:'fas fa-calendar-day',  lbl:'Día libre hoy'},
 };
+
 function renderGrid(){
   const grid=$('empGrid'),srch=$('srchIn').value.toLowerCase(),flt=$('stFlt').value;
   let list=emps.filter(e=>{
@@ -461,8 +502,10 @@ function renderGrid(){
     return`<div class="ec ${cfg.cls}"><div class="ctop"><div><div class="cn">${emp.firstName||''} ${emp.lastName||''}</div><div class="cc"><i class="fas fa-id-badge" style="margin-right:3px;"></i>${emp.username||emp.id}</div></div><span class="pill ${cfg.pill}">${pillTxt}</span></div><div class="cbody"><div class="cpr"><img src="${emp.fotoBase64||'https://via.placeholder.com/54'}" class="cph" alt=""><div class="cm"><div class="cmr"><span class="cml"><i class="fas fa-clock"></i> Turno:</span><span class="cmv">${emp.turnoHoras||8}h</span></div><div class="cmr"><span class="cml"><i class="fas fa-ban"></i> Días fijos:</span><span class="cmv">${dsn.length?dsn.length+'d/sem':'Ninguno'}</span></div><div class="cmr"><span class="cml"><i class="fas fa-rotate"></i> Libres mens.:</span><span class="cmv">${dml.length?dml.length+' día'+(dml.length!==1?'s':''):'Ninguno'}</span></div></div></div>${banner}${tagsSem}${tagsMen}</div><div class="cact"><button class="btn btn-primary btn-sm" onclick="openMod('${emp.id}')"><i class="fas fa-gear"></i> Configurar</button></div></div>`;
   }).join('');
 }
+
 $('srchIn').addEventListener('input',renderGrid);
 $('stFlt').addEventListener('change',renderGrid);
+
 window.openMod=function(id){
   editing=emps.find(e=>e.id===id);if(!editing)return;
   $('mNm').textContent=`${editing.firstName||''} ${editing.lastName||''}`.trim()||editing.username;
@@ -482,17 +525,21 @@ window.openMod=function(id){
   renderCal();
   $('cfgMod').classList.add('open');
 };
+
 window.closeMod=function(){$('cfgMod').classList.remove('open');editing=null;};
 $('cfgMod').addEventListener('click',e=>{if(e.target.id==='cfgMod')closeMod();});
+
 window.sw=function(tab){
   document.querySelectorAll('.tbtn').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));
   document.querySelectorAll('.tp').forEach(p=>p.classList.toggle('on',p.id===`tp-${tab}`));
 };
+
 window.togWd=function(d){const i=wdays.indexOf(d);i>-1?wdays.splice(i,1):wdays.push(d);syncWd();};
 function syncWd(){
   document.querySelectorAll('.wdb').forEach(b=>b.classList.toggle('on',wdays.includes(parseInt(b.dataset.d))));
   $('wdHint').innerHTML=wdays.length?`<i class="fas fa-ban" style="margin-right:4px;color:var(--danger);"></i>Bloqueados: ${wdays.map(d=>DIAS[d]).join(', ')}`:`<i class="fas fa-circle-info" style="margin-right:4px;"></i>Ningún día bloqueado.`;
 }
+
 window.selAus=function(tipo){
   ausType=tipo;
   document.querySelectorAll('.atc').forEach(c=>c.classList.toggle('on',c.dataset.t===tipo));
@@ -500,6 +547,7 @@ window.selAus=function(tipo){
   if(!$('fIni').value){const h=toISO(new Date());$('fIni').value=h;ausStart=new Date(h+'T00:00:00');ausEnd=null;$('fFin').value='';}
   updCalHdr();renderCal();syncRes();
 };
+
 window.clearAus=function(){
   ausType='';ausStart=null;ausEnd=null;
   document.querySelectorAll('.atc').forEach(c=>c.classList.remove('on'));
@@ -507,8 +555,10 @@ window.clearAus=function(){
   $('ausCfg').style.display='none';$('sinAus').style.display='block';$('resb').style.display='none';
   renderCal();
 };
+
 window.onIniC=function(){const v=$('fIni').value;ausStart=v?new Date(v+'T00:00:00'):null;if(ausStart)ausMonth=new Date(ausStart.getFullYear(),ausStart.getMonth(),1);if(ausStart&&ausEnd&&ausEnd<ausStart){ausEnd=null;$('fFin').value='';}updCalHdr();renderCal();syncRes();};
 window.onFinC=function(){const v=$('fFin').value;ausEnd=v?new Date(v+'T00:00:00'):null;renderCal();syncRes();};
+
 function syncRes(){
   if(!ausStart||!ausEnd){$('resb').style.display='none';return;}
   const dias=Math.round((ausEnd-ausStart)/864e5)+1;if(dias<=0){$('resb').style.display='none';return;}
@@ -517,8 +567,11 @@ function syncRes(){
   $('resFechas').textContent=`📅 ${ausStart.toLocaleDateString('es-ES',{day:'2-digit',month:'short'})} → ${ausEnd.toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})}`;
   $('resb').style.display='flex';
 }
+
 function updCalHdr(){const m={vacaciones:'ch-v',licencia:'ch-l',permiso:'ch-p',diaslibres:'ch-d'};$('calHdr').className=`calh ${m[ausType]||'ch-v'}`;}
+
 window.cNav=function(d){ausMonth=new Date(ausMonth.getFullYear(),ausMonth.getMonth()+d,1);renderCal();};
+
 function renderCal(){
   const y=ausMonth.getFullYear(),m=ausMonth.getMonth();
   $('calLbl').textContent=ausMonth.toLocaleDateString('es-ES',{month:'long',year:'numeric'});
@@ -536,18 +589,21 @@ function renderCal(){
   const rem=(fd+dim)%7===0?0:7-(fd+dim)%7;for(let i=1;i<=rem;i++)h+=`<div class="cd other">${i}</div>`;
   $('cg').innerHTML=h;
 }
+
 window.cDay=function(y,m,d){
   const f=new Date(y,m,d);f.setHours(0,0,0,0);const str=toISO(f);
   if(!ausStart||(ausStart&&ausEnd)){ausStart=f;ausEnd=null;$('fIni').value=str;$('fFin').value='';}
   else{if(f<ausStart){ausEnd=ausStart;ausStart=f;$('fFin').value=$('fIni').value;$('fIni').value=str;}else{ausEnd=f;$('fFin').value=str;}}
   syncRes();renderCal();
 };
+
 window.setMode=function(mode){
   menMode=mode;
   $('mAuto').classList.toggle('on',mode==='auto');$('mManual').classList.toggle('on',mode==='manual');
   $('infoAuto').style.display=mode==='auto'?'flex':'none';$('infoMan').style.display=mode==='manual'?'flex':'none';
   renderML();
 };
+
 function renderMCal(){
   const now=new Date(),y=now.getFullYear(),m=now.getMonth();
   const fd=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate(),dip=new Date(y,m,0).getDate(),hd=now.getDate();
@@ -557,25 +613,46 @@ function renderMCal(){
   const rem=(fd+dim)%7===0?0:7-(fd+dim)%7;for(let i=1;i<=rem;i++)h+=`<div class="cd other">${i}</div>`;
   $('cgMens').innerHTML=h;
 }
+
 window.togMD=function(d){const i=mdays.indexOf(d);i>-1?mdays.splice(i,1):mdays.push(d);mdays.sort((a,b)=>a-b);renderMCal();renderML();};
+
 function renderML(){
   const c=$('mll');
   if(!mdays.length){c.innerHTML='<div style="color:var(--win-muted);font-size:11px;padding:7px 0;"><i class="fas fa-info-circle"></i> Ningún día configurado.</div>';return;}
   const mi=menMode==='manual'?'fas fa-hand-pointer':'fas fa-robot',ml=menMode==='manual'?'Manual':'Automático';
   c.innerHTML=`<div class="mll">${mdays.map(d=>`<div class="mlr"><div class="mlb">${d}</div><div class="mli"><div style="font-weight:700;"><i class="fas fa-calendar-day" style="margin-right:4px;color:var(--orange);"></i>Día ${d} de cada mes</div><div class="mls"><i class="${mi}" style="margin-right:3px;"></i>${ml} — ${menMode==='auto'?'se activa y desactiva solo':'requiere activación manual'}</div></div><button class="mld" onclick="togMD(${d})" title="Quitar"><i class="fas fa-xmark"></i></button></div>`).join('')}</div>`;
 }
+
 window.save=async function(){
   if(!editing)return;
   const estado=$('estadoG').value,tipo=$('tipoAus').value,fIni=$('fIni').value,fFin=$('fFin').value,motivo=$('ausMotivo').value;
   if(tipo&&(!fIni||!fFin)){toast('<i class="fas fa-triangle-exclamation"></i> Selecciona fecha inicio y fin','err');sw('aus');return;}
   if(tipo&&fFin<fIni){toast('<i class="fas fa-triangle-exclamation"></i> Fecha fin debe ser posterior al inicio','err');sw('aus');return;}
   let dias=0;if(tipo&&fIni&&fFin)dias=Math.round((new Date(fFin+'T00:00:00')-new Date(fIni+'T00:00:00'))/864e5)+1;
-  const data={status:estado,activo:estado==='active',diasSemanaNoLaborables:wdays,diasMensualesLibres:mdays,menMode:menMode,tipoLibre:tipo||null,fechaInicioLibre:tipo?fIni:null,fechaFinLibre:tipo?fFin:null,cantidadDiasLibre:dias,motivoLibre:tipo?motivo:null,updatedAt:Timestamp.now(),updatedBy:CU.uid};
+  const data={
+    status:estado,
+    activo:estado==='active',
+    diasSemanaNoLaborables:wdays,
+    diasMensualesLibres:mdays,
+    menMode:menMode,
+    tipoLibre:tipo||null,
+    fechaInicioLibre:tipo?fIni:null,
+    fechaFinLibre:tipo?fFin:null,
+    cantidadDiasLibre:dias,
+    motivoLibre:tipo?motivo:null,
+    updatedAt:Timestamp.now(),
+    updatedBy:CU.uid
+  };
   showLd(true);
-  try{await updateDoc(doc(db,'Ponche',editing.id),data);toast('<i class="fas fa-circle-check"></i> Configuración guardada');closeMod();await loadEmps();}
-  catch(e){console.error(e);toast(`<i class="fas fa-circle-exclamation"></i> Error: ${e.message}`,'err');}
+  try{
+    await updateDoc(doc(db,'Ponche',editing.id),data);
+    toast('<i class="fas fa-circle-check"></i> Configuración guardada');
+    closeMod();
+    await loadEmps();
+  }catch(e){console.error(e);toast(`<i class="fas fa-circle-exclamation"></i> Error: ${e.message}`,'err');}
   finally{showLd(false);}
 };
+
 loadEmps();
 </script>
 </body>
