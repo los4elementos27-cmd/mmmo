@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>PlusMoney - Reportes de Asistencia</title>
+  <title>Vizo Access - Reportes de Asistencia</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -56,7 +56,7 @@
     .login-card h1 { font-size: 20px; margin-bottom: 4px; text-align: center; }
     .login-card p  { font-size: 12px; color: var(--win-text-light); margin-bottom: 20px; text-align: center; }
 
-    /* ===== HEADER — oculto hasta sesión ===== */
+    /* ===== HEADER ===== */
     .app-header {
       position: fixed; top: 0; left: 0; right: 0;
       height: var(--header-height);
@@ -79,7 +79,7 @@
     .header-datetime i { margin-right: 4px; }
     .user-badge { background: #e6f2ff; color: var(--primary); padding: 4px 12px; border-radius: 16px; font-weight: 600; }
 
-    /* ===== FOOTER — oculto hasta sesión ===== */
+    /* ===== FOOTER ===== */
     .app-footer {
       position: fixed; bottom: 0; left: 0; right: 0;
       height: var(--footer-height); background: var(--win-white);
@@ -102,7 +102,7 @@
       padding: 2px 4px; border-radius: 10px; min-width: 16px; text-align: center;
     }
 
-    /* ===== MAIN — oculto hasta sesión ===== */
+    /* ===== MAIN ===== */
     .main-container {
       margin-top: var(--header-height); padding: 16px;
       max-width: 1400px; margin-left: auto; margin-right: auto;
@@ -156,6 +156,33 @@
 
     .falta-row { background-color: #ffebee !important; }
     .falta-row td { background-color: #ffebee; color: var(--danger); }
+
+    /* ===== BUSCADOR TARIFAS ===== */
+    .search-box {
+      position: relative; margin-bottom: 14px;
+    }
+    .search-box i {
+      position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+      color: var(--win-text-light); font-size: 13px; pointer-events: none;
+    }
+    .search-box input {
+      width: 100%; padding: 8px 10px 8px 32px;
+      font-size: 12px; border: 1px solid var(--win-border);
+      border-radius: var(--radius); outline: none; transition: border-color 0.2s;
+    }
+    .search-box input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(0,120,212,0.15); }
+    .search-no-results {
+      text-align: center; padding: 20px; color: var(--win-text-light);
+      font-size: 12px; display: none;
+    }
+
+    /* ===== VALOR DOP badge ===== */
+    .dop-value {
+      font-weight: 700; color: var(--success);
+    }
+    .dop-zero {
+      color: var(--win-text-light);
+    }
 
     /* ===== MODAL FULLSCREEN ===== */
     .modal-fullscreen {
@@ -230,13 +257,54 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ===== PRINT ===== */
+    /* ===== PRINT AREA ===== */
+    #printArea { display: none; }
+
+    /* ===== ESTILOS DE IMPRESIÓN ===== */
     @media print {
-      body * { visibility: hidden; }
-      .modal-fullscreen .modal-content, .modal-fullscreen .modal-content * { visibility: visible; }
-      .modal-fullscreen .modal-content { position:absolute;left:0;top:0;width:100%;height:auto;margin:0;padding:20px;box-shadow:none;border:none; }
-      @page { size: landscape; }
-      .modal-fullscreen .modal-header, .modal-fullscreen .modal-footer { display: none !important; }
+      body > *:not(#printArea) { display: none !important; }
+      #printArea { display: block !important; }
+
+      @page { size: landscape; margin: 10mm 12mm; }
+
+      .print-header {
+        display: flex; align-items: center; justify-content: space-between;
+        border-bottom: 3px solid #0078d4; padding-bottom: 8px; margin-bottom: 14px;
+      }
+      .print-header .print-logo { font-size: 22pt; font-weight: 900; color: #0078d4; letter-spacing: -0.5px; }
+      .print-header .print-meta { font-size: 8pt; color: #555; text-align: right; line-height: 1.5; }
+      .print-employee-title {
+        font-size: 14pt; font-weight: 700; color: #0078d4; margin-bottom: 10px;
+        padding: 6px 10px; background: #e6f2ff; border-left: 4px solid #0078d4; border-radius: 2px;
+      }
+      .print-info-grid {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 4px 24px;
+        margin-bottom: 14px; padding: 10px 12px; background: #fafafa;
+        border: 1px solid #ddd; border-radius: 3px;
+      }
+      .print-info-item { display: flex; align-items: baseline; gap: 6px; font-size: 8.5pt; padding: 2px 0; border-bottom: 1px dotted #e0e0e0; }
+      .print-info-item:last-child { border-bottom: none; }
+      .print-info-label { font-weight: 700; color: #0078d4; white-space: nowrap; min-width: 100px; font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.3px; }
+      .print-info-value { color: #222; font-size: 8.5pt; }
+      .print-section-title { font-size: 9pt; font-weight: 700; color: #0078d4; border-bottom: 1.5px solid #0078d4; padding-bottom: 3px; margin: 14px 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px; }
+      .print-table { width: 100%; border-collapse: collapse; font-size: 7.5pt; margin-bottom: 10px; }
+      .print-table thead tr { background: #0078d4; color: white; }
+      .print-table th { padding: 5px 8px; font-weight: 700; text-align: left; font-size: 7pt; text-transform: uppercase; letter-spacing: 0.3px; white-space: nowrap; }
+      .print-table td { padding: 4px 8px; border-bottom: 1px solid #e8e8e8; font-size: 7.5pt; white-space: nowrap; }
+      .print-table tbody tr:nth-child(even) { background: #f5f9ff; }
+      .print-table .total-row { background: #e6f2ff !important; font-weight: 700; border-top: 2px solid #0078d4; }
+      .print-table .total-row td { color: #0078d4; font-size: 8pt; }
+      .print-badge { padding: 1px 5px; border-radius: 8px; font-size: 6.5pt; font-weight: 700; display: inline-block; }
+      .print-badge-success { background: #dff6dd; color: #107c10; }
+      .print-badge-warning { background: #fff3cd; color: #856404; }
+      .print-badge-danger  { background: #fde7e9; color: #d13438; }
+      .print-quincena-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px; }
+      .print-quincena-item { border: 1px solid #ddd; border-radius: 3px; padding: 6px 8px; text-align: center; background: #fafafa; }
+      .print-quincena-label { font-size: 6.5pt; color: #555; text-transform: uppercase; margin-bottom: 3px; }
+      .print-quincena-value { font-size: 11pt; font-weight: 700; color: #0078d4; }
+      .print-footer { margin-top: 16px; padding-top: 8px; border-top: 1px solid #ccc; display: flex; justify-content: space-between; font-size: 7pt; color: #888; }
+      .print-table tbody tr { page-break-inside: avoid; }
+      .print-employee-title { page-break-before: auto; }
     }
 
     /* ===== RESPONSIVE ===== */
@@ -253,13 +321,16 @@
 </head>
 <body>
 
+  <!-- ÁREA DE IMPRESIÓN -->
+  <div id="printArea"></div>
+
   <!-- ============================================================
-       LOGIN  (siempre visible hasta que se autentique)
+       LOGIN
   ============================================================ -->
   <div id="loginScreen" class="login-container">
     <div class="login-card">
-      <div class="logo"><i class="fas fa-chart-bar"></i></div>
-      <h1>PlusMoney</h1>
+      <div class="logo"><i class="fas fa-eye"></i></div>
+      <h1>Vizo Access</h1>
       <p>Reportes de Asistencia</p>
       <input type="text"     id="username" class="form-control" placeholder="Usuario"  style="margin-bottom:12px;">
       <input type="password" id="password" class="form-control" placeholder="PIN"      style="margin-bottom:12px;">
@@ -274,7 +345,7 @@
   </div>
 
   <!-- ============================================================
-       HEADER  (solo visible con body.logged-in)
+       HEADER
   ============================================================ -->
   <header class="app-header">
     <div class="header-menu">
@@ -294,7 +365,7 @@
   </header>
 
   <!-- ============================================================
-       FOOTER  (solo visible con body.logged-in)
+       FOOTER
   ============================================================ -->
   <footer class="app-footer">
     <button class="footer-icon" onclick="mostrarPagina('reportes')"><i class="fas fa-chart-bar"></i><span>Reportes</span></button>
@@ -308,7 +379,7 @@
   </footer>
 
   <!-- ============================================================
-       CONTENIDO PRINCIPAL  (solo visible con body.logged-in)
+       CONTENIDO PRINCIPAL
   ============================================================ -->
   <div class="main-container">
 
@@ -354,7 +425,14 @@
         <div class="card-header"><h2><i class="fas fa-users"></i> Colaboradores</h2></div>
         <div class="table-container">
           <table>
-            <thead><tr><th>COLABORADOR</th><th>HORAS EXTRAS</th><th>VALOR EXTRAS</th><th>ACCIÓN</th></tr></thead>
+            <thead>
+              <tr>
+                <th>COLABORADOR</th>
+                <th>HORAS EXTRAS</th>
+                <th>VALOR EXTRAS (DOP$)</th>
+                <th>ACCIÓN</th>
+              </tr>
+            </thead>
             <tbody id="tablaBody">
               <tr><td colspan="4" style="text-align:center;padding:24px;">
                 <i class="fas fa-inbox" style="font-size:32px;"></i><div>Inicia sesión para ver los reportes</div>
@@ -372,9 +450,34 @@
           <h2><i class="fas fa-dollar-sign"></i> Tarifas por Hora Extra</h2>
           <button class="btn btn-primary" onclick="guardarTarifas()"><i class="fas fa-save"></i> Guardar Todo</button>
         </div>
+
+        <!-- BUSCADOR DE COLABORADORES EN TARIFAS -->
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input
+            type="text"
+            id="buscadorTarifas"
+            placeholder="Buscar por nombre o código de colaborador..."
+            oninput="filtrarTablaTarifas(this.value)"
+          >
+        </div>
+        <div id="tarifasNoResultados" class="search-no-results">
+          <i class="fas fa-search" style="font-size:24px;margin-bottom:8px;display:block;"></i>
+          No se encontraron colaboradores con ese criterio de búsqueda.
+        </div>
+
         <div class="table-container">
           <table>
-            <thead><tr><th>CÓDIGO</th><th>NOMBRE</th><th>TURNO</th><th>TARIFA/H EXTRA</th><th>TOTAL EXTRAS</th><th>TOTAL A PAGAR</th></tr></thead>
+            <thead>
+              <tr>
+                <th>CÓDIGO</th>
+                <th>NOMBRE</th>
+                <th>TURNO</th>
+                <th>TARIFA/H EXTRA (DOP$)</th>
+                <th>TOTAL EXTRAS</th>
+                <th>TOTAL A PAGAR (DOP$)</th>
+              </tr>
+            </thead>
             <tbody id="tablaTarifas"></tbody>
           </table>
         </div>
@@ -427,6 +530,7 @@
           <div class="stat-item"><div class="stat-label">CÓDIGO</div><div class="stat-number" id="modalCodigo">-</div></div>
           <div class="stat-item"><div class="stat-label">TURNO</div><div class="stat-number" id="modalTurno">-</div></div>
           <div class="stat-item"><div class="stat-label">TOTAL EXTRAS</div><div class="stat-number" id="modalTotalExtras">0h</div></div>
+          <div class="stat-item"><div class="stat-label">VALOR EXTRAS (DOP$)</div><div class="stat-number" id="modalValorExtras" style="color:var(--success);">DOP$0.00</div></div>
         </div>
         <div style="margin-bottom:16px;">
           <h4 style="font-size:13px;margin-bottom:8px;">Último Registro</h4>
@@ -551,7 +655,6 @@
     let currentMonth       = new Date();
     let historialQuincenas = [];
 
-    /* Umbral máximo de horas entre dos registros para que el 2º sea SALIDA del 1º */
     const LIMITE_16H = 16;
 
     /* ================================================================
@@ -582,6 +685,15 @@
     window.cerrarModal     = id => document.getElementById(id).style.display = 'none';
     window.cerrarModalFull = id => document.getElementById(id).style.display = 'none';
 
+    /* ---- Formato DOP$ ---- */
+    function formatDOP(valor) {
+      if (!valor || valor === 0) return '<span class="dop-zero">DOP$0.00</span>';
+      return `<span class="dop-value">DOP$${Number(valor).toFixed(2)}</span>`;
+    }
+    function formatDOPraw(valor) {
+      return `DOP$${Number(valor||0).toFixed(2)}`;
+    }
+
     /* ---- Reloj ---- */
     (function() {
       const tick = () => {
@@ -605,11 +717,16 @@
       document.getElementById(`page${pagina.charAt(0).toUpperCase() + pagina.slice(1)}`).classList.add('active');
       document.querySelectorAll('.menu-icon[data-page]').forEach(b => b.classList.remove('active'));
       document.querySelector(`.menu-icon[data-page="${pagina}"]`)?.classList.add('active');
-      if (pagina === 'tarifas')       cargarTarifas();
+      if (pagina === 'tarifas') {
+        // Limpiar buscador al entrar a la página
+        const buscador = document.getElementById('buscadorTarifas');
+        if (buscador) buscador.value = '';
+        mostrarTablaTarifas();
+      }
       if (pagina === 'configuracion') cargarConfiguracionQuincena();
     };
 
-    /* ---- Hora 12 h ---- */
+    /* ---- Hora 12h ---- */
     function a12h(h24) {
       if (!h24) return '---';
       const [h, m] = h24.split(':');
@@ -619,16 +736,14 @@
       return `${String(hh).padStart(2,'0')}:${m} ${ap}`;
     }
 
-    /* ---- Calcular horas: usa timestamps reales si existen, si no usa hora/fecha ---- */
+    /* ---- Calcular horas ---- */
     function calcularHoras(entrada, salida) {
       if (!entrada || !salida) return 0;
       try {
-        // Maxima precision: usar timestamps reales
         if (entrada.timestamp instanceof Date && salida.timestamp instanceof Date) {
           const diff = salida.timestamp - entrada.timestamp;
           return diff < 0 ? 0 : Math.round((diff / 3600000) * 100) / 100;
         }
-        // Fallback: campos hora/fecha
         if (!entrada.hora || !salida.hora) return 0;
         const fe = entrada.fecha || '';
         const fs = salida.fecha  || fe;
@@ -661,18 +776,24 @@
 
     function activarSesion() {
       adminName.textContent = currentAdmin.name;
-      loginScreen.classList.add('hidden');     // oculta el login
-      document.body.classList.add('logged-in'); // muestra header/footer/main
+      loginScreen.classList.add('hidden');
+      document.body.classList.add('logged-in');
     }
 
+    /* ============================================================
+       CORRECCIÓN PRINCIPAL: cargamos tarifas PRIMERO y luego
+       procesamos registros, de modo que tarifasMap ya tiene datos
+       cuando mostrarTabla() se ejecuta.
+    ============================================================ */
     async function iniciarSesion(username, pin) {
       try {
         currentAdmin = await authenticateUser(username, pin);
         sessionStorage.setItem('facial_currentUser', JSON.stringify(currentAdmin));
         activarSesion();
         await cargarConfiguracionQuincena();
+        // ► Cargar tarifas primero → después registros (que llama mostrarTabla)
+        await cargarTarifasSilencioso();
         await cargarRegistros();
-        await cargarTarifas();
         loginAlert.style.display = 'none';
         hideLoading();
       } catch(err) {
@@ -685,12 +806,11 @@
     function logout() {
       currentAdmin = null;
       sessionStorage.removeItem('facial_currentUser');
-      document.body.classList.remove('logged-in'); // oculta header/footer/main
-      loginScreen.classList.remove('hidden');       // muestra login
+      document.body.classList.remove('logged-in');
+      loginScreen.classList.remove('hidden');
       usernameInput.value = ''; passwordInput.value = '';
       todosLosRegistros = []; todosLosPares = [];
       empleadosMap.clear(); tarifasMap.clear();
-      /* Resetear vista */
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.getElementById('pageReportes').classList.add('active');
       document.querySelectorAll('.menu-icon[data-page]').forEach(b => b.classList.remove('active'));
@@ -739,7 +859,7 @@
     };
 
     /* ================================================================
-       CARGAR EMPLEADOS (desde colección Ponche)
+       CARGAR EMPLEADOS
     ================================================================ */
     async function cargarEmpleados() {
       try {
@@ -770,12 +890,11 @@
           .map(d => {
             const data = d.data();
             return {
-              id:               d.id,
+              id:        d.id,
               ...data,
-              timestamp:        data.timestamp?.toDate() || new Date(),
-              /* Preservar explícitamente el campo type para procesarRegistros */
-              type:             data.type || null,
-              parId:            data.parId || null
+              timestamp: data.timestamp?.toDate() || new Date(),
+              type:      data.type || null,
+              parId:     data.parId || null
             };
           })
           .filter(r => r.collaboratorId === currentAdmin.uid);
@@ -791,47 +910,22 @@
     }
 
     /* ================================================================
-       EXTRAER HORA DESDE TIMESTAMP (siempre HH:MM:SS usando el Date real)
-       Garantiza que entrada y salida nunca muestren la misma hora aunque
-       el campo .hora del documento sea idéntico.
+       HELPERS DE TIMESTAMP
     ================================================================ */
     function horaDesdeTimestamp(ts) {
       if (!ts || !(ts instanceof Date)) return null;
-      const h = String(ts.getHours()).padStart(2, '0');
-      const m = String(ts.getMinutes()).padStart(2, '0');
-      const s = String(ts.getSeconds()).padStart(2, '0');
-      return `${h}:${m}:${s}`;
+      return `${String(ts.getHours()).padStart(2,'0')}:${String(ts.getMinutes()).padStart(2,'0')}:${String(ts.getSeconds()).padStart(2,'0')}`;
     }
 
     function fechaDesdeTimestamp(ts) {
       if (!ts || !(ts instanceof Date)) return null;
-      const y  = ts.getFullYear();
-      const mo = String(ts.getMonth() + 1).padStart(2, '0');
-      const d  = String(ts.getDate()).padStart(2, '0');
-      return `${y}-${mo}-${d}`;
+      return `${ts.getFullYear()}-${String(ts.getMonth()+1).padStart(2,'0')}-${String(ts.getDate()).padStart(2,'0')}`;
     }
 
     /* ================================================================
-       PROCESAMIENTO DE REGISTROS — USANDO CAMPO 'type' DE FIREBASE
-       ---------------------------------------------------------------
-       El código de cámara (index.html) guarda en cada documento el
-       campo  type: 'entry' | 'exit'  determinado consultando Firebase
-       en el momento del registro.
-
-       ESTRATEGIA PRINCIPAL (cuando type está disponible):
-         Se agrupan los registros por collaboratorCode y se emparejan
-         usando el campo type:
-           - type='entry' → inicio de par (ENTRADA)
-           - type='exit'  → cierre del par más reciente sin salida (SALIDA)
-         Se usa el parId para emparejar exactamente entrada con salida.
-
-       ESTRATEGIA FALLBACK (registros sin campo type — datos legacy):
-         Si un registro no tiene type, se aplica la lógica alternada
-         original (posición impar = entrada, posición par = salida),
-         respetando el límite de 16 h entre dos registros consecutivos.
+       PROCESAMIENTO DE REGISTROS
     ================================================================ */
     function procesarRegistros() {
-      /* 1. Agrupar por collaboratorCode */
       const porColaborador = new Map();
       todosLosRegistros.forEach(reg => {
         if (!reg.collaboratorCode) return;
@@ -843,14 +937,11 @@
       const resultados = [];
 
       porColaborador.forEach((registros, codigo) => {
-        /* 2. Ordenar cronológicamente */
-        const lista = [...registros].sort((a, b) => a.timestamp - b.timestamp);
-
+        const lista  = [...registros].sort((a, b) => a.timestamp - b.timestamp);
         const info   = empleadosMap.get(codigo) || { nombre: codigo, turnoHoras: 8 };
         const turno  = parseFloat(info.turnoHoras) || 8;
         const nombre = info.nombre || codigo;
 
-        /* Helper: construir objeto hora/fecha desde timestamp real */
         function buildObj(reg) {
           return {
             fecha:     fechaDesdeTimestamp(reg.timestamp) || reg.fecha,
@@ -859,18 +950,11 @@
           };
         }
 
-        /* ── ESTRATEGIA A: todos los registros tienen campo 'type' ── */
         const tienenType = lista.every(r => r.type === 'entry' || r.type === 'exit');
 
         if (tienenType) {
-          /*
-           * Emparejar usando parId: cada 'entry' busca su 'exit' del mismo parId.
-           * Si no encuentra salida, queda como par pendiente.
-           */
-          const entradas = lista.filter(r => r.type === 'entry');
-          const salidas  = lista.filter(r => r.type === 'exit');
-
-          /* Mapa parId → registro de salida */
+          const entradas  = lista.filter(r => r.type === 'entry');
+          const salidas   = lista.filter(r => r.type === 'exit');
           const salidaMap = new Map();
           salidas.forEach(s => salidaMap.set(s.parId, s));
 
@@ -879,8 +963,8 @@
             const salidaReg  = salidaMap.get(entrada.parId);
 
             if (salidaReg) {
-              const salidaObj  = buildObj(salidaReg);
-              const horasTrab  = (salidaReg.timestamp - entrada.timestamp) / 3600000;
+              const salidaObj = buildObj(salidaReg);
+              const horasTrab = (salidaReg.timestamp - entrada.timestamp) / 3600000;
               resultados.push({
                 codigo, nombre, turno,
                 fecha:         entradaObj.fecha,
@@ -891,7 +975,6 @@
                 turnoCompleto: horasTrab >= turno - 0.5
               });
             } else {
-              /* Entrada sin salida correspondiente → pendiente */
               resultados.push({
                 codigo, nombre, turno,
                 fecha:         entradaObj.fecha,
@@ -905,18 +988,16 @@
           });
 
         } else {
-          /* ── ESTRATEGIA B: fallback alternado para registros legacy sin 'type' ── */
           let i = 0;
           while (i < lista.length) {
-            const regA = lista[i];
-            const regB = lista[i + 1];
+            const regA       = lista[i];
+            const regB       = lista[i + 1];
             const entradaObj = buildObj(regA);
 
             if (regB) {
               const diffH = (regB.timestamp - regA.timestamp) / 3600000;
               if (diffH <= LIMITE_16H) {
                 const salidaObj = buildObj(regB);
-                const horasTrab = diffH;
                 resultados.push({
                   codigo, nombre, turno,
                   fecha:         entradaObj.fecha,
@@ -924,7 +1005,7 @@
                   salida:        salidaObj,
                   completo:      true,
                   esFalta:       false,
-                  turnoCompleto: horasTrab >= turno - 0.5
+                  turnoCompleto: diffH >= turno - 0.5
                 });
                 i += 2;
               } else {
@@ -955,7 +1036,6 @@
         }
       });
 
-      /* 4. Ordenar DESC por timestamp de entrada */
       todosLosPares = resultados.sort((a, b) => {
         const tA = a.entrada?.timestamp || new Date(a.fecha);
         const tB = b.entrada?.timestamp || new Date(b.fecha);
@@ -963,17 +1043,14 @@
       });
 
       console.log(`Pares procesados: ${todosLosPares.length}`);
-      todosLosPares.slice(0, 5).forEach(p =>
-        console.log(`${p.nombre} | type=${p.entrada?.type||'legacy'} | E:${p.entrada?.hora} | S:${p.salida?.hora||'---'} | ${p.fecha}`)
-      );
-
+      // tarifasMap ya está cargado → mostrarTabla muestra valores DOP$ correctos
       mostrarTabla(todosLosPares);
       actualizarEstadisticas(todosLosPares);
       actualizarCalendario();
     }
 
     /* ================================================================
-       MOSTRAR TABLA COLABORADORES
+       MOSTRAR TABLA COLABORADORES — con DOP$ calculado correctamente
     ================================================================ */
     function mostrarTabla(resultados) {
       if (!resultados || !resultados.length) {
@@ -994,12 +1071,17 @@
 
       let html = '';
       colMap.forEach(col => {
-        const tarifa = tarifasMap.get(col.codigo) || 0;
+        // tarifasMap ya tiene datos cuando se llega aquí
+        const tarifa      = parseFloat(tarifasMap.get(col.codigo)) || 0;
+        const valorExtras = col.totalExtras * tarifa;
         html += `
           <tr>
-            <td><strong>${col.nombre}</strong><br><small>${col.codigo}</small></td>
-            <td>${col.totalExtras > 0 ? '+'+col.totalExtras+'h' : '0h'}</td>
-            <td>$${(col.totalExtras * tarifa).toFixed(2)}</td>
+            <td><strong>${col.nombre}</strong><br><small style="color:var(--win-text-light);">${col.codigo}</small></td>
+            <td>${col.totalExtras > 0 ? '<strong>+'+col.totalExtras+'h</strong>' : '<span style="color:var(--win-text-light);">0h</span>'}</td>
+            <td>${tarifa > 0
+              ? `<span class="dop-value">DOP$${valorExtras.toFixed(2)}</span>`
+              : '<span class="dop-zero">Sin tarifa</span>'
+            }</td>
             <td><button class="btn btn-primary" style="padding:4px 8px;font-size:11px;"
                 onclick='verDetalle("${col.codigo}")'>
                 <i class="fas fa-eye"></i> Ver</button></td>
@@ -1016,19 +1098,36 @@
     }
 
     /* ================================================================
-       TARIFAS
+       TARIFAS — carga silenciosa (sin mostrar tabla de tarifas en UI)
+       Solo rellena tarifasMap. Se usa en el arranque.
     ================================================================ */
-    async function cargarTarifas() {
-      if (!currentAdmin) return;
+    async function cargarTarifasSilencioso() {
       try {
         const snap = await getDocs(collection(db,'tarifasExtras'));
         tarifasMap.clear();
-        snap.forEach(d => tarifasMap.set(d.id, d.data().tarifa));
+        snap.forEach(d => {
+          const val = d.data().tarifa;
+          if (val !== undefined) tarifasMap.set(d.id, parseFloat(val) || 0);
+        });
+        console.log(`Tarifas cargadas: ${tarifasMap.size}`, Object.fromEntries(tarifasMap));
+      } catch(e) { console.error('Error cargando tarifas:', e); }
+    }
+
+    /* Carga tarifas y actualiza la UI de la página Tarifas */
+    async function cargarTarifas() {
+      if (!currentAdmin) return;
+      try {
+        await cargarTarifasSilencioso();
         mostrarTablaTarifas();
+        // Refrescar tabla principal con valores DOP$ correctos
+        mostrarTabla(todosLosPares);
       } catch(e) { console.error(e); }
     }
 
-    function mostrarTablaTarifas() {
+    /* ================================================================
+       MOSTRAR TABLA TARIFAS — con buscador integrado
+    ================================================================ */
+    function mostrarTablaTarifas(filtro) {
       const colMap = new Map();
       todosLosPares.forEach(r => {
         if (!colMap.has(r.codigo))
@@ -1038,23 +1137,61 @@
           colMap.get(r.codigo).totalExtras += Math.floor(Math.max(0, h - r.turno));
         }
       });
+
+      // Aplicar filtro de búsqueda si existe
+      const term = (filtro || '').toLowerCase().trim();
       let html = '';
+      let visibles = 0;
+
       colMap.forEach(col => {
-        const tarifa = tarifasMap.get(col.codigo) || 0;
+        // Filtrar por código o nombre
+        if (term && !col.codigo.toLowerCase().includes(term) && !col.nombre.toLowerCase().includes(term)) {
+          return; // omitir fila
+        }
+        visibles++;
+        const tarifa      = parseFloat(tarifasMap.get(col.codigo)) || 0;
+        const valorExtras = col.totalExtras * tarifa;
         html += `
-          <tr>
-            <td>${col.codigo}</td><td>${col.nombre}</td><td>${col.turno}h</td>
-            <td><input type="number" class="form-control" style="width:100px;"
-                 value="${tarifa}" step="0.5" min="0"
-                 onchange="actualizarTarifa('${col.codigo}',this.value)"></td>
-            <td>${col.totalExtras}h</td>
-            <td>$${(col.totalExtras * tarifa).toFixed(2)}</td>
+          <tr data-codigo="${col.codigo}" data-nombre="${col.nombre.toLowerCase()}">
+            <td><strong>${col.codigo}</strong></td>
+            <td>${col.nombre}</td>
+            <td>${col.turno}h</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="font-weight:600;color:var(--win-text-light);font-size:10px;">DOP$</span>
+                <input type="number" class="form-control" style="width:100px;"
+                  value="${tarifa}" step="0.5" min="0"
+                  onchange="actualizarTarifa('${col.codigo}',this.value)">
+              </div>
+            </td>
+            <td>${col.totalExtras > 0 ? '<strong>'+col.totalExtras+'h</strong>' : '0h'}</td>
+            <td>${tarifa > 0
+              ? `<span class="dop-value">DOP$${valorExtras.toFixed(2)}</span>`
+              : '<span class="dop-zero">DOP$0.00</span>'
+            }</td>
           </tr>`;
       });
+
       document.getElementById('tablaTarifas').innerHTML = html;
+
+      // Mostrar u ocultar mensaje "sin resultados"
+      const noRes = document.getElementById('tarifasNoResultados');
+      if (noRes) noRes.style.display = (term && visibles === 0) ? 'block' : 'none';
     }
 
-    window.actualizarTarifa = (cod, val) => tarifasMap.set(cod, parseFloat(val)||0);
+    /* Función pública para filtrar desde el input */
+    window.filtrarTablaTarifas = function(valor) {
+      mostrarTablaTarifas(valor);
+    };
+
+    window.actualizarTarifa = (cod, val) => {
+      tarifasMap.set(cod, parseFloat(val) || 0);
+      // Refrescar fila de total en la misma tabla sin redibujar todo
+      const termActual = document.getElementById('buscadorTarifas')?.value || '';
+      mostrarTablaTarifas(termActual);
+      // También refrescar tabla principal
+      mostrarTabla(todosLosPares);
+    };
 
     window.guardarTarifas = async () => {
       if (!currentAdmin) return;
@@ -1063,17 +1200,20 @@
         const batch = writeBatch(db);
         tarifasMap.forEach((t, cod) =>
           batch.set(doc(db,'tarifasExtras',cod),
-            { tarifa:t, actualizado:serverTimestamp(), guardadoPor:currentAdmin.uid })
+            { tarifa: t, actualizado: serverTimestamp(), guardadoPor: currentAdmin.uid })
         );
         await batch.commit();
-        showToast('Tarifas guardadas');
-        mostrarTablaTarifas();
-      } catch { showToast('Error','error'); }
+        showToast('Tarifas guardadas correctamente');
+        // Refrescar ambas tablas
+        const termActual = document.getElementById('buscadorTarifas')?.value || '';
+        mostrarTablaTarifas(termActual);
+        mostrarTabla(todosLosPares);
+      } catch { showToast('Error al guardar','error'); }
       finally  { hideLoading(); }
     };
 
     /* ================================================================
-       VER DETALLE COLABORADOR
+       VER DETALLE COLABORADOR — muestra DOP$ en el modal
     ================================================================ */
     window.verDetalle = codigo => {
       if (!currentAdmin) return;
@@ -1082,9 +1222,9 @@
       const regs = todosLosPares.filter(p => p.codigo === codigo)
                                 .sort((a,b) => b.fecha.localeCompare(a.fecha));
 
-      document.getElementById('modalTitulo').textContent    = info.nombre || codigo;
-      document.getElementById('modalCodigo').textContent    = codigo;
-      document.getElementById('modalTurno').textContent     = (info.turnoHoras||8)+'h';
+      document.getElementById('modalTitulo').textContent = info.nombre || codigo;
+      document.getElementById('modalCodigo').textContent = codigo;
+      document.getElementById('modalTurno').textContent  = (info.turnoHoras||8)+'h';
 
       let totalExtras = 0;
       regs.forEach(r => {
@@ -1093,7 +1233,16 @@
           totalExtras += Math.floor(Math.max(0, h - r.turno));
         }
       });
-      document.getElementById('modalTotalExtras').textContent = totalExtras+'h';
+
+      const tarifa      = parseFloat(tarifasMap.get(codigo)) || 0;
+      const valorExtras = totalExtras * tarifa;
+
+      document.getElementById('modalTotalExtras').textContent = totalExtras + 'h';
+      const elValor = document.getElementById('modalValorExtras');
+      if (elValor) {
+        elValor.textContent = tarifa > 0 ? `DOP$${valorExtras.toFixed(2)}` : 'Sin tarifa asignada';
+        elValor.style.color = tarifa > 0 ? 'var(--success)' : 'var(--win-text-light)';
+      }
 
       /* Último registro */
       const ult = regs[0];
@@ -1112,14 +1261,15 @@
       regs.forEach(r => {
         const h   = r.salida ? calcularHoras(r.entrada, r.salida) : 0;
         const ex  = Math.floor(Math.max(0, h - r.turno));
-        const est = r.turnoCompleto?'Completo':r.completo?'Incompleto':'Pendiente';
-        const cls = r.turnoCompleto?'badge-success':r.completo?'badge-warning':'badge-danger';
+        const est = r.turnoCompleto ? 'Completo' : r.completo ? 'Incompleto' : 'Pendiente';
+        const cls = r.turnoCompleto ? 'badge-success' : r.completo ? 'badge-warning' : 'badge-danger';
         histHtml += `
           <tr>
             <td>${r.fecha}</td>
             <td>${a12h(r.entrada?.hora)}</td>
             <td>${r.salida ? a12h(r.salida.hora) : '---'}</td>
-            <td>${h.toFixed(2)}h</td><td>${ex}h</td>
+            <td>${h.toFixed(2)}h</td>
+            <td>${ex > 0 ? '+'+ex+'h' : '0h'}</td>
             <td><span class="badge ${cls}">${est}</span></td>
           </tr>`;
       });
@@ -1129,26 +1279,199 @@
       const qMap = new Map();
       regs.forEach(r => {
         if (!r.entrada || !r.salida) return;
-        const f=new Date(r.fecha), dia=f.getDate(), mes=f.getMonth()+1, año=f.getFullYear();
-        const h  = calcularHoras(r.entrada, r.salida);
-        const ex = Math.floor(Math.max(0, h - r.turno));
-        let per  = '';
+        const f   = new Date(r.fecha);
+        const dia = f.getDate(), mes = f.getMonth()+1, año = f.getFullYear();
+        const h   = calcularHoras(r.entrada, r.salida);
+        const ex  = Math.floor(Math.max(0, h - r.turno));
+        let per   = '';
         if (dia > configQuincena.primerCierre && dia <= configQuincena.segundoCierre) {
           per = `2ª Quin. ${mes}/${año}`;
         } else {
-          let mq=dia<=configQuincena.primerCierre?mes:mes+1, aq=año;
-          if(mq>12){mq=1;aq++;}
+          let mq = dia <= configQuincena.primerCierre ? mes : mes+1, aq = año;
+          if (mq > 12) { mq = 1; aq++; }
           per = `1ª Quin. ${mq}/${aq}`;
         }
         qMap.set(per, (qMap.get(per)||0) + ex);
       });
+
       let qHtml = '';
-      qMap.forEach((t,p) =>
-        qHtml += `<div class="stat-item"><div class="stat-label">${p}</div><div class="stat-number">${t}h</div></div>`
-      );
+      qMap.forEach((t, p) => {
+        const vq = t * tarifa;
+        qHtml += `
+          <div class="stat-item">
+            <div class="stat-label">${p}</div>
+            <div class="stat-number">${t}h</div>
+            ${tarifa > 0 ? `<div style="font-size:10px;color:var(--success);margin-top:4px;font-weight:600;">DOP$${vq.toFixed(2)}</div>` : ''}
+          </div>`;
+      });
       document.getElementById('modalQuincenaGrid').innerHTML = qHtml || '<p>Sin datos</p>';
 
       document.getElementById('detalleModal').style.display = 'flex';
+    };
+
+    /* ================================================================
+       IMPRIMIR MODAL — sin duplicación, con DOP$
+    ================================================================ */
+    window.imprimirModal = () => {
+      if (!colaboradorActual) return;
+
+      const info = empleadosMap.get(colaboradorActual) || { nombre: colaboradorActual, turnoHoras: 8 };
+      const regs = todosLosPares
+        .filter(p => p.codigo === colaboradorActual)
+        .sort((a, b) => b.fecha.localeCompare(a.fecha));
+
+      let totalHoras     = 0;
+      let totalExtras    = 0;
+      let diasTrabajados = 0;
+      let diasCompletos  = 0;
+
+      regs.forEach(r => {
+        if (r.entrada && r.salida) {
+          const h  = calcularHoras(r.entrada, r.salida);
+          const ex = Math.floor(Math.max(0, h - r.turno));
+          totalHoras  += h;
+          totalExtras += ex;
+          diasTrabajados++;
+          if (r.turnoCompleto) diasCompletos++;
+        } else if (r.entrada) {
+          diasTrabajados++;
+        }
+      });
+
+      const tarifa         = parseFloat(tarifasMap.get(colaboradorActual)) || 0;
+      const valorExtras    = totalExtras * tarifa;
+      const fechaImpresion = new Date().toLocaleString('es-ES');
+      const fechaPrimerReg = regs.length ? regs[regs.length-1].fecha : '---';
+      const fechaUltimoReg = regs.length ? regs[0].fecha : '---';
+      const ultimoReg      = regs[0];
+      const ultEntrada     = ultimoReg ? a12h(ultimoReg.entrada?.hora) : '---';
+      const ultSalida      = ultimoReg ? (ultimoReg.salida ? a12h(ultimoReg.salida.hora) : 'Pendiente') : '---';
+
+      const fichaItems = [
+        { label: 'Código',            value: colaboradorActual },
+        { label: 'Turno',             value: (info.turnoHoras||8) + ' horas' },
+        { label: 'Primer Registro',   value: fechaPrimerReg },
+        { label: 'Último Registro',   value: fechaUltimoReg },
+        { label: 'Días Trabajados',   value: diasTrabajados },
+        { label: 'Días Completos',    value: diasCompletos },
+        { label: 'Total Horas',       value: totalHoras.toFixed(2) + 'h' },
+        { label: 'Horas Extras',      value: totalExtras + 'h' },
+        { label: 'Tarifa / h Extra',  value: tarifa > 0 ? `DOP$${tarifa.toFixed(2)}` : 'Sin tarifa' },
+        { label: 'Total a Pagar',     value: tarifa > 0 ? `DOP$${valorExtras.toFixed(2)}` : '---' },
+        { label: 'Últ. Entrada',      value: ultEntrada },
+        { label: 'Últ. Salida',       value: ultSalida },
+      ];
+
+      const fichaHtml = fichaItems.map(item =>
+        `<div class="print-info-item">
+          <span class="print-info-label">${item.label}:</span>
+          <span class="print-info-value">${item.value}</span>
+        </div>`
+      ).join('');
+
+      /* Quincenas */
+      const qMap = new Map();
+      regs.forEach(r => {
+        if (!r.entrada || !r.salida) return;
+        const f   = new Date(r.fecha);
+        const dia = f.getDate(), mes = f.getMonth()+1, año = f.getFullYear();
+        const h   = calcularHoras(r.entrada, r.salida);
+        const ex  = Math.floor(Math.max(0, h - r.turno));
+        let per   = '';
+        if (dia > configQuincena.primerCierre && dia <= configQuincena.segundoCierre) {
+          per = `2ª Quincena ${mes}/${año}`;
+        } else {
+          let mq = dia <= configQuincena.primerCierre ? mes : mes+1, aq = año;
+          if (mq > 12) { mq = 1; aq++; }
+          per = `1ª Quincena ${mq}/${aq}`;
+        }
+        qMap.set(per, (qMap.get(per)||0) + ex);
+      });
+
+      let qHtml = '';
+      qMap.forEach((t, p) => {
+        const vq = t * tarifa;
+        qHtml += `
+          <div class="print-quincena-item">
+            <div class="print-quincena-label">${p}</div>
+            <div class="print-quincena-value">${t}h</div>
+            ${tarifa > 0 ? `<div style="font-size:6pt;color:#107c10;margin-top:2px;font-weight:700;">DOP$${vq.toFixed(2)}</div>` : ''}
+          </div>`;
+      });
+
+      /* Tabla historial */
+      let tablaHtml = '';
+      regs.forEach(r => {
+        const h       = r.salida ? calcularHoras(r.entrada, r.salida) : 0;
+        const ex      = Math.floor(Math.max(0, h - r.turno));
+        const est     = r.turnoCompleto ? 'Completo' : r.completo ? 'Incompleto' : 'Pendiente';
+        const badgeCls= r.turnoCompleto ? 'print-badge-success' : r.completo ? 'print-badge-warning' : 'print-badge-danger';
+        const vFila   = ex * tarifa;
+        tablaHtml += `
+          <tr>
+            <td>${r.fecha}</td>
+            <td>${a12h(r.entrada?.hora)}</td>
+            <td>${r.salida ? a12h(r.salida.hora) : '---'}</td>
+            <td style="text-align:right;">${h.toFixed(2)}h</td>
+            <td style="text-align:right;">${ex > 0 ? '+'+ex+'h' : '0h'}</td>
+            <td style="text-align:right;">${tarifa > 0 && ex > 0 ? 'DOP$'+vFila.toFixed(2) : '---'}</td>
+            <td>${r.turno}h</td>
+            <td><span class="print-badge ${badgeCls}">${est}</span></td>
+          </tr>`;
+      });
+      tablaHtml += `
+        <tr class="total-row">
+          <td colspan="3"><strong>TOTALES</strong></td>
+          <td style="text-align:right;"><strong>${totalHoras.toFixed(2)}h</strong></td>
+          <td style="text-align:right;"><strong>+${totalExtras}h</strong></td>
+          <td style="text-align:right;"><strong>${tarifa > 0 ? 'DOP$'+valorExtras.toFixed(2) : '---'}</strong></td>
+          <td colspan="2"></td>
+        </tr>`;
+
+      document.getElementById('printArea').innerHTML = `
+        <div class="print-header">
+          <div class="print-logo">👁 Vizo Access</div>
+          <div class="print-meta">
+            <div><strong>Reporte de Asistencia Individual</strong></div>
+            <div>Impreso: ${fechaImpresion}</div>
+            <div>Por: ${currentAdmin.name}</div>
+          </div>
+        </div>
+
+        <div class="print-employee-title">👤 ${info.nombre || colaboradorActual}</div>
+
+        <div class="print-section-title">Información del Colaborador</div>
+        <div class="print-info-grid">${fichaHtml}</div>
+
+        ${qMap.size > 0 ? `
+          <div class="print-section-title">Resumen por Quincenas</div>
+          <div class="print-quincena-grid">${qHtml}</div>
+        ` : ''}
+
+        <div class="print-section-title">Historial Completo de Asistencia (${regs.length} registros)</div>
+        <table class="print-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Entrada</th>
+              <th>Salida</th>
+              <th style="text-align:right;">Horas</th>
+              <th style="text-align:right;">Extras</th>
+              <th style="text-align:right;">Valor (DOP$)</th>
+              <th>Turno</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>${tablaHtml}</tbody>
+        </table>
+
+        <div class="print-footer">
+          <span>Vizo Access — Sistema de Control de Asistencia</span>
+          <span>Colaborador: ${colaboradorActual} | Generado: ${fechaImpresion}</span>
+        </div>
+      `;
+
+      window.print();
     };
 
     /* ================================================================
@@ -1288,7 +1611,7 @@
       showLoading('Generando PDF...');
       try{
         const {jsPDF}=window.jspdf,pdoc=new jsPDF('l','mm','a4');
-        pdoc.setFontSize(18);pdoc.text('Reporte de Quincenas - PlusMoney',14,20);
+        pdoc.setFontSize(18);pdoc.text('Reporte de Quincenas - Vizo Access',14,20);
         pdoc.setFontSize(10);pdoc.text(`Generado: ${new Date().toLocaleString()}`,14,28);
         pdoc.text(`Por: ${currentAdmin.name}`,14,34);
         const qMap=new Map();
@@ -1307,14 +1630,18 @@
           if(y>180){pdoc.addPage();y=20;}
           pdoc.setFontSize(12);pdoc.setTextColor(0,120,212);pdoc.text(per,14,y);
           const data=[];let tp=0;
-          cm.forEach((ex,cod)=>{data.push([cod,empleadosMap.get(cod)?.nombre||cod,ex+'h']);tp+=ex;});
-          data.push(['TOTAL','',tp+'h']);
-          pdoc.autoTable({startY:y+4,head:[['Código','Nombre','Horas Extras']],body:data,theme:'grid',headStyles:{fillColor:[0,120,212]},styles:{fontSize:9}});
+          cm.forEach((ex,cod)=>{
+            const t=parseFloat(tarifasMap.get(cod))||0;
+            data.push([cod,empleadosMap.get(cod)?.nombre||cod,ex+'h',t>0?`DOP$${(ex*t).toFixed(2)}`:'-']);
+            tp+=ex;
+          });
+          data.push(['TOTAL','',tp+'h','']);
+          pdoc.autoTable({startY:y+4,head:[['Código','Nombre','Horas Extras','Valor DOP$']],body:data,theme:'grid',headStyles:{fillColor:[0,120,212]},styles:{fontSize:9}});
           y=pdoc.lastAutoTable.finalY+10;
         });
         pdoc.save(`Quincenas_${new Date().toISOString().split('T')[0]}.pdf`);
         showToast('PDF generado');
-      } catch{showToast('Error','error');}
+      } catch(e){console.error(e);showToast('Error','error');}
       finally{hideLoading();}
     };
 
@@ -1327,16 +1654,18 @@
       todosLosPares.forEach(r=>{
         const h=r.salida?calcularHoras(r.entrada,r.salida):0;
         const ex=Math.floor(Math.max(0,h-r.turno));
+        const t=parseFloat(tarifasMap.get(r.codigo))||0;
         datos.push({
           Código:r.codigo,Nombre:r.nombre,Fecha:r.fecha,
           Entrada:r.entrada?.hora||'---',Salida:r.salida?.hora||'---',
-          Horas:h.toFixed(2),Extras:ex,
+          Horas:h.toFixed(2),'Extras (h)':ex,
+          'Tarifa DOP$':t,'Valor Extras DOP$':ex*t,
           Estado:r.turnoCompleto?'Completo':r.completo?'Incompleto':'Pendiente'
         });
       });
       const ws=XLSX.utils.json_to_sheet(datos),wb=XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb,ws,'Asistencia');
-      XLSX.writeFile(wb,`Asistencia_${new Date().toISOString().split('T')[0]}.xlsx`);
+      XLSX.writeFile(wb,`VizoAccess_${new Date().toISOString().split('T')[0]}.xlsx`);
     };
 
     window.exportarPDFGeneral = async () => {
@@ -1344,7 +1673,7 @@
       showLoading('Generando PDF...');
       try{
         const {jsPDF}=window.jspdf,pdoc=new jsPDF('l','mm','a4');
-        pdoc.setFontSize(20);pdoc.text('Reporte de Asistencia - PlusMoney',14,20);
+        pdoc.setFontSize(20);pdoc.text('Reporte de Asistencia - Vizo Access',14,20);
         pdoc.setFontSize(10);pdoc.text(`Generado: ${new Date().toLocaleString()}`,14,28);
         pdoc.text(`Por: ${currentAdmin.name}`,14,34);
         const colMap=new Map();
@@ -1355,26 +1684,35 @@
         let y=44;
         colMap.forEach((col,cod)=>{
           if(y>180){pdoc.addPage();y=20;}
+          const tarifa=parseFloat(tarifasMap.get(cod))||0;
           pdoc.setFontSize(12);pdoc.setTextColor(0,120,212);
           pdoc.text(`${col.nombre} (${cod}) - Turno: ${col.turno}h`,14,y);
-          const data=[];let te=0;
+          const data=[];let te=0,tv=0;
           col.registros.sort((a,b)=>b.fecha.localeCompare(a.fecha)).forEach(r=>{
             const h=r.salida?calcularHoras(r.entrada,r.salida):0;
-            const ex=Math.floor(Math.max(0,h-r.turno));te+=ex;
-            data.push([r.fecha,a12h(r.entrada?.hora),r.salida?a12h(r.salida.hora):'---',
-              h.toFixed(2)+'h',ex+'h',r.turnoCompleto?'Completo':r.completo?'Incompleto':'Pendiente']);
+            const ex=Math.floor(Math.max(0,h-r.turno));
+            te+=ex; tv+=ex*tarifa;
+            data.push([
+              r.fecha,a12h(r.entrada?.hora),r.salida?a12h(r.salida.hora):'---',
+              h.toFixed(2)+'h',ex+'h',
+              tarifa>0?`DOP$${(ex*tarifa).toFixed(2)}`:'-',
+              r.turnoCompleto?'Completo':r.completo?'Incompleto':'Pendiente'
+            ]);
           });
-          data.push(['TOTAL','','','',te+'h','']);
-          pdoc.autoTable({startY:y+4,head:[['Fecha','Entrada','Salida','Horas','Extras','Estado']],body:data,theme:'grid',headStyles:{fillColor:[0,120,212]},styles:{fontSize:8}});
+          data.push(['TOTAL','','','',te+'h',tarifa>0?`DOP$${tv.toFixed(2)}`:'-','']);
+          pdoc.autoTable({
+            startY:y+4,
+            head:[['Fecha','Entrada','Salida','Horas','Extras','Valor DOP$','Estado']],
+            body:data,theme:'grid',
+            headStyles:{fillColor:[0,120,212]},styles:{fontSize:8}
+          });
           y=pdoc.lastAutoTable.finalY+10;
         });
-        pdoc.save(`Asistencia_${new Date().toISOString().split('T')[0]}.pdf`);
+        pdoc.save(`VizoAccess_${new Date().toISOString().split('T')[0]}.pdf`);
         showToast('PDF generado');
-      } catch{showToast('Error','error');}
+      } catch(e){console.error(e);showToast('Error','error');}
       finally{hideLoading();}
     };
-
-    window.imprimirModal = () => window.print();
 
     window.guardarTodosEnFirebase = async () => {
       if(!currentAdmin) return;
@@ -1395,9 +1733,9 @@
 
     window.aplicarFiltros = () => {
       if(!currentAdmin) return;
-      const fi=document.getElementById('fechaInicio').value;
-      const ff=document.getElementById('fechaFin').value;
-      const est=document.getElementById('filtroEstado').value;
+      const fi  = document.getElementById('fechaInicio').value;
+      const ff  = document.getElementById('fechaFin').value;
+      const est = document.getElementById('filtroEstado').value;
       let filtrados=[...todosLosPares];
       if(fi) filtrados=filtrados.filter(r=>r.fecha>=fi);
       if(ff) filtrados=filtrados.filter(r=>r.fecha<=ff);
@@ -1432,7 +1770,7 @@
     });
 
     /* ================================================================
-       INICIALIZACIÓN — restaurar sesión si existe en sessionStorage
+       INICIALIZACIÓN — restaurar sesión
     ================================================================ */
     (async () => {
       const saved = sessionStorage.getItem('facial_currentUser');
@@ -1441,16 +1779,17 @@
           currentAdmin = JSON.parse(saved);
           activarSesion();
           await cargarConfiguracionQuincena();
+          // ► Mismo orden: tarifas primero → registros después
+          await cargarTarifasSilencioso();
           await cargarRegistros();
-          await cargarTarifas();
           await cargarHistorialQuincenas();
         } catch {
           sessionStorage.removeItem('facial_currentUser');
-          currentAdmin = null; 
+          currentAdmin = null;
         }
       }
-      hideLoading(); 
+      hideLoading();
     })();
   </script>
 </body>
-</html> 
+</html>
