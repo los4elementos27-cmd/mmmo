@@ -3,555 +3,2258 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>Vizo Access — Home</title>
+  <title>Vizo Access - Reportes de Asistencia</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-    :root {
-      --primary:#0078d4; --primary-dark:#005a9e; --primary-light:#e6f2ff; --primary-mid:#3d9fdf;
-      --success:#107c10; --warning:#ca5010; --danger:#d13438; --info:#038387; --purple:#5c2d91;
-      --bg:#f0f2f8; --card:#ffffff; --border:#d4d4d4; --text:#1e1e2e; --text-light:#605e5c; --text-muted:#9ca3af;
-      --shadow-sm:0 1px 3px rgba(0,0,0,0.08); --shadow:0 2px 8px rgba(0,120,212,0.12);
-      --shadow-heavy:0 4px 20px rgba(0,120,212,0.18); --radius:8px; --radius-sm:4px; --radius-lg:12px;
-      --header-h:48px; --bottom-h:56px;
-      --font-main:'Plus Jakarta Sans',sans-serif; --font-display:'Sora',sans-serif;
-      --transition:all 0.2s cubic-bezier(0.4,0,0.2,1);
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      -webkit-tap-highlight-color: transparent;
     }
-    body { background:var(--bg); color:var(--text); font-family:var(--font-main); font-size:13px; min-height:100vh; line-height:1.5; }
-    ::-webkit-scrollbar{width:5px;height:5px} ::-webkit-scrollbar-track{background:var(--bg)} ::-webkit-scrollbar-thumb{background:var(--primary-mid);border-radius:10px}
-    #loadingScreen{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#005a9e 0%,#0078d4 60%,#3d9fdf 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
-    #loadingScreen.hidden{display:none}
-    .ld-logo{width:72px;height:72px;background:rgba(255,255,255,0.15);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:32px;color:white;border:2px solid rgba(255,255,255,0.3);animation:ldPulse 1.5s ease-in-out infinite}
-    @keyframes ldPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
-    .ld-title{font-family:var(--font-display);font-size:22px;font-weight:700;color:white;letter-spacing:0.5px}
-    .ld-sub{font-size:12px;color:rgba(255,255,255,0.7)}
-    .ld-bar{width:180px;height:3px;background:rgba(255,255,255,0.2);border-radius:10px;overflow:hidden}
-    .ld-bar-inner{height:100%;background:white;border-radius:10px;animation:ldBar 1.6s ease-in-out infinite}
-    @keyframes ldBar{0%{width:0;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0;margin-left:100%}}
-    #loginScreen{position:fixed;inset:0;z-index:9000;background:linear-gradient(135deg,#005a9e 0%,#0078d4 60%,#3d9fdf 100%);display:flex;align-items:center;justify-content:center;padding:20px}
-    #loginScreen.hidden{display:none}
-    .login-card{background:white;border-radius:var(--radius-lg);padding:28px 24px;width:100%;max-width:360px;box-shadow:0 16px 48px rgba(0,0,0,0.22);animation:slideUp 0.4s ease}
-    .login-logo{width:56px;height:56px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;color:white;margin:0 auto 16px}
-    .login-card h1{text-align:center;font-size:20px;font-weight:800;font-family:var(--font-display);margin-bottom:4px}
-    .login-card>p{text-align:center;font-size:12px;color:var(--text-light);margin-bottom:24px}
-    .inp-group{margin-bottom:14px}
-    .inp-group label{display:block;font-size:11px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:5px}
-    .inp-group label i{color:var(--primary);margin-right:5px}
-    .form-control{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:var(--font-main);outline:none;transition:var(--transition);background:#fafafa;color:var(--text)}
-    .form-control:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(0,120,212,0.12);background:white}
-    .btn-login{width:100%;padding:11px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;font-family:var(--font-main);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:var(--transition);margin-top:4px}
-    .btn-login:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(0,120,212,0.35)}
-    .login-alert{background:#fde7e9;border-left:3px solid var(--danger);border-radius:var(--radius-sm);padding:10px 14px;margin-top:12px;display:none;align-items:center;gap:8px;font-size:12px;color:var(--danger)}
-    .login-alert.show{display:flex}
-    #topHeader{position:fixed;top:0;left:0;right:0;height:var(--header-h);background:linear-gradient(90deg,var(--primary-dark) 0%,var(--primary) 100%);display:none;align-items:center;padding:0 14px;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,0.15)}
-    #topHeader.visible{display:flex}
-    .hd-left{display:flex;align-items:center;gap:10px;flex:1}
-    .hd-menu-btn{width:36px;height:36px;border:none;background:rgba(255,255,255,0.15);border-radius:var(--radius-sm);color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:var(--transition)}
-    .hd-menu-btn:hover{background:rgba(255,255,255,0.25)}
-    .hd-brand{font-family:var(--font-display);font-size:16px;font-weight:700;color:white;display:flex;align-items:center;gap:8px}
-    .hd-right{display:flex;align-items:center;gap:8px}
-    .hd-icon-btn{width:34px;height:34px;border:none;background:rgba(255,255,255,0.15);border-radius:var(--radius-sm);color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:var(--transition);position:relative}
-    .hd-icon-btn:hover{background:rgba(255,255,255,0.25)}
-    .hd-user-badge{background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);color:white;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px}
-    .hd-notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:#f43f5e;border-radius:50%;border:1.5px solid var(--primary)}
-    #sideOverlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:300;display:none;backdrop-filter:blur(2px)}
-    #sideOverlay.open{display:block;animation:fadeInBg 0.2s ease}
-    @keyframes fadeInBg{from{opacity:0}to{opacity:1}}
-    #sideDrawer{position:fixed;top:0;left:-280px;bottom:0;width:280px;z-index:301;background:white;box-shadow:4px 0 20px rgba(0,0,0,0.15);transition:left 0.3s cubic-bezier(0.4,0,0.2,1);display:flex;flex-direction:column;overflow:hidden}
-    #sideDrawer.open{left:0}
-    .sd-head{background:linear-gradient(135deg,var(--primary-dark),var(--primary));padding:20px 18px 16px;color:white;display:flex;align-items:center;gap:12px;flex-shrink:0}
-    .sd-avatar{width:44px;height:44px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;border:2px solid rgba(255,255,255,0.3);flex-shrink:0}
-    .sd-user-info .sd-name{font-weight:700;font-size:14px;font-family:var(--font-display)}
-    .sd-user-info .sd-role{font-size:11px;color:rgba(255,255,255,0.75);margin-top:2px}
-    .sd-body{flex:1;overflow-y:auto;padding:8px 0}
-    .sd-section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--text-muted);padding:10px 18px 4px}
-    .sd-item{display:flex;align-items:center;gap:12px;padding:10px 18px;cursor:pointer;transition:var(--transition);color:var(--text-light);font-size:13px;font-weight:500;text-decoration:none}
-    .sd-item:hover{background:var(--primary-light);color:var(--primary)}
-    .sd-item.active{background:var(--primary-light);color:var(--primary);font-weight:700}
-    .sd-item i{width:18px;text-align:center;font-size:14px}
-    .sd-item .sd-badge{margin-left:auto;background:var(--primary);color:white;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700}
-    .sd-divider{height:1px;background:var(--border);margin:6px 14px}
-    .sd-foot{padding:12px 18px;border-top:1px solid var(--border);flex-shrink:0}
-    .sd-logout{display:flex;align-items:center;gap:10px;padding:10px;cursor:pointer;border-radius:var(--radius-sm);color:var(--danger);font-size:13px;font-weight:600;transition:var(--transition)}
-    .sd-logout:hover{background:#fde7e9}
-    #appContent{display:none;padding-top:calc(var(--header-h) + 12px);padding-bottom:calc(var(--bottom-h) + 12px);padding-left:14px;padding-right:14px;max-width:900px;margin:0 auto}
-    #appContent.visible{display:block;animation:slideUp 0.4s ease}
-    @keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-    .welcome-banner{background:linear-gradient(135deg,var(--primary-dark) 0%,var(--primary) 70%,var(--primary-mid) 100%);border-radius:var(--radius-lg);padding:18px 20px;margin-bottom:16px;color:white;position:relative;overflow:hidden}
-    .wb-bg{position:absolute;right:-20px;top:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,0.07)}
-    .wb-bg2{position:absolute;right:30px;bottom:-30px;width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,0.05)}
-    .wb-title{font-family:var(--font-display);font-size:17px;font-weight:700;margin-bottom:3px}
-    .wb-sub{font-size:12px;color:rgba(255,255,255,0.8)}
-    .wb-date{font-size:11px;color:rgba(255,255,255,0.65);margin-top:8px;display:flex;align-items:center;gap:5px}
-    .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:16px}
-    .stat-tile{background:white;border-radius:var(--radius);padding:12px;border:1px solid var(--border);box-shadow:var(--shadow-sm);text-align:center;transition:var(--transition)}
-    .stat-tile:hover{box-shadow:var(--shadow);transform:translateY(-2px)}
-    .stat-tile .st-icon{font-size:18px;margin-bottom:5px}
-    .stat-tile .st-val{font-size:20px;font-weight:800;font-family:var(--font-display);line-height:1}
-    .stat-tile .st-lbl{font-size:10px;color:var(--text-light);margin-top:3px;text-transform:uppercase;letter-spacing:0.4px;font-weight:600}
-    .st-blue{color:var(--primary)} .st-green{color:var(--success)} .st-orange{color:var(--warning)} .st-purple{color:var(--purple)}
-    .section-title{font-size:13px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;display:flex;align-items:center;gap:7px}
-    .section-title::after{content:'';flex:1;height:1px;background:var(--border)}
-    .apps-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:10px;margin-bottom:20px}
-    .app-icon{background:white;border:1px solid var(--border);border-radius:var(--radius);padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:var(--transition);text-decoration:none;color:var(--text);box-shadow:var(--shadow-sm);position:relative}
-    .app-icon:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:var(--primary)}
-    .app-icon.locked{opacity:0.38;pointer-events:none;filter:grayscale(0.8);cursor:not-allowed}
-    .app-icon .ai-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:white;flex-shrink:0}
-    .app-icon .ai-label{font-size:10px;font-weight:700;text-align:center;line-height:1.3;color:var(--text)}
-    .app-icon .ai-lock{position:absolute;top:6px;right:6px;font-size:10px;color:var(--text-muted)}
-    .ic-blue{background:linear-gradient(135deg,var(--primary),var(--primary-dark))}
-    .ic-green{background:linear-gradient(135deg,#107c10,#0a5c0a)}
-    .ic-orange{background:linear-gradient(135deg,#ca5010,#9e3d0c)}
-    .ic-purple{background:linear-gradient(135deg,#5c2d91,#431f69)}
-    .ic-teal{background:linear-gradient(135deg,#038387,#025b5e)}
-    .ic-red{background:linear-gradient(135deg,#d13438,#a4262a)}
-    .ic-indigo{background:linear-gradient(135deg,#3d52d5,#2b3aa8)}
-    .ic-amber{background:linear-gradient(135deg,#c19c00,#8f7300)}
-    .ic-gray{background:linear-gradient(135deg,#737373,#525252)}
-    .mini-chart{background:white;border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:16px;box-shadow:var(--shadow-sm)}
-    .mc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-    .mc-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px}
-    .mc-title i{color:var(--primary)}
-    .mc-bars{display:flex;align-items:flex-end;gap:5px;height:60px}
-    .mc-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
-    .mc-bar{width:100%;border-radius:3px 3px 0 0;transition:height 0.5s ease;min-height:3px}
-    .mc-bar-lbl{font-size:9px;color:var(--text-muted);text-align:center}
-    .activity-list{background:white;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm);margin-bottom:16px}
-    .activity-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);transition:var(--transition)}
-    .activity-item:last-child{border-bottom:none}
-    .activity-item:hover{background:var(--bg)}
-    .act-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-    .act-text{flex:1;font-size:12px}
-    .act-text strong{font-weight:600}
-    .act-time{font-size:10px;color:var(--text-muted)}
-    #bottomNav{position:fixed;bottom:0;left:0;right:0;height:var(--bottom-h);background:white;border-top:1px solid var(--border);display:none;align-items:stretch;z-index:200;box-shadow:0 -2px 10px rgba(0,0,0,0.08)}
-    #bottomNav.visible{display:flex}
-    .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;transition:var(--transition);color:var(--text-muted);text-decoration:none;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px;border:none;background:none}
-    .bn-item:hover{color:var(--primary);background:var(--primary-light)}
-    .bn-item.active{color:var(--primary)}
-    .bn-item i{font-size:18px}
-    #guideOverlay{position:fixed;inset:0;z-index:5000;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
-    #guideOverlay.open{display:flex}
-    .guide-box{background:white;border-radius:var(--radius-lg);width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.3);overflow:hidden;animation:slideUp 0.3s ease}
-    .guide-header{background:linear-gradient(135deg,var(--primary-dark),var(--primary));padding:24px 22px 20px;color:white}
-    .guide-steps{display:flex;gap:5px;margin-bottom:16px}
-    .guide-step-dot{flex:1;height:3px;border-radius:10px;background:rgba(255,255,255,0.3);transition:var(--transition)}
-    .guide-step-dot.done{background:white}
-    .guide-icon{width:56px;height:56px;background:rgba(255,255,255,0.2);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:12px}
-    .guide-title{font-family:var(--font-display);font-size:18px;font-weight:700;margin-bottom:4px}
-    .guide-sub{font-size:12px;color:rgba(255,255,255,0.8)}
-    .guide-body{padding:20px 22px}
-    .guide-body p{font-size:13px;color:var(--text-light);line-height:1.7}
-    .guide-features{list-style:none;margin-top:14px;display:flex;flex-direction:column;gap:8px}
-    .guide-features li{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:500}
-    .guide-features li i{color:var(--primary);font-size:14px;width:16px;text-align:center}
-    .guide-foot{padding:16px 22px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
-    .guide-skip{font-size:12px;color:var(--text-muted);cursor:pointer;background:none;border:none;font-family:var(--font-main)}
-    .guide-skip:hover{color:var(--text)}
-    .guide-btns{display:flex;gap:8px}
-    .btn{padding:9px 18px;border:none;border-radius:var(--radius-sm);font-size:12px;font-weight:700;font-family:var(--font-main);cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:var(--transition)}
-    .btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white}
-    .btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,120,212,0.35)}
-    .btn-secondary{background:white;color:var(--text);border:1px solid var(--border)}
-    .btn-secondary:hover{background:var(--bg)}
-    .btn-sm{padding:7px 14px;font-size:11px}
-    #toastContainer{position:fixed;bottom:calc(var(--bottom-h) + 12px);right:14px;z-index:4000;display:flex;flex-direction:column;gap:7px;pointer-events:none}
-    .toast{padding:10px 14px;background:white;border-left:4px solid var(--primary);border-radius:var(--radius-sm);box-shadow:0 4px 16px rgba(0,0,0,0.14);font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;animation:slideUp 0.3s ease;pointer-events:all;max-width:280px}
-    .toast.success{border-left-color:var(--success)} .toast.error{border-left-color:var(--danger)} .toast.warning{border-left-color:var(--warning)}
-    .toast i{font-size:14px}
-    .toast.success i{color:var(--success)} .toast.error i{color:var(--danger)} .toast.warning i{color:var(--warning)}
-    #userMenu{position:fixed;top:calc(var(--header-h) + 6px);right:10px;background:white;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-heavy);z-index:250;min-width:200px;display:none;animation:slideUp 0.2s ease;overflow:hidden}
-    #userMenu.open{display:block}
-    .um-head{padding:14px 16px;background:var(--primary-light);border-bottom:1px solid var(--border)}
-    .um-name{font-size:13px;font-weight:700;color:var(--primary)}
-    .um-role{font-size:11px;color:var(--text-light);margin-top:1px}
-    .um-item{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;font-size:12px;color:var(--text);transition:var(--transition);text-decoration:none}
-    .um-item:hover{background:var(--bg);color:var(--primary)}
-    .um-item i{color:var(--primary);font-size:13px;width:16px;text-align:center}
-    .um-div{height:1px;background:var(--border);margin:2px 0}
-    .um-item.danger{color:var(--danger)} .um-item.danger i{color:var(--danger)} .um-item.danger:hover{background:#fde7e9}
-    #spinnerOverlay{position:fixed;inset:0;background:rgba(255,255,255,0.85);z-index:8000;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;backdrop-filter:blur(3px)}
-    #spinnerOverlay.open{display:flex}
-    .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .spinner-text{font-size:13px;font-weight:600;color:var(--text-light)}
-    @media(max-width:480px){.apps-grid{grid-template-columns:repeat(4,1fr);gap:8px}.app-icon{padding:10px 5px}.app-icon .ai-icon{width:34px;height:34px;font-size:15px}.app-icon .ai-label{font-size:9px}}
+    :root {
+      --win-bg: #f0f0f0;
+      --win-border: #d4d4d4;
+      --win-header: #0078d4;
+      --win-header-dark: #005a9e;
+      --win-text: #323130;
+      --win-text-light: #605e5c;
+      --win-white: #ffffff;
+      --win-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      --win-shadow-heavy: 0 4px 8px rgba(0,0,0,0.15);
+      --primary: #0078d4;
+      --success: #107c10;
+      --warning: #ffc107;
+      --danger: #d13438;
+      --radius: 4px;
+      --header-height: 48px;
+      --footer-height: 56px;
+    }
+    body { background: var(--win-bg); color: var(--win-text); min-height: 100vh; font-size: 12px; }
+    body.logged-in { padding-bottom: var(--footer-height); }
+
+    /* ===== PANTALLA DE REDIRECCIÓN ===== */
+    .redirect-container {
+      display: none; justify-content: center; align-items: center;
+      min-height: 100vh; background: linear-gradient(135deg, #0078d4 0%, #005a9e 100%);
+      padding: 20px; position: fixed; inset: 0; z-index: 9999; flex-direction: column; gap: 16px;
+    }
+    .redirect-container.visible { display: flex; }
+    .redirect-card {
+      background: var(--win-white); border-radius: 8px; padding: 24px;
+      width: 100%; max-width: 360px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); text-align: center;
+    }
+    .redirect-card .logo {
+      width: 56px; height: 56px; background: var(--primary); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; color: white; margin: 0 auto 16px;
+    }
+    .redirect-card h1 { font-size: 18px; margin-bottom: 8px; }
+    .redirect-card p  { font-size: 12px; color: var(--win-text-light); margin-bottom: 16px; }
+    .redirect-spinner {
+      width: 28px; height: 28px; margin: 0 auto;
+      border: 3px solid var(--win-border); border-top: 3px solid var(--primary);
+      border-radius: 50%; animation: spin 1s linear infinite;
+    }
+
+    /* ===== HEADER ===== */
+    .app-header {
+      position: fixed; top: 0; left: 0; right: 0; height: var(--header-height);
+      background: var(--win-white); border-bottom: 1px solid var(--win-border);
+      display: none; align-items: center; padding: 0 16px;
+      z-index: 100; box-shadow: var(--win-shadow);
+    }
+    body.logged-in .app-header { display: flex; }
+    .header-menu { display: flex; gap: 16px; margin-right: auto; }
+    .menu-icon {
+      width: 32px; height: 32px; display: flex; align-items: center;
+      justify-content: center; border-radius: var(--radius);
+      color: var(--win-text); text-decoration: none; font-size: 18px;
+      transition: all 0.2s; background: transparent; border: none; cursor: pointer;
+    }
+    .menu-icon:hover  { background: #f3f2f1; color: var(--primary); }
+    .menu-icon.active { background: var(--primary); color: white; }
+    .header-info { display: flex; align-items: center; gap: 20px; font-size: 12px; }
+    .header-datetime { display: flex; align-items: center; gap: 12px; color: var(--win-text-light); }
+    .header-datetime i { margin-right: 4px; }
+    .user-badge { background: #e6f2ff; color: var(--primary); padding: 4px 12px; border-radius: 16px; font-weight: 600; }
+
+    /* ===== FOOTER ===== */
+    .app-footer {
+      position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-height);
+      background: var(--win-white); border-top: 1px solid var(--win-border);
+      display: none; align-items: center; justify-content: space-around;
+      padding: 0 16px; z-index: 100; box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+    }
+    body.logged-in .app-footer { display: flex; }
+    .footer-icon {
+      display: flex; flex-direction: column; align-items: center;
+      color: var(--win-text-light); text-decoration: none; font-size: 11px;
+      gap: 2px; cursor: pointer; background: transparent; border: none; padding: 4px 8px; transition: all 0.2s;
+    }
+    .footer-icon i { font-size: 16px; }
+    .footer-icon:hover { color: var(--primary); }
+    .footer-icon.calendar-btn { position: relative; }
+    .calendar-badge {
+      position: absolute; top: -4px; right: -4px; background: var(--danger); color: white;
+      font-size: 9px; padding: 2px 4px; border-radius: 10px; min-width: 16px; text-align: center;
+    }
+
+    /* ===== MAIN ===== */
+    .main-container {
+      margin-top: var(--header-height); padding: 16px;
+      max-width: 1400px; margin-left: auto; margin-right: auto; display: none;
+    }
+    body.logged-in .main-container { display: block; }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ===== CARDS ===== */
+    .card {
+      background: var(--win-white); border-radius: 8px; padding: 16px;
+      margin-bottom: 16px; box-shadow: var(--win-shadow); border: 1px solid var(--win-border);
+    }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .card-header h2 { font-size: 16px; font-weight: 600; }
+    .card-header h3 { font-size: 14px; font-weight: 600; }
+
+    .grid-2, .grid-3, .grid-4 { display: grid; gap: 12px; }
+    .grid-2 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+    .grid-4 { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 11px; font-weight: 600; color: var(--win-text-light); margin-bottom: 4px; }
+    .form-control { width: 100%; padding: 8px 10px; font-size: 12px; border: 1px solid var(--win-border); border-radius: var(--radius); }
+
+    .btn {
+      padding: 10px 16px; font-size: 13px; border: none; border-radius: var(--radius);
+      font-weight: 600; cursor: pointer; display: inline-flex;
+      align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--win-header-dark); }
+
+    .table-container { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--win-border); }
+    table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    th { background: #f3f2f1; padding: 8px; font-weight: 600; text-align: left; white-space: nowrap; }
+    td { padding: 8px; border-bottom: 1px solid var(--win-border); white-space: nowrap; }
+
+    .stats-compact { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-bottom: 16px; }
+    .stat-item { background: var(--win-white); padding: 12px; border-radius: var(--radius); border: 1px solid var(--win-border); text-align: center; }
+    .stat-number { font-size: 18px; font-weight: 700; color: var(--primary); }
+    .stat-label  { font-size: 10px; color: var(--win-text-light); }
+
+    .badge { padding: 2px 6px; border-radius: 12px; font-size: 10px; font-weight: 600; }
+    .badge-success { background: #dff6dd; color: var(--success); }
+    .badge-danger  { background: #fde7e9; color: var(--danger); }
+    .badge-warning { background: #fff3cd; color: #856404; }
+
+    /* ===== BUSCADOR TARIFAS ===== */
+    .search-box { position: relative; margin-bottom: 14px; }
+    .search-box i {
+      position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+      color: var(--win-text-light); font-size: 13px; pointer-events: none;
+    }
+    .search-box input {
+      width: 100%; padding: 8px 10px 8px 32px; font-size: 12px;
+      border: 1px solid var(--win-border); border-radius: var(--radius); outline: none; transition: border-color 0.2s;
+    }
+    .search-box input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(0,120,212,0.15); }
+    .search-no-results { text-align: center; padding: 20px; color: var(--win-text-light); font-size: 12px; display: none; }
+
+    .dop-value { font-weight: 700; color: var(--success); }
+    .dop-zero  { color: var(--win-text-light); }
+
+    /* ===== MODAL FULLSCREEN ===== */
+    .modal-fullscreen {
+      display: none; position: fixed; top:0; left:0; width:100%; height:100%;
+      background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center; padding: 20px;
+    }
+    .modal-fullscreen .modal-content {
+      background: var(--win-white); border-radius: 8px; width: 100%; max-width: 1400px; height: 90vh;
+      display: flex; flex-direction: column; box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+    }
+    .modal-fullscreen .modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 20px; border-bottom: 1px solid var(--win-border); background: #f3f2f1;
+    }
+    .modal-fullscreen .modal-header h3 { font-size: 16px; font-weight: 600; }
+    .modal-fullscreen .modal-body { flex: 1; overflow-y: auto; padding: 20px; }
+    .modal-fullscreen .modal-footer {
+      padding: 16px 20px; border-top: 1px solid var(--win-border);
+      display: flex; justify-content: flex-end; gap: 12px; background: #f9f9f9;
+    }
+
+    /* ===== MODAL NORMAL ===== */
+    .modal {
+      display: none; position: fixed; top:0; left:0; width:100%; height:100%;
+      background: rgba(0,0,0,0.5); z-index: 1500; justify-content: center; align-items: center; padding: 16px;
+    }
+    .modal .modal-content {
+      background: var(--win-white); border-radius: 8px;
+      width: 100%; max-width: 500px; max-height: 80vh; overflow-y: auto;
+    }
+    .modal .modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 20px; border-bottom: 1px solid var(--win-border); background: #f3f2f1;
+    }
+    .modal .modal-body   { padding: 16px 20px; }
+    .modal .modal-footer { padding: 16px 20px; border-top: 1px solid var(--win-border); display: flex; justify-content: flex-end; gap: 12px; }
+    .close-modal { background: transparent; border: none; font-size: 18px; cursor: pointer; width: 32px; height: 32px; border-radius: var(--radius); }
+    .close-modal:hover { background: #e1dfdd; }
+
+    /* ===== OVERLAY DE PROGRESO UNIVERSAL ===== */
+    .op-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 6000;
+      display: none; justify-content: center; align-items: center; padding: 20px;
+    }
+    .op-overlay.visible { display: flex; }
+    .op-card {
+      background: var(--win-white); border-radius: 14px; padding: 30px 26px;
+      width: 100%; max-width: 400px; box-shadow: 0 24px 64px rgba(0,0,0,0.35); text-align: center;
+    }
+    .op-icon-wrap {
+      width: 62px; height: 62px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; color: white; margin: 0 auto 16px;
+      transition: background 0.4s;
+    }
+    .op-icon-wrap.uploading  { background: var(--primary);  animation: opPulse 1s ease-in-out infinite; }
+    .op-icon-wrap.deleting   { background: var(--danger);   animation: opPulse 1s ease-in-out infinite; }
+    .op-icon-wrap.downloading{ background: #6f42c1;         animation: opPulse 1s ease-in-out infinite; }
+    .op-icon-wrap.done-ok    { background: var(--success);  animation: none; }
+    .op-icon-wrap.done-err   { background: var(--danger);   animation: none; }
+    @keyframes opPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+    .op-title  { font-size: 17px; font-weight: 700; margin-bottom: 5px; }
+    .op-sub    { font-size: 12px; color: var(--win-text-light); margin-bottom: 20px; min-height: 16px; }
+    .op-bar-wrap { background: #efefef; border-radius: 10px; height: 11px; overflow: hidden; margin-bottom: 10px; }
+    .op-bar {
+      height: 100%; border-radius: 10px; transition: width 0.35s ease;
+      width: 0%;
+    }
+    .op-bar.uploading   { background: linear-gradient(90deg, var(--primary), #3d9fdf); }
+    .op-bar.deleting    { background: linear-gradient(90deg, var(--danger), #f07070); }
+    .op-bar.downloading { background: linear-gradient(90deg, #6f42c1, #a78cd8); }
+    .op-bar.done        { background: var(--success); }
+    .op-stats  { display: flex; justify-content: space-between; font-size: 11px; color: var(--win-text-light); margin-bottom: 6px; }
+    .op-detail { font-size: 11px; color: var(--win-text-light); min-height: 16px; }
+
+    /* ===== CALENDARIO ===== */
+    .calendar-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; margin-top: 8px; }
+    .calendar-day {
+      aspect-ratio: 1; background: #f9f9f9; border: 1px solid var(--win-border);
+      border-radius: var(--radius); display: flex; flex-direction: column;
+      align-items: center; justify-content: center; font-size: 11px; cursor: pointer; transition: all 0.2s;
+    }
+    .calendar-day:hover { background: #e6f2ff; border-color: var(--primary); }
+    .calendar-day.has-registros { background: #e6f2ff; font-weight: 600; }
+    .calendar-day .day-number { font-size: 12px; font-weight: 600; }
+    .calendar-day .day-count  { font-size: 9px; color: var(--win-text-light); }
+
+    /* ===== TOAST / LOADING ===== */
+    .toast {
+      position: fixed; bottom: calc(var(--footer-height) + 16px); right: 16px;
+      padding: 12px 20px; background: var(--win-white); border-left: 4px solid var(--success);
+      border-radius: var(--radius); font-size: 12px; z-index: 7000; display: none; box-shadow: var(--win-shadow-heavy);
+    }
+    .toast.error { border-left-color: var(--danger); }
+    .loading-overlay {
+      position: fixed; inset: 0; background: rgba(255,255,255,0.9);
+      display: none; justify-content: center; align-items: center; z-index: 3000; flex-direction: column; gap: 12px;
+    }
+    .spinner {
+      width: 32px; height: 32px; border: 3px solid var(--win-border); border-top: 3px solid var(--primary);
+      border-radius: 50%; animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===== PRINT AREA ===== */
+    #printArea { display: none; }
+
+    /* ===== ESTILOS DE IMPRESIÓN ===== */
+    @media print {
+      body > *:not(#printArea) { display: none !important; }
+      #printArea { display: block !important; }
+      @page { size: landscape; margin: 10mm 12mm; }
+
+      .print-header {
+        display: flex; align-items: center; justify-content: space-between;
+        border-bottom: 3px solid #0078d4; padding-bottom: 8px; margin-bottom: 14px;
+      }
+      .print-header .print-logo { font-size: 22pt; font-weight: 900; color: #0078d4; letter-spacing: -0.5px; }
+      .print-header .print-meta { font-size: 8pt; color: #555; text-align: right; line-height: 1.5; }
+      .print-employee-title {
+        font-size: 14pt; font-weight: 700; color: #0078d4; margin-bottom: 10px;
+        padding: 6px 10px; background: #e6f2ff; border-left: 4px solid #0078d4; border-radius: 2px;
+      }
+      .print-info-grid {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 4px 24px;
+        margin-bottom: 14px; padding: 10px 12px; background: #fafafa;
+        border: 1px solid #ddd; border-radius: 3px;
+      }
+      .print-info-item { display: flex; align-items: baseline; gap: 6px; font-size: 8.5pt; padding: 2px 0; border-bottom: 1px dotted #e0e0e0; }
+      .print-info-item:last-child { border-bottom: none; }
+      .print-info-label { font-weight: 700; color: #0078d4; white-space: nowrap; min-width: 100px; font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.3px; }
+      .print-info-value { color: #222; font-size: 8.5pt; }
+      .print-section-title { font-size: 9pt; font-weight: 700; color: #0078d4; border-bottom: 1.5px solid #0078d4; padding-bottom: 3px; margin: 14px 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px; }
+      .print-table { width: 100%; border-collapse: collapse; font-size: 7.5pt; margin-bottom: 0; }
+      .print-table thead tr { background: #0078d4; color: white; }
+      .print-table th { padding: 5px 8px; font-weight: 700; text-align: left; font-size: 7pt; text-transform: uppercase; letter-spacing: 0.3px; white-space: nowrap; }
+      .print-table td { padding: 4px 8px; border-bottom: 1px solid #e8e8e8; font-size: 7.5pt; white-space: nowrap; }
+      .print-table tbody tr:nth-child(even) { background: #f5f9ff; }
+      .print-table .total-row { background: #e6f2ff !important; font-weight: 700; border-top: 2px solid #0078d4; }
+      .print-table .total-row td { color: #0078d4; font-size: 8pt; }
+      .print-badge { padding: 1px 5px; border-radius: 8px; font-size: 6.5pt; font-weight: 700; display: inline-block; }
+      .print-badge-success { background: #dff6dd; color: #107c10; }
+      .print-badge-warning { background: #fff3cd; color: #856404; }
+      .print-badge-danger  { background: #fde7e9; color: #d13438; }
+      .print-quincena-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px; }
+      .print-quincena-item { border: 1px solid #ddd; border-radius: 3px; padding: 6px 8px; text-align: center; background: #fafafa; }
+      .print-quincena-label { font-size: 6.5pt; color: #555; text-transform: uppercase; margin-bottom: 3px; }
+      .print-quincena-value { font-size: 11pt; font-weight: 700; color: #0078d4; }
+      /* footer dentro del tfoot, sin página en blanco */
+      .print-table tbody tr { page-break-inside: avoid; }
+      .print-employee-title { page-break-before: auto; }
+      #printArea { margin: 0; padding: 0; }
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .header-info { display: none; }
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .stats-compact { grid-template-columns: repeat(2,1fr); }
+    }
+    @media (max-width: 480px) {
+      .stats-compact { grid-template-columns: 1fr; }
+      .menu-icon { width: 28px; height: 28px; font-size: 16px; }
+    }
   </style>
 </head>
 <body>
 
-<div id="loadingScreen">
-  <div class="ld-logo"><i class="fas fa-eye"></i></div>
-  <div class="ld-title">Vizo Access</div>
-  <div class="ld-sub" id="ldSubText">Verificando permisos...</div>
-  <div class="ld-bar"><div class="ld-bar-inner"></div></div>
-</div>
+  <!-- ÁREA DE IMPRESIÓN -->
+  <div id="printArea"></div>
 
-<div id="loginScreen" class="hidden">
-  <div class="login-card">
-    <div class="login-logo"><i class="fas fa-eye"></i></div>
-    <h1>Vizo Access</h1>
-    <p>Sistema de Gestión Integrado</p>
-    <div class="inp-group">
-      <label><i class="fas fa-user"></i> Usuario</label>
-      <input type="text" id="lUser" class="form-control" placeholder="Ingrese su usuario" autocomplete="username">
-    </div>
-    <div class="inp-group">
-      <label><i class="fas fa-lock"></i> PIN</label>
-      <input type="password" id="lPin" class="form-control" placeholder="Ingrese su PIN" autocomplete="current-password">
-    </div>
-    <button id="loginBtn" class="btn-login"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</button>
-    <div class="login-alert" id="loginAlert">
-      <i class="fas fa-exclamation-circle"></i><span id="loginMsg">Error de acceso</span>
+  <!-- REDIRECCIÓN -->
+  <div id="redirectScreen" class="redirect-container">
+    <div class="redirect-card">
+      <div class="logo"><i class="fas fa-eye"></i></div>
+      <h1>Vizo Access</h1>
+      <p>No hay sesión activa. Redirigiendo...</p>
+      <div class="redirect-spinner"></div>
     </div>
   </div>
-</div>
 
-<header id="topHeader">
-  <div class="hd-left">
-    <button class="hd-menu-btn" id="menuToggle"><i class="fas fa-bars"></i></button>
-    <div class="hd-brand"><i class="fas fa-eye"></i> Vizo Access</div>
+  <!-- ===== OVERLAY DE PROGRESO UNIVERSAL ===== -->
+  <div id="opOverlay" class="op-overlay">
+    <div class="op-card">
+      <div class="op-icon-wrap uploading" id="opIcon"><i id="opIconInner" class="fas fa-cloud-upload-alt"></i></div>
+      <div class="op-title"  id="opTitle">Procesando</div>
+      <div class="op-sub"    id="opSub">Por favor espere...</div>
+      <div class="op-bar-wrap"><div class="op-bar uploading" id="opBar"></div></div>
+      <div class="op-stats">
+        <span id="opPercent">0%</span>
+        <span id="opSize">0 KB</span>
+      </div>
+      <div class="op-detail" id="opDetail">Iniciando...</div>
+    </div>
   </div>
-  <div class="hd-right">
-    <button class="hd-icon-btn" id="notifBtn">
-      <i class="fas fa-bell"></i>
-      <span class="hd-notif-dot" id="notifDot" style="display:none;"></span>
+
+  <!-- ============================================================ HEADER ============================================================ -->
+  <header class="app-header">
+    <div class="header-menu">
+      <button class="menu-icon active" data-page="reportes"      title="Reportes"><i class="fas fa-chart-bar"></i></button>
+      <button class="menu-icon"        data-page="tarifas"       title="Tarifas"><i class="fas fa-dollar-sign"></i></button>
+      <button class="menu-icon"        data-page="configuracion" title="Configuración"><i class="fas fa-cog"></i></button>
+      <a href="index.html" class="menu-icon" title="Cámara"><i class="fas fa-camera"></i></a>
+    </div>
+    <div class="header-info">
+      <div class="header-datetime">
+        <span><i class="far fa-calendar-alt"></i> <span id="fechaActual"></span></span>
+        <span><i class="far fa-clock"></i> <span id="horaActual"></span></span>
+      </div>
+      <span class="user-badge" id="adminName">Admin</span>
+      <button class="menu-icon" id="logoutBtn" title="Salir"><i class="fas fa-sign-out-alt"></i></button>
+    </div>
+  </header>
+
+  <!-- ============================================================ FOOTER ============================================================ -->
+  <footer class="app-footer">
+    <button class="footer-icon" onclick="mostrarPagina('reportes')"><i class="fas fa-chart-bar"></i><span>Reportes</span></button>
+    <button class="footer-icon" onclick="mostrarPagina('tarifas')"><i class="fas fa-dollar-sign"></i><span>Tarifas</span></button>
+    <button class="footer-icon calendar-btn" id="calendarFooterBtn">
+      <i class="fas fa-calendar-alt"></i><span>Calendario</span>
+      <span class="calendar-badge" id="calendarBadge" style="display:none;">0</span>
     </button>
-    <button class="hd-icon-btn" id="userMenuBtn"><i class="fas fa-user-circle"></i></button>
-    <div class="hd-user-badge"><i class="fas fa-circle-user"></i> <span id="userNameTop">—</span></div>
-  </div>
-</header>
+    <button class="footer-icon" onclick="mostrarPagina('configuracion')"><i class="fas fa-cog"></i><span>Config</span></button>
+    <button class="footer-icon" id="logoutFooterBtn"><i class="fas fa-sign-out-alt"></i><span>Salir</span></button>
+  </footer>
 
-<div id="userMenu">  
+  <!-- ============================================================ CONTENIDO PRINCIPAL ============================================================ -->
+  <div class="main-container">
 
-  <div class="um-head">
-    <div class="um-name" id="umName">—</div>
-    <div class="um-role" id="umRole">—</div>
-  </div> <!--
-  <a class="um-item" href="index.html"><i class="fas fa-house"></i> Inicio</a>
-  <a class="um-item" href="sistema_gestion.html"><i class="fas fa-building"></i> Gestión</a> 
-  <div class="um-div"></div>
-  <div class="um-item" onclick="closeUserMenu();openGuide()"><i class="fas fa-question-circle"></i> Ver guía</div> -->
-  <div class="um-div"></div>
-  <div class="um-item danger" id="umLogout"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</div>
-</div>
+    <!-- PÁGINA REPORTES -->
+    <div id="pageReportes" class="page active">
+      <div class="card">
+        <div class="card-header"><h2><i class="fas fa-filter"></i> Filtrar Registros</h2></div>
+        <div class="grid-2">
+          <div class="form-group"><label>FECHA INICIO</label><input type="date" id="fechaInicio" class="form-control"></div>
+          <div class="form-group"><label>FECHA FIN</label><input type="date" id="fechaFin" class="form-control"></div>
+          <div class="form-group">
+            <label>ESTADO</label>
+            <select id="filtroEstado" class="form-control">
+              <option value="todos">Todos</option>
+              <option value="completo">Completos</option>
+              <option value="incompleto">Incompletos</option>
+            </select>
+          </div>
+          <div class="form-group" style="display:flex;gap:8px;align-items:flex-end;">
+            <button class="btn btn-primary" onclick="aplicarFiltros()"><i class="fas fa-check"></i> Aplicar</button>
+            <button class="btn" style="background:#f3f2f1;" onclick="limpiarFiltros()"><i class="fas fa-undo"></i> Limpiar</button>
+          </div>
+        </div>
+      </div>
 
-<div id="sideOverlay"></div>
-<nav id="sideDrawer">
-  <div class="sd-head">
-    <div class="sd-avatar"><i class="fas fa-user"></i></div>
-    <div class="sd-user-info">
-      <div class="sd-name" id="sdName">—</div>
-      <div class="sd-role" id="sdRole">—</div>
+      <div class="card">
+        <div class="card-header"><h2><i class="fas fa-download"></i> Exportar Datos</h2></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="exportarExcel()"><i class="fas fa-file-excel"></i> Excel</button>
+          <button class="btn" style="background:var(--danger);color:white;" onclick="exportarPDFGeneral()"><i class="fas fa-file-pdf"></i> PDF</button>
+          <button class="btn" style="background:var(--warning);" onclick="guardarTodosEnFirebase()"><i class="fas fa-cloud-upload-alt"></i> Guardar Todo</button>
+        </div>
+      </div>
+
+      <div class="stats-compact">
+        <div class="stat-item"><div class="stat-number" id="totalRegistros">0</div><div class="stat-label">Total Registros</div></div>
+        <div class="stat-item"><div class="stat-number" id="totalEntradas">0</div><div class="stat-label">Entradas</div></div>
+        <div class="stat-item"><div class="stat-number" id="totalSalidas">0</div><div class="stat-label">Salidas</div></div>
+        <div class="stat-item"><div class="stat-number" id="totalPares">0</div><div class="stat-label">Completos</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h2><i class="fas fa-users"></i> Colaboradores</h2></div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>COLABORADOR</th><th>HORAS EXTRAS</th><th>VALOR EXTRAS (DOP$)</th><th>ACCIÓN</th>
+              </tr>
+            </thead>
+            <tbody id="tablaBody">
+              <tr><td colspan="4" style="text-align:center;padding:24px;">
+                <i class="fas fa-spinner fa-spin" style="font-size:32px;"></i><div>Cargando datos...</div>
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
-  </div>
-  <div class="sd-body">
-    <div class="sd-section-label">Navegación</div>
-    <a class="sd-item active" href="index.html"><i class="fas fa-house"></i> Inicio</a>
-    <a class="sd-item" href="alojamiento-colaboradores.html"><i class="fas fa-city"></i> Alojamientos</a>
-    <a class="sd-item" href="editar-horas.html"><i class="fas fa-clock"></i> Editor de Horas</a>
-    <div class="sd-section-label" id="sdAdminSection" style="display:none;">Administración</div>
-    <a class="sd-item" href="usuarios.html" id="sdUsersLink" style="display:none;"><i class="fas fa-users-cog"></i> Gestión Usuarios <span class="sd-badge">Admin</span></a>
-    <div class="sd-divider"></div>
-    <div class="sd-section-label">Sistema</div>
-   <!-- <div class="sd-item" onclick="openGuide()"><i class="fas fa-book-open"></i> Guía del sistema</div>
-    <div class="sd-item"><i class="fas fa-bell"></i> Notificaciones <span class="sd-badge" id="sdNotifCount" style="display:none;">0</span></div> -->
-  </div>
-  <div class="sd-foot">
-    <div class="sd-logout" id="sdLogout"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</div> 
-  </div>
-</nav>
 
-<div id="appContent">
-  <div class="welcome-banner">
-    <div class="wb-bg"></div><div class="wb-bg2"></div>
-    <div class="wb-title">Bienvenido, <span id="wbName">—</span> 👋</div>
-    <div class="wb-sub">Panel principal del Sistema Vizo Access</div>
-    <div class="wb-date"><i class="fas fa-calendar-day"></i> <span id="wbDate">—</span></div>
-  </div>
-  <div class="stats-row">
-    <div class="stat-tile"><div class="st-icon st-blue"><i class="fas fa-building"></i></div><div class="st-val st-blue" id="stEdificios">—</div><div class="st-lbl">Edificios</div></div>
-    <div class="stat-tile"><div class="st-icon st-green"><i class="fas fa-door-open"></i></div><div class="st-val st-green" id="stHabs">—</div><div class="st-lbl">Habitaciones</div></div>
-    <div class="stat-tile"><div class="st-icon st-orange"><i class="fas fa-users"></i></div><div class="st-val st-orange" id="stColabs">—</div><div class="st-lbl">Colaboradores</div></div>
-    <div class="stat-tile"><div class="st-icon st-purple"><i class="fas fa-percent"></i></div><div class="st-val st-purple" id="stOcup">—</div><div class="st-lbl">Ocupación</div></div>
-  </div>
-  <div class="section-title"><i class="fas fa-th" style="color:var(--primary)"></i> Aplicaciones</div>
-  <div class="apps-grid" id="appsGrid"></div>
-  <div class="section-title"><i class="fas fa-chart-bar" style="color:var(--primary)"></i> Actividad</div>
-  <div class="mini-chart">
-    <div class="mc-head">
-      <div class="mc-title"><i class="fas fa-chart-bar"></i> Resumen semanal</div>
-      <span style="font-size:11px;color:var(--text-muted)">Esta semana</span>
+    <!-- PÁGINA TARIFAS -->
+    <div id="pageTarifas" class="page">
+      <div class="card">
+        <div class="card-header">
+          <h2><i class="fas fa-dollar-sign"></i> Tarifas por Hora Extra</h2>
+          <button class="btn btn-primary" onclick="guardarTarifas()"><i class="fas fa-save"></i> Guardar Todo</button>
+        </div>
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" id="buscadorTarifas" placeholder="Buscar por nombre o código de colaborador..." oninput="filtrarTablaTarifas(this.value)">
+        </div>
+        <div id="tarifasNoResultados" class="search-no-results">
+          <i class="fas fa-search" style="font-size:24px;margin-bottom:8px;display:block;"></i>
+          No se encontraron colaboradores con ese criterio de búsqueda.
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>CÓDIGO</th><th>NOMBRE</th><th>TURNO</th>
+                <th>TARIFA/H EXTRA (DOP$)</th><th>TOTAL EXTRAS</th><th>TOTAL A PAGAR (DOP$)</th>
+              </tr>
+            </thead>
+            <tbody id="tablaTarifas"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
-    <div class="mc-bars" id="chartBars"></div>
-  </div>
-  <div class="section-title"><i class="fas fa-clock-rotate-left" style="color:var(--primary)"></i> Actividad Reciente</div>
-  <div class="activity-list" id="activityList">
-    <div class="activity-item"><div class="act-dot" style="background:var(--text-muted)"></div><div class="act-text" style="color:var(--text-muted)">Cargando actividad...</div></div>
-  </div>
-</div>
 
-<nav id="bottomNav">  <!--
-  <a class="bn-item active" href="index.html"><i class="fas fa-house"></i><span>Inicio</span></a> -->
-<!--  <a class="bn-item" href="sistema_gestion.html"><i class="fas fa-building"></i><span>Gestión</span></a>  -->
-<!--  <a class="bn-item" href="editar-horas.html"><i class="fas fa-clock"></i><span>Horas</span></a>  -->
-<!--  <a class="bn-item" href="#"><i class="fas fa-chart-bar"></i><span>Reportes</span></a>  -->
- <a class="bn-item" href="usuarios.html" id="bnUsers" style="display:none;"><i class="fas fa-users-cog"></i><span>Usuarios</span></a>    
-</nav>  
-
-<div id="guideOverlay">
-  <div class="guide-box">
-    <div class="guide-header">
-      <div class="guide-steps" id="guideStepsBar"></div>
-      <div class="guide-icon" id="guideIcon"><i class="fas fa-eye"></i></div>
-      <div class="guide-title" id="guideTitle">Bienvenido a Vizo Access</div>
-      <div class="guide-sub" id="guideSub">Sistema de gestión integrado</div>
+    <!-- PÁGINA CONFIGURACIÓN -->
+    <div id="pageConfiguracion" class="page">
+      <div class="card">
+        <div class="card-header"><h2><i class="fas fa-calendar-alt"></i> Configuración de Cierres de Quincena</h2></div>
+        <div class="grid-2">
+          <div class="form-group"><label>PRIMER CIERRE (DÍA)</label><input type="number" id="primerCierre" class="form-control" min="1" max="31" value="10"></div>
+          <div class="form-group"><label>SEGUNDO CIERRE (DÍA)</label><input type="number" id="segundoCierre" class="form-control" min="1" max="31" value="25"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:16px;">
+          <button class="btn btn-primary" onclick="guardarConfiguracionQuincena()"><i class="fas fa-save"></i> Guardar</button>
+          <button class="btn" onclick="calcularQuincenas()"><i class="fas fa-calculator"></i> Calcular</button>
+          <button class="btn" style="background:var(--danger);color:white;" onclick="exportarQuincenasPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+        </div>
+      </div>
+      <div id="quincenaSummary" class="card" style="display:none;">
+        <div class="card-header"><h3><i class="fas fa-chart-pie"></i> Resumen de Quincenas</h3></div>
+        <div id="quincenaGrid" class="grid-3"></div>
+        <div id="totalGeneralQuincenas" style="margin-top:16px;text-align:right;font-weight:700;"></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3><i class="fas fa-history"></i> Historial de Cierres</h3></div>
+        <div class="table-container">
+          <table>
+            <thead><tr><th>#</th><th>FECHA CIERRE</th><th>PERÍODO</th><th>ESTADO</th><th>TOTAL EXTRAS</th><th>VER</th></tr></thead>
+            <tbody id="tablaHistorialQuincenas"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
-    <div class="guide-body" id="guideBody"><p>Cargando guía...</p></div>
-    <div class="guide-foot">
-      <button class="guide-skip" id="guideSkip">Omitir guía</button>
-      <div class="guide-btns">
-        <button class="btn btn-secondary btn-sm" id="guidePrev" style="display:none;"><i class="fas fa-arrow-left"></i> Atrás</button>
-        <button class="btn btn-primary btn-sm" id="guideNext"><i class="fas fa-arrow-right"></i> Siguiente</button>
+
+  </div><!-- /main-container -->
+
+  <!-- ============================================================ MODALES ============================================================ -->
+
+  <!-- DETALLE COLABORADOR -->
+  <div id="detalleModal" class="modal-fullscreen">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-user"></i> <span id="modalTitulo"></span></h3>
+        <button class="close-modal" onclick="cerrarModalFull('detalleModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="grid-3" style="margin-bottom:16px;">
+          <div class="stat-item"><div class="stat-label">CÓDIGO</div><div class="stat-number" id="modalCodigo">-</div></div>
+          <div class="stat-item"><div class="stat-label">TURNO</div><div class="stat-number" id="modalTurno">-</div></div>
+          <div class="stat-item"><div class="stat-label">TOTAL EXTRAS</div><div class="stat-number" id="modalTotalExtras">0h</div></div>
+          <div class="stat-item"><div class="stat-label">VALOR EXTRAS (DOP$)</div><div class="stat-number" id="modalValorExtras" style="color:var(--success);">DOP$0.00</div></div>
+        </div>
+        <div style="margin-bottom:16px;">
+          <h4 style="font-size:13px;margin-bottom:8px;">Último Registro</h4>
+          <div id="modalRegistros" style="background:#f9f9f9;padding:12px;border-radius:4px;"></div>
+        </div>
+        <div style="margin-bottom:16px;">
+          <h4 style="font-size:13px;margin-bottom:8px;">Historial Completo</h4>
+          <div class="table-container">
+            <table>
+              <thead><tr><th>FECHA</th><th>ENTRADA</th><th>SALIDA</th><th>HORAS</th><th>EXTRAS</th><th>ESTADO</th></tr></thead>
+              <tbody id="modalTablaBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <h4 style="font-size:13px;margin-bottom:8px;">Totales por Quincena</h4>
+          <div id="modalQuincenaGrid" class="grid-3"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary"                          onclick="imprimirModal()">           <i class="fas fa-print"></i>     Imprimir   </button>
+        <button class="btn" style="background:var(--danger);color:white;"  id="btnEliminarRegistro"> <i class="fas fa-trash-alt"></i>  Eliminar   </button>
+        <button class="btn" style="background:var(--success);color:white;" id="btnGuardarRegistro">  <i class="fas fa-save"></i>       Guardar    </button>
       </div>
     </div>
   </div>
-</div>
 
-<div id="toastContainer"></div>
-<div id="spinnerOverlay"><div class="spinner"></div><div class="spinner-text" id="spinnerText">Cargando...</div></div>
+  <!-- DETALLE QUINCENA -->
+  <div id="quincenaDetalleModal" class="modal-fullscreen" style="z-index:2100;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-calendar-check"></i> <span id="qdTitulo">Detalle de Quincena</span></h3>
+        <button class="close-modal" onclick="cerrarModalFull('quincenaDetalleModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <!-- Resumen stats -->
+        <div class="stats-compact" id="qdStats" style="margin-bottom:16px;"></div>
+        <!-- Bloques: registros anteriores (pasados) y actuales (en curso) -->
+        <div id="qdBloques"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" style="background:#f3f2f1;" onclick="cerrarModalFull('quincenaDetalleModal')"><i class="fas fa-times"></i> Cerrar</button>
+      </div>
+    </div>
+  </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-import { getFirestore, collection, getDocs, query, where }
-  from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+  <!-- CALENDARIO -->
+  <div id="calendarModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-calendar-alt"></i> Calendario de Asistencia</h3>
+        <button class="close-modal" onclick="cerrarModal('calendarModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <button class="btn" onclick="cambiarMes(-1)"><i class="fas fa-chevron-left"></i></button>
+          <span id="mesActual" style="font-weight:600;"></span>
+          <button class="btn" onclick="cambiarMes(1)"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+      </div>
+    </div>
+  </div>
 
-const db = getFirestore(initializeApp({
-  apiKey:"AIzaSyAMTWJr3mISmNiP-e_KjCO9BdBPi7Uuug4",
-  authDomain:"formulario-2-8929a.firebaseapp.com",
-  projectId:"formulario-2-8929a",
-  storageBucket:"formulario-2-8929a.appspot.com",
-  messagingSenderId:"136908102526",
-  appId:"1:136908102526:web:d0a3bc1e3cb91a3fcab12f"
-}));
+  <!-- DETALLE DÍA -->
+  <div id="dayDetailModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-clock"></i> <span id="dayDetailTitle"></span></h3>
+        <button class="close-modal" onclick="cerrarModal('dayDetailModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="table-container">
+          <table>
+            <thead><tr><th>COLABORADOR</th><th>ENTRADA</th><th>SALIDA</th><th>HORAS</th><th>ESTADO</th></tr></thead>
+            <tbody id="dayDetailBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 
-const $ = id => document.getElementById(id);
-let currentUser = null;
+  <!-- CONFIRM — z-index 5500 para quedar sobre todo excepto el overlay de progreso -->
+  <div id="confirmDialog" class="modal" style="z-index:5500;">
+    <div class="modal-content" style="max-width:400px;">
+      <div class="modal-header"><h3><i class="fas fa-exclamation-triangle" style="color:var(--danger);"></i> Confirmar</h3></div>
+      <div class="modal-body"><p id="confirmMessage">¿Estás seguro?</p></div>
+      <div class="modal-footer">
+        <button class="btn" id="confirmCancelBtn">Cancelar</button>
+        <button class="btn btn-primary" id="confirmAcceptBtn">Aceptar</button>
+      </div>
+    </div>
+  </div>
 
-function toast(msg,type='success'){
-  const icons={success:'fa-check-circle',error:'fa-times-circle',warning:'fa-exclamation-triangle'};
-  const el=document.createElement('div'); el.className=`toast ${type}`;
-  el.innerHTML=`<i class="fas ${icons[type]}"></i><span>${msg}</span>`;
-  $('toastContainer').appendChild(el);
-  setTimeout(()=>{el.style.opacity='0';el.style.transform='translateY(8px)';el.style.transition='all 0.3s';setTimeout(()=>el.remove(),300)},3000);
-}
-function showSpinner(t='Cargando...'){$('spinnerOverlay').classList.add('open');$('spinnerText').textContent=t}
-function hideSpinner(){$('spinnerOverlay').classList.remove('open')}
-function formatDate(d){return d.toLocaleDateString('es-ES',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div id="loadingText" style="font-size:13px;">Cargando...</div>
+  </div>
+  <div class="toast" id="toast"></div>
 
-/* ═══ CLAVE: siempre leer permisos frescos de Firebase ═══ */
-async function fetchFreshPermissions(collabId){
-  try{
-    const snap = await getDocs(query(collection(db,'vizoUsers'), where('userId','==',collabId)));
-    if(!snap.empty){
-      const d = snap.docs[0].data();
-      return { appRole: d.appRole||'superAdmin', permissions: Array.isArray(d.permissions)?d.permissions:[] };
+  <!-- ============================================================ JAVASCRIPT ============================================================ -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import {
+      getFirestore, collection, getDocs, query, where, orderBy,
+      writeBatch, addDoc, serverTimestamp, doc, setDoc, getDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey:            "AIzaSyAMTWJr3mISmNiP-e_KjCO9BdBPi7Uuug4",
+      authDomain:        "formulario-2-8929a.firebaseapp.com",
+      projectId:         "formulario-2-8929a",
+      storageBucket:     "formulario-2-8929a.appspot.com",
+      messagingSenderId: "136908102526",
+      appId:             "1:136908102526:web:d0a3bc1e3cb91a3fcab12f"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
+
+    /* ---- Referencias DOM ---- */
+    const redirectScreen = document.getElementById('redirectScreen');
+    const adminName      = document.getElementById('adminName');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const loadingText    = document.getElementById('loadingText');
+    const toastEl        = document.getElementById('toast');
+    const calendarBadge  = document.getElementById('calendarBadge');
+
+    /* Overlay de progreso */
+    const opOverlay   = document.getElementById('opOverlay');
+    const opIcon      = document.getElementById('opIcon');
+    const opIconInner = document.getElementById('opIconInner');
+    const opTitle     = document.getElementById('opTitle');
+    const opSub       = document.getElementById('opSub');
+    const opBar       = document.getElementById('opBar');
+    const opPercent   = document.getElementById('opPercent');
+    const opSize      = document.getElementById('opSize');
+    const opDetail    = document.getElementById('opDetail');
+
+    /* ---- Estado global ---- */
+    let currentAdmin       = null;
+    let todosLosRegistros  = [];
+    let empleadosMap       = new Map();
+    let todosLosPares      = [];
+    let colaboradorActual  = null;
+    let tarifasMap         = new Map();
+    let configQuincena     = { primerCierre: 10, segundoCierre: 25 };
+    let currentMonth       = new Date();
+    let historialQuincenas = [];
+    const LIMITE_16H = 16;
+
+    /* ================================================================
+       UTILIDADES GENERALES
+    ================================================================ */
+    const showLoading = msg => { loadingText.textContent = msg; loadingOverlay.style.display = 'flex'; };
+    const hideLoading = ()  => { loadingOverlay.style.display = 'none'; };
+
+    function showToast(msg, type = 'success') {
+      toastEl.textContent = msg;
+      toastEl.className   = 'toast' + (type === 'error' ? ' error' : '');
+      toastEl.style.display = 'block';
+      setTimeout(() => toastEl.style.display = 'none', 3500);
     }
-  }catch(e){console.warn('vizoUsers error',e)}
-  return { appRole:'superAdmin', permissions:[] };
-}
 
-/* ═══ LOGIN ═══ */
-async function doLogin(username,pin){
-  showSpinner('Verificando credenciales...');
-  try{
-    const snap = await getDocs(query(collection(db,'Collaborators'),where('username','==',username),where('pin','==',pin)));
-    if(snap.empty) throw new Error('Usuario o PIN incorrectos');
-    const d=snap.docs[0].data(), id=snap.docs[0].id;
-    const {appRole,permissions} = await fetchFreshPermissions(id);
-    return { uid:id, username:d.username, name:`${d.firstName||''} ${d.lastName||''}`.trim()||username, role:d.role||'colaborador', appRole, permissions };
-  }finally{hideSpinner()}
-}
+    /* ── CONFIRM: cierra el modal ANTES de ejecutar la acción ── */
+    function showConfirm(message, onAccept, onCancel) {
+      document.getElementById('confirmMessage').textContent = message;
+      const dlg = document.getElementById('confirmDialog');
+      dlg.style.display = 'flex';
+      document.getElementById('confirmAcceptBtn').onclick = () => {
+        dlg.style.display = 'none';
+        onAccept();
+      };
+      document.getElementById('confirmCancelBtn').onclick = () => {
+        dlg.style.display = 'none';
+        if (onCancel) onCancel();
+      };
+    }
 
-$('loginBtn').addEventListener('click', async()=>{
-  const u=$('lUser').value.trim(), p=$('lPin').value.trim();
-  if(!u||!p){$('loginMsg').textContent='Complete todos los campos';$('loginAlert').classList.add('show');return}
-  $('loginAlert').classList.remove('show');
-  try{
-    currentUser = await doLogin(u,p);
-    /* Guardar SOLO identidad básica, NUNCA permisos en localStorage */
-    localStorage.setItem('vizo_home_user', JSON.stringify({uid:currentUser.uid,username:currentUser.username,name:currentUser.name,role:currentUser.role}));
-    activateApp();
-  }catch(e){$('loginMsg').textContent=e.message;$('loginAlert').classList.add('show')}
-});
-['lUser','lPin'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter')$('loginBtn').click()}));
+    window.cerrarModal     = id => document.getElementById(id).style.display = 'none';
+    window.cerrarModalFull = id => document.getElementById(id).style.display = 'none';
 
-function doLogout(){localStorage.removeItem('vizo_home_user');currentUser=null;location.reload()}
-['umLogout','sdLogout'].forEach(id=>{const el=$(id);if(el)el.addEventListener('click',doLogout)});
+    /* ---- Peso KB de un objeto ---- */
+    function calcularPesoKB(obj) {
+      try { return (new Blob([JSON.stringify(obj)]).size / 1024).toFixed(2); }
+      catch { return '?'; }
+    }
 
-$('menuToggle').addEventListener('click',()=>{$('sideDrawer').classList.toggle('open');$('sideOverlay').classList.toggle('open')});
-$('sideOverlay').addEventListener('click',()=>{$('sideDrawer').classList.remove('open');$('sideOverlay').classList.remove('open')});
-$('userMenuBtn').addEventListener('click',e=>{e.stopPropagation();$('userMenu').classList.toggle('open')});
-document.addEventListener('click',()=>$('userMenu').classList.remove('open'));
-function closeUserMenu(){$('userMenu').classList.remove('open')}
+    /* ================================================================
+       OVERLAY DE PROGRESO UNIVERSAL
+       tipo: 'uploading' | 'deleting' | 'downloading'
+    ================================================================ */
+    const ICONOS = {
+      uploading:   'fa-cloud-upload-alt',
+      deleting:    'fa-trash-alt',
+      downloading: 'fa-file-download'
+    };
 
-function activateApp(){
-  $('loadingScreen').classList.add('hidden');
-  $('loginScreen').classList.add('hidden');
-  $('topHeader').classList.add('visible');
-  $('appContent').classList.add('visible');
-  $('bottomNav').classList.add('visible');
-  const n=currentUser.name;
-  $('userNameTop').textContent=n.split(' ')[0];
-  $('wbName').textContent=n;
-  $('wbDate').textContent=formatDate(new Date());
-  $('umName').textContent=n; $('sdName').textContent=n;
-  const roleLabels={superAdmin:'Super Administrador',admin:'Administrador',tercero:'Tercero / Externo'};
-  const rl=roleLabels[currentUser.appRole]||currentUser.appRole;
-  $('umRole').textContent=rl; $('sdRole').textContent=rl;
-  if(currentUser.appRole==='superAdmin'||currentUser.appRole==='admin'){
-    $('sdAdminSection').style.display='block';
-    $('sdUsersLink').style.display='flex';
-    $('bnUsers').style.display='flex';
-  }
-  buildAppsGrid(); loadStats(); buildChart(); loadActivity(); checkFirstVisit();
-}
+    function opMostrar(tipo, titulo, sub) {
+      opIcon.className      = `op-icon-wrap ${tipo}`;
+      opIconInner.className = `fas ${ICONOS[tipo] || 'fa-spinner'}`;
+      opBar.className       = `op-bar ${tipo}`;
+      opTitle.textContent   = titulo;
+      opSub.textContent     = sub;
+      opBar.style.width     = '0%';
+      opPercent.textContent = '0%';
+      opSize.textContent    = '0 KB';
+      opDetail.textContent  = 'Iniciando...';
+      opOverlay.classList.add('visible');
+    }
 
-/* ═══ APPS: TODOS requieren permiso explícito ═══ */
-function allApps(){
-  return [
-    {key:'gestion',      label:'Gestión',       icon:'fa-building',    color:'ic-blue',   href:'sistema_gestion.html'},
-    {key:'horas',        label:'Editor Horas',  icon:'fa-clock',       color:'ic-green',  href:'editar-horas.html'},
-    {key:'reportes',     label:'Reportes',      icon:'fa-chart-bar',   color:'ic-indigo', href:'reportes.html'},
-    {key:'usuarios',     label:'Usuarios',      icon:'fa-users-cog',   color:'ic-purple', href:'usuarios.html',  adminOnly:true}, 
-    {key:'colabs',       label:'Permisos de Colaboradores', icon:'fa-id-card',     color:'ic-orange', href:'ponche-libres.html'},
-    {key:'edificios',    label:'Alojamientos',     icon:'fa-city',        color:'ic-amber',  href:'alojamiento-colaboradores.html'},
-    {key:'habitaciones', label:'Tokens',  icon:'fas fa-key',   color:'ic-green',  href:'tokens.html'},
-    {key:'acceso',       label:'Registros de horas',  icon:'fa-fingerprint', color:'ic-red',    href:'registro de ponche.html'},
-    {key:'config',       label:'Configuración', icon:'fa-sliders',     color:'ic-gray',   href:'configuracion.html'},
-  ];
-}  
+    function opActualizar(pct, kbActual, kbTotal, detalle) {
+      opBar.style.width     = Math.min(pct, 100) + '%';
+      opPercent.textContent = Math.round(Math.min(pct, 100)) + '%';
+      opSize.textContent    = `${kbActual} / ${kbTotal} KB`;
+      opDetail.textContent  = detalle;
+    }
 
-/* ═══ LÓGICA DE PERMISO CORREGIDA ═══
-   SuperAdmin → todo abierto
-   Admin → todo abierto EXCEPTO los adminOnly que tienen lógica propia
-   Tercero → SOLO lo que tenga en permissions[]
-   ======================================= */
-function hasPermission(app){
-  const role = currentUser.appRole;
-  const perms = Array.isArray(currentUser.permissions) ? currentUser.permissions : [];
+    function opFinalizar(exito, mensaje, kbTotal) {
+      opBar.className       = 'op-bar done';
+      opBar.style.width     = '100%';
+      opPercent.textContent = exito ? '100%' : 'Error';
+      opIcon.className      = `op-icon-wrap ${exito ? 'done-ok' : 'done-err'}`;
+      opIcon.style.animation= 'none';
+      opIconInner.className = `fas ${exito ? 'fa-check' : 'fa-times'}`;
+      opTitle.textContent   = exito ? '¡Listo!' : 'Error';
+      opSub.textContent     = mensaje;
+      if (kbTotal) opSize.textContent = kbTotal + ' KB';
+      opDetail.textContent  = exito ? 'Operación completada' : 'Inténtalo de nuevo';
+      setTimeout(() => opOverlay.classList.remove('visible'), 2400);
+    }
 
-  if(role==='superAdmin') return true;
+    const delay = ms => new Promise(r => setTimeout(r, ms));
 
-  if(app.adminOnly){
-    // solo admin o superAdmin pueden acceder
-    return role==='admin';
-  }
+    /* ================================================================
+       DESCARGA UNIVERSAL — funciona en navegadores, Electron, WebView
+       Usa Blob + URL.createObjectURL + <a> programático
+    ================================================================ */
+    function descargarBlobComoArchivo(blob, nombreArchivo) {
+      const url = URL.createObjectURL(blob);
+      const a   = document.createElement('a');
+      a.href     = url;
+      a.download = nombreArchivo;
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      /* Limpiar después de un tick */
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }, 300);
+    }
 
-  if(role==='admin') return true;
+    /* ---- Reloj ---- */
+    (function() {
+      const tick = () => {
+        const n = new Date();
+        document.getElementById('fechaActual').textContent =
+          n.toLocaleDateString('es-ES', {day:'2-digit', month:'2-digit', year:'numeric'});
+        document.getElementById('horaActual').textContent =
+          n.toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+      };
+      tick(); setInterval(tick, 1000);
+    })();
 
-  // Tercero: verificar contra array de permisos desde Firebase
-  return perms.includes(app.key);
-}
+    /* ---- Navegación ---- */
+    document.querySelectorAll('.menu-icon[data-page]').forEach(btn => {
+      btn.addEventListener('click', e => { e.preventDefault(); mostrarPagina(btn.dataset.page); });
+    });
 
-function buildAppsGrid(){
-  const grid=$('appsGrid');
-  grid.innerHTML = allApps().map(a=>{
-    const ok=hasPermission(a);
-    return `<a class="app-icon ${ok?'':'locked'}" href="${ok?a.href:'#'}" ${ok?'':'tabindex="-1" aria-disabled="true"'} title="${a.label}">
-      <div class="ai-icon ${a.color}"><i class="fas ${a.icon}"></i></div>
-      <div class="ai-label">${a.label}</div>
-      ${ok?'':'<i class="fas fa-lock ai-lock"></i>'}
-    </a>`;
-  }).join('');
-}
+    window.mostrarPagina = pagina => {
+      if (!currentAdmin) return;
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(`page${pagina.charAt(0).toUpperCase() + pagina.slice(1)}`).classList.add('active');
+      document.querySelectorAll('.menu-icon[data-page]').forEach(b => b.classList.remove('active'));
+      document.querySelector(`.menu-icon[data-page="${pagina}"]`)?.classList.add('active');
+      if (pagina === 'tarifas') {
+        const buscador = document.getElementById('buscadorTarifas');
+        if (buscador) buscador.value = '';
+        mostrarTablaTarifas();
+      }
+      if (pagina === 'configuracion') cargarConfiguracionQuincena();
+    };
 
-async function loadStats(){
-  try{
-    const mine=d=>d.createdBy===currentUser.uid||d.ownerId===currentUser.uid;
-    const bs=await getDocs(collection(db,'buildings')); const buildings=bs.docs.map(d=>({id:d.id,...d.data()})).filter(mine);
-    const rs=await getDocs(collection(db,'rooms'));     const rooms=rs.docs.map(d=>({id:d.id,...d.data()})).filter(mine);
-    const ss=await getDocs(collection(db,'housedStaff'));const staff=ss.docs.map(d=>({id:d.id,...d.data()})).filter(mine);
-    const cap=rooms.reduce((s,r)=>s+(r.capacity||0),0);
-    const occ=rooms.reduce((s,r)=>s+(r.housedStaff?.length||0),0);
-    $('stEdificios').textContent=buildings.length; $('stHabs').textContent=rooms.length;
-    $('stColabs').textContent=staff.length; $('stOcup').textContent=cap>0?Math.round(occ/cap*100)+'%':'0%';
-    if(cap>0&&occ/cap>0.8){$('notifDot').style.display='block';$('sdNotifCount').style.display='inline';$('sdNotifCount').textContent='1'}
-  }catch{['stEdificios','stHabs','stColabs','stOcup'].forEach(i=>$(i).textContent='—')}
-}
+    /* ---- Hora 12h ---- */
+    function a12h(h24) {
+      if (!h24) return '---';
+      const [h, m] = h24.split(':');
+      let hh = parseInt(h);
+      const ap = hh >= 12 ? 'PM' : 'AM';
+      hh = hh % 12 || 12;
+      return `${String(hh).padStart(2,'0')}:${m} ${ap}`;
+    }
 
-function buildChart(){
-  const days=['L','M','X','J','V','S','D'];
-  const vals=Array.from({length:7},()=>Math.floor(Math.random()*80)+20);
-  const max=Math.max(...vals);
-  $('chartBars').innerHTML=days.map((d,i)=>`
-    <div class="mc-bar-wrap">
-      <div class="mc-bar" style="height:${(vals[i]/max)*100}%;background:${i===6?'var(--primary-light)':i===5?'var(--border)':'var(--primary)'}"></div>
-      <div class="mc-bar-lbl">${d}</div>
-    </div>`).join('');
-}
+    /* ---- Calcular horas ---- */
+    function calcularHoras(entrada, salida) {
+      if (!entrada || !salida) return 0;
+      try {
+        if (entrada.timestamp instanceof Date && salida.timestamp instanceof Date) {
+          const diff = salida.timestamp - entrada.timestamp;
+          return diff < 0 ? 0 : Math.round((diff / 3600000) * 100) / 100;
+        }
+        if (!entrada.hora || !salida.hora) return 0;
+        const fe = entrada.fecha || '', fs = salida.fecha || fe;
+        const de = new Date(`${fe}T${entrada.hora}`), ds = new Date(`${fs}T${salida.hora}`);
+        let diff = ds - de;
+        if (diff < 0) diff += 24 * 3600000;
+        return Math.round((diff / 3600000) * 100) / 100;
+      } catch { return 0; }
+    }
 
-async function loadActivity(){
-  const list=$('activityList');
-  try{
-    const mine=d=>d.createdBy===currentUser.uid||d.ownerId===currentUser.uid;
-    const items=[];
-    const bs=await getDocs(collection(db,'buildings')); bs.forEach(d=>{const x={id:d.id,...d.data()};if(mine(x)&&x.createdAt)items.push({type:'building',name:x.name,ts:x.createdAt.toDate?.()??new Date(),color:'var(--primary)'})});
-    const ss=await getDocs(collection(db,'housedStaff')); ss.forEach(d=>{const x={id:d.id,...d.data()};if(mine(x)&&x.createdAt)items.push({type:'staff',name:x.name,ts:x.createdAt.toDate?.()??new Date(),color:'var(--success)'})});
-    items.sort((a,b)=>b.ts-a.ts);
-    const rec=items.slice(0,6);
-    if(!rec.length){list.innerHTML=`<div class="activity-item"><div class="act-dot" style="background:var(--text-muted)"></div><div class="act-text" style="color:var(--text-muted)">Sin actividad reciente</div></div>`;return}
-    const tl={building:'Edificio registrado',staff:'Colaborador registrado'};
-    list.innerHTML=rec.map(a=>`<div class="activity-item"><div class="act-dot" style="background:${a.color}"></div><div class="act-text"><strong>${tl[a.type]||a.type}:</strong> ${a.name||'N/A'}</div><div class="act-time">${a.ts.toLocaleDateString('es-ES')}</div></div>`).join('');
-  }catch{list.innerHTML=`<div class="activity-item"><div class="act-dot" style="background:var(--text-muted)"></div><div class="act-text" style="color:var(--text-muted)">No se pudo cargar la actividad</div></div>`}
-}
+    /* ================================================================
+       AUTENTICACIÓN — lee localStorage de index.html (vizo_home_user)
+    ================================================================ */
+    function leerSesionLocalStorage() {
+      try {
+        const saved = localStorage.getItem('vizo_home_user');
+        if (!saved) return null;
+        const base = JSON.parse(saved);
+        if (!base || !base.uid) return null;
+        return base;
+      } catch(e) { console.warn('Error leyendo sesión:', e); return null; }
+    }
 
-const GUIDE_KEY='vizo_guide_done_v2';
-const guideSteps=[
-  {icon:'fa-eye',title:'Bienvenido a Vizo Access',sub:'Sistema de Gestión Integrado',body:'Vizo Access es tu plataforma central para gestionar hoteles, colaboradores, accesos y más.',features:[{i:'fa-building',t:'Gestión de edificios y habitaciones'},{i:'fa-users',t:'Colaboradores y huéspedes'},{i:'fa-clock',t:'Control de horas y asistencia'},{i:'fa-chart-bar',t:'Reportes en tiempo real'}]},
-  {icon:'fa-building',title:'Módulo de Gestión',sub:'Hoteles y Colaboradores',body:'Administra edificios, habitaciones y personal alojado. Genera tarjetas de identificación.',features:[{i:'fa-door-open',t:'Habitaciones por piso'},{i:'fa-id-card',t:'Tarjetas imprimibles'},{i:'fa-chart-bar',t:'Reportes de ocupación'},{i:'fa-database',t:'Respaldos automáticos'}]},
-  {icon:'fa-clock',title:'Editor de Horas',sub:'Control de asistencia',body:'Revisa, corrige y agrega registros de asistencia biométrica directamente.',features:[{i:'fa-sign-in-alt',t:'Editar entradas y salidas'},{i:'fa-plus',t:'Registros manuales'},{i:'fa-filter',t:'Filtros por colaborador'},{i:'fa-trash-alt',t:'Eliminar registros incorrectos'}]},
-  {icon:'fa-users-cog',title:'Gestión de Usuarios',sub:'Permisos y acceso',body:'Crea usuarios con diferentes roles. Los permisos se refrescan en tiempo real desde Firebase.',features:[{i:'fa-crown',t:'SuperAdmin: acceso total'},{i:'fa-user-shield',t:'Admin: gestión completa'},{i:'fa-user-lock',t:'Tercero: acceso limitado'},{i:'fa-key',t:'Permisos por módulo en tiempo real'}]},
-  {icon:'fa-check-circle',title:'Listo para comenzar',sub:'Ya conoces el sistema',body:'Los íconos con candado indican módulos sin permiso asignado para tu usuario.',features:[{i:'fa-bars',t:'Menú lateral con accesos'},{i:'fa-bell',t:'Notificaciones de alertas'},{i:'fa-lock',t:'Ícono con candado = sin permiso'},{i:'fa-sync',t:'Permisos actualizados en tiempo real'}]}
-];
-let guideStep=0;
-function openGuide(){guideStep=0;$('guideOverlay').classList.add('open');renderGuideStep()}
-function closeGuide(p=false){$('guideOverlay').classList.remove('open');if(p)localStorage.setItem(GUIDE_KEY,'done')}
-function renderGuideStep(){
-  const s=guideSteps[guideStep];
-  $('guideStepsBar').innerHTML=guideSteps.map((_,i)=>`<div class="guide-step-dot ${i<=guideStep?'done':''}"></div>`).join('');
-  $('guideIcon').innerHTML=`<i class="fas ${s.icon}"></i>`;
-  $('guideTitle').textContent=s.title; $('guideSub').textContent=s.sub;
-  $('guideBody').innerHTML=`<p>${s.body}</p><ul class="guide-features">${s.features.map(f=>`<li><i class="fas ${f.i}"></i> ${f.t}</li>`).join('')}</ul>`;
-  $('guidePrev').style.display=guideStep>0?'inline-flex':'none';
-  const last=guideStep===guideSteps.length-1;
-  $('guideNext').innerHTML=last?'<i class="fas fa-check"></i> Finalizar':'<i class="fas fa-arrow-right"></i> Siguiente';
-  $('guideNext').onclick=last?()=>closeGuide(true):()=>{guideStep++;renderGuideStep()};
-}
-$('guidePrev').addEventListener('click',()=>{if(guideStep>0){guideStep--;renderGuideStep()}});
-$('guideSkip').addEventListener('click',()=>closeGuide(true));
-window.openGuide=openGuide;
-function checkFirstVisit(){if(!localStorage.getItem(GUIDE_KEY))setTimeout(openGuide,800)}
+    function activarSesion() {
+      adminName.textContent = currentAdmin.name;
+      redirectScreen.classList.remove('visible');
+      document.body.classList.add('logged-in');
+    }
 
-/* ═══ INIT: SIEMPRE refresca permisos de Firebase ═══ */
-(async function init(){
-  await new Promise(r=>setTimeout(r,700));
-  const saved=localStorage.getItem('vizo_home_user');
-  if(saved){
-    try{
-      const base=JSON.parse(saved);
-      // SIEMPRE consultar Firebase para obtener permisos actualizados
-      $('ldSubText').textContent='Actualizando permisos...';
-      const {appRole,permissions}=await fetchFreshPermissions(base.uid);
-      currentUser={...base, appRole, permissions};
-      activateApp();
-      return;
-    }catch(e){console.warn('Session error',e);localStorage.removeItem('vizo_home_user')}
-  }
-  $('loadingScreen').classList.add('hidden');
-  $('loginScreen').classList.remove('hidden');
-})();
-</script>
+    function mostrarRedireccion() {
+      redirectScreen.classList.add('visible');
+      document.body.classList.remove('logged-in');
+      hideLoading();
+      setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+    }
+
+    function logout() {
+      localStorage.removeItem('vizo_home_user');
+      currentAdmin = null;
+      todosLosRegistros = []; todosLosPares = [];
+      empleadosMap.clear(); tarifasMap.clear();
+      document.body.classList.remove('logged-in');
+      window.location.href = 'index.html';
+    }
+
+    ['logoutBtn','logoutFooterBtn'].forEach(id =>
+      document.getElementById(id)?.addEventListener('click', logout)
+    );
+
+    /* ================================================================
+       CONFIGURACIÓN QUINCENA
+    ================================================================ */
+    async function cargarConfiguracionQuincena() {
+      try {
+        const snap = await getDoc(doc(db,'configuracion','cierreQuincena'));
+        if (snap.exists()) {
+          configQuincena = snap.data();
+          document.getElementById('primerCierre').value  = configQuincena.primerCierre;
+          document.getElementById('segundoCierre').value = configQuincena.segundoCierre;
+        }
+      } catch(e) { console.error(e); }
+    }
+
+    window.guardarConfiguracionQuincena = async () => {
+      if (!currentAdmin) return;
+      const p1 = parseInt(document.getElementById('primerCierre').value);
+      const p2 = parseInt(document.getElementById('segundoCierre').value);
+      if (p1<1||p1>31||p2<1||p2>31) { showToast('Días inválidos','error'); return; }
+      showLoading('Guardando configuración...');
+      try {
+        await setDoc(doc(db,'configuracion','cierreQuincena'),
+          { primerCierre:p1, segundoCierre:p2, actualizado:serverTimestamp(), guardadoPor:currentAdmin.uid });
+        configQuincena = { primerCierre:p1, segundoCierre:p2 };
+        showToast('Configuración de quincena guardada');
+      } catch { showToast('Error al guardar','error'); }
+      finally  { hideLoading(); }
+    };
+
+    /* ================================================================
+       CARGAR EMPLEADOS
+    ================================================================ */
+    async function cargarEmpleados() {
+      try {
+        const snap = await getDocs(query(collection(db,'Ponche'), where('collaboratorId','==',currentAdmin.uid)));
+        empleadosMap.clear();
+        snap.forEach(d => {
+          const data = d.data();
+          if (data.username) empleadosMap.set(data.username, {
+            nombre: `${data.firstName||''} ${data.lastName||''}`.trim() || data.username,
+            turnoHoras: parseFloat(data.turnoHoras) || 8
+          });
+        });
+        console.log(`Empleados cargados: ${empleadosMap.size}`);
+      } catch(e) { console.error(e); }
+    }
+
+    /* ================================================================
+       CARGAR REGISTROS DESDE FIREBASE
+    ================================================================ */
+    async function cargarRegistros() {
+      if (!currentAdmin) return;
+      showLoading('Cargando registros...');
+      try {
+        await cargarEmpleados();
+        const snap = await getDocs(query(collection(db,'facialAttendance'), orderBy('timestamp','asc')));
+        todosLosRegistros = snap.docs
+          .map(d => {
+            const data = d.data();
+            return { id:d.id, ...data, timestamp:data.timestamp?.toDate()||new Date(), type:data.type||null, parId:data.parId||null };
+          })
+          .filter(r => r.collaboratorId === currentAdmin.uid);
+        console.log(`Registros del usuario: ${todosLosRegistros.length}`);
+        procesarRegistros();
+        await verificarCierreAutomatico();
+        await cargarHistorialQuincenas();
+      } catch(err) {
+        console.error(err);
+        showToast('Error al cargar: ' + err.message, 'error');
+      } finally { hideLoading(); }
+    }
+
+    /* ================================================================
+       HELPERS DE TIMESTAMP
+    ================================================================ */
+    function horaDesdeTimestamp(ts) {
+      if (!ts || !(ts instanceof Date)) return null;
+      return `${String(ts.getHours()).padStart(2,'0')}:${String(ts.getMinutes()).padStart(2,'0')}:${String(ts.getSeconds()).padStart(2,'0')}`;
+    }
+    function fechaDesdeTimestamp(ts) {
+      if (!ts || !(ts instanceof Date)) return null;
+      return `${ts.getFullYear()}-${String(ts.getMonth()+1).padStart(2,'0')}-${String(ts.getDate()).padStart(2,'0')}`;
+    }
+
+    /* ================================================================
+       PROCESAMIENTO DE REGISTROS
+    ================================================================ */
+    function procesarRegistros() {
+      const porColaborador = new Map();
+      todosLosRegistros.forEach(reg => {
+        if (!reg.collaboratorCode) return;
+        if (!porColaborador.has(reg.collaboratorCode)) porColaborador.set(reg.collaboratorCode, []);
+        porColaborador.get(reg.collaboratorCode).push(reg);
+      });
+
+      const resultados = [];
+      porColaborador.forEach((registros, codigo) => {
+        const lista  = [...registros].sort((a, b) => a.timestamp - b.timestamp);
+        const info   = empleadosMap.get(codigo) || { nombre: codigo, turnoHoras: 8 };
+        const turno  = parseFloat(info.turnoHoras) || 8;
+        const nombre = info.nombre || codigo;
+
+        function buildObj(reg) {
+          return {
+            fecha:     fechaDesdeTimestamp(reg.timestamp) || reg.fecha,
+            hora:      horaDesdeTimestamp(reg.timestamp)  || reg.hora,
+            timestamp: reg.timestamp
+          };
+        }
+
+        const tienenType = lista.every(r => r.type === 'entry' || r.type === 'exit');
+
+        if (tienenType) {
+          const entradas  = lista.filter(r => r.type === 'entry');
+          const salidas   = lista.filter(r => r.type === 'exit');
+          const salidaMap = new Map();
+          salidas.forEach(s => salidaMap.set(s.parId, s));
+          entradas.forEach(entrada => {
+            const entradaObj = buildObj(entrada);
+            const salidaReg  = salidaMap.get(entrada.parId);
+            if (salidaReg) {
+              const salidaObj  = buildObj(salidaReg);
+              const horasTrab  = (salidaReg.timestamp - entrada.timestamp) / 3600000;
+              resultados.push({ codigo, nombre, turno, fecha:entradaObj.fecha, entrada:entradaObj, salida:salidaObj, completo:true, esFalta:false, turnoCompleto:horasTrab >= turno - 0.5 });
+            } else {
+              resultados.push({ codigo, nombre, turno, fecha:entradaObj.fecha, entrada:entradaObj, salida:null, completo:false, esFalta:false, turnoCompleto:false });
+            }
+          });
+        } else {
+          let i = 0;
+          while (i < lista.length) {
+            const regA = lista[i], regB = lista[i + 1];
+            const entradaObj = buildObj(regA);
+            if (regB) {
+              const diffH = (regB.timestamp - regA.timestamp) / 3600000;
+              if (diffH <= LIMITE_16H) {
+                const salidaObj = buildObj(regB);
+                resultados.push({ codigo, nombre, turno, fecha:entradaObj.fecha, entrada:entradaObj, salida:salidaObj, completo:true, esFalta:false, turnoCompleto:diffH >= turno - 0.5 });
+                i += 2;
+              } else {
+                resultados.push({ codigo, nombre, turno, fecha:entradaObj.fecha, entrada:entradaObj, salida:null, completo:false, esFalta:false, turnoCompleto:false });
+                i += 1;
+              }
+            } else {
+              resultados.push({ codigo, nombre, turno, fecha:entradaObj.fecha, entrada:entradaObj, salida:null, completo:false, esFalta:false, turnoCompleto:false });
+              i += 1;
+            }
+          }
+        }
+      });
+
+      todosLosPares = resultados.sort((a, b) => {
+        const tA = a.entrada?.timestamp || new Date(a.fecha);
+        const tB = b.entrada?.timestamp || new Date(b.fecha);
+        return tB - tA;
+      });
+
+      console.log(`Pares procesados: ${todosLosPares.length}`);
+      mostrarTabla(todosLosPares);
+      actualizarEstadisticas(todosLosPares);
+      actualizarCalendario();
+    }
+
+    /* ================================================================
+       MOSTRAR TABLA COLABORADORES
+    ================================================================ */
+    function mostrarTabla(resultados) {
+      if (!resultados || !resultados.length) {
+        document.getElementById('tablaBody').innerHTML = '<tr><td colspan="4" style="text-align:center;">Sin datos</td></tr>';
+        return;
+      }
+      const colMap = new Map();
+      resultados.forEach(r => {
+        if (!colMap.has(r.codigo)) colMap.set(r.codigo, { codigo:r.codigo, nombre:r.nombre, turno:r.turno, totalExtras:0 });
+        if (r.entrada && r.salida) {
+          const h = calcularHoras(r.entrada, r.salida);
+          colMap.get(r.codigo).totalExtras += Math.floor(Math.max(0, h - r.turno));
+        }
+      });
+      let html = '';
+      colMap.forEach(col => {
+        const tarifa      = parseFloat(tarifasMap.get(col.codigo)) || 0;
+        const valorExtras = col.totalExtras * tarifa;
+        html += `
+          <tr>
+            <td><strong>${col.nombre}</strong><br><small style="color:var(--win-text-light);">${col.codigo}</small></td>
+            <td>${col.totalExtras > 0 ? '<strong>+'+col.totalExtras+'h</strong>' : '<span style="color:var(--win-text-light);">0h</span>'}</td>
+            <td>${tarifa > 0 ? `<span class="dop-value">DOP$${valorExtras.toFixed(2)}</span>` : '<span class="dop-zero">Sin tarifa</span>'}</td>
+            <td><button class="btn btn-primary" style="padding:4px 8px;font-size:11px;" onclick='verDetalle("${col.codigo}")'>
+                <i class="fas fa-eye"></i> Ver</button></td>
+          </tr>`;
+      });
+      document.getElementById('tablaBody').innerHTML = html;
+    }
+
+    function actualizarEstadisticas(res) {
+      document.getElementById('totalRegistros').textContent = todosLosRegistros.length;
+      document.getElementById('totalEntradas').textContent  = res.filter(r => r.entrada).length;
+      document.getElementById('totalSalidas').textContent   = res.filter(r => r.salida).length;
+      document.getElementById('totalPares').textContent     = res.filter(r => r.completo).length;
+    }
+
+    /* ================================================================
+       TARIFAS
+    ================================================================ */
+    async function cargarTarifasSilencioso() {
+      try {
+        const snap = await getDocs(collection(db,'tarifasExtras'));
+        tarifasMap.clear();
+        snap.forEach(d => {
+          const val = d.data().tarifa;
+          if (val !== undefined) tarifasMap.set(d.id, parseFloat(val) || 0);
+        });
+        console.log(`Tarifas cargadas: ${tarifasMap.size}`);
+      } catch(e) { console.error('Error cargando tarifas:', e); }
+    }
+
+    async function cargarTarifas() {
+      if (!currentAdmin) return;
+      try {
+        await cargarTarifasSilencioso();
+        mostrarTablaTarifas();
+        mostrarTabla(todosLosPares);
+      } catch(e) { console.error(e); }
+    }
+
+    function mostrarTablaTarifas(filtro) {
+      const colMap = new Map();
+      todosLosPares.forEach(r => {
+        if (!colMap.has(r.codigo)) colMap.set(r.codigo, { codigo:r.codigo, nombre:r.nombre, turno:r.turno, totalExtras:0 });
+        if (r.entrada && r.salida) {
+          const h = calcularHoras(r.entrada, r.salida);
+          colMap.get(r.codigo).totalExtras += Math.floor(Math.max(0, h - r.turno));
+        }
+      });
+      const term = (filtro || '').toLowerCase().trim();
+      let html = '', visibles = 0;
+      colMap.forEach(col => {
+        if (term && !col.codigo.toLowerCase().includes(term) && !col.nombre.toLowerCase().includes(term)) return;
+        visibles++;
+        const tarifa      = parseFloat(tarifasMap.get(col.codigo)) || 0;
+        const valorExtras = col.totalExtras * tarifa;
+        html += `
+          <tr data-codigo="${col.codigo}" data-nombre="${col.nombre.toLowerCase()}">
+            <td><strong>${col.codigo}</strong></td>
+            <td>${col.nombre}</td>
+            <td>${col.turno}h</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="font-weight:600;color:var(--win-text-light);font-size:10px;">DOP$</span>
+                <input type="number" class="form-control" style="width:100px;"
+                  value="${tarifa}" step="0.5" min="0"
+                  onchange="actualizarTarifa('${col.codigo}',this.value)">
+              </div>
+            </td>
+            <td>${col.totalExtras > 0 ? '<strong>'+col.totalExtras+'h</strong>' : '0h'}</td>
+            <td>${tarifa > 0 ? `<span class="dop-value">DOP$${valorExtras.toFixed(2)}</span>` : '<span class="dop-zero">DOP$0.00</span>'}</td>
+          </tr>`;
+      });
+      document.getElementById('tablaTarifas').innerHTML = html;
+      const noRes = document.getElementById('tarifasNoResultados');
+      if (noRes) noRes.style.display = (term && visibles === 0) ? 'block' : 'none';
+    }
+
+    window.filtrarTablaTarifas = function(valor) { mostrarTablaTarifas(valor); };
+
+    window.actualizarTarifa = (cod, val) => {
+      tarifasMap.set(cod, parseFloat(val) || 0);
+      const termActual = document.getElementById('buscadorTarifas')?.value || '';
+      mostrarTablaTarifas(termActual);
+      mostrarTabla(todosLosPares);
+    };
+
+    window.guardarTarifas = async () => {
+      if (!currentAdmin) return;
+      showLoading('Guardando tarifas...');
+      try {
+        const batch = writeBatch(db);
+        tarifasMap.forEach((t, cod) =>
+          batch.set(doc(db,'tarifasExtras',cod), { tarifa:t, actualizado:serverTimestamp(), guardadoPor:currentAdmin.uid })
+        );
+        await batch.commit();
+        showToast('Tarifas guardadas correctamente');
+        const termActual = document.getElementById('buscadorTarifas')?.value || '';
+        mostrarTablaTarifas(termActual);
+        mostrarTabla(todosLosPares);
+      } catch { showToast('Error al guardar','error'); }
+      finally  { hideLoading(); }
+    };
+
+    /* ================================================================
+       VER DETALLE COLABORADOR
+    ================================================================ */
+    window.verDetalle = codigo => {
+      if (!currentAdmin) return;
+      colaboradorActual = codigo;
+      const info = empleadosMap.get(codigo) || { nombre:codigo, turnoHoras:8 };
+      const regs = todosLosPares.filter(p => p.codigo === codigo).sort((a,b) => b.fecha.localeCompare(a.fecha));
+
+      document.getElementById('modalTitulo').textContent = info.nombre || codigo;
+      document.getElementById('modalCodigo').textContent = codigo;
+      document.getElementById('modalTurno').textContent  = (info.turnoHoras||8)+'h';
+
+      let totalExtras = 0;
+      regs.forEach(r => {
+        if (r.entrada && r.salida) {
+          const h = calcularHoras(r.entrada, r.salida);
+          totalExtras += Math.floor(Math.max(0, h - r.turno));
+        }
+      });
+      const tarifa      = parseFloat(tarifasMap.get(codigo)) || 0;
+      const valorExtras = totalExtras * tarifa;
+      document.getElementById('modalTotalExtras').textContent = totalExtras + 'h';
+      const elValor = document.getElementById('modalValorExtras');
+      if (elValor) {
+        elValor.textContent = tarifa > 0 ? `DOP$${valorExtras.toFixed(2)}` : 'Sin tarifa asignada';
+        elValor.style.color = tarifa > 0 ? 'var(--success)' : 'var(--win-text-light)';
+      }
+
+      const ult = regs[0];
+      if (ult) {
+        const h = ult.salida ? calcularHoras(ult.entrada, ult.salida) : 0;
+        document.getElementById('modalRegistros').innerHTML = `
+          <div><strong>Fecha:</strong> ${ult.fecha}</div>
+          <div><strong>Entrada:</strong> ${a12h(ult.entrada?.hora)}</div>
+          <div><strong>Salida:</strong> ${ult.salida ? a12h(ult.salida.hora) : 'Pendiente'}</div>
+          <div><strong>Horas:</strong> ${h.toFixed(2)}h</div>
+          <div><strong>Estado:</strong> ${ult.turnoCompleto?'Completo':ult.completo?'Incompleto':'Pendiente'}</div>`;
+      }
+
+      /* Historial con separadores de quincena */
+      let histHtml = '';
+      let periodoAnterior = null;
+      const regsAsc = [...regs].sort((a,b) => a.fecha.localeCompare(b.fecha)); // para separadores cronológicos
+      const p1 = configQuincena.primerCierre, p2 = configQuincena.segundoCierre;
+
+      /* Agrupar por quincena manteniendo orden cronológico */
+      const gruposQ = [];
+      regsAsc.forEach(r => {
+        const pi = obtenerPeriodoDeRegistro(r);
+        if (!gruposQ.length || gruposQ[gruposQ.length-1].periodo !== pi.periodo) {
+          gruposQ.push({ periodo: pi.periodo, label: pi.label, diaPago: pi.diaPago, registros: [] });
+        }
+        gruposQ[gruposQ.length-1].registros.push(r);
+      });
+
+      /* Renderizar de más reciente a más antiguo (invertir grupos) */
+      [...gruposQ].reverse().forEach((gq, gIdx) => {
+        /* Fila separadora de quincena */
+        const sepColor = gq.diaPago === p1 ? '#e6f2ff' : '#e8f5e9';
+        const sepBorde = gq.diaPago === p1 ? '#0078d4' : '#107c10';
+        histHtml += `<tr>
+          <td colspan="6" style="background:${sepColor};border-left:4px solid ${sepBorde};
+              padding:5px 10px;font-size:10px;font-weight:700;color:${sepBorde};">
+            📅 ${gq.label}
+            <span style="float:right;font-weight:400;color:#555;">
+              💳 Pago día ${gq.diaPago}
+            </span>
+          </td>
+        </tr>`;
+        /* Registros del bloque (más reciente primero) */
+        [...gq.registros].reverse().forEach(r => {
+          const h   = r.salida ? calcularHoras(r.entrada, r.salida) : 0;
+          const ex  = Math.floor(Math.max(0, h - r.turno));
+          const est = r.turnoCompleto ? 'Completo' : r.completo ? 'Incompleto' : 'Pendiente';
+          const cls = r.turnoCompleto ? 'badge-success' : r.completo ? 'badge-warning' : 'badge-danger';
+          histHtml += `<tr>
+            <td>${r.fecha}</td><td>${a12h(r.entrada?.hora)}</td>
+            <td>${r.salida ? a12h(r.salida.hora) : '---'}</td>
+            <td>${h.toFixed(2)}h</td><td>${ex > 0 ? '<strong>+'+ex+'h</strong>' : '0h'}</td>
+            <td><span class="badge ${cls}">${est}</span></td>
+          </tr>`;
+        });
+      });
+      document.getElementById('modalTablaBody').innerHTML = histHtml || '<tr><td colspan="6">Sin registros</td></tr>';
+
+      /* Resumen por quincena — usar obtenerPeriodoDeRegistro para consistencia */
+      const qMap = new Map();
+      regs.forEach(r => {
+        if (!r.entrada || !r.salida) return;
+        const h  = calcularHoras(r.entrada, r.salida);
+        const ex = Math.floor(Math.max(0, h - r.turno));
+        const pi = obtenerPeriodoDeRegistro(r);
+        qMap.set(pi.periodo, { label: pi.label, diaPago: pi.diaPago,
+          extras: (qMap.get(pi.periodo)?.extras||0) + ex });
+      });
+      let qHtml = '';
+      [...qMap.entries()].sort((a,b)=>a[0].localeCompare(b[0])).forEach(([per, val]) => {
+        const vq = val.extras * tarifa;
+        qHtml += `<div class="stat-item">
+          <div class="stat-label" style="font-size:10px;">${val.label}</div>
+          <div class="stat-number">${val.extras}h</div>
+          ${tarifa > 0 ? `<div style="font-size:10px;color:var(--success);margin-top:4px;font-weight:600;">DOP$${vq.toFixed(2)}</div>` : ''}
+        </div>`;
+      });
+      document.getElementById('modalQuincenaGrid').innerHTML = qHtml || '<p>Sin datos</p>';
+      document.getElementById('detalleModal').style.display = 'flex';
+    };
+
+    /* ================================================================
+       IMPRIMIR MODAL — igual al código original
+       Footer dentro del <tfoot> para evitar página en blanco
+    ================================================================ */
+    window.imprimirModal = () => {
+      if (!colaboradorActual) return;
+
+      const info = empleadosMap.get(colaboradorActual) || { nombre: colaboradorActual, turnoHoras: 8 };
+      const regs = todosLosPares
+        .filter(p => p.codigo === colaboradorActual)
+        .sort((a, b) => b.fecha.localeCompare(a.fecha));
+
+      let totalHoras = 0, totalExtras = 0, diasTrabajados = 0, diasCompletos = 0;
+      regs.forEach(r => {
+        if (r.entrada && r.salida) {
+          const h  = calcularHoras(r.entrada, r.salida);
+          const ex = Math.floor(Math.max(0, h - r.turno));
+          totalHoras += h; totalExtras += ex; diasTrabajados++;
+          if (r.turnoCompleto) diasCompletos++;
+        } else if (r.entrada) { diasTrabajados++; }
+      });
+
+      const tarifa         = parseFloat(tarifasMap.get(colaboradorActual)) || 0;
+      const valorExtras    = totalExtras * tarifa;
+      const fechaImpresion = new Date().toLocaleString('es-ES');
+      const fechaPrimerReg = regs.length ? regs[regs.length-1].fecha : '---';
+      const fechaUltimoReg = regs.length ? regs[0].fecha : '---';
+      const ultimoReg      = regs[0];
+      const ultEntrada     = ultimoReg ? a12h(ultimoReg.entrada?.hora) : '---';
+      const ultSalida      = ultimoReg ? (ultimoReg.salida ? a12h(ultimoReg.salida.hora) : 'Pendiente') : '---';
+
+      const fichaItems = [
+        { label:'Código',           value: colaboradorActual },
+        { label:'Turno',            value: (info.turnoHoras||8)+' horas' },
+        { label:'Primer Registro',  value: fechaPrimerReg },
+        { label:'Último Registro',  value: fechaUltimoReg },
+        { label:'Días Trabajados',  value: diasTrabajados },
+        { label:'Días Completos',   value: diasCompletos },
+        { label:'Total Horas',      value: totalHoras.toFixed(2)+'h' },
+        { label:'Horas Extras',     value: totalExtras+'h' },
+        { label:'Tarifa / h Extra', value: tarifa > 0 ? `DOP$${tarifa.toFixed(2)}` : 'Sin tarifa' },
+        { label:'Total a Pagar',    value: tarifa > 0 ? `DOP$${valorExtras.toFixed(2)}` : '---' },
+        { label:'Últ. Entrada',     value: ultEntrada },
+        { label:'Últ. Salida',      value: ultSalida },
+      ];
+      const fichaHtml = fichaItems.map(item =>
+        `<div class="print-info-item">
+          <span class="print-info-label">${item.label}:</span>
+          <span class="print-info-value">${item.value}</span>
+        </div>`
+      ).join('');
+
+      /* Quincenas — usando obtenerPeriodoDeRegistro para consistencia */
+      const qMap = new Map();
+      regs.forEach(r => {
+        if (!r.entrada || !r.salida) return;
+        const h  = calcularHoras(r.entrada, r.salida);
+        const ex = Math.floor(Math.max(0, h - r.turno));
+        const pi = obtenerPeriodoDeRegistro(r);
+        qMap.set(pi.periodo, { label: pi.label, extras: (qMap.get(pi.periodo)?.extras||0) + ex });
+      });
+      let qHtml = '';
+      [...qMap.entries()].sort((a,b)=>a[0].localeCompare(b[0])).forEach(([, val]) => {
+        const vq = val.extras * tarifa;
+        qHtml += `<div class="print-quincena-item">
+          <div class="print-quincena-label">${val.label}</div>
+          <div class="print-quincena-value">${val.extras}h</div>
+          ${tarifa > 0 ? `<div style="font-size:6pt;color:#107c10;margin-top:2px;font-weight:700;">DOP$${vq.toFixed(2)}</div>` : ''}
+        </div>`;
+      });
+
+      /* Tabla historial */
+      let tablaHtml = '';
+      regs.forEach(r => {
+        const h       = r.salida ? calcularHoras(r.entrada, r.salida) : 0;
+        const ex      = Math.floor(Math.max(0, h - r.turno));
+        const est     = r.turnoCompleto ? 'Completo' : r.completo ? 'Incompleto' : 'Pendiente';
+        const badgeCls= r.turnoCompleto ? 'print-badge-success' : r.completo ? 'print-badge-warning' : 'print-badge-danger';
+        const vFila   = ex * tarifa;
+        tablaHtml += `<tr>
+          <td>${r.fecha}</td>
+          <td>${a12h(r.entrada?.hora)}</td>
+          <td>${r.salida ? a12h(r.salida.hora) : '---'}</td>
+          <td style="text-align:right;">${h.toFixed(2)}h</td>
+          <td style="text-align:right;">${ex > 0 ? '+'+ex+'h' : '0h'}</td>
+          <td style="text-align:right;">${tarifa > 0 && ex > 0 ? 'DOP$'+vFila.toFixed(2) : '---'}</td>
+          <td>${r.turno}h</td>
+          <td><span class="print-badge ${badgeCls}">${est}</span></td>
+        </tr>`;
+      });
+      tablaHtml += `<tr class="total-row">
+        <td colspan="3"><strong>TOTALES</strong></td>
+        <td style="text-align:right;"><strong>${totalHoras.toFixed(2)}h</strong></td>
+        <td style="text-align:right;"><strong>+${totalExtras}h</strong></td>
+        <td style="text-align:right;"><strong>${tarifa > 0 ? 'DOP$'+valorExtras.toFixed(2) : '---'}</strong></td>
+        <td colspan="2"></td>
+      </tr>`;
+
+      document.getElementById('printArea').innerHTML = `
+        <div class="print-header">
+          <div class="print-logo">👁 Vizo Access</div>
+          <div class="print-meta">
+            <div><strong>Reporte de Asistencia Individual</strong></div>
+            <div>Impreso: ${fechaImpresion}</div>
+            <div>Por: ${currentAdmin.name}</div>
+          </div>
+        </div>
+        <div class="print-employee-title">👤 ${info.nombre || colaboradorActual}</div>
+        <div class="print-section-title">Información del Colaborador</div>
+        <div class="print-info-grid">${fichaHtml}</div>
+        ${qMap.size > 0 ? `<div class="print-section-title">Resumen por Quincenas</div><div class="print-quincena-grid">${qHtml}</div>` : ''}
+        <div class="print-section-title">Historial Completo de Asistencia (${regs.length} registros)</div>
+        <table class="print-table">
+          <thead>
+            <tr>
+              <th>Fecha</th><th>Entrada</th><th>Salida</th>
+              <th style="text-align:right;">Horas</th>
+              <th style="text-align:right;">Extras</th>
+              <th style="text-align:right;">Valor (DOP$)</th>
+              <th>Turno</th><th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>${tablaHtml}</tbody>
+          <tfoot>
+            <tr>
+              <td colspan="8" style="padding-top:6px;border-top:1px solid #ccc;">
+                <table style="width:100%;font-size:7pt;color:#888;"><tr>
+                  <td>Vizo Access — Sistema de Control de Asistencia</td>
+                  <td style="text-align:right;">Colaborador: ${colaboradorActual} | Generado: ${fechaImpresion}</td>
+                </tr></table>
+              </td>
+            </tr>
+          </tfoot>
+        </table>`;
+
+      window.print();
+    };
+
+    /* ================================================================
+       CALENDARIO
+    ================================================================ */
+    function actualizarCalendario() {
+      const hoy   = new Date().toISOString().split('T')[0];
+      const count = todosLosPares.filter(r => r.fecha === hoy).length;
+      calendarBadge.style.display = count > 0 ? 'block' : 'none';
+      calendarBadge.textContent   = count;
+    }
+
+    document.getElementById('calendarFooterBtn').addEventListener('click', () => {
+      if (!currentAdmin) return;
+      mostrarCalendario();
+    });
+
+    function mostrarCalendario() {
+      const año = currentMonth.getFullYear(), mes = currentMonth.getMonth();
+      document.getElementById('mesActual').textContent =
+        currentMonth.toLocaleDateString('es-ES',{month:'long',year:'numeric'});
+      const inicio = new Date(año,mes,1).getDay(), total = new Date(año,mes+1,0).getDate();
+      const dias = ['Do','Lu','Ma','Mi','Ju','Vi','Sa'];
+      let html = dias.map(d=>`<div style="text-align:center;font-weight:600;">${d}</div>`).join('');
+      for(let i=0;i<inicio;i++) html+='<div></div>';
+      for(let d=1;d<=total;d++){
+        const f=`${año}-${String(mes+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const c=todosLosPares.filter(r=>r.fecha===f).length;
+        html+=`<div class="calendar-day ${c>0?'has-registros':''}" onclick="verDia('${f}')">
+          <span class="day-number">${d}</span>${c>0?`<span class="day-count">${c}</span>`:''}
+        </div>`;
+      }
+      document.getElementById('calendarGrid').innerHTML = html;
+      document.getElementById('calendarModal').style.display = 'flex';
+    }
+
+    window.cambiarMes = d => { currentMonth.setMonth(currentMonth.getMonth()+d); mostrarCalendario(); };
+
+    window.verDia = fecha => {
+      const regs = todosLosPares.filter(r => r.fecha===fecha);
+      document.getElementById('dayDetailTitle').textContent = `Registros del ${fecha}`;
+      let html='';
+      regs.forEach(r=>{
+        const h=r.salida?calcularHoras(r.entrada,r.salida):0;
+        const est=r.turnoCompleto?'Completo':r.completo?'Incompleto':'Pendiente';
+        html+=`<tr>
+          <td>${r.nombre}</td><td>${a12h(r.entrada?.hora)}</td>
+          <td>${r.salida?a12h(r.salida.hora):'---'}</td><td>${h.toFixed(2)}h</td>
+          <td><span class="badge ${r.turnoCompleto?'badge-success':r.completo?'badge-warning':'badge-danger'}">${est}</span></td>
+        </tr>`;
+      });
+      document.getElementById('dayDetailBody').innerHTML = html||'<tr><td colspan="5">Sin registros</td></tr>';
+      document.getElementById('dayDetailModal').style.display='flex';
+      document.getElementById('calendarModal').style.display='none';
+    };
+
+    /* ================================================================
+       QUINCENAS
+    ================================================================ */
+    async function verificarCierreAutomatico() {
+      try {
+        const hoy=new Date(), dia=hoy.getDate();
+        if(dia===configQuincena.primerCierre||dia===configQuincena.segundoCierre){
+          const f=hoy.toISOString().split('T')[0];
+          const snap=await getDocs(query(
+            collection(db,'historialQuincenas'),
+            where('fecha','==',f),
+            where('creadoPor','==',currentAdmin.uid)
+          ));
+          if(snap.empty){
+            await guardarCierreQuincena();
+            console.log('Cierre automático ejecutado');
+          }
+        }
+      } catch(e){ console.error('Error en cierre automático:', e); }
+    }
+
+    async function guardarCierreQuincena(){
+      const hoy = new Date();
+      const dia = hoy.getDate(), mes = hoy.getMonth()+1, año = hoy.getFullYear();
+      const p1  = configQuincena.primerCierre;   // ej. 10
+      const p2  = configQuincena.segundoCierre;  // ej. 25
+      let per='', fi='', ff = hoy.toISOString().split('T')[0];
+
+      if(dia === p1){
+        /* Cierre del día p1: período del (p2+1) del MES ANTERIOR al p1 del mes actual */
+        per = `Quincena ${mes}/${año} (pago día ${p1})`;
+        const mesPrev = mes === 1 ? 12 : mes - 1;
+        const añoPrev = mes === 1 ? año - 1 : año;
+        fi = new Date(añoPrev, mesPrev-1, p2+1).toISOString().split('T')[0];
+      } else {
+        /* Cierre del día p2: período del (p1+1) al p2 del mismo mes */
+        per = `Quincena ${mes}/${año} (pago día ${p2})`;
+        fi  = new Date(año, mes-1, p1+1).toISOString().split('T')[0];
+      }
+
+      const extras = new Map();
+      todosLosPares.forEach(r=>{
+        if(r.fecha >= fi && r.fecha <= ff && r.entrada && r.salida){
+          const h = calcularHoras(r.entrada, r.salida);
+          extras.set(r.codigo, (extras.get(r.codigo)||0) + Math.floor(Math.max(0, h - r.turno)));
+        }
+      });
+      try{
+        await addDoc(collection(db,'historialQuincenas'),{
+          fecha: ff, periodo: per, fechaInicio: fi, fechaFin: ff,
+          totalExtras: [...extras.values()].reduce((a,b)=>a+b, 0),
+          colaboradores: Object.fromEntries(extras),
+          creado: serverTimestamp(), creadoPor: currentAdmin.uid
+        });
+        showToast(`Cierre guardado: ${per}`);
+        await cargarHistorialQuincenas();
+      } catch(e){ console.error('Error guardando cierre:', e); }
+    }
+
+    /* ================================================================
+       HELPER — dado un registro, calcula a qué período de quincena
+       pertenece según la configuración p1 (primer cierre) y p2 (segundo cierre).
+
+       Ejemplo: p1=10, p2=25
+         • Días 11–25 → pago día 25 del mismo mes  (del 11 al 25)
+         • Días 26–31 y 1–10 del mes siguiente → pago día 10  (del 26 al 10)
+
+       IMPORTANTE: los rangos son CONTIGUOS y sin superposición:
+         - Quincena p2: comienza el día p1+1 y termina el día p2  (ej. del 11 al 25)
+         - Quincena p1: comienza el día p2+1 del mes anterior y termina el día p1  (ej. del 26 al 10)
+         El día p2 pertenece al cierre p2. El día p2+1 pertenece al siguiente cierre p1.
+
+       Retorna: { periodo, fi, ff, diaPago, label }
+    ================================================================ */
+    function obtenerPeriodoDeRegistro(r) {
+      const f   = new Date(r.fecha + 'T12:00:00');  /* T12 evita desfase UTC */
+      const dia = f.getDate(), mes = f.getMonth()+1, año = f.getFullYear();
+      const p1  = configQuincena.primerCierre;   // ej. 10
+      const p2  = configQuincena.segundoCierre;  // ej. 25
+
+      if (dia > p1 && dia <= p2) {
+        /* Días p1+1 … p2 → cierre día p2, mismo mes */
+        const fi = `${año}-${String(mes).padStart(2,'0')}-${String(p1+1).padStart(2,'0')}`;
+        const ff = `${año}-${String(mes).padStart(2,'0')}-${String(p2).padStart(2,'0')}`;
+        return {
+          periodo: `Quincena ${mes}/${año} (pago día ${p2})`,
+          fi, ff, diaPago: p2,
+          label: `Cierre día ${p2} — del ${p1+1} al ${p2} de ${mes}/${año}`
+        };
+      } else {
+        /* Días p2+1 … fin de mes … 1 … p1 → cierre día p1 del mes de pago */
+        /* "Mes de pago" = mes siguiente si dia > p2, mismo mes si dia <= p1 */
+        let mesPago = dia <= p1 ? mes : mes + 1;
+        let añoPago = año;
+        if (mesPago > 12) { mesPago = 1; añoPago++; }
+
+        const mesPrev = mesPago === 1 ? 12 : mesPago - 1;
+        const añoPrev = mesPago === 1 ? añoPago - 1 : añoPago;
+
+        /* fi = día p2+1 del mes previo (el día siguiente al último cierre p2) */
+        const fi = `${añoPrev}-${String(mesPrev).padStart(2,'0')}-${String(p2+1).padStart(2,'0')}`;
+        const ff = `${añoPago}-${String(mesPago).padStart(2,'0')}-${String(p1).padStart(2,'0')}`;
+        return {
+          periodo: `Quincena ${mesPago}/${añoPago} (pago día ${p1})`,
+          fi, ff, diaPago: p1,
+          label: `Cierre día ${p1} — del ${p2+1}/${mesPrev} al ${p1}/${mesPago}/${añoPago}`
+        };
+      }
+    }
+
+    /* ── Determina la quincena activa ahora mismo ── */
+    function periodoActualStr() {
+      const ahora = new Date();
+      return obtenerPeriodoDeRegistro({ fecha: ahora.toISOString().split('T')[0] }).periodo;
+    }
+
+    async function cargarHistorialQuincenas(){
+      try{
+        const snap = await getDocs(query(collection(db,'historialQuincenas'), orderBy('fecha','asc')));
+        historialQuincenas = snap.docs.map(d=>({id:d.id,...d.data()}));
+        const hoy       = new Date().toISOString().split('T')[0];
+        const perActual = periodoActualStr();
+        const p1 = configQuincena.primerCierre;
+        const p2 = configQuincena.segundoCierre;
+
+        let html = '';
+        historialQuincenas.forEach((h, idx) => {
+          const num      = idx + 1;
+          const esActual = (h.periodo||'') === perActual;
+          const esPasado = h.fecha < hoy;
+          const ff       = h.fecha;
+
+          /* Obtener fi correcto: siempre recalcular desde ff usando obtenerPeriodoDeRegistro
+             para garantizar coherencia con la configuración de p1/p2 actual */
+          const pInfo = obtenerPeriodoDeRegistro({ fecha: ff });
+          const fi    = pInfo.fi;
+
+          /* Calcular horas en vivo desde todosLosPares para este rango */
+          let horasVivo = 0, extrasVivo = 0;
+          todosLosPares.forEach(r => {
+            if(!r.entrada || !r.salida) return;
+            if(r.fecha < fi || r.fecha > ff) return;
+            const hr = calcularHoras(r.entrada, r.salida);
+            horasVivo  += hr;
+            extrasVivo += Math.floor(Math.max(0, hr - r.turno));
+          });
+
+          const diaFin    = parseInt(ff.split('-')[2]);
+          const etiqPago  = diaFin === p1 ? `💳 Cierre día ${p1}` :
+                            diaFin === p2 ? `💳 Cierre día ${p2}` : `💳 ${ff}`;
+          const etiqRango = `${fi} → ${ff}`;
+
+          const badgeStyle = esActual
+            ? 'background:#e6f2ff;color:#0078d4;'
+            : esPasado
+              ? 'background:#dff6dd;color:#107c10;'
+              : 'background:#fff3cd;color:#856404;';
+          const badgeTxt = esActual ? '🔵 En curso' : esPasado ? '✅ Cerrado' : '⏳ Pendiente';
+
+          html += `<tr>
+            <td style="font-size:15px;font-weight:800;color:#0078d4;">#${num}</td>
+            <td>${ff}<br><small style="color:#aaa;font-size:9px;">${etiqRango}</small></td>
+            <td>
+              <strong>${h.periodo || '---'}</strong><br>
+              <small style="color:var(--win-text-light);">${etiqPago}</small>
+            </td>
+            <td><span style="padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;${badgeStyle}">${badgeTxt}</span></td>
+            <td>
+              <strong style="color:${extrasVivo>0?'#c00':'#888'};">${extrasVivo}h</strong> extras<br>
+              <small style="color:#888;">${horasVivo.toFixed(1)}h totales</small>
+            </td>
+            <td>
+              <button class="btn btn-primary" style="padding:4px 10px;font-size:11px;"
+                onclick="verDetalleQuincena('${h.id}')">
+                <i class="fas fa-eye"></i> Ver
+              </button>
+            </td>
+          </tr>`;
+        });
+        document.getElementById('tablaHistorialQuincenas').innerHTML =
+          html || '<tr><td colspan="6" style="text-align:center;">Sin historial</td></tr>';
+      } catch(e){ console.error(e); }
+    }
+
+    /* ================================================================
+       VER DETALLE DE UNA QUINCENA
+       — Resumen global de todos los colaboradores
+       — Por cada colaborador: bloques separados con línea divisoria
+         entre la quincena CERRADA (anterior) y la ACTUAL (en curso),
+         cada bloque con sus propios totales de días / horas / extras / DOP$
+    ================================================================ */
+    window.verDetalleQuincena = (id) => {
+      const q = historialQuincenas.find(h => h.id === id);
+      if(!q){ showToast('Quincena no encontrada','error'); return; }
+
+      const numQ     = historialQuincenas.findIndex(h=>h.id===id) + 1;
+      const hoy      = new Date().toISOString().split('T')[0];
+      const esPasado = q.fecha < hoy;
+      const ff_cierre = q.fecha;
+      const diaPago   = parseInt(ff_cierre.split('-')[2]);
+      const p1 = configQuincena.primerCierre;
+      const p2 = configQuincena.segundoCierre;
+
+      /* Siempre recalcular fi desde ff usando obtenerPeriodoDeRegistro
+         para garantizar que el rango es correcto según p1/p2 configurado */
+      const pInfoCierre = obtenerPeriodoDeRegistro({ fecha: ff_cierre });
+      const fi_cierre   = pInfoCierre.fi;
+      const labelCierre = pInfoCierre.label;
+
+      /* ── Filtrar SOLO registros dentro del rango ESTRICTO del cierre ── */
+      const regsDelCierre = todosLosPares.filter(r =>
+        r.entrada && r.fecha >= fi_cierre && r.fecha <= ff_cierre
+      );
+
+      /* ── Agrupar por colaborador ── */
+      const colMap = new Map();
+      regsDelCierre.forEach(r => {
+        if(!colMap.has(r.codigo))
+          colMap.set(r.codigo, { nombre: r.nombre, turno: r.turno, dias: 0, horas: 0, extras: 0 });
+        const col = colMap.get(r.codigo);
+        if(r.entrada && r.salida){
+          const h  = calcularHoras(r.entrada, r.salida);
+          const ex = Math.floor(Math.max(0, h - r.turno));
+          col.dias++; col.horas += h; col.extras += ex;
+        } else if(r.entrada) { col.dias++; }
+      });
+
+      /* ── Totales globales ── */
+      let grDias=0, grHoras=0, grExtras=0, grDop=0;
+      colMap.forEach((col, cod) => {
+        const tarifa = parseFloat(tarifasMap.get(cod))||0;
+        grDias += col.dias; grHoras += col.horas;
+        grExtras += col.extras; grDop += col.extras * tarifa;
+      });
+
+      document.getElementById('qdTitulo').textContent =
+        `Cierre #${numQ} — ${q.periodo||ff_cierre} — 💳 ${labelCierre}`;
+
+      document.getElementById('qdStats').innerHTML = `
+        <div class="stat-item">
+          <div class="stat-label">N° Cierre</div>
+          <div class="stat-number" style="font-size:24px;color:#0078d4;">#${numQ}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Período</div>
+          <div class="stat-number" style="font-size:11px;">${q.periodo||'---'}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Rango del cierre</div>
+          <div class="stat-number" style="font-size:11px;">${fi_cierre} → ${ff_cierre}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Día de pago</div>
+          <div class="stat-number">💳 Día ${diaPago}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Colaboradores</div>
+          <div class="stat-number">${colMap.size}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Días trabajados</div>
+          <div class="stat-number">${grDias}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Horas totales</div>
+          <div class="stat-number">${grHoras.toFixed(1)}h</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Horas extras</div>
+          <div class="stat-number" style="color:${grExtras>0?'#c00':'inherit'};">${grExtras}h</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Total DOP$</div>
+          <div class="stat-number" style="color:var(--success);font-size:13px;">
+            ${grDop>0?'DOP$'+grDop.toFixed(2):'Sin tarifa'}
+          </div>
+        </div>`;
+
+      /* ── Banner estado ── */
+      const bannerColor = esPasado?'#dff6dd':'#e6f2ff';
+      const bannerBorde = esPasado?'#107c10':'#0078d4';
+      const bannerLabel = esPasado
+        ? `✅ Quincena cerrada — registros del ${fi_cierre} al ${ff_cierre}`
+        : `🔵 Quincena en curso — registros del ${fi_cierre} al ${ff_cierre}`;
+
+      let bloquesHtml = `
+        <div style="background:${bannerColor};border-left:5px solid ${bannerBorde};padding:10px 16px;border-radius:6px;margin-bottom:20px;font-size:12px;">
+          <strong>${bannerLabel}</strong><br>
+          <span style="color:#555;font-size:11px;">
+            ${labelCierre} &nbsp;|&nbsp;
+            Configuración activa: cierre día <strong>${p1}</strong> y cierre día <strong>${p2}</strong>
+          </span>
+        </div>`;
+
+      /* ── TABLA DE COLABORADORES — solo del rango fi_cierre→ff_cierre ── */
+      let resRows = '';
+      if(colMap.size === 0){
+        resRows = `<tr><td colspan="6" style="text-align:center;padding:20px;color:#999;">
+          Sin registros en el rango ${fi_cierre} → ${ff_cierre}
+        </td></tr>`;
+      } else {
+        colMap.forEach((col, cod) => {
+          const tarifa = parseFloat(tarifasMap.get(cod))||0;
+          const dop    = col.extras * tarifa;
+          resRows += `<tr>
+            <td>
+              <strong>${col.nombre}</strong>
+              <br><small style="color:#888;font-size:10px;">${cod}</small>
+            </td>
+            <td style="text-align:center;">${col.dias}</td>
+            <td style="text-align:right;">${col.horas.toFixed(2)}h</td>
+            <td style="text-align:right;font-weight:700;color:${col.extras>0?'#c00':'#888'};">
+              ${col.extras>0?'+'+col.extras+'h':'0h'}
+            </td>
+            <td style="text-align:right;">
+              ${tarifa>0?'DOP$'+tarifa.toFixed(2):'<span style="color:#bbb;">Sin tarifa</span>'}
+            </td>
+            <td style="text-align:right;">
+              ${dop>0?'<span class="dop-value">DOP$'+dop.toFixed(2)+'</span>':'<span style="color:#bbb;">—</span>'}
+            </td>
+          </tr>`;
+        });
+        resRows += `<tr style="background:#e6f2ff;font-weight:700;border-top:2px solid #0078d4;">
+          <td>TOTALES</td>
+          <td style="text-align:center;">${grDias}</td>
+          <td style="text-align:right;">${grHoras.toFixed(2)}h</td>
+          <td style="text-align:right;color:#c00;">+${grExtras}h</td>
+          <td></td>
+          <td style="text-align:right;color:var(--success);">${grDop>0?'DOP$'+grDop.toFixed(2):'—'}</td>
+        </tr>`;
+      }
+
+      bloquesHtml += `
+        <div>
+          <div style="padding:8px 14px;background:#0078d4;color:white;border-radius:6px 6px 0 0;font-weight:700;font-size:13px;">
+            👥 Colaboradores — Cierre #${numQ} &nbsp;
+            <small style="font-weight:400;opacity:.85;">(${fi_cierre} → ${ff_cierre})</small>
+          </div>
+          <div class="table-container" style="border-radius:0 0 6px 6px;">
+            <table>
+              <thead>
+                <tr style="background:#f3f2f1;">
+                  <th>Colaborador / Código</th>
+                  <th style="text-align:center;">Días</th>
+                  <th style="text-align:right;">Horas trabajadas</th>
+                  <th style="text-align:right;">Horas extras</th>
+                  <th style="text-align:right;">Tarifa/h</th>
+                  <th style="text-align:right;">Total DOP$</th>
+                </tr>
+              </thead>
+              <tbody>${resRows}</tbody>
+            </table>
+          </div>
+        </div>`;
+
+      document.getElementById('qdBloques').innerHTML  = bloquesHtml;
+      document.getElementById('quincenaDetalleModal').style.display = 'flex';
+    };
+
+    window.calcularQuincenas = () => {
+      if(!currentAdmin) return;
+      const qMap = new Map();
+      todosLosPares.forEach(r=>{
+        if(!r.entrada||!r.salida) return;
+        const h  = calcularHoras(r.entrada,r.salida);
+        const ex = Math.floor(Math.max(0,h-r.turno));
+        const pi = obtenerPeriodoDeRegistro(r);
+        if(!qMap.has(pi.periodo)) qMap.set(pi.periodo,{ label:pi.label, total:0 });
+        qMap.get(pi.periodo).total += ex;
+      });
+      let html='',total=0;
+      [...qMap.entries()].sort((a,b)=>a[0].localeCompare(b[0])).forEach(([,v])=>{
+        html+=`<div class="stat-item"><div class="stat-label" style="font-size:10px;">${v.label}</div><div class="stat-number">${v.total}h</div></div>`;
+        total+=v.total;
+      });
+      document.getElementById('quincenaGrid').innerHTML=html;
+      document.getElementById('totalGeneralQuincenas').innerHTML=`TOTAL GENERAL: ${total}h`;
+      document.getElementById('quincenaSummary').style.display='block';
+    };
+
+    /* ================================================================
+       EXPORTAR QUINCENAS PDF — igual al original + descarga universal
+    ================================================================ */
+    window.exportarQuincenasPDF = async () => {
+      if(!currentAdmin||!todosLosPares.length){showToast('Sin datos','error');return;}
+
+      const nombreArchivo = `Quincenas_${new Date().toISOString().split('T')[0]}.pdf`;
+      opMostrar('downloading','Generando PDF Quincenas','Preparando datos...');
+      opActualizar(15, '0', '?', 'Calculando quincenas...');
+      await delay(200);
+
+      try{
+        const {jsPDF}=window.jspdf,pdoc=new jsPDF('l','mm','a4');
+        pdoc.setFontSize(18);pdoc.text('Reporte de Quincenas - Vizo Access',14,20);
+        pdoc.setFontSize(10);pdoc.text(`Generado: ${new Date().toLocaleString()}`,14,28);
+        pdoc.text(`Por: ${currentAdmin.name}`,14,34);
+        const qMap=new Map();
+        todosLosPares.forEach(r=>{
+          if(!r.entrada||!r.salida) return;
+          const h  = calcularHoras(r.entrada,r.salida);
+          const ex = Math.floor(Math.max(0,h-r.turno));
+          const pi = obtenerPeriodoDeRegistro(r);
+          if(!qMap.has(pi.periodo)) qMap.set(pi.periodo,{ label:pi.label, colab:new Map() });
+          const cm = qMap.get(pi.periodo).colab;
+          cm.set(r.codigo,(cm.get(r.codigo)||0)+ex);
+        });
+
+        opActualizar(45,'?','?','Construyendo tablas...');
+        await delay(200);
+
+        let y=44;
+        [...qMap.entries()].sort((a,b)=>a[0].localeCompare(b[0])).forEach(([,v])=>{
+          if(y>180){pdoc.addPage();y=20;}
+          pdoc.setFontSize(12);pdoc.setTextColor(0,120,212);pdoc.text(v.label,14,y);
+          const data=[];let tp=0;
+          v.colab.forEach((ex,cod)=>{
+            const t=parseFloat(tarifasMap.get(cod))||0;
+            data.push([cod,empleadosMap.get(cod)?.nombre||cod,ex+'h',t>0?`DOP$${(ex*t).toFixed(2)}`:'-']);
+            tp+=ex;
+          });
+          data.push(['TOTAL','',tp+'h','']);
+          pdoc.autoTable({startY:y+4,head:[['Código','Nombre','Horas Extras','Valor DOP$']],body:data,theme:'grid',headStyles:{fillColor:[0,120,212]},styles:{fontSize:9}});
+          y=pdoc.lastAutoTable.finalY+10;
+        });
+
+        opActualizar(75,'?','?','Generando archivo...');
+        await delay(150);
+
+        /* Descarga universal via Blob */
+        const pdfBlob = pdoc.output('blob');
+        const kbFinal = (pdfBlob.size / 1024).toFixed(2);
+        opActualizar(92, kbFinal, kbFinal, 'Abriendo diálogo de descarga...');
+        await delay(150);
+        descargarBlobComoArchivo(pdfBlob, nombreArchivo);
+        opFinalizar(true, `PDF generado — ${kbFinal} KB`, kbFinal);
+      } catch(e){
+        console.error(e);
+        opFinalizar(false, 'Error al generar PDF');
+      }
+    };
+
+    /* ================================================================
+       EXPORTAR EXCEL — descarga universal via Blob (funciona en Electron)
+    ================================================================ */
+    window.exportarExcel = async () => {
+      if(!currentAdmin||!todosLosPares.length){showToast('Sin datos','error');return;}
+
+      const nombreArchivo = `VizoAccess_${new Date().toISOString().split('T')[0]}.xlsx`;
+      opMostrar('downloading','Generando Excel','Preparando datos...');
+      opActualizar(10, '0', '?', 'Construyendo filas...');
+      await delay(200);
+
+      try {
+        const datos=[];
+        todosLosPares.forEach(r=>{
+          const h=r.salida?calcularHoras(r.entrada,r.salida):0;
+          const ex=Math.floor(Math.max(0,h-r.turno));
+          const t=parseFloat(tarifasMap.get(r.codigo))||0;
+          datos.push({
+            Código:r.codigo, Nombre:r.nombre, Fecha:r.fecha,
+            Entrada:r.entrada?.hora||'---', Salida:r.salida?.hora||'---',
+            Horas:parseFloat(h.toFixed(2)),
+            'Extras (h)':ex,
+            'Tarifa DOP$':t,
+            'Valor Extras DOP$':parseFloat((ex*t).toFixed(2)),
+            Estado:r.turnoCompleto?'Completo':r.completo?'Incompleto':'Pendiente'
+          });
+        });
+
+        opActualizar(40, '?', '?', `${datos.length} filas generadas...`);
+        await delay(150);
+
+        const ws = XLSX.utils.json_to_sheet(datos);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Asistencia');
+
+        opActualizar(70, '?', '?', 'Generando archivo XLSX...');
+        await delay(150);
+
+        /* Convertir a Blob y descargar universalmente */
+        const wbArrayBuffer = XLSX.write(wb, { bookType:'xlsx', type:'array' });
+        const blob = new Blob([wbArrayBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const kbFinal = (blob.size / 1024).toFixed(2);
+
+        opActualizar(92, kbFinal, kbFinal, 'Abriendo diálogo de descarga...');
+        await delay(150);
+        descargarBlobComoArchivo(blob, nombreArchivo);
+        opFinalizar(true, `Excel generado — ${kbFinal} KB`, kbFinal);
+      } catch(e) {
+        console.error(e);
+        opFinalizar(false, 'Error al generar Excel');
+      }
+    };
+
+    /* ================================================================
+       EXPORTAR PDF GENERAL — descarga universal via Blob
+    ================================================================ */
+    window.exportarPDFGeneral = async () => {
+      if(!currentAdmin||!todosLosPares.length){showToast('Sin datos','error');return;}
+
+      const nombreArchivo = `VizoAccess_${new Date().toISOString().split('T')[0]}.pdf`;
+      opMostrar('downloading','Generando PDF General','Preparando datos...');
+      opActualizar(10, '0', '?', 'Agrupando colaboradores...');
+      await delay(200);
+
+      try{
+        const {jsPDF}=window.jspdf,pdoc=new jsPDF('l','mm','a4');
+        pdoc.setFontSize(20);pdoc.text('Reporte de Asistencia - Vizo Access',14,20);
+        pdoc.setFontSize(10);pdoc.text(`Generado: ${new Date().toLocaleString()}`,14,28);
+        pdoc.text(`Por: ${currentAdmin.name}`,14,34);
+
+        const colMap=new Map();
+        todosLosPares.forEach(r=>{
+          if(!colMap.has(r.codigo)) colMap.set(r.codigo,{nombre:r.nombre,turno:r.turno,registros:[]});
+          colMap.get(r.codigo).registros.push(r);
+        });
+
+        opActualizar(30,'?','?',`${colMap.size} colaboradores encontrados...`);
+        await delay(150);
+
+        let y=44, colIdx=0;
+        colMap.forEach((col,cod)=>{
+          colIdx++;
+          if(y>180){pdoc.addPage();y=20;}
+          const tarifa=parseFloat(tarifasMap.get(cod))||0;
+          pdoc.setFontSize(12);pdoc.setTextColor(0,120,212);
+          pdoc.text(`${col.nombre} (${cod}) - Turno: ${col.turno}h`,14,y);
+          const data=[];let te=0,tv=0;
+          col.registros.sort((a,b)=>b.fecha.localeCompare(a.fecha)).forEach(r=>{
+            const h=r.salida?calcularHoras(r.entrada,r.salida):0;
+            const ex=Math.floor(Math.max(0,h-r.turno));
+            te+=ex; tv+=ex*tarifa;
+            data.push([
+              r.fecha,a12h(r.entrada?.hora),r.salida?a12h(r.salida.hora):'---',
+              h.toFixed(2)+'h',ex+'h',
+              tarifa>0?`DOP$${(ex*tarifa).toFixed(2)}`:'-',
+              r.turnoCompleto?'Completo':r.completo?'Incompleto':'Pendiente'
+            ]);
+          });
+          data.push(['TOTAL','','','',te+'h',tarifa>0?`DOP$${tv.toFixed(2)}`:'-','']);
+          pdoc.autoTable({
+            startY:y+4,
+            head:[['Fecha','Entrada','Salida','Horas','Extras','Valor DOP$','Estado']],
+            body:data, theme:'grid', headStyles:{fillColor:[0,120,212]}, styles:{fontSize:8}
+          });
+          y=pdoc.lastAutoTable.finalY+10;
+          const pct = 30 + Math.round((colIdx / colMap.size) * 55);
+          opActualizar(pct,'?','?',`Procesando ${col.nombre}...`);
+        });
+
+        opActualizar(88,'?','?','Generando archivo PDF...');
+        await delay(150);
+
+        const pdfBlob = pdoc.output('blob');
+        const kbFinal = (pdfBlob.size / 1024).toFixed(2);
+        opActualizar(95, kbFinal, kbFinal, 'Abriendo diálogo de descarga...');
+        await delay(150);
+        descargarBlobComoArchivo(pdfBlob, nombreArchivo);
+        opFinalizar(true, `PDF generado — ${kbFinal} KB`, kbFinal);
+      } catch(e){
+        console.error(e);
+        opFinalizar(false, 'Error al generar PDF');
+      }
+    };
+
+    /* ================================================================
+       GUARDAR TODOS EN FIREBASE — con overlay de progreso + peso real
+    ================================================================ */
+    window.guardarTodosEnFirebase = async () => {
+      if(!currentAdmin) return;
+      showConfirm(
+        `¿Guardar todos los registros en Firebase? (${todosLosPares.length} registros)`,
+        async () => {
+          const payload = {
+            fecha:          new Date().toISOString(),
+            registros:      todosLosPares,
+            totalRegistros: todosLosPares.length,
+            guardadoPor:    currentAdmin.name,
+            guardadoPorUid: currentAdmin.uid,
+          };
+          const kbTotal = calcularPesoKB(payload);
+
+          opMostrar('uploading','Guardando en Firebase',`${todosLosPares.length} registros — ${kbTotal} KB`);
+          opActualizar(10, '0', kbTotal, 'Preparando datos...');
+          await delay(300);
+          opActualizar(30, (kbTotal * 0.3).toFixed(2), kbTotal, 'Conectando con Firebase...');
+          await delay(300);
+          opActualizar(55, (kbTotal * 0.55).toFixed(2), kbTotal, 'Subiendo registros...');
+
+          try {
+            await addDoc(collection(db,'reportesGuardados'), {
+              fecha:          new Date().toISOString(),
+              registros:      todosLosPares,
+              totalRegistros: todosLosPares.length,
+              guardadoPor:    currentAdmin.name,
+              guardadoPorUid: currentAdmin.uid,
+              timestamp:      serverTimestamp()
+            });
+            opActualizar(90, (kbTotal * 0.9).toFixed(2), kbTotal, 'Verificando guardado...');
+            await delay(250);
+            opFinalizar(true, `${todosLosPares.length} registros guardados (${kbTotal} KB)`, kbTotal);
+          } catch(e) {
+            console.error(e);
+            opFinalizar(false, 'No se pudo guardar en Firebase');
+          }
+        }
+      );
+    };
+
+    /* ================================================================
+       BOTÓN GUARDAR INDIVIDUAL
+       1. Cierra el modal de detalle ANTES de mostrar el confirm
+       2. Muestra confirm
+       3. Al aceptar muestra overlay de progreso
+    ================================================================ */
+    document.getElementById('btnGuardarRegistro').addEventListener('click', () => {
+      if (!currentAdmin || !colaboradorActual) return;
+
+      /* 1 — Cerrar modal de detalle PRIMERO */
+      document.getElementById('detalleModal').style.display = 'none';
+
+      const regsColab = todosLosPares.filter(p => p.codigo === colaboradorActual);
+      const payload   = {
+        tipo:           'INDIVIDUAL',
+        colaborador:    colaboradorActual,
+        registros:      regsColab,
+        fecha:          new Date().toISOString(),
+        guardadoPor:    currentAdmin.name,
+        guardadoPorUid: currentAdmin.uid
+      };
+      const kbTotal = calcularPesoKB(payload);
+
+      /* 2 — Mostrar confirm (modal ya cerrado) */
+      showConfirm(
+        `¿Guardar registro de ${colaboradorActual}?\n${regsColab.length} registros — ${kbTotal} KB`,
+        async () => {
+          /* 3 — Mostrar overlay de progreso */
+          opMostrar('uploading','Guardando colaborador',`${regsColab.length} registros — ${kbTotal} KB`);
+          opActualizar(15, '0', kbTotal, 'Preparando datos...');
+          await delay(250);
+          opActualizar(40, (kbTotal * 0.4).toFixed(2), kbTotal, 'Conectando con Firebase...');
+          await delay(250);
+          opActualizar(65, (kbTotal * 0.65).toFixed(2), kbTotal, 'Subiendo registros...');
+
+          try {
+            await addDoc(collection(db,'reportesGuardados'), {
+              tipo:           'INDIVIDUAL',
+              colaborador:    colaboradorActual,
+              registros:      regsColab,
+              fecha:          new Date().toISOString(),
+              guardadoPor:    currentAdmin.name,
+              guardadoPorUid: currentAdmin.uid,
+              timestamp:      serverTimestamp()
+            });
+            opActualizar(90, (kbTotal * 0.9).toFixed(2), kbTotal, 'Verificando...');
+            await delay(250);
+            opFinalizar(true, `${regsColab.length} registros guardados (${kbTotal} KB)`, kbTotal);
+          } catch(e) {
+            console.error(e);
+            opFinalizar(false, 'No se pudo guardar en Firebase');
+          }
+        },
+        /* onCancel — volver a abrir el modal de detalle si cancela */
+        () => {
+          if (colaboradorActual) window.verDetalle(colaboradorActual);
+        }
+      );
+    });
+
+    /* ================================================================
+       BOTÓN ELIMINAR TODOS LOS REGISTROS DEL COLABORADOR
+       1. Cierra el modal de detalle ANTES del confirm
+       2. Muestra confirm
+       3. Elimina con overlay de progreso mostrando peso y avance
+    ================================================================ */
+    document.getElementById('btnEliminarRegistro').addEventListener('click', () => {
+      if (!currentAdmin || !colaboradorActual) return;
+
+      const regsColab = todosLosRegistros.filter(r => r.collaboratorCode === colaboradorActual);
+      const kbEstimado = calcularPesoKB(regsColab);
+
+      /* 1 — Cerrar modal de detalle PRIMERO */
+      document.getElementById('detalleModal').style.display = 'none';
+
+      /* 2 — Mostrar confirm */
+      showConfirm(
+        `⚠️ ¿Eliminar TODOS los ${regsColab.length} registros de ${colaboradorActual}?\n\nPeso estimado: ${kbEstimado} KB\n\nEsta acción NO se puede deshacer.`,
+        async () => {
+          /* 3 — Overlay de eliminación con progreso real */
+          opMostrar('deleting','Eliminando registros',`${regsColab.length} registros — ${kbEstimado} KB`);
+          opActualizar(5, '0', kbEstimado, 'Preparando eliminación...');
+          await delay(250);
+
+          try {
+            const tamChunk = 400;
+            const chunks   = [];
+            for (let i = 0; i < regsColab.length; i += tamChunk) chunks.push(regsColab.slice(i, i + tamChunk));
+
+            let eliminados = 0;
+            for (let ci = 0; ci < chunks.length; ci++) {
+              const chunk = chunks[ci];
+              const batch = writeBatch(db);
+              chunk.forEach(r => batch.delete(doc(db,'facialAttendance', r.id)));
+              await batch.commit();
+              eliminados += chunk.length;
+
+              const pct       = Math.round((eliminados / regsColab.length) * 90);
+              const kbActual  = ((eliminados / regsColab.length) * parseFloat(kbEstimado)).toFixed(2);
+              opActualizar(
+                pct,
+                kbActual,
+                kbEstimado,
+                `Eliminados ${eliminados} de ${regsColab.length} registros (lote ${ci+1}/${chunks.length})`
+              );
+              await delay(120);
+            }
+
+            /* Actualizar estado local */
+            todosLosRegistros = todosLosRegistros.filter(r => r.collaboratorCode !== colaboradorActual);
+            procesarRegistros();
+
+            opFinalizar(true, `${eliminados} registros eliminados (${kbEstimado} KB)`, kbEstimado);
+          } catch(e) {
+            console.error(e);
+            opFinalizar(false, 'Error al eliminar: ' + e.message);
+          }
+        },
+        /* onCancel — volver a abrir el modal si cancela */
+        () => {
+          if (colaboradorActual) window.verDetalle(colaboradorActual);
+        }
+      );
+    });
+
+    /* ================================================================
+       FILTROS
+    ================================================================ */
+    window.aplicarFiltros = () => {
+      if(!currentAdmin) return;
+      const fi  = document.getElementById('fechaInicio').value;
+      const ff  = document.getElementById('fechaFin').value;
+      const est = document.getElementById('filtroEstado').value;
+      let filtrados=[...todosLosPares];
+      if(fi) filtrados=filtrados.filter(r=>r.fecha>=fi);
+      if(ff) filtrados=filtrados.filter(r=>r.fecha<=ff);
+      if(est==='completo')   filtrados=filtrados.filter(r=>r.turnoCompleto);
+      if(est==='incompleto') filtrados=filtrados.filter(r=>r.completo&&!r.turnoCompleto);
+      mostrarTabla(filtrados);
+    };
+
+    window.limpiarFiltros = () => {
+      document.getElementById('fechaInicio').value='';
+      document.getElementById('fechaFin').value='';
+      document.getElementById('filtroEstado').value='todos';
+      mostrarTabla(todosLosPares);
+    };
+
+    /* ================================================================
+       INICIALIZACIÓN — Lee sesión de localStorage (igual que index.html)
+    ================================================================ */
+    (async () => {
+      showLoading('Verificando sesión...');
+      try {
+        const saved = localStorage.getItem('vizo_home_user');
+        if (saved) {
+          const base = JSON.parse(saved);
+          if (base && base.uid) {
+            currentAdmin = {
+              uid:      base.uid,
+              username: base.username || base.uid,
+              name:     base.name || base.username || base.uid
+            };
+            activarSesion();
+            await cargarConfiguracionQuincena();
+            await cargarTarifasSilencioso();
+            await cargarRegistros();
+            hideLoading();
+            return;
+          }
+        }
+        mostrarRedireccion();
+      } catch(err) {
+        console.error('Error en init:', err);
+        mostrarRedireccion();
+      }
+    })();
+  </script>
 </body>
 </html>
