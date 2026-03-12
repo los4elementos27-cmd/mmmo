@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>Vizo Access — Portal del Colaborador</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    :root {
+      --primary:#16e086; --primary-dark:#0da85c; --bg-dark:#080f12; --bg-mid:#0e1c22;
+      --bg-card:#14242b; --border:rgba(22,224,134,0.18); --text:rgba(255,255,255,0.92);
+      --muted:rgba(255,255,255,0.5); --danger:#e74c3c; --info:#3498db;
+      --google:#ea4335; --facebook:#1877f2;
+    }
+    body { background:var(--bg-dark); min-height:100vh; font-family:'Space Grotesk',sans-serif; color:var(--text); overflow-x:hidden; }
+
+    /* ── BACKGROUND ANIMATION ── */
+    .bg-orb { position:fixed; border-radius:50%; filter:blur(80px); pointer-events:none; z-index:0; }
+    .bg-orb-1 { width:400px; height:400px; background:rgba(22,224,134,0.06); top:-100px; right:-100px; }
+    .bg-orb-2 { width:300px; height:300px; background:rgba(52,152,219,0.05); bottom:0; left:-80px; }
+
+    /* ── SCREENS ── */
+    .screen { position:fixed; top:0; left:0; width:100%; height:100%; overflow-y:auto; z-index:10; display:none; padding-bottom:80px; }
+    .screen.active { display:block; }
+
+    /* ── VERIFY ID SCREEN ── */
+    #screenVerify {
+      background:linear-gradient(160deg,var(--bg-dark),var(--bg-mid));
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding:30px 20px;
+    }
+    .verify-logo { width:80px; margin-bottom:24px; }
+    .verify-logo img { width:100%; }
+    .verify-title { font-size:1.4rem; font-weight:700; color:var(--primary); margin-bottom:4px; text-align:center; }
+    .verify-sub { font-size:0.8rem; color:var(--muted); text-align:center; margin-bottom:32px; }
+    .verify-card { background:var(--bg-card); border:1px solid var(--border); border-radius:20px; padding:28px 24px; width:100%; max-width:340px; }
+    .verify-label { font-size:0.7rem; color:var(--primary); font-weight:600; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px; }
+    .verify-input { width:100%; padding:14px 18px; background:rgba(0,0,0,0.4); border:1.5px solid var(--border); border-radius:12px; color:white; font-size:1rem; font-family:'Space Grotesk',sans-serif; letter-spacing:3px; text-transform:uppercase; text-align:center; }
+    .verify-input:focus { outline:none; border-color:var(--primary); }
+    .verify-input::placeholder { letter-spacing:1px; text-transform:none; color:rgba(255,255,255,0.25); font-size:0.75rem; }
+    .verify-btn { width:100%; margin-top:16px; padding:14px; background:var(--primary); color:#000; border:none; border-radius:12px; font-size:0.9rem; font-weight:700; font-family:'Space Grotesk',sans-serif; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:opacity 0.2s; }
+    .verify-btn:active { opacity:0.8; }
+    .verify-error { color:var(--danger); font-size:0.72rem; margin-top:8px; text-align:center; display:none; }
+
+    /* ── LOGIN SCREEN ── */
+    #screenLogin {
+      background:linear-gradient(160deg,var(--bg-dark),var(--bg-mid));
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding:30px 20px;
+    }
+    .login-card { background:var(--bg-card); border:1px solid var(--border); border-radius:20px; padding:28px 24px; width:100%; max-width:340px; }
+    .login-card-header { text-align:center; margin-bottom:24px; }
+    .login-card-header img { width:50px; border-radius:50%; border:2px solid var(--primary); object-fit:cover; }
+    .login-card-header h2 { font-size:1rem; color:white; margin-top:10px; font-weight:600; }
+    .login-card-header p { font-size:0.7rem; color:var(--muted); }
+    .login-card-header .rtm-chip { display:inline-block; background:rgba(22,224,134,0.12); border:1px solid var(--border); color:var(--primary); font-size:0.72rem; font-family:monospace; letter-spacing:2px; padding:3px 12px; border-radius:50px; margin-top:6px; }
+
+    /* Social buttons */
+    .social-btn { width:100%; padding:13px; border:1.5px solid; border-radius:12px; font-size:0.85rem; font-weight:600; font-family:'Space Grotesk',sans-serif; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; transition:opacity 0.2s; margin-bottom:10px; background:transparent; }
+    .social-btn-google { border-color:rgba(234,67,53,0.5); color:var(--google); }
+    .social-btn-google:hover { background:rgba(234,67,53,0.08); }
+    .social-btn-facebook { border-color:rgba(24,119,242,0.5); color:var(--facebook); }
+    .social-btn-facebook:hover { background:rgba(24,119,242,0.08); }
+
+    .divider { display:flex; align-items:center; gap:10px; margin:14px 0; }
+    .divider::before, .divider::after { content:''; flex:1; height:1px; background:rgba(255,255,255,0.1); }
+    .divider span { color:var(--muted); font-size:0.7rem; }
+
+    .form-field { margin-bottom:12px; }
+    .form-field label { display:block; font-size:0.68rem; color:var(--primary); font-weight:600; letter-spacing:0.5px; margin-bottom:5px; }
+    .form-field input { width:100%; padding:11px 14px; background:rgba(0,0,0,0.35); border:1.5px solid rgba(255,255,255,0.1); border-radius:10px; color:white; font-family:'Space Grotesk',sans-serif; font-size:0.85rem; }
+    .form-field input:focus { outline:none; border-color:var(--primary); }
+    .form-field input::placeholder { color:rgba(255,255,255,0.25); }
+    .login-submit { width:100%; padding:13px; background:var(--primary); color:#000; border:none; border-radius:12px; font-size:0.9rem; font-weight:700; font-family:'Space Grotesk',sans-serif; cursor:pointer; margin-top:4px; }
+    .login-error { color:var(--danger); font-size:0.72rem; text-align:center; display:none; margin-top:6px; }
+
+    /* ── MAIN APP ── */
+    #screenApp { background:var(--bg-dark); padding:0; }
+    .app-header { background:rgba(8,15,18,0.95); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); padding:12px 16px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+    .app-header-left { display:flex; align-items:center; gap:10px; }
+    .app-header-avatar { width:36px; height:36px; border-radius:50%; border:2px solid var(--primary); object-fit:cover; }
+    .app-header-name { font-size:0.8rem; font-weight:600; color:white; }
+    .app-header-id { font-size:0.62rem; color:var(--primary); font-family:monospace; letter-spacing:1px; }
+    .app-header-right { display:flex; gap:8px; }
+    .hdr-btn { width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.7); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:0.8rem; }
+
+    /* Bottom Nav */
+    .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:rgba(8,15,18,0.97); backdrop-filter:blur(20px); border-top:1px solid var(--border); display:flex; justify-content:space-around; padding:8px 0 12px; z-index:100; }
+    .nav-item { flex:1; display:flex; flex-direction:column; align-items:center; color:rgba(255,255,255,0.4); font-size:10px; cursor:pointer; background:none; border:none; gap:3px; font-family:'Space Grotesk',sans-serif; padding:4px 0; }
+    .nav-item i { font-size:1rem; }
+    .nav-item.active { color:var(--primary); }
+
+    /* ── SECTIONS ── */
+    .section { display:none; padding:16px; }
+    .section.active { display:block; }
+
+    /* DASHBOARD */
+    .dash-welcome { background:linear-gradient(135deg,rgba(22,224,134,0.12),rgba(22,224,134,0.04)); border:1px solid var(--border); border-radius:16px; padding:20px; margin-bottom:16px; }
+    .dash-welcome h2 { font-size:1.1rem; color:white; font-weight:700; }
+    .dash-welcome p { font-size:0.75rem; color:var(--muted); margin-top:4px; }
+    .dash-welcome .rtm-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(0,0,0,0.3); border:1px solid var(--border); color:var(--primary); font-family:monospace; font-size:0.8rem; letter-spacing:2px; padding:4px 12px; border-radius:50px; margin-top:10px; }
+
+    .dash-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+    .dash-card { background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:14px; }
+    .dash-card-label { font-size:0.62rem; color:var(--muted); font-weight:500; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; }
+    .dash-card-value { font-size:0.9rem; color:white; font-weight:700; }
+    .dash-card-icon { font-size:1.1rem; color:var(--primary); margin-bottom:6px; }
+
+    .recent-section { margin-bottom:16px; }
+    .section-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+    .section-hdr h3 { font-size:0.85rem; font-weight:700; color:white; display:flex; align-items:center; gap:6px; }
+    .badge-count { background:rgba(22,224,134,0.15); color:var(--primary); font-size:0.62rem; padding:2px 8px; border-radius:50px; }
+
+    /* VOLANTES */
+    .volante-item { background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:14px 16px; margin-bottom:10px; display:flex; align-items:center; gap:14px; cursor:pointer; transition:border-color 0.2s; }
+    .volante-item:hover { border-color:rgba(22,224,134,0.4); }
+    .volante-icon { width:42px; height:42px; border-radius:10px; background:rgba(231,76,60,0.15); border:1px solid rgba(231,76,60,0.3); display:flex; align-items:center; justify-content:center; font-size:1.1rem; color:#e74c3c; flex-shrink:0; }
+    .volante-info { flex:1; min-width:0; }
+    .volante-name { font-size:0.78rem; color:white; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .volante-meta { font-size:0.65rem; color:var(--muted); margin-top:2px; }
+    .volante-new { width:8px; height:8px; background:var(--primary); border-radius:50%; flex-shrink:0; }
+    .volante-actions { display:flex; gap:6px; margin-top:8px; }
+    .btn-sm { padding:5px 12px; border-radius:8px; font-size:0.7rem; font-weight:600; font-family:'Space Grotesk',sans-serif; cursor:pointer; border:none; display:inline-flex; align-items:center; gap:4px; }
+    .btn-sm-primary { background:var(--primary); color:#000; }
+    .btn-sm-outline { background:transparent; border:1px solid rgba(255,255,255,0.2); color:rgba(255,255,255,0.7); }
+
+    /* DATOS PERSONALES */
+    .perfil-avatar { text-align:center; padding:20px 0 14px; }
+    .perfil-avatar img { width:90px; height:90px; border-radius:50%; object-fit:cover; border:3px solid var(--primary); }
+    .perfil-avatar h2 { font-size:1rem; color:white; font-weight:700; margin-top:10px; }
+    .perfil-avatar .rtm { font-size:0.75rem; color:var(--primary); font-family:monospace; letter-spacing:2px; margin-top:4px; }
+
+    .info-card { background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:12px; }
+    .info-card h4 { font-size:0.72rem; color:var(--primary); font-weight:700; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:12px; display:flex; align-items:center; gap:6px; }
+    .info-row { display:flex; align-items:flex-start; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.06); }
+    .info-row:last-child { border-bottom:none; }
+    .info-row-label { font-size:0.68rem; color:var(--muted); font-weight:500; }
+    .info-row-value { font-size:0.78rem; color:white; font-weight:600; text-align:right; max-width:60%; }
+    .non-editable-note { font-size:0.62rem; color:rgba(255,255,255,0.3); text-align:center; padding:8px; display:flex; align-items:center; justify-content:center; gap:4px; }
+
+    /* CONFIGURACIÓN */
+    .config-card { background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:12px; }
+    .config-card h4 { font-size:0.72rem; color:var(--primary); font-weight:700; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:14px; display:flex; align-items:center; gap:6px; }
+    .config-item { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.06); }
+    .config-item:last-child { border-bottom:none; }
+    .config-item-icon { width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:0.9rem; flex-shrink:0; }
+    .config-item-text { flex:1; }
+    .config-item-text strong { display:block; font-size:0.78rem; color:white; font-weight:600; }
+    .config-item-text span { font-size:0.65rem; color:var(--muted); }
+    .config-item-action { font-size:0.7rem; color:var(--muted); cursor:pointer; }
+    .config-item-action:hover { color:var(--primary); }
+
+    .form-field-config { margin-bottom:10px; }
+    .form-field-config label { display:block; font-size:0.65rem; color:var(--primary); font-weight:600; margin-bottom:5px; }
+    .form-field-config input { width:100%; padding:10px 12px; background:rgba(0,0,0,0.35); border:1.5px solid rgba(255,255,255,0.1); border-radius:10px; color:white; font-family:'Space Grotesk',sans-serif; font-size:0.82rem; }
+    .form-field-config input:focus { outline:none; border-color:var(--primary); }
+
+    /* ALERT */
+    .alert-toast { position:fixed; top:16px; left:50%; transform:translateX(-50%); background:rgba(22,224,134,0.95); color:#000; padding:10px 20px; border-radius:50px; display:flex; align-items:center; gap:8px; z-index:9999; font-size:0.78rem; font-weight:700; box-shadow:0 4px 20px rgba(0,0,0,0.4); animation:toastIn 0.3s ease, toastOut 0.3s ease 2.5s forwards; white-space:nowrap; }
+    @keyframes toastIn { from{opacity:0;transform:translate(-50%,-10px)} to{opacity:1;transform:translate(-50%,0)} }
+    @keyframes toastOut { to{opacity:0;transform:translate(-50%,-10px)} }
+
+    /* LOADING */
+    .loading-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg-dark); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; }
+    .loading-overlay img { width:70px; animation:pulse 1.5s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:0.6;transform:scale(0.97)} 50%{opacity:1;transform:scale(1.03)} }
+    .loading-overlay p { color:var(--muted); font-size:0.75rem; }
+
+    /* EMPTY STATE */
+    .empty-state { text-align:center; padding:40px 20px; }
+    .empty-state i { font-size:2.5rem; color:rgba(255,255,255,0.1); margin-bottom:12px; display:block; }
+    .empty-state p { color:var(--muted); font-size:0.78rem; }
+
+    /* Modal PDF viewer */
+    .pdf-modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); z-index:9998; display:none; flex-direction:column; }
+    .pdf-modal.active { display:flex; }
+    .pdf-modal-header { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--border); }
+    .pdf-modal-header h4 { color:white; font-size:0.82rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:70%; }
+    .pdf-modal-header button { background:rgba(255,255,255,0.1); border:none; color:white; width:32px; height:32px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+    .pdf-modal-body { flex:1; display:flex; align-items:center; justify-content:center; padding:16px; }
+    .pdf-modal-body iframe { width:100%; height:100%; border:none; border-radius:8px; }
+    .pdf-modal-footer { padding:12px 16px; display:flex; gap:10px; justify-content:center; }
+
+    /* Connection status banner */
+    .rtm-verified-banner { background:rgba(22,224,134,0.08); border:1px solid rgba(22,224,134,0.25); border-radius:12px; padding:10px 14px; font-size:0.7rem; color:rgba(255,255,255,0.7); display:flex; align-items:center; gap:8px; margin-bottom:16px; }
+    .rtm-verified-banner i { color:var(--primary); }
+  </style>
+</head>
+<body>
+<div class="bg-orb bg-orb-1"></div>
+<div class="bg-orb bg-orb-2"></div>
+
+<!-- ═══════════ LOADING ═══════════ -->
+<div class="loading-overlay" id="loadingOverlay">
+  <img src="https://firebasestorage.googleapis.com/v0/b/formulario-2-8929a.appspot.com/o/Vizo%20Access.png?alt=media&token=2e31c49c-ca38-4b5e-b35e-43dee12c16da" alt="Logo">
+  <p>Cargando portal...</p>
+</div>
+
+<!-- ═══════════ VERIFICAR ID RTM ═══════════ -->
+<div id="screenVerify" class="screen">
+  <div class="verify-logo">
+    <img src="https://firebasestorage.googleapis.com/v0/b/formulario-2-8929a.appspot.com/o/Vizo%20Access.png?alt=media&token=2e31c49c-ca38-4b5e-b35e-43dee12c16da" alt="Vizo Access">
+  </div>
+  <div class="verify-title">Portal del Colaborador</div>
+  <div class="verify-sub">Ingresa tu ID RTM para continuar</div>
+  <div class="verify-card">
+    <div class="verify-label"><i class="fas fa-fingerprint"></i> Tu ID RTM</div>
+    <input type="text" id="rtmInput" class="verify-input" placeholder="Ej: RTM123456" maxlength="9" autocomplete="off">
+    <div class="verify-error" id="verifyError"></div>
+    <button class="verify-btn" id="verifyBtn"><i class="fas fa-arrow-right"></i> Continuar</button>
+  </div>
+</div>
+
+<!-- ═══════════ LOGIN ═══════════ -->
+<div id="screenLogin" class="screen">
+  <div class="login-card">
+    <div class="login-card-header">
+      <img id="loginAvatar" src="https://via.placeholder.com/50" alt="Avatar">
+      <h2 id="loginColabName">Colaborador</h2>
+      <p id="loginColabOrg" style="color:var(--muted);font-size:0.68rem;"></p>
+      <div class="rtm-chip" id="loginRTMChip"></div>
+    </div>
+
+    <!-- Social Login -->
+    <button class="social-btn social-btn-google" id="btnLoginGoogle">
+      <i class="fab fa-google"></i> Continuar con Google
+    </button>
+    <button class="social-btn social-btn-facebook" id="btnLoginFacebook">
+      <i class="fab fa-facebook-f"></i> Continuar con Facebook
+    </button>
+
+    <div class="divider"><span>o usa email</span></div>
+
+    <div class="form-field">
+      <label>Correo electrónico</label>
+      <input type="email" id="loginEmail" placeholder="tu@email.com" autocomplete="email">
+    </div>
+    <div class="form-field">
+      <label>Contraseña</label>
+      <input type="password" id="loginPass" placeholder="••••••••">
+    </div>
+    <div class="login-error" id="loginError"></div>
+    <button class="login-submit" id="btnLoginEmail">Ingresar</button>
+
+    <p style="text-align:center;font-size:0.68rem;color:var(--muted);margin-top:14px;">
+      ¿Primera vez? <span id="btnShowRegister" style="color:var(--primary);cursor:pointer;font-weight:600;">Regístrate</span>
+    </p>
+  </div>
+</div>
+
+<!-- ═══════════ REGISTER (primer acceso) ═══════════ -->
+<div id="screenRegister" class="screen" style="background:linear-gradient(160deg,var(--bg-dark),var(--bg-mid));display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;">
+  <div class="login-card" style="background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:28px 24px;width:100%;max-width:340px;">
+    <h3 style="color:var(--primary);font-size:0.9rem;margin-bottom:4px;">Crear cuenta</h3>
+    <p style="color:var(--muted);font-size:0.7rem;margin-bottom:18px;">Registra tu acceso al portal</p>
+
+    <button class="social-btn social-btn-google" id="btnRegGoogle">
+      <i class="fab fa-google"></i> Registrarse con Google
+    </button>
+    <button class="social-btn social-btn-facebook" id="btnRegFacebook">
+      <i class="fab fa-facebook-f"></i> Registrarse con Facebook
+    </button>
+
+    <div class="divider"><span>o con email</span></div>
+
+    <div class="form-field">
+      <label>Correo</label>
+      <input type="email" id="regEmail" placeholder="tu@email.com">
+    </div>
+    <div class="form-field">
+      <label>Contraseña</label>
+      <input type="password" id="regPass" placeholder="Mínimo 6 caracteres">
+    </div>
+    <div class="form-field">
+      <label>Confirmar contraseña</label>
+      <input type="password" id="regPassConfirm" placeholder="Repite la contraseña">
+    </div>
+    <div class="login-error" id="regError"></div>
+    <button class="login-submit" id="btnRegEmail" style="margin-top:6px;">Crear cuenta</button>
+    <p style="text-align:center;font-size:0.68rem;color:var(--muted);margin-top:12px;">
+      ¿Ya tienes cuenta? <span id="btnShowLogin" style="color:var(--primary);cursor:pointer;font-weight:600;">Inicia sesión</span>
+    </p>
+  </div>
+</div>
+
+<!-- ═══════════ MAIN APP ═══════════ -->
+<div id="screenApp" class="screen">
+  <div class="app-header">
+    <div class="app-header-left">
+      <img id="appAvatar" class="app-header-avatar" src="https://via.placeholder.com/36" alt="Avatar">
+      <div>
+        <div class="app-header-name" id="appName">Colaborador</div>
+        <div class="app-header-id" id="appRTMId"></div>
+      </div>
+    </div>
+    <div class="app-header-right">
+      <button class="hdr-btn" id="btnNotif" title="Notificaciones"><i class="fas fa-bell"></i></button>
+      <button class="hdr-btn" id="btnLogout" title="Cerrar sesión"><i class="fas fa-sign-out-alt"></i></button>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="secDashboard" class="section active">
+    <div class="dash-welcome">
+      <h2 id="dashName">¡Bienvenido!</h2>
+      <p id="dashOrg" style="color:var(--muted);font-size:0.75rem;"></p>
+      <div class="rtm-badge"><i class="fas fa-fingerprint"></i><span id="dashRTM"></span></div>
+    </div>
+
+    <div class="rtm-verified-banner">
+      <i class="fas fa-shield-alt"></i>
+      <span>Conectado a la organización · Datos sincronizados</span>
+    </div>
+
+    <div class="dash-grid">
+      <div class="dash-card">
+        <div class="dash-card-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+        <div class="dash-card-label">Comprobantes</div>
+        <div class="dash-card-value" id="dashCountVol">0</div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card-icon"><i class="fas fa-clock"></i></div>
+        <div class="dash-card-label">Turno</div>
+        <div class="dash-card-value" id="dashTurno">–</div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card-icon"><i class="fas fa-user-tie"></i></div>
+        <div class="dash-card-label">Jefe</div>
+        <div class="dash-card-value" id="dashJefe" style="font-size:0.75rem;">–</div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card-icon"><i class="fas fa-building"></i></div>
+        <div class="dash-card-label">Área</div>
+        <div class="dash-card-value" id="dashArea" style="font-size:0.75rem;">–</div>
+      </div>
+    </div>
+
+    <div class="recent-section">
+      <div class="section-hdr">
+        <h3><i class="fas fa-file-pdf" style="color:var(--danger);"></i> Últimos Comprobantes</h3>
+        <span class="badge-count" id="newCount">0 nuevos</span>
+      </div>
+      <div id="recentVol"></div>
+    </div>
+  </div>
+
+  <!-- VOLANTES -->
+  <div id="secVolantes" class="section">
+    <div class="section-hdr">
+      <h3><i class="fas fa-file-invoice-dollar" style="color:var(--primary);"></i> Mis Comprobantes</h3>
+    </div>
+    <div id="allVol"></div>
+  </div>
+
+  <!-- DATOS PERSONALES -->
+  <div id="secPerfil" class="section">
+    <div class="perfil-avatar">
+      <img id="perfilAvatar" src="https://via.placeholder.com/90" alt="Avatar">
+      <h2 id="perfilName">—</h2>
+      <div class="rtm" id="perfilRTM">—</div>
+    </div>
+
+    <div class="info-card">
+      <h4><i class="fas fa-id-badge"></i> Datos Personales</h4>
+      <div class="info-row"><span class="info-row-label">Nombre completo</span><span class="info-row-value" id="piNombre">–</span></div>
+      <div class="info-row"><span class="info-row-label">ID RTM</span><span class="info-row-value" id="piRTM" style="font-family:monospace;color:var(--primary);">–</span></div>
+      <div class="info-row"><span class="info-row-label">Departamento</span><span class="info-row-value" id="piDepto">–</span></div>
+      <div class="info-row"><span class="info-row-label">Área de trabajo</span><span class="info-row-value" id="piArea">–</span></div>
+    </div>
+
+    <div class="info-card">
+      <h4><i class="fas fa-briefcase"></i> Información Laboral</h4>
+      <div class="info-row"><span class="info-row-label">Turno</span><span class="info-row-value" id="piTurno">–</span></div>
+      <div class="info-row"><span class="info-row-label">Jefe inmediato</span><span class="info-row-value" id="piJefe">–</span></div>
+      <div class="info-row"><span class="info-row-label">Precio por hora</span><span class="info-row-value" id="piPrecio">–</span></div>
+    </div>
+
+    <div class="non-editable-note"><i class="fas fa-lock"></i> Datos no editables · Contacta a RRHH para cambios</div>
+  </div>
+
+  <!-- CONFIGURACIÓN -->
+  <div id="secConfig" class="section">
+    <div class="config-card">
+      <h4><i class="fas fa-user-circle"></i> Mi Cuenta</h4>
+      <div class="config-item">
+        <div class="config-item-icon" style="background:rgba(22,224,134,0.12);color:var(--primary);"><i class="fas fa-envelope"></i></div>
+        <div class="config-item-text">
+          <strong>Correo electrónico</strong>
+          <span id="cfgEmail">–</span>
+        </div>
+      </div>
+      <div class="config-item">
+        <div class="config-item-icon" style="background:rgba(52,152,219,0.12);color:var(--info);"><i class="fas fa-sign-in-alt"></i></div>
+        <div class="config-item-text">
+          <strong>Método de acceso</strong>
+          <span id="cfgMethod">–</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cambiar a usuario/contraseña (si usa Google/Facebook) -->
+    <div class="config-card" id="cfgSetPassword">
+      <h4><i class="fas fa-lock"></i> Configurar Contraseña</h4>
+      <p style="color:var(--muted);font-size:0.68rem;margin-bottom:12px;">Si iniciaste sesión con Google o Facebook, puedes agregar una contraseña para también ingresar con email.</p>
+      <div class="form-field-config">
+        <label>Nuevo email</label>
+        <input type="email" id="cfgNewEmail" placeholder="tu@email.com">
+      </div>
+      <div class="form-field-config">
+        <label>Nueva contraseña</label>
+        <input type="password" id="cfgNewPass" placeholder="Mínimo 6 caracteres">
+      </div>
+      <button class="login-submit" id="btnSetPassword" style="font-size:0.82rem;padding:11px;margin-top:4px;">Guardar contraseña</button>
+    </div>
+
+    <div class="config-card">
+      <h4><i class="fas fa-bell"></i> Notificaciones</h4>
+      <div class="config-item">
+        <div class="config-item-icon" style="background:rgba(231,76,60,0.12);color:var(--danger);"><i class="fas fa-file-pdf"></i></div>
+        <div class="config-item-text">
+          <strong>Nuevos comprobantes</strong>
+          <span>Cuando RRHH suba un comprobante</span>
+        </div>
+        <div class="config-item-action"><i class="fas fa-toggle-on" style="font-size:1.2rem;color:var(--primary);"></i></div>
+      </div>
+    </div>
+
+    <div class="config-card">
+      <h4><i class="fas fa-info-circle"></i> Acerca de</h4>
+      <div class="info-row"><span class="info-row-label">App</span><span class="info-row-value" style="font-size:0.72rem;">Vizo Access Portal</span></div>
+      <div class="info-row"><span class="info-row-label">Versión</span><span class="info-row-value" style="font-size:0.72rem;">2.0.0</span></div>
+    </div>
+
+    <button class="login-submit" id="btnLogoutConfig" style="background:var(--danger);color:white;margin-top:4px;">
+      <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+    </button>
+  </div>
+
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-sec="secDashboard"><i class="fas fa-home"></i><span>Inicio</span></button>
+    <button class="nav-item" data-sec="secVolantes"><i class="fas fa-file-invoice-dollar"></i><span>Pagos</span></button>
+    <button class="nav-item" data-sec="secPerfil"><i class="fas fa-user"></i><span>Perfil</span></button>
+    <button class="nav-item" data-sec="secConfig"><i class="fas fa-cog"></i><span>Config</span></button>
+  </nav>
+</div>
+
+<!-- PDF MODAL -->
+<div class="pdf-modal" id="pdfModal">
+  <div class="pdf-modal-header">
+    <h4 id="pdfModalTitle">Comprobante</h4>
+    <button onclick="cerrarPDFModal()"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="pdf-modal-body">
+    <iframe id="pdfModalFrame" title="PDF"></iframe>
+  </div>
+  <div class="pdf-modal-footer">
+    <button class="btn-sm btn-sm-primary" id="btnDownloadPDF"><i class="fas fa-download"></i> Descargar</button>
+    <button class="btn-sm btn-sm-outline" onclick="cerrarPDFModal()"><i class="fas fa-times"></i> Cerrar</button>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+  import {
+    getFirestore, collection, query, where, getDocs, doc, getDoc,
+    onSnapshot, updateDoc, addDoc, orderBy, Timestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+  import {
+    getAuth, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider,
+    signInWithEmailAndPassword, createUserWithEmailAndPassword,
+    onAuthStateChanged, signOut, linkWithCredential, EmailAuthProvider,
+    updateEmail, updatePassword
+  } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey:"AIzaSyAMTWJr3mISmNiP-e_KjCO9BdBPi7Uuug4",
+    authDomain:"formulario-2-8929a.firebaseapp.com",
+    projectId:"formulario-2-8929a",
+    storageBucket:"formulario-2-8929a.appspot.com",
+    messagingSenderId:"136908102526",
+    appId:"1:136908102526:web:d0a3bc1e3cb91a3fcab12f"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+  const googleProvider = new GoogleAuthProvider();
+  const facebookProvider = new FacebookAuthProvider();
+
+  // ── STATE ──
+  let empleadoData = null;
+  let empleadoDocId = null;
+  let currentRTMId = null;
+  let currentPDFData = null;
+  let unsubComprobantes = null;
+
+  // ── DOM UTILS ──
+  const $ = id => document.getElementById(id);
+  const showScreen = id => {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    $(id).classList.add('active');
+  };
+
+  function showToast(msg, type='success') {
+    const el = document.createElement('div');
+    el.className = 'alert-toast';
+    el.style.background = type==='success' ? 'rgba(22,224,134,0.95)' : 'rgba(231,76,60,0.95)';
+    el.style.color = type==='success' ? '#000' : 'white';
+    el.innerHTML = `<i class="fas ${type==='success'?'fa-check-circle':'fa-exclamation-circle'}"></i><span>${msg}</span>`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3000);
+  }
+
+  // ── INIT ──
+  async function init() {
+    // Leer ID RTM de URL
+    const params = new URLSearchParams(window.location.search);
+    const urlId = params.get('id');
+    if (urlId && /^RTM\d{6}$/.test(urlId.toUpperCase())) {
+      currentRTMId = urlId.toUpperCase();
+      localStorage.setItem('portal_rtm_id', currentRTMId);
+    } else {
+      const saved = localStorage.getItem('portal_rtm_id');
+      if (saved) currentRTMId = saved;
+    }
+
+    // Verificar sesión Firebase
+    onAuthStateChanged(auth, async user => {
+      $('loadingOverlay').style.display = 'none';
+      if (user) {
+        if (!currentRTMId) {
+          showScreen('screenVerify');
+          return;
+        }
+        const ok = await cargarEmpleado(currentRTMId);
+        if (ok) {
+          await iniciarApp(user);
+        } else {
+          showScreen('screenVerify');
+        }
+      } else {
+        if (!currentRTMId) {
+          showScreen('screenVerify');
+        } else {
+          const ok = await cargarEmpleado(currentRTMId);
+          if (ok) {
+            mostrarLogin();
+          } else {
+            showScreen('screenVerify');
+          }
+        }
+      }
+    });
+  }
+
+  // ── VERIFICAR ID RTM ──
+  $('verifyBtn').addEventListener('click', verificarRTM);
+  $('rtmInput').addEventListener('keydown', e => { if(e.key==='Enter') verificarRTM(); });
+  $('rtmInput').addEventListener('input', e => {
+    e.target.value = e.target.value.toUpperCase();
+  });
+
+  async function verificarRTM() {
+    const id = $('rtmInput').value.trim().toUpperCase();
+    if (!/^RTM\d{6}$/.test(id)) {
+      $('verifyError').textContent = 'Formato inválido. Debe ser RTM seguido de 6 dígitos.';
+      $('verifyError').style.display = 'block';
+      return;
+    }
+    $('verifyError').style.display = 'none';
+    $('verifyBtn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando...';
+    $('verifyBtn').disabled = true;
+
+    const ok = await cargarEmpleado(id);
+    $('verifyBtn').innerHTML = '<i class="fas fa-arrow-right"></i> Continuar';
+    $('verifyBtn').disabled = false;
+
+    if (ok) {
+      currentRTMId = id;
+      localStorage.setItem('portal_rtm_id', id);
+      const user = auth.currentUser;
+      if (user) { await iniciarApp(user); }
+      else { mostrarLogin(); }
+    } else {
+      $('verifyError').textContent = 'ID RTM no encontrado. Verifica con RRHH.';
+      $('verifyError').style.display = 'block';
+    }
+  }
+
+  async function cargarEmpleado(rtmId) {
+    try {
+      const q = query(collection(db,'Ponche'), where('username','==',rtmId));
+      const snap = await getDocs(q);
+      if (snap.empty) return false;
+      const d = snap.docs[0];
+      empleadoData = { id: d.id, ...d.data() };
+      empleadoDocId = d.id;
+      return true;
+    } catch(e) { return false; }
+  }
+
+  // ── LOGIN ──
+  function mostrarLogin() {
+    if (!empleadoData) return;
+    const nombre = `${empleadoData.firstName||''} ${empleadoData.lastName||''}`.trim();
+    $('loginAvatar').src = empleadoData.fotoBase64 || 'https://via.placeholder.com/50';
+    $('loginColabName').textContent = nombre;
+    $('loginColabOrg').textContent = empleadoData.departamento||'';
+    $('loginRTMChip').textContent = empleadoData.username||'';
+    showScreen('screenLogin');
+  }
+
+  // Social
+  $('btnLoginGoogle').addEventListener('click', () => loginSocial(googleProvider));
+  $('btnLoginFacebook').addEventListener('click', () => loginSocial(facebookProvider));
+  $('btnRegGoogle').addEventListener('click', () => loginSocial(googleProvider));
+  $('btnRegFacebook').addEventListener('click', () => loginSocial(facebookProvider));
+
+  async function loginSocial(provider) {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      await guardarSesionColaborador(result.user, provider instanceof GoogleAuthProvider ? 'Google' : 'Facebook');
+      await iniciarApp(result.user);
+    } catch(e) {
+      $('loginError').textContent = 'Error al iniciar sesión: ' + (e.message||'Intenta de nuevo');
+      $('loginError').style.display = 'block';
+    }
+  }
+
+  // Email
+  $('btnLoginEmail').addEventListener('click', async () => {
+    const email = $('loginEmail').value.trim();
+    const pass = $('loginPass').value;
+    if (!email||!pass) { $('loginError').textContent='Completa todos los campos'; $('loginError').style.display='block'; return; }
+    try {
+      const result = await signInWithEmailAndPassword(auth, email, pass);
+      await guardarSesionColaborador(result.user, 'Email');
+      await iniciarApp(result.user);
+    } catch(e) {
+      $('loginError').textContent = e.code==='auth/user-not-found'?'Usuario no encontrado':e.code==='auth/wrong-password'?'Contraseña incorrecta':'Error: '+e.message;
+      $('loginError').style.display = 'block';
+    }
+  });
+
+  $('btnRegEmail').addEventListener('click', async () => {
+    const email = $('regEmail').value.trim();
+    const pass = $('regPass').value;
+    const confirm = $('regPassConfirm').value;
+    if (!email||!pass||!confirm) { $('regError').textContent='Completa todos los campos'; $('regError').style.display='block'; return; }
+    if (pass!==confirm) { $('regError').textContent='Las contraseñas no coinciden'; $('regError').style.display='block'; return; }
+    if (pass.length<6) { $('regError').textContent='Mínimo 6 caracteres'; $('regError').style.display='block'; return; }
+    try {
+      const result = await createUserWithEmailAndPassword(auth, email, pass);
+      await guardarSesionColaborador(result.user, 'Email');
+      await iniciarApp(result.user);
+    } catch(e) {
+      $('regError').textContent = e.code==='auth/email-already-in-use'?'Email ya registrado':'Error: '+e.message;
+      $('regError').style.display = 'block';
+    }
+  });
+
+  $('btnShowRegister').addEventListener('click', () => showScreen('screenRegister'));
+  $('btnShowLogin').addEventListener('click', () => mostrarLogin());
+
+  // Guardar vinculación colaborador<->usuario Firebase en Firestore
+  async function guardarSesionColaborador(user, method) {
+    if (!empleadoDocId) return;
+    await updateDoc(doc(db,'Ponche',empleadoDocId),{
+      portalUid: user.uid,
+      portalEmail: user.email,
+      portalMethod: method,
+      portalLastLogin: Timestamp.now()
+    });
+  }
+
+  // ── APP PRINCIPAL ──
+  async function iniciarApp(user) {
+    if (!empleadoData) return;
+    const nombre = `${empleadoData.firstName||''} ${empleadoData.lastName||''}`.trim();
+
+    // Header
+    $('appAvatar').src = empleadoData.fotoBase64||'https://via.placeholder.com/36';
+    $('appName').textContent = nombre;
+    $('appRTMId').textContent = empleadoData.username||'';
+
+    // Dashboard
+    $('dashName').textContent = `¡Hola, ${empleadoData.firstName||'Colaborador'}!`;
+    $('dashOrg').textContent = `${empleadoData.departamento||''} · ${empleadoData.areaTrabajo||''}`;
+    $('dashRTM').textContent = empleadoData.username||'';
+    $('dashTurno').textContent = empleadoData.turnoHoras ? `${empleadoData.turnoHoras}h` : '–';
+    $('dashJefe').textContent = empleadoData.jefeCargo||'–';
+    $('dashArea').textContent = empleadoData.areaTrabajo||'–';
+
+    // Perfil
+    $('perfilAvatar').src = empleadoData.fotoBase64||'https://via.placeholder.com/90';
+    $('perfilName').textContent = nombre;
+    $('perfilRTM').textContent = empleadoData.username||'';
+    $('piNombre').textContent = nombre;
+    $('piRTM').textContent = empleadoData.username||'';
+    $('piDepto').textContent = empleadoData.departamento||'–';
+    $('piArea').textContent = empleadoData.areaTrabajo||'–';
+    $('piTurno').textContent = empleadoData.turnoHoras ? `${empleadoData.turnoHoras} horas` : '–';
+    $('piJefe').textContent = empleadoData.jefeCargo||'–';
+    $('piPrecio').textContent = empleadoData.precioHora ? `$${empleadoData.precioHora}/h` : '–';
+
+    // Config
+    $('cfgEmail').textContent = user.email||'No registrado';
+    const methods = user.providerData.map(p => p.providerId).join(', ')
+      .replace('google.com','Google').replace('facebook.com','Facebook').replace('password','Email/Contraseña');
+    $('cfgMethod').textContent = methods||'–';
+
+    // Mostrar opción de añadir contraseña si usa social
+    const usaSocial = user.providerData.some(p=>p.providerId!=='password');
+    $('cfgSetPassword').style.display = usaSocial ? 'block' : 'none';
+
+    // Escuchar comprobantes en tiempo real
+    if (unsubComprobantes) unsubComprobantes();
+    const q = query(collection(db,'Comprobantes'), where('empleadoId','==',empleadoDocId), orderBy('fechaEnvio','desc'));
+    unsubComprobantes = onSnapshot(q, snap => {
+      const todos = [];
+      snap.forEach(d => todos.push({id:d.id,...d.data()}));
+      actualizarComprobantes(todos);
+    });
+
+    showScreen('screenApp');
+  }
+
+  function actualizarComprobantes(lista) {
+    $('dashCountVol').textContent = lista.length;
+    const nuevos = lista.filter(c=>!c.leido).length;
+    $('newCount').textContent = `${nuevos} nuevo${nuevos!==1?'s':''}`;
+
+    // Dashboard: últimos 3
+    const recientes = lista.slice(0,3);
+    $('recentVol').innerHTML = recientes.length ? recientes.map(c=>volanteHTML(c)).join('') : emptyState('Sin comprobantes aún');
+
+    // Todos
+    $('allVol').innerHTML = lista.length ? lista.map(c=>volanteHTML(c)).join('') : emptyState('Aún no hay comprobantes disponibles');
+  }
+
+  function volanteHTML(c) {
+    const nuevo = !c.leido;
+    return `<div class="volante-item" onclick="abrirComprobante('${c.id}')">
+      <div class="volante-icon"><i class="fas fa-file-pdf"></i></div>
+      <div class="volante-info">
+        <div class="volante-name">${c.nombreArchivo||c.nombreOriginal||'Comprobante'}</div>
+        <div class="volante-meta"><i class="fas fa-calendar-alt" style="font-size:0.6rem;"></i> ${c.fechaStr||''} ${c.horaStr||''} · ${formatBytes(c.tamaño||0)}</div>
+        <div class="volante-actions">
+          <button class="btn-sm btn-sm-primary" onclick="event.stopPropagation();abrirComprobante('${c.id}')"><i class="fas fa-eye"></i> Ver</button>
+          <button class="btn-sm btn-sm-outline" onclick="event.stopPropagation();descargarComprobante('${c.id}','${c.nombreArchivo||'comprobante.pdf'}')"><i class="fas fa-download"></i> Descargar</button>
+        </div>
+      </div>
+      ${nuevo?'<div class="volante-new" title="Nuevo"></div>':''}
+    </div>`;
+  }
+
+  function emptyState(msg) {
+    return `<div class="empty-state"><i class="fas fa-folder-open"></i><p>${msg}</p></div>`;
+  }
+
+  function formatBytes(bytes) {
+    if(!bytes) return '–';
+    if(bytes<1024) return bytes+'B';
+    if(bytes<1048576) return (bytes/1024).toFixed(1)+'KB';
+    return (bytes/1048576).toFixed(1)+'MB';
+  }
+
+  // ── VER PDF ──
+  window.abrirComprobante = async (id) => {
+    try {
+      const d = await getDoc(doc(db,'Comprobantes',id));
+      if (!d.exists()) return;
+      const data = d.data();
+
+      // Marcar como leído
+      if (!data.leido) await updateDoc(doc(db,'Comprobantes',id),{leido:true});
+
+      currentPDFData = { datos: data.datos, nombre: data.nombreArchivo||data.nombreOriginal||'comprobante.pdf' };
+
+      const byteStr = atob(data.datos);
+      const ab = new ArrayBuffer(byteStr.length);
+      const ia = new Uint8Array(ab);
+      for (let i=0;i<byteStr.length;i++) ia[i]=byteStr.charCodeAt(i);
+      const blob = new Blob([ab],{type:'application/pdf'});
+      const url = URL.createObjectURL(blob);
+
+      $('pdfModalTitle').textContent = currentPDFData.nombre;
+      $('pdfModalFrame').src = url;
+      $('pdfModal').classList.add('active');
+    } catch(e) { showToast('Error al abrir el PDF','error'); }
+  };
+
+  window.descargarComprobante = async (id, nombre) => {
+    try {
+      const d = await getDoc(doc(db,'Comprobantes',id));
+      if (!d.exists()) return;
+      const data = d.data();
+      const byteStr = atob(data.datos);
+      const ab = new ArrayBuffer(byteStr.length);
+      const ia = new Uint8Array(ab);
+      for(let i=0;i<byteStr.length;i++) ia[i]=byteStr.charCodeAt(i);
+      const blob = new Blob([ab],{type:'application/pdf'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href=url; a.download=nombre||'comprobante.pdf';
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Descargando...');
+    } catch(e) { showToast('Error al descargar','error'); }
+  };
+
+  $('btnDownloadPDF').addEventListener('click', () => {
+    if (!currentPDFData) return;
+    descargarComprobante(null, currentPDFData.nombre);
+    // Already have data
+    const byteStr = atob(currentPDFData.datos);
+    const ab = new ArrayBuffer(byteStr.length);
+    const ia = new Uint8Array(ab);
+    for(let i=0;i<byteStr.length;i++) ia[i]=byteStr.charCodeAt(i);
+    const blob = new Blob([ab],{type:'application/pdf'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href=url; a.download=currentPDFData.nombre;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  window.cerrarPDFModal = () => {
+    $('pdfModal').classList.remove('active');
+    $('pdfModalFrame').src='';
+  };
+
+  // ── CONFIGURACIÓN: AÑADIR CONTRASEÑA ──
+  $('btnSetPassword').addEventListener('click', async () => {
+    const email = $('cfgNewEmail').value.trim();
+    const pass = $('cfgNewPass').value;
+    if (!email||!pass) { showToast('Completa los campos','error'); return; }
+    if (pass.length<6) { showToast('Mínimo 6 caracteres','error'); return; }
+    try {
+      const user = auth.currentUser;
+      const credential = EmailAuthProvider.credential(email, pass);
+      await linkWithCredential(user, credential);
+      $('cfgEmail').textContent = email;
+      $('cfgMethod').textContent = $('cfgMethod').textContent + ', Email/Contraseña';
+      showToast('Contraseña configurada');
+      $('cfgSetPassword').style.display = 'none';
+      $('cfgNewEmail').value='';
+      $('cfgNewPass').value='';
+    } catch(e) {
+      showToast(e.code==='auth/email-already-in-use'?'Email ya en uso':'Error: '+e.message,'error');
+    }
+  });
+
+  // ── LOGOUT ──
+  async function logout() {
+    if (unsubComprobantes) unsubComprobantes();
+    await signOut(auth);
+    localStorage.removeItem('portal_rtm_id');
+    currentRTMId=null; empleadoData=null; empleadoDocId=null;
+    showScreen('screenVerify');
+  }
+
+  $('btnLogout').addEventListener('click', logout);
+  $('btnLogoutConfig').addEventListener('click', logout);
+
+  // ── NAVEGACIÓN BOTTOM ──
+  document.querySelectorAll('.nav-item[data-sec]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const sec = btn.dataset.sec;
+      document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+      $(sec).classList.add('active');
+      document.querySelectorAll('.nav-item[data-sec]').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  // ── START ──
+  init();
+</script>
+</body>
+</html>
