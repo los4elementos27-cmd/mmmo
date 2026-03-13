@@ -1279,7 +1279,8 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
     import {
       getFirestore, collection, getDocs, addDoc,
-      query, where, Timestamp, onSnapshot
+      query, where, Timestamp, onSnapshot,
+      doc, getDoc, updateDoc, setDoc
     } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -1294,16 +1295,18 @@
     const db  = getFirestore(app);
 
     /* =================================================================
-       CONFIGURACIÓN DINÁMICA (persiste en localStorage)
+       CONFIGURACIÓN DINÁMICA — guardada en Firebase por usuario
+       Colección: Collaborators / doc: currentUser.uid / campo: appConfig
+       Se carga al iniciar sesión y se aplica en tiempo real.
     ================================================================= */
     const DEFAULT_SETTINGS = {
-      UMBRAL_PRECISION:    0.45,   // distancia matcher (más bajo = más estricto)
+      UMBRAL_PRECISION:    0.45,
       DETECTION_INTERVAL:  2500,
       COOLDOWN_SEGUNDOS:   60,
-      MIN_CONFIDENCE:      0.70,   // porcentaje mínimo aceptado
+      MIN_CONFIDENCE:      0.70,
       MULTI_SCAN_ENABLED:  true,
-      MULTI_SCAN_COUNT:    3,      // capturas consecutivas requeridas
-      CONFIRM_MODE:        'none', // 'none'|'modal'|'code'|'both'
+      MULTI_SCAN_COUNT:    3,
+      CONFIRM_MODE:        'none',
       CONFIRM_SEARCH:      true,
       DOUBLE_CODE:         true,
       SHIFT_LIMIT_HOURS:   16,
@@ -1314,21 +1317,35 @@
 
     let CONFIG = { ...DEFAULT_SETTINGS };
 
-    function loadSettings() {
+    /* Cargar config desde Firebase para el usuario logueado */
+    async function loadUserConfig(uid) {
       try {
-        const saved = localStorage.getItem('asistenciaSettings');
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          CONFIG = { ...DEFAULT_SETTINGS, ...parsed };
+        const snap = await getDoc(doc(db, 'Collaborators', uid));
+        if (snap.exists() && snap.data().appConfig) {
+          CONFIG = { ...DEFAULT_SETTINGS, ...snap.data().appConfig };
+          console.log('⚙️ Config cargada desde Firebase para', uid, CONFIG);
+        } else {
+          CONFIG = { ...DEFAULT_SETTINGS };
         }
-      } catch (e) { CONFIG = { ...DEFAULT_SETTINGS }; }
+      } catch (e) {
+        console.error('loadUserConfig error:', e);
+        CONFIG = { ...DEFAULT_SETTINGS };
+      }
     }
 
-    function saveSettings() {
-      try { localStorage.setItem('asistenciaSettings', JSON.stringify(CONFIG)); } catch (e) {}
+    /* Guardar config en Firebase para el usuario logueado */
+    async function saveUserConfig() {
+      if (!currentUser) return;
+      try {
+        await updateDoc(doc(db, 'Collaborators', currentUser.uid), { appConfig: CONFIG });
+        console.log('✅ Config guardada en Firebase para', currentUser.uid);
+      } catch (e) {
+        // Si el doc no soporta updateDoc intenta setDoc merge
+        try {
+          await setDoc(doc(db, 'Collaborators', currentUser.uid), { appConfig: CONFIG }, { merge: true });
+        } catch (e2) { console.error('saveUserConfig error:', e2); }
+      }
     }
-
-    loadSettings();
 
     /* =================================================================
        VARIABLES GLOBALES
@@ -1529,6 +1546,8 @@
       if (menuUserName) menuUserName.textContent = user.name;
       loginScreen.style.display = 'none';
       appScreen.style.display   = 'block';
+      // Cargar config de este usuario desde Firebase ANTES de iniciar detección
+      await loadUserConfig(user.uid);
       await cargarModelos();
       await iniciarCamara();
       await iniciarEscuchaEmpleados();
@@ -2468,7 +2487,6 @@
     async function getCfgPinFromFirebase() {
       if (!currentUser) return null;
       try {
-        const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js');
         const snap = await getDoc(doc(db, 'Collaborators', currentUser.uid));
         if (snap.exists()) return snap.data().configPin || null;
       } catch (e) { console.error('getCfgPin error:', e); }
@@ -2479,9 +2497,12 @@
     async function saveCfgPinToFirebase(pin) {
       if (!currentUser) return;
       try {
-        const { doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js');
         await updateDoc(doc(db, 'Collaborators', currentUser.uid), { configPin: pin });
-      } catch (e) { console.error('saveCfgPin error:', e); }
+      } catch (e) {
+        try {
+          await setDoc(doc(db, 'Collaborators', currentUser.uid), { configPin: pin }, { merge: true });
+        } catch (e2) { console.error('saveCfgPin error:', e2); }
+      }
     }
 
     // Abrir modal: determina si tiene PIN o no
@@ -2619,8 +2640,8 @@
       settingsPanel.classList.remove('show');
     });
 
-    document.getElementById('settingsSaveBtn').addEventListener('click', () => {
-      guardarConfiguracionDesdeUI();
+    document.getElementById('settingsSaveBtn').addEventListener('click', async () => {
+      await guardarConfiguracionDesdeUI();
       settingsPanel.classList.remove('show');
       showToast('✅ Configuración guardada', 'success');
     });
@@ -2679,10 +2700,11 @@
       if (row)  row.style.opacity  = enabled ? '1' : '0.4';
     }
 
-    function guardarConfiguracionDesdeUI() {
-      CONFIG.MIN_CONFIDENCE   = parseInt(document.getElementById('sliderMinConf').value) / 100;
-      CONFIG.UMBRAL_PRECISION = parseInt(document.getElementById('sliderPrecision').value) / 100;
-      CONFIG.MULTI_SCAN_COUNT = parseInt(document.getElementById('sliderMultiScan').value);
+    async function guardarConfiguracionDesdeUI() {
+      // Leer todos los valores de la UI
+      CONFIG.MIN_CONFIDENCE     = parseInt(document.getElementById('sliderMinConf').value) / 100;
+      CONFIG.UMBRAL_PRECISION   = parseInt(document.getElementById('sliderPrecision').value) / 100;
+      CONFIG.MULTI_SCAN_COUNT   = parseInt(document.getElementById('sliderMultiScan').value);
       CONFIG.DETECTION_INTERVAL = parseInt(document.getElementById('sliderInterval').value);
       CONFIG.COOLDOWN_SEGUNDOS  = parseInt(document.getElementById('sliderCooldown').value);
       CONFIG.SHIFT_LIMIT_HOURS  = parseInt(document.getElementById('sliderShiftLimit').value);
@@ -2692,11 +2714,17 @@
       CONFIG.DOUBLE_CODE        = document.getElementById('toggleDoubleCode').checked;
       CONFIG.SOUND_ENABLED      = document.getElementById('toggleSound').checked;
       CONFIG.FLASH_ENABLED      = document.getElementById('toggleFlash').checked;
-      saveSettings();
-      // Reconstruir FaceMatcher con nuevo umbral
-      reconstruirFaceMatcher();
-      // Reiniciar detección con nuevo intervalo
-      iniciarDeteccion();
+      // Leer modo de confirmación activo
+      const confActivo = document.querySelector('.confirm-type-btn.active');
+      if (confActivo) CONFIG.CONFIRM_MODE = confActivo.dataset.conf;
+
+      // Guardar en Firebase (por usuario) — en tiempo real
+      await saveUserConfig();
+
+      // Aplicar cambios en tiempo real sin recargar página
+      reconstruirFaceMatcher();   // nuevo umbral de precisión
+      iniciarDeteccion();         // nuevo intervalo de detección
+      console.log('⚙️ Config aplicada en tiempo real:', CONFIG);
     }
 
     /* Listeners de sliders en tiempo real */
