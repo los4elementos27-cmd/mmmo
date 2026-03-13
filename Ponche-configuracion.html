@@ -1,0 +1,2493 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Asistencia Facial - TensorFlow.js</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1/dist/face-api.js"></script>
+  <style>
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    :root {
+      --primary: #16e086; --primary-dark: #0da85c; --secondary: #2e4a55;
+      --dark: #0e1c22; --danger: #e74c3c; --warning: #f39c12;
+      --success: #16e086; --error: #e74c3c;
+      --text-secondary: rgba(255,255,255,0.7);
+      --card-bg: rgba(30,41,48,0.95);
+      --text-xs:   clamp(0.7rem,  2vw,   0.8rem);
+      --text-sm:   clamp(0.8rem,  2.5vw, 0.9rem);
+      --text-base: clamp(0.9rem,  3vw,   1rem);
+      --text-lg:   clamp(1.1rem,  4vw,   1.2rem);
+      --text-xl:   clamp(1.3rem,  5vw,   1.5rem);
+      --text-3xl:  clamp(2rem,    8vw,   2.5rem);
+      --spacing-xs: clamp(6px,  1.5vw, 8px);
+      --spacing-sm: clamp(8px,  2vw,   12px);
+      --spacing-md: clamp(12px, 3vw,   18px);
+      --spacing-lg: clamp(18px, 4vw,   24px);
+      --spacing-xl: clamp(24px, 5vw,   32px);
+      --border-radius:    clamp(16px, 5vw, 28px);
+      --border-radius-sm: clamp(10px, 3vw, 16px);
+      --border-radius-lg: clamp(24px, 6vw, 36px);
+      --safe-area-inset-top:    env(safe-area-inset-top,    0px);
+      --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    body {
+      background: #000; min-height: 100vh; display: flex;
+      justify-content: center; align-items: center; overflow: hidden;
+      font-size: var(--text-base); position: fixed; width: 100%; height: 100%;
+    }
+    .fullscreen-container { position: relative; width: 100vw; height: 100vh; background: #000; overflow: hidden; }
+    .camera-full { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+    #videoFacial { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+    .overlay-content {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10;
+      display: flex; flex-direction: column; justify-content: space-between;
+      padding: var(--spacing-md);
+      padding-top:    max(var(--spacing-md), var(--safe-area-inset-top));
+      padding-bottom: max(var(--spacing-md), var(--safe-area-inset-bottom));
+      pointer-events: none;
+    }
+    .overlay-content * { pointer-events: auto; }
+    .top-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--border-radius-lg);
+      border: 1px solid rgba(22,224,134,0.3); color: white;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4); transition: all 0.3s ease;
+    }
+    .title { display: flex; align-items: center; gap: var(--spacing-xs); }
+    .title i { font-size: var(--text-xl); color: var(--primary); text-shadow: 0 0 10px rgba(22,224,134,0.5); }
+    .title h1 { font-size: var(--text-lg); font-weight: 600; letter-spacing: -0.3px; }
+    .menu-container { position: relative; }
+    .menu-button {
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 30px; padding: var(--spacing-xs) var(--spacing-sm);
+      display: flex; align-items: center; gap: var(--spacing-xs);
+      cursor: pointer; transition: all 0.2s ease;
+    }
+    .menu-button:hover, .menu-button:active { background: rgba(255,255,255,0.2); }
+    .user-name-short { font-weight: 600; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--text-sm); }
+    .menu-button i { font-size: var(--text-base); color: var(--primary); }
+    .menu-modal {
+      position: absolute; top: calc(100% + 8px); right: 0;
+      background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-radius: var(--border-radius); border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5); min-width: 280px; max-width: 320px;
+      padding: var(--spacing-sm); z-index: 100; display: none;
+      transform-origin: top right; animation: menuAppear 0.2s ease;
+      max-height: 70vh; overflow-y: auto;
+    }
+    @keyframes menuAppear { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
+    .menu-modal.show { display: block; }
+    .menu-item {
+      display: flex; align-items: center; gap: var(--spacing-sm);
+      padding: var(--spacing-md); border-radius: var(--border-radius-sm);
+      color: white; text-decoration: none; transition: all 0.2s ease;
+      cursor: pointer; border: none; background: transparent;
+      width: 100%; font-size: var(--text-base);
+    }
+    .menu-item:hover, .menu-item:active { background: rgba(255,255,255,0.1); }
+    .menu-item i { width: 24px; font-size: var(--text-lg); }
+    .menu-item.logout { color: var(--danger); border-top: 1px solid rgba(255,255,255,0.1); margin-top: var(--spacing-xs); }
+    .menu-item.logout i { color: var(--danger); }
+    .menu-item.settings-item i { color: #f39c12; }
+    .menu-divider { height: 1px; background: rgba(255,255,255,0.1); margin: var(--spacing-xs) 0; }
+    .menu-section-title { color: var(--text-secondary); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 1px; padding: var(--spacing-xs) var(--spacing-md); margin-top: var(--spacing-xs); }
+    .status-led { width: clamp(10px,2vw,12px); height: clamp(10px,2vw,12px); background: var(--primary); border-radius: 50%; display: inline-block; animation: pulse 2s infinite; box-shadow: 0 0 10px var(--primary); }
+    @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.6; transform:scale(0.95); } }
+    .status-indicator-large {
+      position: absolute;
+      bottom: max(var(--spacing-xl), var(--safe-area-inset-bottom));
+      left: 50%; transform: translateX(-50%);
+      width: clamp(70px,15vw,90px); height: clamp(70px,15vw,90px); border-radius: 50%;
+      background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 2px solid rgba(255,255,255,0.2); display: flex; justify-content: center; align-items: center;
+      z-index: 40; transition: all 0.3s cubic-bezier(0.175,0.885,0.32,1.275); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .status-icon { font-size: var(--text-3xl); transition: all 0.3s ease; }
+    .status-icon.success { color: var(--success); filter: drop-shadow(0 0 15px var(--success)); animation: successPop 0.4s ease; }
+    .status-icon.error   { color: var(--error);   filter: drop-shadow(0 0 15px var(--error));   animation: errorShake 0.4s ease; }
+    .status-icon.idle    { color: rgba(255,255,255,0.3); }
+    @keyframes successPop { 0% { transform:scale(0); opacity:0; } 50% { transform:scale(1.2); } 100% { transform:scale(1); opacity:1; } }
+    @keyframes errorShake { 0%,100% { transform:translateX(0); } 10%,30%,50%,70%,90% { transform:translateX(-5px); } 20%,40%,60%,80% { transform:translateX(5px); } }
+    .status-label {
+      position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%);
+      color: white; font-size: var(--text-xs); white-space: nowrap;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+      padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); opacity: 0.8;
+    }
+    .resultado-flotante {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      width: 90%; max-width: 400px; background: var(--card-bg);
+      backdrop-filter: blur(25px) saturate(180%); -webkit-backdrop-filter: blur(25px) saturate(180%);
+      border-radius: var(--border-radius-lg); padding: var(--spacing-xl);
+      border: 1.5px solid var(--primary);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 0 2px rgba(22,224,134,0.1) inset;
+      display: none; flex-direction: column; align-items: center; gap: var(--spacing-lg); z-index: 50; animation: modalAppear 0.3s ease;
+    }
+    @keyframes modalAppear { from { opacity:0; transform:translate(-50%,-40%); } to { opacity:1; transform:translate(-50%,-50%); } }
+    .resultado-header { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-md); width: 100%; }
+    .foto-colaborador { width: clamp(110px,25vw,140px); height: clamp(110px,25vw,140px); border-radius: 50%; object-fit: cover; border: 4px solid var(--primary); box-shadow: 0 0 30px rgba(22,224,134,0.4); }
+    .info-colaborador { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-xs); width: 100%; text-align: center; }
+    .nombre-colaborador { color: white; font-size: var(--text-xl); font-weight: 700; line-height: 1.3; letter-spacing: -0.5px; }
+    #codigoDisplay { color: var(--primary); font-size: var(--text-sm); opacity: 0.9; }
+    .tipo-registro { display: inline-block; padding: var(--spacing-xs) var(--spacing-lg); border-radius: 40px; font-weight: 700; font-size: var(--text-sm); letter-spacing: 0.5px; }
+    .entrada { background: var(--primary); color: #000; box-shadow: 0 0 15px var(--primary); }
+    .salida  { background: var(--danger);  color: white; box-shadow: 0 0 15px var(--danger); }
+    .fecha-hora { color: rgba(255,255,255,0.7); font-size: var(--text-sm); background: rgba(0,0,0,0.3); padding: var(--spacing-xs) var(--spacing-md); border-radius: 30px; width: fit-content; }
+    #parIdDisplay { color: var(--warning); font-size: var(--text-xs); background: rgba(243,156,18,0.1); padding: var(--spacing-xs) var(--spacing-sm); border-radius: 30px; }
+    .search-section-menu { background: rgba(0,0,0,0.2); border-radius: var(--border-radius-sm); padding: var(--spacing-sm); margin: var(--spacing-xs) 0; }
+    .search-box-menu { display: flex; gap: var(--spacing-xs); }
+    .search-input-menu { flex: 1; padding: 10px 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--secondary); border-radius: 20px; color: white; font-size: var(--text-sm); }
+    .search-input-menu:focus { outline: none; border-color: var(--primary); }
+    .search-btn-menu { background: var(--primary); border: none; color: #000; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: var(--text-sm); }
+    .search-results-menu { margin-top: var(--spacing-xs); max-height: 200px; overflow-y: auto; }
+    .search-result-item { display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm); border-radius: var(--border-radius-sm); cursor: pointer; transition: all 0.2s ease; }
+    .search-result-item:hover { background: rgba(255,255,255,0.1); }
+    .search-result-item img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); }
+    .search-result-info { flex: 1; }
+    .search-result-name { font-size: var(--text-sm); font-weight: 500; }
+    .search-result-code { font-size: var(--text-xs); color: var(--text-secondary); }
+    .search-result-punch { background: var(--primary); border: none; color: #000; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+    /* ================================================================
+       ALERTA DE BLOQUEO — con icono y color según tipo de ausencia
+    ================================================================ */
+    .bloqueo-alert {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      width: 90%; max-width: 380px;
+      background: linear-gradient(135deg,rgba(231,76,60,0.98),rgba(192,57,43,0.98));
+      border-radius: var(--border-radius-lg); padding: var(--spacing-xl);
+      border: 3px solid var(--danger); box-shadow: 0 0 50px rgba(231,76,60,0.6),0 20px 40px rgba(0,0,0,0.5);
+      display: none; flex-direction: column; align-items: center; gap: var(--spacing-md); z-index: 60; text-align: center; animation: bloqueoAppear 0.3s ease;
+    }
+    .bloqueo-alert.tipo-vacaciones { background: linear-gradient(135deg,rgba(198,149,0,0.98),rgba(160,120,0,0.98)); border-color: #c69500; box-shadow: 0 0 50px rgba(198,149,0,0.6),0 20px 40px rgba(0,0,0,0.5); }
+    .bloqueo-alert.tipo-licencia   { background: linear-gradient(135deg,rgba(135,100,184,0.98),rgba(100,70,150,0.98)); border-color: #8764b8; box-shadow: 0 0 50px rgba(135,100,184,0.6),0 20px 40px rgba(0,0,0,0.5); }
+    .bloqueo-alert.tipo-permiso    { background: linear-gradient(135deg,rgba(0,120,212,0.98),rgba(0,90,158,0.98)); border-color: #0078d4; box-shadow: 0 0 50px rgba(0,120,212,0.6),0 20px 40px rgba(0,0,0,0.5); }
+    .bloqueo-alert.tipo-diaslibres { background: linear-gradient(135deg,rgba(202,80,16,0.98),rgba(160,60,10,0.98)); border-color: #ca5010; box-shadow: 0 0 50px rgba(202,80,16,0.6),0 20px 40px rgba(0,0,0,0.5); }
+    .bloqueo-alert.tipo-libre-mensual { background: linear-gradient(135deg,rgba(202,80,16,0.98),rgba(160,60,10,0.98)); border-color: #ca5010; box-shadow: 0 0 50px rgba(202,80,16,0.6),0 20px 40px rgba(0,0,0,0.5); }
+    .bloqueo-alert.tipo-dia-semana { background: linear-gradient(135deg,rgba(60,60,60,0.98),rgba(30,30,30,0.98)); border-color: #888; box-shadow: 0 0 50px rgba(60,60,60,0.6),0 20px 40px rgba(0,0,0,0.5); }
+    @keyframes bloqueoAppear { from { opacity:0; transform:translate(-50%,-40%) scale(0.9); } to { opacity:1; transform:translate(-50%,-50%) scale(1); } }
+    .bloqueo-icon { font-size: 4rem; color: white; animation: bloqueoPulse 1.5s infinite; }
+    @keyframes bloqueoPulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.1); } }
+    .bloqueo-title   { color: white; font-size: var(--text-xl); font-weight: bold; }
+    .bloqueo-message { color: rgba(255,255,255,0.95); font-size: var(--text-base); line-height: 1.5; }
+    .bloqueo-detail  { background: rgba(0,0,0,0.3); padding: var(--spacing-md); border-radius: var(--border-radius-sm); color: white; font-size: var(--text-sm); width: 100%; line-height: 1.6; }
+    .bloqueo-close   { background: white; border: none; color: var(--danger); padding: var(--spacing-sm) var(--spacing-xl); border-radius: 30px; font-weight: bold; cursor: pointer; margin-top: var(--spacing-xs); font-size: var(--text-base); }
+    .bloqueo-alert.tipo-vacaciones .bloqueo-close { color: #c69500; }
+    .bloqueo-alert.tipo-licencia   .bloqueo-close { color: #8764b8; }
+    .bloqueo-alert.tipo-permiso    .bloqueo-close { color: #0078d4; }
+    .bloqueo-alert.tipo-diaslibres .bloqueo-close { color: #ca5010; }
+    .bloqueo-alert.tipo-libre-mensual .bloqueo-close { color: #ca5010; }
+    .bloqueo-alert.tipo-dia-semana .bloqueo-close { color: #555; }
+
+    .loading-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; padding: var(--spacing-lg); }
+    .spinner { border: 3px solid rgba(22,224,134,0.1); border-top: 3px solid var(--primary); border-radius: 50%; width: clamp(45px,10vw,55px); height: clamp(45px,10vw,55px); animation: spin 0.8s linear infinite; margin-bottom: var(--spacing-md); }
+    @keyframes spin { 0% { transform:rotate(0deg); } 100% { transform:rotate(360deg); } }
+    .toast { position: fixed; bottom: max(calc(var(--spacing-xl) * 2.5),var(--safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); padding: var(--spacing-sm) var(--spacing-xl); border-radius: 40px; background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 1px solid var(--primary); color: white; z-index: 200; display: none; font-size: var(--text-sm); max-width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: toastAppear 0.2s ease; }
+    @keyframes toastAppear { from { opacity:0; transform:translateX(-50%) translateY(20px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
+    .login-container { position: fixed; top:0; left:0; width:100%; height:100%; background: linear-gradient(135deg,#0a1a20,#1a2f38); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+    .login-card { background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border-radius: var(--border-radius-lg); padding: var(--spacing-xl); width: 90%; max-width: 380px; border: 1px solid rgba(22,224,134,0.3); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+    .login-card h2 { color: var(--primary); text-align: center; margin-bottom: var(--spacing-xl); font-size: var(--text-xl); font-weight: 600; }
+    .login-input { width: 100%; padding: var(--spacing-md); margin-bottom: var(--spacing-md); background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--border-radius-sm); color: white; font-size: var(--text-base); transition: all 0.2s ease; }
+    .login-input:focus { outline: none; border-color: var(--primary); background: rgba(0,0,0,0.5); }
+    .alert { padding: var(--spacing-sm); border-radius: var(--border-radius-sm); margin-bottom: var(--spacing-md); display: none; font-size: var(--text-sm); text-align: center; }
+    .alert-error { background: rgba(231,76,60,0.2); border: 1px solid var(--danger); color: white; }
+    .btn { background: var(--primary); color: #000; border: none; padding: var(--spacing-md); border-radius: 50px; font-weight: 700; font-size: var(--text-base); cursor: pointer; transition: all 0.2s ease; width: 100%; }
+    .btn:hover, .btn:active { background: var(--primary-dark); transform: scale(0.98); }
+
+    /* ================================================================
+       BOTÓN DE CAPTURA MANUAL
+    ================================================================ */
+    .capture-btn-wrapper {
+      position: absolute;
+      bottom: max(calc(var(--spacing-xl) + clamp(70px,15vw,90px) + 20px), calc(var(--safe-area-inset-bottom) + clamp(70px,15vw,90px) + 20px));
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      z-index: 41;
+      pointer-events: auto;
+    }
+    .capture-btn {
+      width: clamp(52px, 12vw, 64px);
+      height: clamp(52px, 12vw, 64px);
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(22,224,134,0.25), rgba(22,224,134,0.1));
+      border: 2px solid rgba(22,224,134,0.7);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      color: var(--primary);
+      font-size: clamp(1.2rem, 4vw, 1.5rem);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.4), 0 0 0 0 rgba(22,224,134,0.4);
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      -webkit-tap-highlight-color: transparent;
+      position: relative;
+      overflow: hidden;
+    }
+    .capture-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(22,224,134,0.3) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .capture-btn:hover { transform: scale(1.08); border-color: var(--primary); box-shadow: 0 8px 25px rgba(0,0,0,0.5), 0 0 20px rgba(22,224,134,0.3); }
+    .capture-btn:hover::before { opacity: 1; }
+    .capture-btn:active { transform: scale(0.94); }
+    .capture-btn.capturing { animation: capturePulse 0.4s ease; border-color: white; color: white; }
+    @keyframes capturePulse {
+      0%   { transform: scale(1); box-shadow: 0 6px 20px rgba(0,0,0,0.4), 0 0 0 0 rgba(22,224,134,0.6); }
+      40%  { transform: scale(1.15); box-shadow: 0 8px 30px rgba(0,0,0,0.5), 0 0 0 12px rgba(22,224,134,0); }
+      100% { transform: scale(1); }
+    }
+    .capture-btn-label {
+      color: rgba(255,255,255,0.85);
+      font-size: var(--text-xs);
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(5px);
+      padding: 3px 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+      white-space: nowrap;
+      letter-spacing: 0.3px;
+    }
+    .capture-flash {
+      position: fixed; inset: 0; background: white; opacity: 0;
+      pointer-events: none; z-index: 5; transition: opacity 0.05s ease;
+    }
+    .capture-flash.active { opacity: 0.45; }
+
+    /* ================================================================
+       MODAL DE CONFIRMACIÓN FACIAL (para confirmar antes de registrar)
+    ================================================================ */
+    .confirm-modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 500;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: var(--spacing-md);
+    }
+    .confirm-modal-overlay.show { display: flex; }
+    .confirm-modal {
+      background: var(--card-bg);
+      border-radius: var(--border-radius-lg);
+      padding: var(--spacing-xl);
+      width: 90%; max-width: 380px;
+      border: 2px solid var(--primary);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 30px rgba(22,224,134,0.15);
+      animation: modalAppear 0.3s ease;
+      text-align: center;
+    }
+    .confirm-modal h3 { color: var(--primary); font-size: var(--text-lg); margin-bottom: var(--spacing-md); }
+    .confirm-photo-wrap {
+      position: relative; display: inline-block; margin-bottom: var(--spacing-md);
+    }
+    .confirm-photo {
+      width: 120px; height: 120px; border-radius: 50%; object-fit: cover;
+      border: 4px solid var(--primary);
+      box-shadow: 0 0 25px rgba(22,224,134,0.4);
+    }
+    .confirm-confidence-badge {
+      position: absolute; bottom: 4px; right: 4px;
+      background: linear-gradient(135deg,#0da85c,#16e086);
+      color: #000; font-size: 0.7rem; font-weight: 800;
+      padding: 3px 8px; border-radius: 20px;
+      border: 2px solid rgba(0,0,0,0.4);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    }
+    .confirm-name { color: white; font-size: var(--text-xl); font-weight: 700; margin-bottom: 4px; }
+    .confirm-code { color: var(--primary); font-size: var(--text-sm); margin-bottom: var(--spacing-sm); }
+    .confirm-tipo-badge {
+      display: inline-block; padding: 6px 20px; border-radius: 30px;
+      font-weight: 700; font-size: var(--text-sm); margin-bottom: var(--spacing-md);
+    }
+    .confirm-info-row {
+      display: flex; justify-content: center; gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-lg); flex-wrap: wrap;
+    }
+    .confirm-info-chip {
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 20px; padding: 5px 12px; font-size: var(--text-xs); color: rgba(255,255,255,0.8);
+    }
+    .confirm-warning {
+      background: rgba(231,76,60,0.15); border: 1px solid rgba(231,76,60,0.4);
+      border-radius: var(--border-radius-sm); padding: var(--spacing-sm) var(--spacing-md);
+      color: #ff8a7a; font-size: var(--text-xs); margin-bottom: var(--spacing-md);
+      display: none;
+    }
+    .confirm-warning.show { display: block; }
+    .confirm-actions { display: flex; gap: var(--spacing-sm); }
+    .confirm-btn-yes {
+      flex: 1; background: var(--primary); color: #000; border: none;
+      padding: var(--spacing-md); border-radius: 50px; font-weight: 700;
+      font-size: var(--text-base); cursor: pointer; transition: all 0.2s ease;
+    }
+    .confirm-btn-yes:hover { background: var(--primary-dark); }
+    .confirm-btn-no {
+      flex: 1; background: transparent; color: var(--danger);
+      border: 2px solid var(--danger); padding: var(--spacing-md);
+      border-radius: 50px; font-weight: 700; font-size: var(--text-base);
+      cursor: pointer; transition: all 0.2s ease;
+    }
+    .confirm-btn-no:hover { background: rgba(231,76,60,0.15); }
+
+    /* ================================================================
+       MODAL BUSCADOR POR CÓDIGO (teclado virtual, solo números)
+    ================================================================ */
+    .code-search-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.82);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 480;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: var(--spacing-md);
+    }
+    .code-search-overlay.show { display: flex; }
+    .code-search-modal {
+      background: var(--card-bg);
+      border-radius: var(--border-radius-lg);
+      padding: var(--spacing-xl);
+      width: 90%; max-width: 400px;
+      border: 2px solid rgba(22,224,134,0.4);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+      animation: modalAppear 0.3s ease;
+    }
+    .code-search-modal h3 {
+      color: white; font-size: var(--text-lg); font-weight: 700;
+      margin-bottom: var(--spacing-lg); text-align: center;
+      display: flex; align-items: center; gap: var(--spacing-sm); justify-content: center;
+    }
+    .code-search-modal h3 i { color: var(--primary); }
+    .code-display {
+      background: rgba(0,0,0,0.5); border: 2px solid rgba(22,224,134,0.4);
+      border-radius: var(--border-radius-sm); padding: var(--spacing-md) var(--spacing-lg);
+      text-align: center; margin-bottom: var(--spacing-sm);
+      color: var(--primary); font-size: 2rem; font-weight: 700;
+      letter-spacing: 6px; min-height: 64px; display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s ease;
+    }
+    .code-display.has-value { border-color: var(--primary); box-shadow: 0 0 15px rgba(22,224,134,0.2); }
+    /* Preview del colaborador encontrado por código */
+    .code-preview {
+      display: none;
+      background: rgba(22,224,134,0.08);
+      border: 1px solid rgba(22,224,134,0.3);
+      border-radius: var(--border-radius-sm);
+      padding: var(--spacing-sm);
+      margin-bottom: var(--spacing-md);
+      flex-direction: row;
+      align-items: center;
+      gap: var(--spacing-sm);
+      animation: fadeIn 0.2s ease;
+    }
+    .code-preview.show { display: flex; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
+    .code-preview img {
+      width: 48px; height: 48px; border-radius: 50%; object-fit: cover;
+      border: 2px solid var(--primary);
+    }
+    .code-preview-info { flex: 1; }
+    .code-preview-name { color: white; font-size: var(--text-sm); font-weight: 600; }
+    .code-preview-code { color: var(--primary); font-size: var(--text-xs); }
+    .code-confirm-hint {
+      background: rgba(243,156,18,0.12); border: 1px solid rgba(243,156,18,0.4);
+      border-radius: var(--border-radius-sm); padding: var(--spacing-xs) var(--spacing-sm);
+      margin-bottom: var(--spacing-sm); color: #f39c12; font-size: var(--text-xs);
+      text-align: center; display: none;
+    }
+    .code-confirm-hint.show { display: block; }
+    .virtual-keyboard {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: var(--spacing-sm); margin-bottom: var(--spacing-md);
+    }
+    .vk-btn {
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+      border-radius: var(--border-radius-sm); padding: var(--spacing-md);
+      color: white; font-size: var(--text-xl); font-weight: 600;
+      cursor: pointer; transition: all 0.15s ease; text-align: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .vk-btn:hover { background: rgba(255,255,255,0.15); border-color: var(--primary); color: var(--primary); }
+    .vk-btn:active { transform: scale(0.92); background: rgba(22,224,134,0.2); }
+    .vk-btn.vk-del { background: rgba(231,76,60,0.15); border-color: rgba(231,76,60,0.3); color: #ff8a7a; font-size: var(--text-base); }
+    .vk-btn.vk-del:hover { background: rgba(231,76,60,0.3); }
+    .vk-btn.vk-zero { grid-column: 1 / 3; }
+    .vk-btn.vk-clear { background: rgba(243,156,18,0.15); border-color: rgba(243,156,18,0.3); color: #f39c12; font-size: var(--text-sm); }
+    .code-search-actions { display: flex; gap: var(--spacing-sm); }
+    .code-search-btn-register {
+      flex: 1; background: var(--primary); color: #000; border: none;
+      padding: var(--spacing-md); border-radius: 50px; font-weight: 700;
+      font-size: var(--text-base); cursor: pointer; transition: all 0.2s ease;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .code-search-btn-register:hover { background: var(--primary-dark); }
+    .code-search-btn-register:disabled { opacity: 0.4; cursor: not-allowed; }
+    .code-search-btn-cancel {
+      background: transparent; color: rgba(255,255,255,0.7);
+      border: 1px solid rgba(255,255,255,0.2); padding: var(--spacing-md) var(--spacing-lg);
+      border-radius: 50px; font-size: var(--text-base); cursor: pointer; transition: all 0.2s ease;
+    }
+    .code-search-btn-cancel:hover { background: rgba(255,255,255,0.08); color: white; }
+
+    /* Segunda confirmación de código (doble verificación) */
+    .code-reconfirm-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 490;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: var(--spacing-md);
+    }
+    .code-reconfirm-overlay.show { display: flex; }
+    .code-reconfirm-modal {
+      background: var(--card-bg);
+      border-radius: var(--border-radius-lg);
+      padding: var(--spacing-xl);
+      width: 90%; max-width: 400px;
+      border: 2px solid var(--warning);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.7), 0 0 25px rgba(243,156,18,0.2);
+      animation: modalAppear 0.3s ease;
+    }
+    .code-reconfirm-modal h3 {
+      color: var(--warning); font-size: var(--text-lg); font-weight: 700;
+      margin-bottom: var(--spacing-sm); text-align: center;
+      display: flex; align-items: center; gap: var(--spacing-sm); justify-content: center;
+    }
+    .code-reconfirm-desc {
+      color: rgba(255,255,255,0.75); font-size: var(--text-sm);
+      text-align: center; margin-bottom: var(--spacing-lg); line-height: 1.5;
+    }
+    .reconfirm-display {
+      background: rgba(0,0,0,0.5); border: 2px solid rgba(243,156,18,0.4);
+      border-radius: var(--border-radius-sm); padding: var(--spacing-md);
+      text-align: center; margin-bottom: var(--spacing-sm);
+      color: var(--warning); font-size: 2rem; font-weight: 700;
+      letter-spacing: 6px; min-height: 64px; display: flex; align-items: center; justify-content: center;
+    }
+    .reconfirm-error {
+      background: rgba(231,76,60,0.15); border: 1px solid rgba(231,76,60,0.4);
+      border-radius: var(--border-radius-sm); padding: var(--spacing-xs) var(--spacing-sm);
+      color: #ff8a7a; font-size: var(--text-xs); text-align: center;
+      margin-bottom: var(--spacing-sm); display: none;
+    }
+    .reconfirm-error.show { display: block; }
+    .reconfirm-vk { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-sm); margin-bottom: var(--spacing-md); }
+
+    /* ================================================================
+       PANEL DE CONFIGURACIÓN (página dentro de la misma página)
+    ================================================================ */
+    .settings-panel {
+      position: fixed; inset: 0;
+      background: linear-gradient(135deg,#0a1a20,#1a2f38);
+      z-index: 900;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .settings-panel.show { display: flex; }
+    .settings-header {
+      display: flex; align-items: center; gap: var(--spacing-md);
+      padding: var(--spacing-lg) var(--spacing-xl);
+      padding-top: max(var(--spacing-lg), var(--safe-area-inset-top));
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      flex-shrink: 0;
+    }
+    .settings-back-btn {
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 50%; width: 40px; height: 40px; color: white;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.2s ease; flex-shrink: 0;
+    }
+    .settings-back-btn:hover { background: rgba(255,255,255,0.2); }
+    .settings-header-title { flex: 1; }
+    .settings-header-title h2 { color: white; font-size: var(--text-xl); font-weight: 700; }
+    .settings-header-title p { color: var(--text-secondary); font-size: var(--text-sm); }
+    .settings-header-icon { color: #f39c12; font-size: var(--text-xl); }
+    .settings-body {
+      flex: 1; overflow-y: auto;
+      padding: var(--spacing-lg) var(--spacing-xl);
+      padding-bottom: max(var(--spacing-xl), var(--safe-area-inset-bottom));
+    }
+    /* Secciones de config */
+    .settings-section {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--border-radius);
+      margin-bottom: var(--spacing-lg);
+      overflow: hidden;
+    }
+    .settings-section-header {
+      display: flex; align-items: center; gap: var(--spacing-sm);
+      padding: var(--spacing-md) var(--spacing-lg);
+      background: rgba(255,255,255,0.05);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .settings-section-header i { color: var(--primary); font-size: var(--text-lg); }
+    .settings-section-header span { color: white; font-weight: 600; font-size: var(--text-base); }
+    .settings-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: var(--spacing-md) var(--spacing-lg);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      gap: var(--spacing-md);
+    }
+    .settings-row:last-child { border-bottom: none; }
+    .settings-row-info { flex: 1; }
+    .settings-row-label { color: white; font-size: var(--text-sm); font-weight: 500; margin-bottom: 3px; }
+    .settings-row-desc  { color: var(--text-secondary); font-size: var(--text-xs); line-height: 1.4; }
+    /* Toggle switch */
+    .toggle-switch {
+      position: relative; width: 52px; height: 28px; flex-shrink: 0;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .toggle-slider {
+      position: absolute; cursor: pointer; inset: 0;
+      background: rgba(255,255,255,0.15); border-radius: 28px;
+      transition: 0.3s; border: 1px solid rgba(255,255,255,0.2);
+    }
+    .toggle-slider::before {
+      content: ''; position: absolute;
+      height: 20px; width: 20px; left: 3px; bottom: 3px;
+      background: rgba(255,255,255,0.7); border-radius: 50%; transition: 0.3s;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+    .toggle-switch input:checked + .toggle-slider { background: var(--primary); border-color: var(--primary-dark); }
+    .toggle-switch input:checked + .toggle-slider::before { transform: translateX(24px); background: white; }
+    /* Slider de rango */
+    .settings-slider-wrap { display: flex; align-items: center; gap: var(--spacing-sm); width: 100%; flex-direction: column; }
+    .settings-slider-row { display: flex; align-items: center; gap: var(--spacing-sm); width: 100%; }
+    .settings-slider {
+      flex: 1; -webkit-appearance: none; appearance: none;
+      height: 6px; border-radius: 3px;
+      background: rgba(255,255,255,0.15); outline: none; cursor: pointer;
+    }
+    .settings-slider::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--primary); cursor: pointer;
+      box-shadow: 0 2px 8px rgba(22,224,134,0.5);
+    }
+    .settings-slider::-moz-range-thumb {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--primary); cursor: pointer; border: none;
+    }
+    .settings-slider-val {
+      background: rgba(22,224,134,0.15); border: 1px solid rgba(22,224,134,0.3);
+      border-radius: 8px; padding: 3px 10px; color: var(--primary);
+      font-size: var(--text-sm); font-weight: 700; min-width: 52px; text-align: center;
+    }
+    /* Selector de tipo de confirmación */
+    .confirm-type-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-sm);
+      padding: var(--spacing-md) var(--spacing-lg);
+    }
+    .confirm-type-btn {
+      background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.12);
+      border-radius: var(--border-radius-sm); padding: var(--spacing-md);
+      color: rgba(255,255,255,0.7); cursor: pointer; transition: all 0.2s ease;
+      text-align: center; font-size: var(--text-xs); line-height: 1.4;
+    }
+    .confirm-type-btn i { display: block; font-size: var(--text-xl); margin-bottom: 6px; color: rgba(255,255,255,0.5); }
+    .confirm-type-btn.active {
+      background: rgba(22,224,134,0.15); border-color: var(--primary);
+      color: white;
+    }
+    .confirm-type-btn.active i { color: var(--primary); }
+    .confirm-type-btn:hover:not(.active) { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.25); }
+    /* Settings save bar */
+    .settings-save-bar {
+      padding: var(--spacing-md) var(--spacing-xl);
+      padding-bottom: max(var(--spacing-md), var(--safe-area-inset-bottom));
+      background: rgba(0,0,0,0.4);
+      border-top: 1px solid rgba(255,255,255,0.1);
+      flex-shrink: 0;
+    }
+    .settings-save-btn {
+      width: 100%; background: var(--primary); color: #000; border: none;
+      padding: var(--spacing-md); border-radius: 50px; font-weight: 700;
+      font-size: var(--text-base); cursor: pointer; transition: all 0.2s ease;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .settings-save-btn:hover { background: var(--primary-dark); }
+    /* Panel de acceso a configuración (PIN gate) */
+    .settings-pin-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.9);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      z-index: 895;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: var(--spacing-md);
+    }
+    .settings-pin-overlay.show { display: flex; }
+    .settings-pin-card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius-lg);
+      padding: var(--spacing-xl);
+      width: 90%; max-width: 360px;
+      border: 2px solid rgba(243,156,18,0.5);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.7), 0 0 30px rgba(243,156,18,0.1);
+      animation: modalAppear 0.3s ease;
+      text-align: center;
+    }
+    .settings-pin-card .pin-icon { font-size: 3rem; color: #f39c12; margin-bottom: var(--spacing-md); }
+    .settings-pin-card h3 { color: white; font-size: var(--text-lg); font-weight: 700; margin-bottom: var(--spacing-xs); }
+    .settings-pin-card p { color: var(--text-secondary); font-size: var(--text-sm); margin-bottom: var(--spacing-lg); }
+    .settings-pin-display {
+      background: rgba(0,0,0,0.4); border: 2px solid rgba(243,156,18,0.4);
+      border-radius: var(--border-radius-sm); padding: var(--spacing-md);
+      text-align: center; margin-bottom: var(--spacing-sm);
+      color: var(--warning); font-size: 1.8rem; font-weight: 700;
+      letter-spacing: 8px; min-height: 60px; display: flex; align-items: center; justify-content: center;
+    }
+    .settings-pin-error { color: #ff8a7a; font-size: var(--text-xs); margin-bottom: var(--spacing-sm); display: none; min-height: 20px; }
+    .settings-pin-error.show { display: block; }
+    .settings-pin-vk { display: grid; grid-template-columns: repeat(3,1fr); gap: var(--spacing-sm); margin-bottom: var(--spacing-md); }
+    .settings-pin-cancel {
+      width: 100%; background: transparent; color: rgba(255,255,255,0.5);
+      border: 1px solid rgba(255,255,255,0.15); padding: var(--spacing-sm);
+      border-radius: 50px; cursor: pointer; font-size: var(--text-sm); transition: all 0.2s ease;
+    }
+    .settings-pin-cancel:hover { color: white; border-color: rgba(255,255,255,0.3); }
+    /* Indicador de confianza en tiempo real */
+    .face-confidence-bar {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, calc(-50% - clamp(90px,20vw,110px)));
+      z-index: 20; pointer-events: none;
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      opacity: 0; transition: opacity 0.4s ease;
+    }
+    .face-confidence-bar.show { opacity: 1; }
+    .face-confidence-ring {
+      width: clamp(140px,35vw,180px); height: clamp(140px,35vw,180px);
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+    }
+    .face-confidence-arc {
+      position: absolute; inset: 0; border-radius: 50%;
+      background: conic-gradient(var(--primary) 0deg, transparent 0deg);
+      transition: background 0.3s ease;
+      opacity: 0.5;
+    }
+    .face-confidence-pct {
+      color: white; font-size: clamp(1rem,3.5vw,1.3rem); font-weight: 800;
+      position: relative; z-index: 1; text-shadow: 0 0 10px rgba(0,0,0,0.8);
+    }
+    .face-confidence-label {
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+      border-radius: 20px; padding: 3px 12px;
+      color: rgba(255,255,255,0.9); font-size: var(--text-xs); font-weight: 600;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    @media (max-width: 480px) {
+      .top-bar { padding: var(--spacing-xs) var(--spacing-sm); }
+      .title h1 { font-size: var(--text-base); }
+      .menu-button .user-name-short { max-width: 70px; }
+      .status-indicator-large { width: 60px; height: 60px; }
+      .status-icon { font-size: 2rem; }
+      .menu-modal { min-width: 260px; right: -10px; }
+      .capture-btn-wrapper { bottom: max(calc(var(--spacing-xl) + 60px + 16px), calc(var(--safe-area-inset-bottom) + 60px + 16px)); }
+      .confirm-type-grid { grid-template-columns: 1fr 1fr; }
+      .settings-body { padding: var(--spacing-md); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===================== LOGIN SCREEN ===================== -->
+  <div id="loginScreen" class="login-container">
+    <div class="login-card">
+      <h2><i class="fas fa-building"></i> Acceso Empresa</h2>
+      <input type="text"     id="username" class="login-input" placeholder="Usuario" autocomplete="off">
+      <input type="password" id="password" class="login-input" placeholder="PIN (8 dígitos)" inputmode="numeric" pattern="[0-9]*">
+      <div id="loginAlert" class="alert alert-error"></div>
+      <button id="loginBtn" class="btn">Ingresar</button>
+    </div>
+  </div>
+
+  <!-- ===================== APP PRINCIPAL ===================== -->
+  <div id="appScreen" style="display:none;">
+    <div class="fullscreen-container">
+      <div class="camera-full">
+        <video id="videoFacial" autoplay muted playsinline></video>
+      </div>
+      <div class="overlay-content">
+
+        <!-- TOP BAR -->
+        <div class="top-bar">
+          <div class="title">
+            <i class="fas fa-user-shield"></i>
+            <h1>Asistencia</h1>
+          </div>
+          <div class="menu-container">
+            <div class="menu-button" id="menuButton">
+              <span class="user-name-short" id="companyName"></span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="menu-modal" id="menuModal">
+              <div class="menu-item" style="pointer-events:none;opacity:0.7;">
+                <div class="status-led"></div>
+                <span>Sistema activo</span>
+              </div>
+              <div class="menu-item" id="menuUserInfo">
+                <i class="fas fa-user-circle"></i>
+                <span id="menuUserName">Usuario</span>
+              </div>
+              <div class="menu-divider"></div>
+
+              <!-- BUSCADOR POR CÓDIGO (sin filtrado, solo registra al buscar) -->
+              <div class="menu-section-title"><i class="fas fa-search"></i> Buscar Colaborador</div>
+              <div class="search-section-menu">
+                <div class="search-box-menu">
+                  <input type="text" id="searchInput" class="search-input-menu" placeholder="Nombre del colaborador..." autocomplete="off">
+                  <button class="search-btn-menu" id="searchBtn"><i class="fas fa-fingerprint"></i></button>
+                </div>
+                <div class="search-results-menu" id="searchResults"></div>
+              </div>
+
+              <div class="menu-divider"></div>
+              <!-- BOTÓN BUSCAR POR CÓDIGO (abre teclado virtual) -->
+              <button class="menu-item" id="menuCodeSearch">
+                <i class="fas fa-keyboard" style="color:var(--primary)"></i>
+                <span>Registrar por Código</span>
+              </button>
+              <div class="menu-divider"></div>
+              <!-- BOTÓN CONFIGURACIÓN -->
+              <button class="menu-item settings-item" id="menuSettings">
+                <i class="fas fa-sliders-h"></i>
+                <span>Configuración</span>
+              </button>
+              <div class="menu-divider"></div>
+              <div class="menu-item" id="menuReports">
+                <i class="fas fa-chart-bar"></i>
+                <span>Ver mis reportes</span>
+              </div>
+              <button class="menu-item logout" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Cerrar sesión</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Indicador de confianza de reconocimiento facial (ring visual) -->
+        <div class="face-confidence-bar" id="faceConfidenceBar">
+          <div class="face-confidence-ring">
+            <div class="face-confidence-arc" id="faceConfidenceArc"></div>
+            <span class="face-confidence-pct" id="faceConfidencePct">0%</span>
+          </div>
+          <div class="face-confidence-label" id="faceConfidenceLabel">Analizando...</div>
+        </div>
+
+        <!-- MODAL RESULTADO FACIAL -->
+        <div id="resultadoFlotante" class="resultado-flotante">
+          <div class="resultado-header">
+            <img id="fotoColaborador" class="foto-colaborador" src="" alt="Foto">
+            <div class="info-colaborador">
+              <div id="nombreDisplay"    class="nombre-colaborador">---</div>
+              <div id="codigoDisplay">---</div>
+              <div id="tipoDisplay"      class="tipo-registro">---</div>
+              <div id="fechaHoraDisplay" class="fecha-hora">---</div>
+              <div id="parIdDisplay">---</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ALERTA BLOQUEO -->
+        <div id="bloqueoAlert" class="bloqueo-alert">
+          <i class="fas fa-ban bloqueo-icon" id="bloqueoIconEl"></i>
+          <div class="bloqueo-title"   id="bloqueoTitle">Registro Bloqueado</div>
+          <div class="bloqueo-message" id="bloqueoMessage">---</div>
+          <div class="bloqueo-detail"  id="bloqueoDetail">---</div>
+          <button class="bloqueo-close" onclick="cerrarBloqueo()">
+            <i class="fas fa-check"></i> Entendido
+          </button>
+        </div>
+
+        <!-- BOTÓN CAPTURA MANUAL -->
+        <div class="capture-btn-wrapper" id="captureBtnWrapper">
+          <button class="capture-btn" id="captureBtn" title="Captura manual">
+            <i class="fas fa-camera-retro"></i>
+          </button>
+          <span class="capture-btn-label">Captura manual</span>
+        </div>
+
+        <!-- INDICADOR ESTADO -->
+        <div class="status-indicator-large" id="statusIndicator">
+          <div class="status-icon idle" id="statusIcon"><i class="fas fa-circle"></i></div>
+          <div class="status-label" id="statusLabel">Esperando...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL CONFIRMACIÓN FACIAL ===================== -->
+  <div class="confirm-modal-overlay" id="confirmModalOverlay">
+    <div class="confirm-modal">
+      <h3><i class="fas fa-shield-alt" style="color:var(--primary)"></i> Confirmar Registro</h3>
+      <div class="confirm-photo-wrap">
+        <img id="confirmPhoto" class="confirm-photo" src="" alt="">
+        <span class="confirm-confidence-badge" id="confirmConfidenceBadge">99%</span>
+      </div>
+      <div class="confirm-name" id="confirmName">---</div>
+      <div class="confirm-code" id="confirmCode">---</div>
+      <div class="confirm-tipo-badge entrada" id="confirmTipo">ENTRADA</div>
+      <div class="confirm-info-row">
+        <span class="confirm-info-chip" id="confirmFecha">---</span>
+        <span class="confirm-info-chip" id="confirmHora">---</span>
+      </div>
+      <div class="confirm-warning" id="confirmWarning">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span id="confirmWarningText"></span>
+      </div>
+      <div class="confirm-actions">
+        <button class="confirm-btn-no"  id="confirmBtnNo"><i class="fas fa-times"></i> No soy yo</button>
+        <button class="confirm-btn-yes" id="confirmBtnYes"><i class="fas fa-check"></i> Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL BUSCADOR POR CÓDIGO ===================== -->
+  <div class="code-search-overlay" id="codeSearchOverlay">
+    <div class="code-search-modal">
+      <h3><i class="fas fa-keyboard"></i> Registrar por Código</h3>
+      <div class="code-display" id="codeDisplay">_</div>
+      <div class="code-preview" id="codePreview">
+        <img id="codePreviewImg" src="" alt="">
+        <div class="code-preview-info">
+          <div class="code-preview-name" id="codePreviewName">---</div>
+          <div class="code-preview-code" id="codePreviewCode">---</div>
+        </div>
+      </div>
+      <div class="code-confirm-hint" id="codeConfirmHint">
+        <i class="fas fa-info-circle"></i> Se pedirá confirmación antes de registrar
+      </div>
+      <div class="virtual-keyboard" id="virtualKeyboard">
+        <button class="vk-btn" data-val="1">1</button>
+        <button class="vk-btn" data-val="2">2</button>
+        <button class="vk-btn" data-val="3">3</button>
+        <button class="vk-btn" data-val="4">4</button>
+        <button class="vk-btn" data-val="5">5</button>
+        <button class="vk-btn" data-val="6">6</button>
+        <button class="vk-btn" data-val="7">7</button>
+        <button class="vk-btn" data-val="8">8</button>
+        <button class="vk-btn" data-val="9">9</button>
+        <button class="vk-btn vk-zero" data-val="0">0</button>
+        <button class="vk-btn vk-del" id="vkDel"><i class="fas fa-delete-left"></i></button>
+      </div>
+      <div class="code-search-actions">
+        <button class="code-search-btn-cancel" id="codeSearchCancel"><i class="fas fa-times"></i></button>
+        <button class="code-search-btn-register" id="codeSearchRegister" disabled>
+          <i class="fas fa-fingerprint"></i> Buscar y Registrar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL RECONFIRMACIÓN DE CÓDIGO ===================== -->
+  <div class="code-reconfirm-overlay" id="codeReconfirmOverlay">
+    <div class="code-reconfirm-modal">
+      <h3><i class="fas fa-lock"></i> Confirmar Código</h3>
+      <p class="code-reconfirm-desc">Para asegurarte de no registrar el código de otra persona, ingresa el código nuevamente:</p>
+      <div class="reconfirm-display" id="reconfirmDisplay">_</div>
+      <div class="reconfirm-error" id="reconfirmError">❌ El código no coincide. Intenta de nuevo.</div>
+      <div class="reconfirm-vk" id="reconfirmVK">
+        <button class="vk-btn" data-val="1">1</button>
+        <button class="vk-btn" data-val="2">2</button>
+        <button class="vk-btn" data-val="3">3</button>
+        <button class="vk-btn" data-val="4">4</button>
+        <button class="vk-btn" data-val="5">5</button>
+        <button class="vk-btn" data-val="6">6</button>
+        <button class="vk-btn" data-val="7">7</button>
+        <button class="vk-btn" data-val="8">8</button>
+        <button class="vk-btn" data-val="9">9</button>
+        <button class="vk-btn vk-zero" data-val="0">0</button>
+        <button class="vk-btn vk-del" id="reconfirmDel"><i class="fas fa-delete-left"></i></button>
+      </div>
+      <div style="display:flex;gap:var(--spacing-sm)">
+        <button class="code-search-btn-cancel" id="reconfirmCancel" style="flex:1;border-radius:50px;padding:var(--spacing-md);">
+          <i class="fas fa-arrow-left"></i> Atrás
+        </button>
+        <button class="code-search-btn-register" id="reconfirmConfirm" disabled style="flex:2;">
+          <i class="fas fa-check"></i> Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== PIN GATE DE CONFIGURACIÓN ===================== -->
+  <div class="settings-pin-overlay" id="settingsPinOverlay">
+    <div class="settings-pin-card">
+      <div class="pin-icon"><i class="fas fa-lock"></i></div>
+      <h3>Acceso a Configuración</h3>
+      <p>Ingresa tu PIN para continuar</p>
+      <div class="settings-pin-display" id="settingsPinDisplay">_</div>
+      <div class="settings-pin-error" id="settingsPinError">PIN incorrecto</div>
+      <div class="settings-pin-vk" id="settingsPinVK">
+        <button class="vk-btn" data-val="1">1</button>
+        <button class="vk-btn" data-val="2">2</button>
+        <button class="vk-btn" data-val="3">3</button>
+        <button class="vk-btn" data-val="4">4</button>
+        <button class="vk-btn" data-val="5">5</button>
+        <button class="vk-btn" data-val="6">6</button>
+        <button class="vk-btn" data-val="7">7</button>
+        <button class="vk-btn" data-val="8">8</button>
+        <button class="vk-btn" data-val="9">9</button>
+        <button class="vk-btn vk-zero" data-val="0">0</button>
+        <button class="vk-btn vk-del" id="settingsPinDel"><i class="fas fa-delete-left"></i></button>
+      </div>
+      <button class="settings-pin-cancel" id="settingsPinCancel">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- ===================== PANEL DE CONFIGURACIÓN ===================== -->
+  <div class="settings-panel" id="settingsPanel">
+    <div class="settings-header">
+      <button class="settings-back-btn" id="settingsBackBtn"><i class="fas fa-arrow-left"></i></button>
+      <div class="settings-header-title">
+        <h2>Configuración</h2>
+        <p>Ajustes del sistema de asistencia</p>
+      </div>
+      <i class="fas fa-sliders-h settings-header-icon"></i>
+    </div>
+    <div class="settings-body">
+
+      <!-- SECCIÓN: RECONOCIMIENTO FACIAL -->
+      <div class="settings-section">
+        <div class="settings-section-header">
+          <i class="fas fa-brain"></i>
+          <span>Reconocimiento Facial</span>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Umbral de confianza mínimo</div>
+            <div class="settings-row-desc">Porcentaje mínimo para aceptar un rostro como válido. Más alto = más seguro.</div>
+          </div>
+        </div>
+        <div style="padding:0 var(--spacing-lg) var(--spacing-md);">
+          <div class="settings-slider-wrap">
+            <div class="settings-slider-row">
+              <span style="color:var(--text-secondary);font-size:var(--text-xs);">50%</span>
+              <input type="range" class="settings-slider" id="sliderMinConf" min="50" max="99" step="1" value="70">
+              <span style="color:var(--text-secondary);font-size:var(--text-xs);">99%</span>
+              <div class="settings-slider-val" id="sliderMinConfVal">70%</div>
+            </div>
+            <div style="font-size:var(--text-xs);color:var(--text-secondary);text-align:center;">
+              Recomendado: 70–85% · Máxima seguridad: 90%+
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Umbral de precisión del matcher</div>
+            <div class="settings-row-desc">Distancia máxima para considerar dos rostros como la misma persona (menor = más estricto).</div>
+          </div>
+        </div>
+        <div style="padding:0 var(--spacing-lg) var(--spacing-md);">
+          <div class="settings-slider-wrap">
+            <div class="settings-slider-row">
+              <span style="color:var(--text-secondary);font-size:var(--text-xs);">0.3</span>
+              <input type="range" class="settings-slider" id="sliderPrecision" min="30" max="65" step="1" value="45">
+              <span style="color:var(--text-secondary);font-size:var(--text-xs);">0.65</span>
+              <div class="settings-slider-val" id="sliderPrecisionVal">0.45</div>
+            </div>
+            <div style="font-size:var(--text-xs);color:var(--text-secondary);text-align:center;">
+              Recomendado: 0.40–0.50 · Máxima seguridad: 0.30–0.35
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Escaneo múltiple (anti-confusión)</div>
+            <div class="settings-row-desc">Requiere que el mismo rostro sea detectado en varias capturas consecutivas antes de registrar. Elimina falsas coincidencias.</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggleMultiScan" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="settings-row" id="rowMultiScanCount">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Capturas requeridas para validar</div>
+            <div class="settings-row-desc">Número de detecciones consecutivas del mismo rostro para confirmar identidad.</div>
+          </div>
+        </div>
+        <div style="padding:0 var(--spacing-lg) var(--spacing-md);" id="sliderMultiScanWrap">
+          <div class="settings-slider-wrap">
+            <div class="settings-slider-row">
+              <span style="color:var(--text-secondary);font-size:var(--text-xs);">2</span>
+              <input type="range" class="settings-slider" id="sliderMultiScan" min="2" max="5" step="1" value="3">
+              <span style="color:var(--text-secondary);font-size:var(--text-xs);">5</span>
+              <div class="settings-slider-val" id="sliderMultiScanVal">3</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Intervalo de detección (ms)</div>
+            <div class="settings-row-desc">Cada cuántos milisegundos se analiza el video. Menor = más rápido pero más CPU.</div>
+          </div>
+        </div>
+        <div style="padding:0 var(--spacing-lg) var(--spacing-md);">
+          <div class="settings-slider-wrap">
+            <div class="settings-slider-row">
+              <span style="color:var(--text-secondary);font-size:var(--text-xs);">1s</span>
+              <input type="range" class="settings-slider" id="sliderInterval" min="1000" max="5000" step="500" value="2500">
+              <span style="color:var(--text-secondary);font-size:var(--text-xs);">5s</span>
+              <div class="settings-slider-val" id="sliderIntervalVal">2.5s</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Mostrar indicador de confianza</div>
+            <div class="settings-row-desc">Muestra en pantalla el porcentaje de coincidencia del rostro detectado en tiempo real.</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggleShowConfidence" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- SECCIÓN: CONFIRMACIONES -->
+      <div class="settings-section">
+        <div class="settings-section-header">
+          <i class="fas fa-shield-check"></i>
+          <span>Confirmaciones y Seguridad</span>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Modo de confirmación facial</div>
+            <div class="settings-row-desc">Elige cómo se confirmará la identidad cuando el reconocimiento facial detecte un rostro.</div>
+          </div>
+        </div>
+        <div class="confirm-type-grid">
+          <button class="confirm-type-btn active" data-conf="none" id="confTypeNone">
+            <i class="fas fa-bolt"></i>
+            Sin confirmación<br><small style="opacity:0.7">Registro instantáneo</small>
+          </button>
+          <button class="confirm-type-btn" data-conf="modal" id="confTypeModal">
+            <i class="fas fa-question-circle"></i>
+            Confirmar modal<br><small style="opacity:0.7">Muestra quién es, acepta/rechaza</small>
+          </button>
+          <button class="confirm-type-btn" data-conf="code" id="confTypeCode">
+            <i class="fas fa-keyboard"></i>
+            Código adicional<br><small style="opacity:0.7">Digita código si no eres tú</small>
+          </button>
+          <button class="confirm-type-btn" data-conf="both" id="confTypeBoth">
+            <i class="fas fa-lock"></i>
+            Modal + Código<br><small style="opacity:0.7">Máxima seguridad</small>
+          </button>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Confirmación en búsqueda por nombre</div>
+            <div class="settings-row-desc">Muestra confirmación antes de registrar cuando se usa el buscador por nombre.</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggleConfirmSearch" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Doble verificación de código</div>
+            <div class="settings-row-desc">Al registrar por código, pide ingresarlo dos veces para evitar errores.</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggleDoubleCode" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Cooldown entre registros (segundos)</div>
+            <div class="settings-row-desc">Tiempo de espera por colaborador entre registros consecutivos.</div>
+          </div>
+        </div>
+        <div style="padding:0 var(--spacing-lg) var(--spacing-md);">
+          <div class="settings-slider-wrap">
+            <div class="settings-slider-row">
+              <span style="color:var(--text-secondary);font-size:var(--text-xs);">10s</span>
+              <input type="range" class="settings-slider" id="sliderCooldown" min="10" max="300" step="10" value="60">
+              <span style="color:var(--text-secondary);font-size:var(--text-xs);">300s</span>
+              <div class="settings-slider-val" id="sliderCooldownVal">60s</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN: COMPORTAMIENTO -->
+      <div class="settings-section">
+        <div class="settings-section-header">
+          <i class="fas fa-cogs"></i>
+          <span>Comportamiento General</span>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Límite de horas de turno</div>
+            <div class="settings-row-desc">Si la última entrada fue hace más de este número de horas, la próxima marcación será entrada nueva.</div>
+          </div>
+        </div>
+        <div style="padding:0 var(--spacing-lg) var(--spacing-md);">
+          <div class="settings-slider-wrap">
+            <div class="settings-slider-row">
+              <span style="color:var(--text-secondary);font-size:var(--text-xs);">6h</span>
+              <input type="range" class="settings-slider" id="sliderShiftLimit" min="6" max="24" step="1" value="16">
+              <span style="color:var(--text-secondary);font-size:var(--text-xs);">24h</span>
+              <div class="settings-slider-val" id="sliderShiftLimitVal">16h</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Sonido al registrar</div>
+            <div class="settings-row-desc">Emite un pitido de confirmación al completar un registro.</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggleSound">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Flash de captura</div>
+            <div class="settings-row-desc">Muestra un destello visual al capturar manualmente.</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggleFlash" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+    </div><!-- /settings-body -->
+    <div class="settings-save-bar">
+      <button class="settings-save-btn" id="settingsSaveBtn">
+        <i class="fas fa-save"></i> Guardar configuración
+      </button>
+    </div>
+  </div><!-- /settings-panel -->
+
+  <div class="toast" id="toastNotification"></div>
+  <div class="capture-flash" id="captureFlash"></div>
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div id="loadingText">Cargando...</div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import {
+      getFirestore, collection, getDocs, addDoc,
+      query, where, Timestamp, onSnapshot
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey:            "AIzaSyAMTWJr3mISmNiP-e_KjCO9BdBPi7Uuug4",
+      authDomain:        "formulario-2-8929a.firebaseapp.com",
+      projectId:         "formulario-2-8929a",
+      storageBucket:     "formulario-2-8929a.appspot.com",
+      messagingSenderId: "136908102526",
+      appId:             "1:136908102526:web:d0a3bc1e3cb91a3fcab12f"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
+
+    /* =================================================================
+       CONFIGURACIÓN DINÁMICA (persiste en localStorage)
+    ================================================================= */
+    const DEFAULT_SETTINGS = {
+      UMBRAL_PRECISION:    0.45,   // distancia matcher (más bajo = más estricto)
+      DETECTION_INTERVAL:  2500,
+      COOLDOWN_SEGUNDOS:   60,
+      MIN_CONFIDENCE:      0.70,   // porcentaje mínimo aceptado
+      MULTI_SCAN_ENABLED:  true,
+      MULTI_SCAN_COUNT:    3,      // capturas consecutivas requeridas
+      CONFIRM_MODE:        'none', // 'none'|'modal'|'code'|'both'
+      CONFIRM_SEARCH:      true,
+      DOUBLE_CODE:         true,
+      SHIFT_LIMIT_HOURS:   16,
+      SOUND_ENABLED:       false,
+      FLASH_ENABLED:       true,
+      SHOW_CONFIDENCE:     true
+    };
+
+    let CONFIG = { ...DEFAULT_SETTINGS };
+
+    function loadSettings() {
+      try {
+        const saved = localStorage.getItem('asistenciaSettings');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          CONFIG = { ...DEFAULT_SETTINGS, ...parsed };
+        }
+      } catch (e) { CONFIG = { ...DEFAULT_SETTINGS }; }
+    }
+
+    function saveSettings() {
+      try { localStorage.setItem('asistenciaSettings', JSON.stringify(CONFIG)); } catch (e) {}
+    }
+
+    loadSettings();
+
+    /* =================================================================
+       VARIABLES GLOBALES
+    ================================================================= */
+    let faceMatcher         = null;
+    let employeesData       = new Map();
+    let isProcessing        = false;
+    let processingMap       = new Map();
+    let videoStarted        = false;
+    let detectionInterval   = null;
+    let modelosCargados     = false;
+    let currentUser         = null;
+    let multiScanBuffer     = {};  // { codigo: consecutiveCount }
+    let lastMultiLabel      = null;
+
+    // Cola de confirmación pendiente (para modal de confirmación facial)
+    let pendingConfirmData  = null;
+    // Cola de código pendiente (para reconfirmación de código)
+    let pendingCodeData     = null;
+
+    const MODEL_URL = 'https://raw.githubusercontent.com/vladmandic/face-api/master/model/';
+    const NOMBRES_DIAS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+
+    /* =================================================================
+       DOM
+    ================================================================= */
+    const video             = document.getElementById('videoFacial');
+    const loadingOverlay    = document.getElementById('loadingOverlay');
+    const loadingText       = document.getElementById('loadingText');
+    const toast             = document.getElementById('toastNotification');
+    const resultadoFlotante = document.getElementById('resultadoFlotante');
+    const loginScreen       = document.getElementById('loginScreen');
+    const appScreen         = document.getElementById('appScreen');
+    const usernameInput     = document.getElementById('username');
+    const passwordInput     = document.getElementById('password');
+    const loginBtn          = document.getElementById('loginBtn');
+    const loginAlert        = document.getElementById('loginAlert');
+    const logoutBtn         = document.getElementById('logoutBtn');
+    const companyNameSpan   = document.getElementById('companyName');
+    const menuButton        = document.getElementById('menuButton');
+    const menuModal         = document.getElementById('menuModal');
+    const menuUserName      = document.getElementById('menuUserName');
+    const menuReports       = document.getElementById('menuReports');
+    const searchInput       = document.getElementById('searchInput');
+    const searchBtn         = document.getElementById('searchBtn');
+    const searchResults     = document.getElementById('searchResults');
+    const statusIcon        = document.getElementById('statusIcon');
+    const statusLabel       = document.getElementById('statusLabel');
+
+    /* =================================================================
+       UTILIDADES
+    ================================================================= */
+    function showToast(message, type = 'success') {
+      toast.textContent       = message;
+      toast.style.background  = type === 'success' ? 'rgba(22,224,134,0.2)' : 'rgba(231,76,60,0.2)';
+      toast.style.borderColor = type === 'success' ? 'var(--primary)'       : 'var(--danger)';
+      toast.style.display     = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 3000);
+    }
+
+    function showLoading(msg = 'Cargando...') { loadingText.textContent = msg; loadingOverlay.style.display = 'flex'; }
+    function hideLoading()                    { loadingOverlay.style.display = 'none'; }
+
+    function updateStatusIndicator(type, message) {
+      if (!statusIcon || !statusLabel) return;
+      statusIcon.className = 'status-icon';
+      if (type === 'success') {
+        statusIcon.classList.add('success');
+        statusIcon.innerHTML    = '<i class="fas fa-check-circle"></i>';
+        statusLabel.textContent = message || 'Registro exitoso';
+      } else if (type === 'error') {
+        statusIcon.classList.add('error');
+        statusIcon.innerHTML    = '<i class="fas fa-times-circle"></i>';
+        statusLabel.textContent = message || 'Error en registro';
+      } else {
+        statusIcon.classList.add('idle');
+        statusIcon.innerHTML    = '<i class="fas fa-circle"></i>';
+        statusLabel.textContent = message || 'Esperando...';
+      }
+      if (type !== 'idle') {
+        setTimeout(() => {
+          statusIcon.className    = 'status-icon idle';
+          statusIcon.innerHTML    = '<i class="fas fa-circle"></i>';
+          statusLabel.textContent = 'Esperando...';
+        }, 3000);
+      }
+    }
+
+    function playBeep() {
+      if (!CONFIG.SOUND_ENABLED) return;
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.3);
+      } catch (e) {}
+    }
+
+    function getFechaHora() {
+      const ahora       = Timestamp.now();
+      const fechaActual = ahora.toDate();
+      const year    = fechaActual.getFullYear();
+      const month   = String(fechaActual.getMonth() + 1).padStart(2, '0');
+      const day     = String(fechaActual.getDate()).padStart(2, '0');
+      const hours   = String(fechaActual.getHours()).padStart(2, '0');
+      const minutes = String(fechaActual.getMinutes()).padStart(2, '0');
+      const seconds = String(fechaActual.getSeconds()).padStart(2, '0');
+      return {
+        timestamp: ahora,
+        fecha: `${year}-${month}-${day}`,
+        hora:  `${hours}:${minutes}:${seconds}`
+      };
+    }
+
+    /* =================================================================
+       INDICADOR DE CONFIANZA EN TIEMPO REAL
+    ================================================================= */
+    const faceConfidenceBar  = document.getElementById('faceConfidenceBar');
+    const faceConfidenceArc  = document.getElementById('faceConfidenceArc');
+    const faceConfidencePct  = document.getElementById('faceConfidencePct');
+    const faceConfidenceLbl  = document.getElementById('faceConfidenceLabel');
+    let   confidenceHideTimer = null;
+
+    function showConfidenceIndicator(confidence, label) {
+      if (!CONFIG.SHOW_CONFIDENCE) return;
+      const pct     = Math.round(confidence * 100);
+      const degrees = Math.round(pct * 3.6);
+      const color   = pct >= 85 ? '#16e086' : pct >= 70 ? '#f39c12' : '#e74c3c';
+      faceConfidenceArc.style.background = `conic-gradient(${color} ${degrees}deg, transparent ${degrees}deg)`;
+      faceConfidencePct.textContent      = `${pct}%`;
+      faceConfidencePct.style.color      = color;
+      faceConfidenceLbl.textContent      = label || 'Analizando...';
+      faceConfidenceBar.classList.add('show');
+      if (confidenceHideTimer) clearTimeout(confidenceHideTimer);
+      confidenceHideTimer = setTimeout(() => faceConfidenceBar.classList.remove('show'), 3000);
+    }
+
+    /* =================================================================
+       MENÚ
+    ================================================================= */
+    document.addEventListener('click', (e) => {
+      if (menuModal && menuButton && !menuButton.contains(e.target) && !menuModal.contains(e.target)) {
+        menuModal.classList.remove('show');
+      }
+    });
+    if (menuButton) {
+      menuButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        menuModal.classList.toggle('show');
+      });
+    }
+
+    /* =================================================================
+       LOGIN / LOGOUT
+    ================================================================= */
+    async function authenticateUser(username, pin) {
+      showLoading('Verificando credenciales...');
+      try {
+        const q = query(
+          collection(db, 'Collaborators'),
+          where('username', '==', username),
+          where('pin',      '==', pin)
+        );
+        const snapshot = await getDocs(q);
+        if (snapshot.empty) throw new Error('Usuario o PIN incorrectos');
+        const userDoc  = snapshot.docs[0];
+        const userData = userDoc.data();
+        return {
+          uid:      userDoc.id,
+          username: userData.username,
+          pin:      pin,
+          name:     userData.companyName || `${userData.firstName||''} ${userData.lastName||''}`.trim() || username,
+          tipo:     'admin'
+        };
+      } catch (error) {
+        console.error('Login error:', error);
+        throw error;
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function loadSavedSession() {
+      const saved = localStorage.getItem('currentUserAsistencia');
+      if (saved) { try { return JSON.parse(saved); } catch { return null; } }
+      return null;
+    }
+
+    async function initWithUser(user) {
+      currentUser = user;
+      companyNameSpan.textContent = user.name.split(' ')[0];
+      if (menuUserName) menuUserName.textContent = user.name;
+      loginScreen.style.display = 'none';
+      appScreen.style.display   = 'block';
+      await cargarModelos();
+      await iniciarCamara();
+      await iniciarEscuchaEmpleados();
+      iniciarDeteccion();
+      passwordInput.value      = '';
+      loginAlert.style.display = 'none';
+      updateStatusIndicator('idle');
+      showToast(`Bienvenido, ${user.name}`, 'success');
+      applySettingsToUI();
+    }
+
+    const savedUser = loadSavedSession();
+    if (savedUser) { initWithUser(savedUser); }
+
+    loginBtn.addEventListener('click', async () => {
+      const username = usernameInput.value.trim();
+      const pin      = passwordInput.value.trim();
+      if (!username || !pin) {
+        loginAlert.textContent   = 'Complete todos los campos';
+        loginAlert.style.display = 'block';
+        return;
+      }
+      try {
+        const userData = await authenticateUser(username, pin);
+        localStorage.setItem('currentUserAsistencia', JSON.stringify(userData));
+        await initWithUser(userData);
+      } catch (error) {
+        loginAlert.textContent   = error.message;
+        loginAlert.style.display = 'block';
+        updateStatusIndicator('error', 'Error de login');
+      }
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('currentUserAsistencia');
+      currentUser               = null;
+      appScreen.style.display   = 'none';
+      loginScreen.style.display = 'flex';
+      usernameInput.value       = '';
+      passwordInput.value       = '';
+      menuModal.classList.remove('show');
+      if (detectionInterval) clearInterval(detectionInterval);
+      if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+      updateStatusIndicator('idle');
+    });
+
+    if (menuReports) {
+      menuReports.addEventListener('click', () => {
+        if (currentUser) { window.location.href = 'reportes.html'; }
+        else { showToast('Debe iniciar sesión primero', 'error'); }
+      });
+    }
+
+    usernameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') passwordInput.focus(); });
+    passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') loginBtn.click(); });
+
+    /* =================================================================
+       MODELOS Y CÁMARA
+    ================================================================= */
+    async function cargarModelos() {
+      showLoading('Cargando modelos de reconocimiento facial...');
+      try {
+        await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+        modelosCargados = true;
+      } catch (error) {
+        console.error('Error cargando modelos:', error);
+        showToast('Error cargando modelos', 'error');
+        updateStatusIndicator('error', 'Error cargando modelos');
+      } finally { hideLoading(); }
+    }
+
+    async function iniciarCamara() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
+        });
+        video.srcObject = stream;
+        return new Promise((resolve) => {
+          video.onloadedmetadata = () => { video.play(); videoStarted = true; resolve(); };
+        });
+      } catch (error) {
+        console.error('Error cámara:', error);
+        showToast('Error al acceder a la cámara', 'error');
+        updateStatusIndicator('error', 'Error de cámara');
+      }
+    }
+
+    /* =================================================================
+       ESCUCHA EN TIEMPO REAL EMPLEADOS
+       Recupera todos los campos desde colección 'Ponche' — igual que antes.
+    ================================================================= */
+    function iniciarEscuchaEmpleados() {
+      if (!currentUser) return;
+      const q = query(collection(db, 'Ponche'), where('collaboratorId', '==', currentUser.uid));
+      onSnapshot(q, (snapshot) => {
+        const descriptors = [];
+        employeesData.clear();
+        const promises = [];
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          if (data.fotoBase64 && data.username) {
+            employeesData.set(data.username, {
+              id:                     docSnap.id,
+              firstName:              data.firstName              || '',
+              lastName:               data.lastName               || '',
+              fotoBase64:             data.fotoBase64,
+              turnoHoras:             data.turnoHoras             || 8,
+              collaboratorId:         data.collaboratorId,
+              activo:                 data.activo !== false,
+              status:                 data.status  || 'active',
+              diasSemanaNoLaborables: data.diasSemanaNoLaborables || [],
+              diasMensualesLibres:    data.diasMensualesLibres    || [],
+              menMode:                data.menMode                || 'auto',
+              tipoLibre:              data.tipoLibre              || null,
+              fechaInicioLibre:       data.fechaInicioLibre       || null,
+              fechaFinLibre:          data.fechaFinLibre          || null,
+              motivoLibre:            data.motivoLibre            || ''
+            });
+
+            if (data.activo !== false && data.status !== 'inactive') {
+              const img = new Image();
+              img.src = data.fotoBase64;
+              const promise = new Promise((resolve) => {
+                img.onload = async () => {
+                  try {
+                    const detection = await faceapi
+                      .detectSingleFace(img)
+                      .withFaceLandmarks()
+                      .withFaceDescriptor();
+                    if (detection) {
+                      descriptors.push(
+                        new faceapi.LabeledFaceDescriptors(data.username, [detection.descriptor])
+                      );
+                    }
+                  } catch (err) { console.error('Error detectando rostro en foto:', err); }
+                  resolve();
+                };
+                img.onerror = resolve;
+              });
+              promises.push(promise);
+            }
+          }
+        });
+
+        Promise.all(promises).then(() => {
+          if (descriptors.length > 0) {
+            /* Usar el umbral de precisión configurado dinámicamente */
+            faceMatcher = new faceapi.FaceMatcher(descriptors, CONFIG.UMBRAL_PRECISION);
+            console.log('✅ FaceMatcher actualizado con', descriptors.length, 'empleados | umbral:', CONFIG.UMBRAL_PRECISION);
+          }
+        });
+      });
+    }
+
+    /* Reconstruir FaceMatcher con nueva configuración sin recargar desde Firebase */
+    function reconstruirFaceMatcher() {
+      if (!faceMatcher) return;
+      const descriptors = faceMatcher.labeledDescriptors;
+      if (descriptors && descriptors.length > 0) {
+        faceMatcher = new faceapi.FaceMatcher(descriptors, CONFIG.UMBRAL_PRECISION);
+        console.log('🔄 FaceMatcher reconstruido | nuevo umbral:', CONFIG.UMBRAL_PRECISION);
+      }
+    }
+
+    /* =================================================================
+       VERIFICAR BLOQUEOS — sin cambios de lógica respecto al original
+    ================================================================= */
+    function verificarBloqueos(codigo) {
+      const emp = employeesData.get(codigo);
+      if (!emp) {
+        return { bloqueado: true, mensaje: 'Colaborador no encontrado', detalle: 'Verifica el código ingresado.', tipo: 'no_encontrado' };
+      }
+      const hoy       = new Date(); hoy.setHours(0,0,0,0);
+      const diaSemana = hoy.getDay();
+      const diaDelMes = hoy.getDate();
+
+      if (emp.activo === false || emp.status === 'inactive') {
+        return { bloqueado: true, mensaje: 'Tu cuenta está inactiva', detalle: 'Contacta al administrador para reactivarla.', tipo: 'inactivo' };
+      }
+      const diasMensuales = emp.diasMensualesLibres || [];
+      if (emp.menMode !== 'manual' && diasMensuales.includes(diaDelMes)) {
+        return { bloqueado: true, mensaje: `Hoy es tu día libre mensual (día ${diaDelMes})`, detalle: `📅 Día ${diaDelMes} de cada mes — Modo automático\nNo necesitas registrar asistencia hoy.`, tipo: 'libre-mensual' };
+      }
+      if (emp.tipoLibre && emp.fechaInicioLibre && emp.fechaFinLibre) {
+        const inicio = new Date(emp.fechaInicioLibre + 'T00:00:00'); inicio.setHours(0,0,0,0);
+        const fin    = new Date(emp.fechaFinLibre    + 'T00:00:00'); fin.setHours(23,59,59,999);
+        if (hoy >= inicio && hoy <= fin) {
+          const diasRestantes = Math.ceil((fin - hoy) / (1000*60*60*24));
+          const diasTotales   = Math.round((new Date(emp.fechaFinLibre+'T00:00:00') - new Date(emp.fechaInicioLibre+'T00:00:00')) / (1000*60*60*24)) + 1;
+          const info = {
+            vacaciones: { mensaje: '🏖 Estás de vacaciones', detalle: `📅 ${emp.fechaInicioLibre} → ${emp.fechaFinLibre}\n⏳ ${diasRestantes} día${diasRestantes!==1?'s':''} restantes de ${diasTotales} en total${emp.motivoLibre?'\n📝 '+emp.motivoLibre:''}`, tipo: 'vacaciones' },
+            licencia:   { mensaje: '🏥 Tienes una licencia médica activa', detalle: `📅 ${emp.fechaInicioLibre} → ${emp.fechaFinLibre}\n⏳ ${diasRestantes} día${diasRestantes!==1?'s':''} restantes de ${diasTotales} en total${emp.motivoLibre?'\n📝 '+emp.motivoLibre:''}`, tipo: 'licencia' },
+            permiso:    { mensaje: '⏱ Tienes un permiso autorizado', detalle: `📅 ${emp.fechaInicioLibre} → ${emp.fechaFinLibre}\n⏳ ${diasRestantes} día${diasRestantes!==1?'s':''} restantes de ${diasTotales} en total${emp.motivoLibre?'\n📝 '+emp.motivoLibre:''}`, tipo: 'permiso' },
+            diaslibres: { mensaje: '☀ Tienes días libres asignados', detalle: `📅 ${emp.fechaInicioLibre} → ${emp.fechaFinLibre}\n⏳ ${diasRestantes} día${diasRestantes!==1?'s':''} restantes de ${diasTotales} en total${emp.motivoLibre?'\n📝 '+emp.motivoLibre:''}`, tipo: 'diaslibres' }
+          };
+          const datosBloq = info[emp.tipoLibre] || { mensaje: '📵 No disponible hoy', detalle: `${diasRestantes} día${diasRestantes!==1?'s':''} restantes.`, tipo: 'ausencia' };
+          return { bloqueado: true, ...datosBloq };
+        }
+      }
+      const diasNoLab = emp.diasSemanaNoLaborables || [];
+      if (diasNoLab.includes(diaSemana)) {
+        return { bloqueado: true, mensaje: `Hoy es ${NOMBRES_DIAS[diaSemana]} — día no laborable`, detalle: `🚫 Días no laborables configurados:\n${diasNoLab.map(d=>NOMBRES_DIAS[d]).join(', ')}`, tipo: 'dia-semana' };
+      }
+      return { bloqueado: false, emp };
+    }
+
+    /* =================================================================
+       MOSTRAR ALERTA DE BLOQUEO
+    ================================================================= */
+    function mostrarBloqueo(info) {
+      const alertEl = document.getElementById('bloqueoAlert');
+      const iconEl  = document.getElementById('bloqueoIconEl');
+      const iconos  = { inactivo:'fas fa-user-slash', vacaciones:'fas fa-umbrella-beach', licencia:'fas fa-file-medical', permiso:'fas fa-clock', diaslibres:'fas fa-sun', 'libre-mensual':'fas fa-rotate', 'dia-semana':'fas fa-ban', no_encontrado:'fas fa-user-question' };
+      alertEl.className = 'bloqueo-alert';
+      if (info.tipo) alertEl.classList.add(`tipo-${info.tipo}`);
+      iconEl.className = `${iconos[info.tipo]||'fas fa-ban'} bloqueo-icon`;
+      document.getElementById('bloqueoTitle').textContent   = '⛔ Registro No Permitido';
+      document.getElementById('bloqueoMessage').textContent = info.mensaje;
+      document.getElementById('bloqueoDetail').textContent  = info.detalle || '';
+      alertEl.style.display = 'flex';
+      updateStatusIndicator('error', 'Registro bloqueado');
+    }
+
+    window.cerrarBloqueo = function() {
+      document.getElementById('bloqueoAlert').style.display = 'none';
+    };
+
+    /* =================================================================
+       COOLDOWN POR COLABORADOR
+    ================================================================= */
+    function verificarCooldown(codigo) {
+      const ultimoRegistro = processingMap.get(codigo);
+      if (!ultimoRegistro) return true;
+      const diffSeg = (new Date() - ultimoRegistro) / 1000;
+      if (diffSeg < CONFIG.COOLDOWN_SEGUNDOS) {
+        const seg = Math.ceil(CONFIG.COOLDOWN_SEGUNDOS - diffSeg);
+        showToast(`⏳ ${seg}s para próximo registro`, 'error');
+        return false;
+      }
+      return true;
+    }
+
+    function marcarCooldown(codigo) { processingMap.set(codigo, new Date()); }
+
+    /* =================================================================
+       DETERMINAR TIPO: ENTRADA o SALIDA (consulta Firebase — sin cambios)
+    ================================================================= */
+    async function determinarTipoRegistro(codigo) {
+      if (!currentUser) return { tipo: 'entry', parId: `PAR_${codigo}_${Date.now()}` };
+      try {
+        const q = query(
+          collection(db, 'facialAttendance'),
+          where('collaboratorCode', '==', codigo),
+          where('collaboratorId',   '==', currentUser.uid)
+        );
+        const snapshot = await getDocs(q);
+        if (snapshot.empty) {
+          return { tipo: 'entry', parId: `PAR_${codigo}_${Date.now()}` };
+        }
+        const docs = snapshot.docs
+          .map(d => ({ ...d.data(), _ts: d.data().timestamp?.toDate() || new Date(0) }))
+          .sort((a, b) => b._ts - a._ts);
+        const ultimo     = docs[0];
+        const ultimoTipo = ultimo.type;
+        const ultimoParId= ultimo.parId;
+        const diffHoras  = (new Date() - ultimo._ts) / 3600000;
+
+        if (ultimoTipo === 'entry' && diffHoras <= CONFIG.SHIFT_LIMIT_HOURS) {
+          return { tipo: 'exit', parId: ultimoParId };
+        }
+        if (ultimoTipo === 'entry' && diffHoras > CONFIG.SHIFT_LIMIT_HOURS) {
+          return { tipo: 'entry', parId: `PAR_${codigo}_${Date.now()}` };
+        }
+        if (ultimoTipo === 'exit') {
+          return { tipo: 'entry', parId: `PAR_${codigo}_${Date.now()}` };
+        }
+        if (diffHoras <= CONFIG.SHIFT_LIMIT_HOURS) {
+          return { tipo: 'exit', parId: ultimoParId || `PAR_${codigo}_${Date.now()}` };
+        }
+        return { tipo: 'entry', parId: `PAR_${codigo}_${Date.now()}` };
+      } catch (error) {
+        console.error('Error determinando tipo de registro:', error);
+        return { tipo: 'entry', parId: `PAR_${codigo}_${Date.now()}` };
+      }
+    }
+
+    /* =================================================================
+       GUARDAR REGISTRO EN FIREBASE — misma colección y mismos campos
+    ================================================================= */
+    async function guardarRegistroFirebase(codigo, confianza, metodo) {
+      const verificacion = verificarBloqueos(codigo);
+      if (verificacion.bloqueado) { mostrarBloqueo(verificacion); return false; }
+      const userData = verificacion.emp;
+      if (!userData) { showToast('❌ Empleado no encontrado', 'error'); return false; }
+
+      if (!verificarCooldown(codigo)) return false;
+
+      const { tipo, parId } = await determinarTipoRegistro(codigo);
+      const { timestamp, fecha, hora } = getFechaHora();
+
+      const attendanceData = {
+        collaboratorId:   currentUser.uid,
+        collaboratorName: currentUser.name,
+        collaboratorCode: codigo,
+        employeeName:     `${userData.firstName||''} ${userData.lastName||''}`.trim() || codigo,
+        employeeId:       userData.id,
+        timestamp,
+        fecha,
+        hora,
+        type:             tipo,
+        confidence:       confianza,
+        method:           metodo,
+        turnoHoras:       userData.turnoHoras || 8,
+        device:           'TensorFlow.js',
+        parId,
+        registroId:       `${codigo}_${Date.now()}`
+      };
+
+      await addDoc(collection(db, 'facialAttendance'), attendanceData);
+      console.log('✅ Registro guardado:', tipo.toUpperCase(), codigo, fecha, hora, '| método:', metodo);
+      marcarCooldown(codigo);
+      mostrarResultadoUI(codigo, tipo, parId, fecha, hora, userData);
+      playBeep();
+      return true;
+    }
+
+    function mostrarResultadoUI(codigo, tipo, parId, fecha, hora, userData) {
+      document.getElementById('nombreDisplay').textContent =
+        `${userData.firstName||''} ${userData.lastName||''}`.trim() || codigo;
+      document.getElementById('codigoDisplay').textContent = `Código: ${codigo}`;
+      if (userData.fotoBase64) document.getElementById('fotoColaborador').src = userData.fotoBase64;
+      const tipoLabel = document.getElementById('tipoDisplay');
+      tipoLabel.textContent = tipo === 'entry' ? '✅ ENTRADA' : '🚪 SALIDA';
+      tipoLabel.className   = `tipo-registro ${tipo === 'entry' ? 'entrada' : 'salida'}`;
+      document.getElementById('fechaHoraDisplay').textContent = `📅 ${fecha} ${hora}`;
+      document.getElementById('parIdDisplay').textContent     = `Par: ${parId.slice(-8)}`;
+      resultadoFlotante.style.display = 'flex';
+      setTimeout(() => { resultadoFlotante.style.display = 'none'; }, 5000);
+      updateStatusIndicator('success', tipo === 'entry' ? 'Entrada registrada' : 'Salida registrada');
+      showToast(`✅ ${tipo === 'entry' ? 'ENTRADA' : 'SALIDA'} registrada`, 'success');
+    }
+
+    /* =================================================================
+       MODAL DE CONFIRMACIÓN FACIAL
+       Muestra la foto del colaborador reconocido con su confianza
+       y pide confirmar antes de registrar.
+    ================================================================= */
+    const confirmModalOverlay = document.getElementById('confirmModalOverlay');
+    const confirmPhoto        = document.getElementById('confirmPhoto');
+    const confirmConfBadge    = document.getElementById('confirmConfidenceBadge');
+    const confirmName         = document.getElementById('confirmName');
+    const confirmCode         = document.getElementById('confirmCode');
+    const confirmTipo         = document.getElementById('confirmTipo');
+    const confirmFecha        = document.getElementById('confirmFecha');
+    const confirmHora         = document.getElementById('confirmHora');
+    const confirmWarning      = document.getElementById('confirmWarning');
+    const confirmWarningText  = document.getElementById('confirmWarningText');
+    const confirmBtnYes       = document.getElementById('confirmBtnYes');
+    const confirmBtnNo        = document.getElementById('confirmBtnNo');
+
+    async function mostrarConfirmacionFacial(codigo, confianza, metodo) {
+      const emp = employeesData.get(codigo);
+      if (!emp) return;
+      const { tipo } = await determinarTipoRegistro(codigo);
+      const now = new Date();
+      const fecha = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+      const hora  = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+      confirmPhoto.src          = emp.fotoBase64 || '';
+      confirmConfBadge.textContent = `${Math.round(confianza * 100)}%`;
+      confirmConfBadge.style.background = confianza >= 0.90 ? 'linear-gradient(135deg,#0da85c,#16e086)' : confianza >= 0.75 ? 'linear-gradient(135deg,#ca8a04,#f59e0b)' : 'linear-gradient(135deg,#b91c1c,#ef4444)';
+      confirmName.textContent   = `${emp.firstName||''} ${emp.lastName||''}`.trim() || codigo;
+      confirmCode.textContent   = `Código: ${codigo}`;
+      confirmTipo.textContent   = tipo === 'entry' ? '✅ ENTRADA' : '🚪 SALIDA';
+      confirmTipo.className     = `confirm-tipo-badge ${tipo === 'entry' ? 'entrada' : 'salida'}`;
+      confirmFecha.textContent  = `📅 ${fecha}`;
+      confirmHora.textContent   = `🕐 ${hora}`;
+
+      // Advertencia si la confianza es baja
+      if (confianza < 0.82) {
+        confirmWarningText.textContent = `Confianza baja: ${Math.round(confianza*100)}%. Verifica que eres la persona correcta.`;
+        confirmWarning.classList.add('show');
+      } else {
+        confirmWarning.classList.remove('show');
+      }
+
+      pendingConfirmData = { codigo, confianza, metodo };
+      confirmModalOverlay.classList.add('show');
+    }
+
+    confirmBtnYes.addEventListener('click', async () => {
+      confirmModalOverlay.classList.remove('show');
+      if (!pendingConfirmData) return;
+      const { codigo, confianza, metodo } = pendingConfirmData;
+      pendingConfirmData = null;
+      isProcessing = true;
+      try {
+        await guardarRegistroFirebase(codigo, confianza, metodo);
+      } catch (e) {
+        console.error(e);
+        showToast('❌ Error al registrar', 'error');
+      } finally {
+        isProcessing = false;
+      }
+    });
+
+    confirmBtnNo.addEventListener('click', () => {
+      confirmModalOverlay.classList.remove('show');
+      pendingConfirmData = null;
+      isProcessing = false;
+      showToast('❌ Registro cancelado', 'error');
+      updateStatusIndicator('error', 'Cancelado por usuario');
+    });
+
+    /* =================================================================
+       PROCESAR REGISTRO FACIAL (con lógica multi-scan y confirmación)
+    ================================================================= */
+    async function procesarRegistro(codigo, confianza = 1.0, metodo = 'facial') {
+      if (isProcessing || !currentUser) return;
+
+      // Verificar bloqueo antes de cualquier cosa
+      const verificacion = verificarBloqueos(codigo);
+      if (verificacion.bloqueado) {
+        mostrarBloqueo(verificacion);
+        return;
+      }
+
+      if (!verificarCooldown(codigo)) return;
+
+      // Lógica según modo de confirmación configurado
+      const modo = CONFIG.CONFIRM_MODE;
+
+      if (modo === 'none') {
+        // Registro instantáneo sin confirmación
+        isProcessing = true;
+        try {
+          await guardarRegistroFirebase(codigo, confianza, metodo);
+        } catch (e) {
+          console.error(e);
+          showToast('❌ Error al registrar', 'error');
+          updateStatusIndicator('error', 'Error en registro');
+        } finally {
+          isProcessing = false;
+        }
+      } else if (modo === 'modal' || modo === 'both') {
+        // Mostrar modal de confirmación visual
+        isProcessing = true;
+        await mostrarConfirmacionFacial(codigo, confianza, metodo);
+        // isProcessing se libera en los handlers del modal
+      } else if (modo === 'code') {
+        // Abrir buscador por código adicional (el colaborador escribe su código)
+        isProcessing = true;
+        showToast('⚠️ Confirma con tu código', 'error');
+        abrirBuscadorCodigo(codigo);
+      }
+    }
+
+    /* =================================================================
+       BUSCADOR EN MENÚ (solo por nombre — sin filtrado al escribir código)
+       El campo searchInput es para nombre. Al dar clic en buscar
+       muestra resultados; el ícono de fingerprint registra directamente.
+    ================================================================= */
+    function realizarBusqueda() {
+      const termino = searchInput.value.trim().toLowerCase();
+      if (!termino) { searchResults.innerHTML = ''; return; }
+      const resultados = [];
+      employeesData.forEach((emp, codigo) => {
+        const nombre = `${emp.firstName||''} ${emp.lastName||''}`.toLowerCase();
+        // Solo buscar por nombre (NO filtrar si escribe números/código)
+        if (nombre.includes(termino)) {
+          resultados.push({ codigo, ...emp });
+        }
+      });
+      if (resultados.length === 0) {
+        searchResults.innerHTML = '<div style="padding:10px;color:var(--text-secondary);text-align:center;">No encontrado</div>';
+        return;
+      }
+      searchResults.innerHTML = resultados.map(emp => {
+        const blqCheck = verificarBloqueos(emp.codigo);
+        const blqBadge = blqCheck.bloqueado
+          ? `<span style="background:rgba(231,76,60,0.2);color:#e74c3c;font-size:10px;padding:2px 6px;border-radius:10px;border:1px solid rgba(231,76,60,0.4);">⛔ Bloqueado</span>`
+          : `<span style="background:rgba(22,224,134,0.15);color:#16e086;font-size:10px;padding:2px 6px;border-radius:10px;border:1px solid rgba(22,224,134,0.3);">✅ Activo</span>`;
+        return `
+          <div class="search-result-item">
+            <img src="${emp.fotoBase64||'https://via.placeholder.com/35'}" alt="">
+            <div class="search-result-info">
+              <div class="search-result-name">${emp.firstName||''} ${emp.lastName||''}</div>
+              <div class="search-result-code">${emp.codigo} &nbsp;${blqBadge}</div>
+            </div>
+            <button class="search-result-punch"
+                    onclick="event.stopPropagation(); registrarDesdeBusqueda('${emp.codigo}')"
+                    title="Registrar">
+              <i class="fas fa-fingerprint"></i>
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.registrarDesdeBusqueda = async function(codigo) {
+      menuModal.classList.remove('show');
+      searchInput.value       = '';
+      searchResults.innerHTML = '';
+      // Si confirmación de búsqueda está activa, usar modal
+      if (CONFIG.CONFIRM_SEARCH) {
+        const verificacion = verificarBloqueos(codigo);
+        if (verificacion.bloqueado) { mostrarBloqueo(verificacion); return; }
+        if (!verificarCooldown(codigo)) return;
+        isProcessing = true;
+        await mostrarConfirmacionFacial(codigo, 1.0, 'manual');
+      } else {
+        await procesarRegistroDirecto(codigo, 1.0, 'manual');
+      }
+    };
+
+    // Registro directo sin flujo de confirmación (para manual y código)
+    async function procesarRegistroDirecto(codigo, confianza, metodo) {
+      isProcessing = true;
+      try {
+        await guardarRegistroFirebase(codigo, confianza, metodo);
+      } catch (e) {
+        console.error(e);
+        showToast('❌ Error al registrar', 'error');
+        updateStatusIndicator('error', 'Error en registro');
+      } finally {
+        isProcessing = false;
+      }
+    }
+
+    searchBtn.addEventListener('click', realizarBusqueda);
+    searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') realizarBusqueda(); });
+    // NO auto-filtrar al escribir (solo al presionar buscar o Enter)
+    // searchInput.addEventListener('input', realizarBusqueda); — REMOVIDO
+
+    /* =================================================================
+       TECLADO VIRTUAL — BUSCADOR POR CÓDIGO
+       Solo números. Al buscar: verifica el código, muestra preview
+       del colaborador encontrado, y pide doble confirmación si está activa.
+    ================================================================= */
+    const codeSearchOverlay  = document.getElementById('codeSearchOverlay');
+    const codeDisplay        = document.getElementById('codeDisplay');
+    const codePreview        = document.getElementById('codePreview');
+    const codePreviewImg     = document.getElementById('codePreviewImg');
+    const codePreviewName    = document.getElementById('codePreviewName');
+    const codePreviewCode    = document.getElementById('codePreviewCode');
+    const codeConfirmHint    = document.getElementById('codeConfirmHint');
+    const codeSearchRegister = document.getElementById('codeSearchRegister');
+    const codeSearchCancel   = document.getElementById('codeSearchCancel');
+    let   currentCodeValue   = '';
+    let   codeSearchTarget   = null; // código esperado (para confirmación facial por código)
+
+    function abrirBuscadorCodigo(targetCode = null) {
+      currentCodeValue  = '';
+      codeSearchTarget  = targetCode;
+      codeDisplay.textContent  = '_';
+      codeDisplay.classList.remove('has-value');
+      codePreview.classList.remove('show');
+      codeConfirmHint.classList.remove('show');
+      codeSearchRegister.disabled = true;
+      codeSearchOverlay.classList.add('show');
+    }
+
+    function actualizarCodeDisplay() {
+      codeDisplay.textContent = currentCodeValue || '_';
+      codeDisplay.classList.toggle('has-value', currentCodeValue.length > 0);
+      // Buscar colaborador en tiempo real cuando hay al menos 1 dígito
+      if (currentCodeValue.length > 0) {
+        const emp = employeesData.get(currentCodeValue);
+        if (emp) {
+          codePreviewImg.src           = emp.fotoBase64 || '';
+          codePreviewName.textContent  = `${emp.firstName||''} ${emp.lastName||''}`.trim() || currentCodeValue;
+          codePreviewCode.textContent  = `Código: ${currentCodeValue}`;
+          codePreview.classList.add('show');
+          // Mostrar hint de confirmación si aplica
+          if (CONFIG.DOUBLE_CODE) codeConfirmHint.classList.add('show');
+          else codeConfirmHint.classList.remove('show');
+          codeSearchRegister.disabled = false;
+        } else {
+          codePreview.classList.remove('show');
+          codeConfirmHint.classList.remove('show');
+          codeSearchRegister.disabled = false; // permite intentar buscar aunque no encuentre aún
+        }
+      } else {
+        codePreview.classList.remove('show');
+        codeConfirmHint.classList.remove('show');
+        codeSearchRegister.disabled = true;
+      }
+    }
+
+    // Teclado virtual del buscador
+    document.querySelectorAll('#virtualKeyboard .vk-btn[data-val]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (currentCodeValue.length >= 12) return;
+        currentCodeValue += btn.dataset.val;
+        actualizarCodeDisplay();
+      });
+    });
+    document.getElementById('vkDel').addEventListener('click', () => {
+      currentCodeValue = currentCodeValue.slice(0, -1);
+      actualizarCodeDisplay();
+    });
+
+    codeSearchCancel.addEventListener('click', () => {
+      codeSearchOverlay.classList.remove('show');
+      currentCodeValue = '';
+      codeSearchTarget = null;
+      isProcessing = false;
+    });
+
+    codeSearchRegister.addEventListener('click', async () => {
+      if (!currentCodeValue) return;
+      const codigo = currentCodeValue;
+      const emp    = employeesData.get(codigo);
+      if (!emp) {
+        showToast('❌ Código no encontrado', 'error');
+        return;
+      }
+
+      // Si hay un código objetivo (confirmación de identidad facial)
+      if (codeSearchTarget && codigo !== codeSearchTarget) {
+        showToast('❌ Código incorrecto. El rostro detectado no coincide.', 'error');
+        updateStatusIndicator('error', 'Código no coincide');
+        codeSearchOverlay.classList.remove('show');
+        currentCodeValue = '';
+        codeSearchTarget = null;
+        isProcessing = false;
+        return;
+      }
+
+      // Si la doble verificación está activa, pasar a reconfirmación
+      if (CONFIG.DOUBLE_CODE) {
+        codeSearchOverlay.classList.remove('show');
+        abrirReconfirmacionCodigo(codigo);
+        return;
+      }
+
+      // Registro directo
+      codeSearchOverlay.classList.remove('show');
+      currentCodeValue = '';
+      codeSearchTarget = null;
+      await procesarRegistroDirecto(codigo, 1.0, 'code');
+    });
+
+    /* =================================================================
+       MODAL RECONFIRMACIÓN DE CÓDIGO
+       Pide escribir el código de nuevo para confirmarlo.
+    ================================================================= */
+    const codeReconfirmOverlay = document.getElementById('codeReconfirmOverlay');
+    const reconfirmDisplay     = document.getElementById('reconfirmDisplay');
+    const reconfirmError       = document.getElementById('reconfirmError');
+    const reconfirmConfirm     = document.getElementById('reconfirmConfirm');
+    const reconfirmCancel      = document.getElementById('reconfirmCancel');
+    let   reconfirmValue       = '';
+    let   reconfirmTarget      = '';
+
+    function abrirReconfirmacionCodigo(codigo) {
+      reconfirmTarget  = codigo;
+      reconfirmValue   = '';
+      reconfirmDisplay.textContent = '_';
+      reconfirmError.classList.remove('show');
+      reconfirmConfirm.disabled = true;
+      codeReconfirmOverlay.classList.add('show');
+    }
+
+    function actualizarReconfirmDisplay() {
+      reconfirmDisplay.textContent = reconfirmValue || '_';
+      reconfirmError.classList.remove('show');
+      reconfirmConfirm.disabled = reconfirmValue.length === 0;
+    }
+
+    document.querySelectorAll('#reconfirmVK .vk-btn[data-val]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (reconfirmValue.length >= 12) return;
+        reconfirmValue += btn.dataset.val;
+        actualizarReconfirmDisplay();
+      });
+    });
+    document.getElementById('reconfirmDel').addEventListener('click', () => {
+      reconfirmValue = reconfirmValue.slice(0, -1);
+      actualizarReconfirmDisplay();
+    });
+
+    reconfirmCancel.addEventListener('click', () => {
+      codeReconfirmOverlay.classList.remove('show');
+      reconfirmValue  = '';
+      reconfirmTarget = '';
+      // Volver al buscador de código
+      abrirBuscadorCodigo(codeSearchTarget);
+    });
+
+    reconfirmConfirm.addEventListener('click', async () => {
+      if (reconfirmValue !== reconfirmTarget) {
+        reconfirmError.classList.add('show');
+        reconfirmValue = '';
+        reconfirmDisplay.textContent = '_';
+        reconfirmConfirm.disabled = true;
+        return;
+      }
+      const codigo = reconfirmTarget;
+      codeReconfirmOverlay.classList.remove('show');
+      reconfirmValue  = '';
+      reconfirmTarget = '';
+      codeSearchTarget = null;
+      currentCodeValue = '';
+      await procesarRegistroDirecto(codigo, 1.0, 'code');
+    });
+
+    /* Botón en menú para abrir buscador por código */
+    document.getElementById('menuCodeSearch').addEventListener('click', () => {
+      menuModal.classList.remove('show');
+      abrirBuscadorCodigo();
+    });
+
+    /* =================================================================
+       DETECCIÓN FACIAL AUTOMÁTICA
+       Con escaneo múltiple (anti-confusión de colaboradores)
+    ================================================================= */
+    function iniciarDeteccion() {
+      if (detectionInterval) clearInterval(detectionInterval);
+      detectionInterval = setInterval(async () => {
+        if (!faceMatcher || !videoStarted || !modelosCargados || isProcessing || !currentUser) return;
+        try {
+          const detection = await faceapi
+            .detectSingleFace(video)
+            .withFaceLandmarks()
+            .withFaceDescriptor();
+
+          if (detection) {
+            const match      = faceMatcher.findBestMatch(detection.descriptor);
+            const confidence = 1 - match.distance;
+
+            if (match.label !== 'unknown' && confidence >= CONFIG.MIN_CONFIDENCE) {
+              showConfidenceIndicator(confidence, `${employeesData.get(match.label)?.firstName || match.label}`);
+
+              if (CONFIG.MULTI_SCAN_ENABLED) {
+                /* Anti-confusión: acumular capturas del MISMO colaborador */
+                if (match.label !== lastMultiLabel) {
+                  // Cambio de colaborador detectado: reiniciar buffer
+                  multiScanBuffer = {};
+                  lastMultiLabel  = match.label;
+                }
+                multiScanBuffer[match.label] = (multiScanBuffer[match.label] || 0) + 1;
+                const count = multiScanBuffer[match.label];
+
+                if (count < CONFIG.MULTI_SCAN_COUNT) {
+                  updateStatusIndicator('idle', `Escaneando... ${count}/${CONFIG.MULTI_SCAN_COUNT}`);
+                  return; // Esperar más capturas
+                }
+                // Suficientes capturas consistentes del mismo rostro → registrar
+                multiScanBuffer[match.label] = 0;
+                lastMultiLabel = null;
+              }
+
+              await procesarRegistro(match.label, confidence, 'facial');
+            } else {
+              showConfidenceIndicator(confidence, 'Desconocido');
+            }
+          }
+        } catch (error) { /* silenciar errores de detección en ciclo */ }
+      }, CONFIG.DETECTION_INTERVAL);
+    }
+
+    async function init() {
+      try {
+        await iniciarCamara();
+        showToast('✅ Sistema activo');
+        updateStatusIndicator('idle');
+      } catch (error) {
+        console.error('Error init:', error);
+        updateStatusIndicator('error', 'Error al iniciar');
+      }
+    }
+
+    /* =================================================================
+       CAPTURA MANUAL
+    ================================================================= */
+    async function capturarManualmente() {
+      const captureBtn   = document.getElementById('captureBtn');
+      const captureFlash = document.getElementById('captureFlash');
+
+      if (!currentUser) { showToast('⚠️ Inicia sesión primero', 'error'); return; }
+      if (isProcessing)  { showToast('⏳ Procesando, espera...', 'error'); return; }
+      if (!modelosCargados || !videoStarted) { showToast('⚠️ Cámara no lista aún', 'error'); return; }
+
+      if (!faceMatcher) {
+        updateStatusIndicator('idle', 'Cargando colaboradores...');
+        showToast('⏳ Cargando colaboradores, espera...', 'error');
+        let intentos = 0;
+        await new Promise(resolve => {
+          const esperar = setInterval(() => {
+            intentos++;
+            if (faceMatcher || intentos >= 16) { clearInterval(esperar); resolve(); }
+          }, 500);
+        });
+        if (!faceMatcher) { showToast('⚠️ No hay colaboradores con foto registrada', 'error'); return; }
+      }
+
+      captureBtn.classList.add('capturing');
+      if (CONFIG.FLASH_ENABLED) {
+        captureFlash.classList.add('active');
+        setTimeout(() => captureFlash.classList.remove('active'), 150);
+      }
+      setTimeout(() => captureBtn.classList.remove('capturing'), 400);
+      updateStatusIndicator('idle', 'Detectando...');
+
+      try {
+        const detection = await faceapi
+          .detectSingleFace(video)
+          .withFaceLandmarks()
+          .withFaceDescriptor();
+
+        if (!detection) { showToast('🔍 No se detectó ningún rostro', 'error'); updateStatusIndicator('error', 'Sin rostro detectado'); return; }
+
+        const match      = faceMatcher.findBestMatch(detection.descriptor);
+        const confidence = 1 - match.distance;
+
+        showConfidenceIndicator(confidence, employeesData.get(match.label)?.firstName || match.label);
+
+        if (match.label === 'unknown' || confidence < CONFIG.MIN_CONFIDENCE) {
+          showToast(`❓ Rostro no reconocido (${(confidence*100).toFixed(0)}%)`, 'error');
+          updateStatusIndicator('error', 'No reconocido');
+          return;
+        }
+
+        await procesarRegistro(match.label, confidence, 'capture');
+
+      } catch (error) {
+        console.error('Error en captura manual:', error);
+        showToast('❌ Error en captura', 'error');
+        updateStatusIndicator('error', 'Error de captura');
+      }
+    }
+
+    document.getElementById('captureBtn').addEventListener('click', capturarManualmente);
+
+    /* =================================================================
+       PANEL DE CONFIGURACIÓN — PIN GATE
+    ================================================================= */
+    const settingsPinOverlay = document.getElementById('settingsPinOverlay');
+    const settingsPinDisplay = document.getElementById('settingsPinDisplay');
+    const settingsPinError   = document.getElementById('settingsPinError');
+    const settingsPanel      = document.getElementById('settingsPanel');
+    let   pinBuffer          = '';
+
+    document.getElementById('menuSettings').addEventListener('click', () => {
+      menuModal.classList.remove('show');
+      pinBuffer = '';
+      settingsPinDisplay.textContent = '_';
+      settingsPinError.classList.remove('show');
+      settingsPinOverlay.classList.add('show');
+    });
+
+    document.getElementById('settingsPinCancel').addEventListener('click', () => {
+      settingsPinOverlay.classList.remove('show');
+      pinBuffer = '';
+    });
+
+    document.querySelectorAll('#settingsPinVK .vk-btn[data-val]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (pinBuffer.length >= 12) return;
+        pinBuffer += btn.dataset.val;
+        settingsPinDisplay.textContent = '•'.repeat(pinBuffer.length);
+        settingsPinError.classList.remove('show');
+      });
+    });
+
+    document.getElementById('settingsPinDel').addEventListener('click', () => {
+      pinBuffer = pinBuffer.slice(0, -1);
+      settingsPinDisplay.textContent = pinBuffer.length > 0 ? '•'.repeat(pinBuffer.length) : '_';
+    });
+
+    // Verificar PIN automáticamente al completar (misma longitud que pin del usuario)
+    const settingsPinVKBtns = document.querySelectorAll('#settingsPinVK .vk-btn[data-val]');
+    settingsPinVKBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Verificar después de cada tecla
+        if (currentUser && currentUser.pin && pinBuffer === currentUser.pin) {
+          settingsPinOverlay.classList.remove('show');
+          pinBuffer = '';
+          abrirConfiguracion();
+        } else if (pinBuffer.length >= (currentUser?.pin?.length || 8)) {
+          // PIN completo pero incorrecto
+          settingsPinError.classList.add('show');
+          setTimeout(() => {
+            pinBuffer = '';
+            settingsPinDisplay.textContent = '_';
+            settingsPinError.classList.remove('show');
+          }, 1500);
+        }
+      });
+    });
+
+    function abrirConfiguracion() {
+      applySettingsToUI();
+      settingsPanel.classList.add('show');
+    }
+
+    document.getElementById('settingsBackBtn').addEventListener('click', () => {
+      settingsPanel.classList.remove('show');
+    });
+
+    document.getElementById('settingsSaveBtn').addEventListener('click', () => {
+      guardarConfiguracionDesdeUI();
+      settingsPanel.classList.remove('show');
+      showToast('✅ Configuración guardada', 'success');
+    });
+
+    /* =================================================================
+       APLICAR SETTINGS A LA UI (sliders y toggles)
+    ================================================================= */
+    function applySettingsToUI() {
+      // Sliders
+      const sliderMinConf    = document.getElementById('sliderMinConf');
+      const sliderPrecision  = document.getElementById('sliderPrecision');
+      const sliderMultiScan  = document.getElementById('sliderMultiScan');
+      const sliderInterval   = document.getElementById('sliderInterval');
+      const sliderCooldown   = document.getElementById('sliderCooldown');
+      const sliderShiftLimit = document.getElementById('sliderShiftLimit');
+
+      const minConfVal = Math.round(CONFIG.MIN_CONFIDENCE * 100);
+      sliderMinConf.value    = minConfVal;
+      document.getElementById('sliderMinConfVal').textContent = `${minConfVal}%`;
+
+      const precVal = Math.round(CONFIG.UMBRAL_PRECISION * 100);
+      sliderPrecision.value  = precVal;
+      document.getElementById('sliderPrecisionVal').textContent = `${CONFIG.UMBRAL_PRECISION.toFixed(2)}`;
+
+      sliderMultiScan.value  = CONFIG.MULTI_SCAN_COUNT;
+      document.getElementById('sliderMultiScanVal').textContent = CONFIG.MULTI_SCAN_COUNT;
+
+      sliderInterval.value   = CONFIG.DETECTION_INTERVAL;
+      document.getElementById('sliderIntervalVal').textContent = `${(CONFIG.DETECTION_INTERVAL/1000).toFixed(1)}s`;
+
+      sliderCooldown.value   = CONFIG.COOLDOWN_SEGUNDOS;
+      document.getElementById('sliderCooldownVal').textContent = `${CONFIG.COOLDOWN_SEGUNDOS}s`;
+
+      sliderShiftLimit.value = CONFIG.SHIFT_LIMIT_HOURS;
+      document.getElementById('sliderShiftLimitVal').textContent = `${CONFIG.SHIFT_LIMIT_HOURS}h`;
+
+      // Toggles
+      document.getElementById('toggleMultiScan').checked       = CONFIG.MULTI_SCAN_ENABLED;
+      document.getElementById('toggleShowConfidence').checked  = CONFIG.SHOW_CONFIDENCE;
+      document.getElementById('toggleConfirmSearch').checked   = CONFIG.CONFIRM_SEARCH;
+      document.getElementById('toggleDoubleCode').checked      = CONFIG.DOUBLE_CODE;
+      document.getElementById('toggleSound').checked           = CONFIG.SOUND_ENABLED;
+      document.getElementById('toggleFlash').checked           = CONFIG.FLASH_ENABLED;
+      toggleMultiScanUI(CONFIG.MULTI_SCAN_ENABLED);
+
+      // Modo confirmación
+      document.querySelectorAll('.confirm-type-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.conf === CONFIG.CONFIRM_MODE);
+      });
+    }
+
+    function toggleMultiScanUI(enabled) {
+      const wrap = document.getElementById('sliderMultiScanWrap');
+      const row  = document.getElementById('rowMultiScanCount');
+      if (wrap) wrap.style.opacity = enabled ? '1' : '0.4';
+      if (row)  row.style.opacity  = enabled ? '1' : '0.4';
+    }
+
+    function guardarConfiguracionDesdeUI() {
+      CONFIG.MIN_CONFIDENCE   = parseInt(document.getElementById('sliderMinConf').value) / 100;
+      CONFIG.UMBRAL_PRECISION = parseInt(document.getElementById('sliderPrecision').value) / 100;
+      CONFIG.MULTI_SCAN_COUNT = parseInt(document.getElementById('sliderMultiScan').value);
+      CONFIG.DETECTION_INTERVAL = parseInt(document.getElementById('sliderInterval').value);
+      CONFIG.COOLDOWN_SEGUNDOS  = parseInt(document.getElementById('sliderCooldown').value);
+      CONFIG.SHIFT_LIMIT_HOURS  = parseInt(document.getElementById('sliderShiftLimit').value);
+      CONFIG.MULTI_SCAN_ENABLED = document.getElementById('toggleMultiScan').checked;
+      CONFIG.SHOW_CONFIDENCE    = document.getElementById('toggleShowConfidence').checked;
+      CONFIG.CONFIRM_SEARCH     = document.getElementById('toggleConfirmSearch').checked;
+      CONFIG.DOUBLE_CODE        = document.getElementById('toggleDoubleCode').checked;
+      CONFIG.SOUND_ENABLED      = document.getElementById('toggleSound').checked;
+      CONFIG.FLASH_ENABLED      = document.getElementById('toggleFlash').checked;
+      saveSettings();
+      // Reconstruir FaceMatcher con nuevo umbral
+      reconstruirFaceMatcher();
+      // Reiniciar detección con nuevo intervalo
+      iniciarDeteccion();
+    }
+
+    /* Listeners de sliders en tiempo real */
+    document.getElementById('sliderMinConf').addEventListener('input', function() {
+      document.getElementById('sliderMinConfVal').textContent = `${this.value}%`;
+    });
+    document.getElementById('sliderPrecision').addEventListener('input', function() {
+      document.getElementById('sliderPrecisionVal').textContent = (parseInt(this.value)/100).toFixed(2);
+    });
+    document.getElementById('sliderMultiScan').addEventListener('input', function() {
+      document.getElementById('sliderMultiScanVal').textContent = this.value;
+    });
+    document.getElementById('sliderInterval').addEventListener('input', function() {
+      document.getElementById('sliderIntervalVal').textContent = `${(parseInt(this.value)/1000).toFixed(1)}s`;
+    });
+    document.getElementById('sliderCooldown').addEventListener('input', function() {
+      document.getElementById('sliderCooldownVal').textContent = `${this.value}s`;
+    });
+    document.getElementById('sliderShiftLimit').addEventListener('input', function() {
+      document.getElementById('sliderShiftLimitVal').textContent = `${this.value}h`;
+    });
+    document.getElementById('toggleMultiScan').addEventListener('change', function() {
+      toggleMultiScanUI(this.checked);
+    });
+
+    // Botones de tipo de confirmación
+    document.querySelectorAll('.confirm-type-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.confirm-type-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+
+    if (savedUser) { init(); }
+  </script>
+</body>
+</html>
