@@ -1560,7 +1560,7 @@
     }
 
     const savedUser = loadSavedSession();
-    if (savedUser) { initWithUser(savedUser); }
+    // initWithUser se llama al final del script, después de registrar todos los listeners
 
     loginBtn.addEventListener('click', async () => {
       const username = usernameInput.value.trim();
@@ -2701,7 +2701,7 @@
     }
 
     async function guardarConfiguracionDesdeUI() {
-      // Leer todos los valores de la UI
+      // Leer todos los valores de la UI en el momento exacto
       CONFIG.MIN_CONFIDENCE     = parseInt(document.getElementById('sliderMinConf').value) / 100;
       CONFIG.UMBRAL_PRECISION   = parseInt(document.getElementById('sliderPrecision').value) / 100;
       CONFIG.MULTI_SCAN_COUNT   = parseInt(document.getElementById('sliderMultiScan').value);
@@ -2714,16 +2714,36 @@
       CONFIG.DOUBLE_CODE        = document.getElementById('toggleDoubleCode').checked;
       CONFIG.SOUND_ENABLED      = document.getElementById('toggleSound').checked;
       CONFIG.FLASH_ENABLED      = document.getElementById('toggleFlash').checked;
+
       // Leer modo de confirmación activo
       const confActivo = document.querySelector('.confirm-type-btn.active');
       if (confActivo) CONFIG.CONFIRM_MODE = confActivo.dataset.conf;
 
-      // Guardar en Firebase (por usuario) — en tiempo real
+      console.log('⚙️ Guardando config:', JSON.stringify(CONFIG));
+
+      // Guardar en Firebase (por usuario)
       await saveUserConfig();
 
-      // Aplicar cambios en tiempo real sin recargar página
-      reconstruirFaceMatcher();   // nuevo umbral de precisión
-      iniciarDeteccion();         // nuevo intervalo de detección
+      // Aplicar TODOS los cambios en tiempo real inmediatamente
+      aplicarConfigEnTiempoReal();
+    }
+
+    /* Aplica CONFIG al sistema en tiempo real sin recargar */
+    function aplicarConfigEnTiempoReal() {
+      // 1. Reconstruir FaceMatcher con nuevo umbral de precisión
+      reconstruirFaceMatcher();
+      // 2. Reiniciar intervalo de detección con nuevo tiempo
+      iniciarDeteccion();
+      // 3. Indicador de confianza: ocultar si fue desactivado
+      if (!CONFIG.SHOW_CONFIDENCE) {
+        const bar = document.getElementById('faceConfidenceBar');
+        if (bar) bar.classList.remove('show');
+      }
+      // 4. Limpiar buffer de multi-scan cuando se desactiva
+      if (!CONFIG.MULTI_SCAN_ENABLED) {
+        multiScanBuffer = {};
+        lastMultiLabel  = null;
+      }
       console.log('⚙️ Config aplicada en tiempo real:', CONFIG);
     }
 
@@ -2750,15 +2770,19 @@
       toggleMultiScanUI(this.checked);
     });
 
-    // Botones de tipo de confirmación
+    // Botones de tipo de confirmación — selección visual
     document.querySelectorAll('.confirm-type-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.confirm-type-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
+        // Aplicar cambio de modo de confirmación en tiempo real inmediatamente
+        CONFIG.CONFIRM_MODE = btn.dataset.conf;
+        console.log('🔄 Modo confirmación cambiado a:', CONFIG.CONFIRM_MODE);
       });
     });
 
-    if (savedUser) { init(); }
+    // ✅ Todos los listeners registrados — ahora sí iniciar con el usuario guardado
+    if (savedUser) { initWithUser(savedUser); }
   </script>
 </body>
 </html>
