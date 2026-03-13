@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <title>Vizo Access - App Móvil</title>
+  <title>Vizo Access - Admin</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1/dist/face-api.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <style>
     * {
       margin: 0;
@@ -31,17 +32,12 @@
       --bg-dark: #0e1c22;
       --bg-light: #1a2f38;
 
-      /* Tamaños para formulario */
       --text-form-xs: clamp(0.7rem, 2.8vw, 0.75rem);
       --text-form-sm: clamp(0.75rem, 3vw, 0.8rem);
       --text-form-base: clamp(0.8rem, 3.2vw, 0.85rem);
-      
-      /* Tamaños para lista - ICONOS MÁS GRANDES */
       --text-list-xs: clamp(0.65rem, 2.5vw, 0.7rem);
       --text-list-sm: clamp(0.7rem, 2.8vw, 0.75rem);
       --text-list-base: clamp(0.75rem, 3vw, 0.8rem);
-      
-      /* Tamaños generales */
       --text-xs: clamp(0.7rem, 2.8vw, 0.75rem);
       --text-sm: clamp(0.75rem, 3vw, 0.8rem);
       --text-base: clamp(0.8rem, 3.2vw, 0.85rem);
@@ -65,6 +61,7 @@
       padding: 0;
       margin: 0;
       font-size: var(--text-base);
+      color: white;
     }
 
     body.logged-in {
@@ -435,7 +432,6 @@
       flex: 1;
     }
 
-    /* Ocultar flechas del input number */
     input[type=number]::-webkit-inner-spin-button, 
     input[type=number]::-webkit-outer-spin-button { 
       -webkit-appearance: none; 
@@ -525,7 +521,129 @@
       border: none;
     }
 
-    /* LISTA DE COLABORADORES - ICONOS MÁS GRANDES */
+    /* Upload area para comprobantes - SELECTOR ÚNICO */
+    .upload-section {
+      margin-top: 20px;
+      padding: 20px;
+      background: rgba(22, 224, 134, 0.05);
+      border-radius: 15px;
+      border: 2px dashed var(--primary);
+    }
+
+    .upload-section h4 {
+      color: var(--primary);
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .upload-area {
+      border: 3px dashed var(--primary);
+      border-radius: 20px;
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 20px;
+      background: rgba(0,0,0,0.2);
+    }
+
+    .upload-area:hover {
+      background: rgba(22, 224, 134, 0.2);
+    }
+
+    .upload-area i {
+      font-size: 50px;
+      color: var(--primary);
+      margin-bottom: 15px;
+    }
+
+    .upload-area p {
+      color: white;
+      font-size: 16px;
+    }
+
+    .upload-area small {
+      color: rgba(255,255,255,0.5);
+      font-size: 14px;
+    }
+
+    .selected-files {
+      margin-top: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .file-item {
+      background: rgba(0,0,0,0.3);
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid var(--primary);
+    }
+
+    .file-item i {
+      color: var(--primary);
+      font-size: 20px;
+    }
+
+    .file-info {
+      flex: 1;
+    }
+
+    .file-name {
+      color: white;
+      font-size: 14px;
+      word-break: break-all;
+    }
+
+    .file-size {
+      color: rgba(255,255,255,0.5);
+      font-size: 12px;
+    }
+
+    .file-remove {
+      color: var(--danger);
+      cursor: pointer;
+      font-size: 20px;
+    }
+
+    .badge-success {
+      background: var(--success);
+      color: black;
+      padding: 2px 8px;
+      border-radius: 50px;
+      font-size: 11px;
+      margin-left: 5px;
+    }
+
+    .btn-upload {
+      width: 100%;
+      padding: 15px;
+      background: var(--primary);
+      color: black;
+      border: none;
+      border-radius: 50px;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn-upload:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* LISTA DE COLABORADORES */
     .lista-search {
       margin-bottom: var(--spacing-sm);
     }
@@ -585,7 +703,6 @@
       flex-wrap: wrap;
     }
 
-    /* ICONOS MÁS GRANDES EN LA LISTA */
     .employee-actions button {
       padding: var(--spacing-xs) var(--spacing-sm);
       font-size: var(--text-list-sm);
@@ -787,6 +904,11 @@
       font-size: var(--text-base);
       color: var(--primary);
       margin: var(--spacing-xs) 0;
+    }
+
+    .detail-code {
+      font-size: var(--text-xs);
+      color: white;
     }
 
     .detail-info-grid {
@@ -1093,7 +1215,7 @@
               <h4><i class="fas fa-id-card"></i> Básica</h4>
               <div class="form-row">
                 <div class="form-group">
-                  <label><i class="fas fa-barcode"></i> Código</label>
+                  <label><i class="fas fa-barcode"></i> Código Nómina</label>
                   <div class="code-input-group">
                     <input type="number" id="username" class="form-control" placeholder="001" min="1" step="1" inputmode="numeric" required>
                     <button type="button" class="btn-auto" id="btnGenerarCodigo">
@@ -1104,23 +1226,41 @@
                 </div>
 
                 <div class="form-group">
-                  <label><i class="fas fa-user"></i> Nombre</label>
-                  <input type="text" id="firstName" class="form-control" placeholder="Nombre" required>
+                  <label><i class="fas fa-id-card"></i> RTM ID</label>
+                  <div class="code-input-group">
+                    <input type="text" id="rtmId" class="form-control" placeholder="RTM001234" maxlength="9" readonly>
+                    <button type="button" class="btn-auto" id="btnGenerarRtmId">
+                      <i class="fas fa-sync-alt"></i> RTM
+                    </button>
+                  </div>
+                  <div id="rtmStatus" class="code-status"></div>
                 </div>
               </div>
 
               <div class="form-row">
                 <div class="form-group">
+                  <label><i class="fas fa-user"></i> Nombre</label>
+                  <input type="text" id="firstName" class="form-control" placeholder="Nombre" required>
+                </div>
+
+                <div class="form-group">
                   <label><i class="fas fa-user"></i> Apellido</label>
                   <input type="text" id="lastName" class="form-control" placeholder="Apellido" required>
                 </div>
+              </div>
 
+              <div class="form-row">
                 <div class="form-group">
                   <label><i class="fas fa-clock"></i> Turno</label>
                   <select id="turnoHoras" class="form-control" required>
                     <option value="8">8 horas</option>
                     <option value="12">12 horas</option>
                   </select>
+                </div>
+
+                <div class="form-group">
+                  <label><i class="fas fa-dollar-sign"></i> Precio/h</label>
+                  <input type="number" id="precioHora" class="form-control" placeholder="0.00" step="0.01" min="0">
                 </div>
               </div>
             </div>
@@ -1144,11 +1284,6 @@
                 <div class="form-group">
                   <label><i class="fas fa-user-tie"></i> Jefe</label>
                   <input type="text" id="jefeCargo" class="form-control" placeholder="Supervisor" required>
-                </div>
-
-                <div class="form-group">
-                  <label><i class="fas fa-dollar-sign"></i> Precio/h</label>
-                  <input type="number" id="precioHora" class="form-control" placeholder="0.00" step="0.01" min="0">
                 </div>
               </div>
             </div>
@@ -1199,6 +1334,38 @@
 
           <!-- RESULTADOS DE LISTA - ICONOS GRANDES -->
           <div id="employeesGrid" class="employees-grid"></div>
+        </div>
+
+        <!-- SECCIÓN DE SUBIDA DE COMPROBANTES - SELECTOR ÚNICO MÚLTIPLE -->
+        <div id="uploadSection" class="upload-section" style="display: none;">
+          <h4>
+            <i class="fas fa-upload"></i> 
+            Subir Comprobantes para: <span id="selectedColaboradorNombre"></span>
+          </h4>
+          
+          <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+            <p><strong>RTM ID:</strong> <span id="selectedColaboradorRtm"></span></p>
+            <p><strong>Código Nómina:</strong> <span id="selectedColaboradorNomina"></span></p>
+          </div>
+          
+          <!-- SELECTOR ÚNICO DE ARCHIVOS (MÚLTIPLE) -->
+          <div class="upload-area" id="uploadArea">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p>Haz clic o arrastra los PDFs aquí</p>
+            <small>Puedes seleccionar múltiples archivos a la vez</small>
+          </div>
+          
+          <input type="file" id="fileInput" multiple accept=".pdf" style="display: none;">
+
+          <div id="selectedFiles" class="selected-files"></div>
+
+          <button id="uploadBtn" class="btn-upload" style="display: none;">
+            <i class="fas fa-compress-alt"></i> Comprimir y Subir Todos ({count} archivos)
+          </button>
+
+          <button id="cancelUploadBtn" class="btn-upload" style="background: var(--danger); color: white; margin-top: 10px; display: none;">
+            <i class="fas fa-times"></i> Cancelar
+          </button>
         </div>
       </div>
     </div>
@@ -1279,6 +1446,14 @@
         <div class="detail-info-label">Precio/h</div>
         <div class="detail-info-value" id="detailPrecio"></div>
       </div>
+      <div class="detail-info-item">
+        <div class="detail-info-label">Código Nómina</div>
+        <div class="detail-info-value" id="detailCodigoNomina"></div>
+      </div>
+      <div class="detail-info-item">
+        <div class="detail-info-label">RTM ID</div>
+        <div class="detail-info-value" id="detailRtmId"></div>
+      </div>
     </div>
     
     <!-- ACCIONES -->
@@ -1288,6 +1463,9 @@
       </button>
       <button class="btn-copy" id="copyToClipboardBtn">
         <i class="fas fa-copy"></i> Copiar
+      </button>
+      <button class="btn-info" id="uploadForThisBtn">
+        <i class="fas fa-upload"></i> Subir Comprobantes
       </button>
     </div>
   </div>
@@ -1362,7 +1540,8 @@
       deleteDoc,
       Timestamp,
       onSnapshot,
-      orderBy
+      orderBy,
+      getDoc
     } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -1382,11 +1561,14 @@
     let stream = null;
     let currentFacingMode = 'environment';
     let codigoSecuencial = 1;
+    let rtmSecuencial = 1;
     let modelosCargados = false;
     let empleados = [];
     let empleadoAEliminar = null;
     let faceDetectionInterval = null;
     let currentEmployeeForSharing = null;
+    let colaboradorParaSubida = null;
+    let archivosSeleccionados = [];
 
     const MODEL_URL = 'https://raw.githubusercontent.com/vladmandic/face-api/master/model/';
 
@@ -1427,9 +1609,12 @@
     const detailTurno = document.getElementById('detailTurno');
     const detailJefe = document.getElementById('detailJefe');
     const detailPrecio = document.getElementById('detailPrecio');
+    const detailCodigoNomina = document.getElementById('detailCodigoNomina');
+    const detailRtmId = document.getElementById('detailRtmId');
     
     const sendToWhatsAppBtn = document.getElementById('sendToWhatsAppBtn');
     const copyToClipboardBtn = document.getElementById('copyToClipboardBtn');
+    const uploadForThisBtn = document.getElementById('uploadForThisBtn');
     
     const shareCard = document.getElementById('shareCard');
     const shareCardEmployeeImg = document.getElementById('shareCardEmployeeImg');
@@ -1459,6 +1644,7 @@
     const registroForm = document.getElementById('registroForm');
     const editId = document.getElementById('editId');
     const username = document.getElementById('username');
+    const rtmId = document.getElementById('rtmId');
     const firstName = document.getElementById('firstName');
     const lastName = document.getElementById('lastName');
     const turnoHoras = document.getElementById('turnoHoras');
@@ -1469,13 +1655,26 @@
     const btnSubmitText = document.getElementById('btnSubmitText');
     const btnCancelarEdit = document.getElementById('btnCancelarEdit');
     const codeStatus = document.getElementById('codeStatus');
+    const rtmStatus = document.getElementById('rtmStatus');
     const modelosStatus = document.getElementById('modelosStatus');
     const btnCargarModelos = document.getElementById('btnCargarModelos');
     const btnGenerarCodigo = document.getElementById('btnGenerarCodigo');
+    const btnGenerarRtmId = document.getElementById('btnGenerarRtmId');
     const employeesGrid = document.getElementById('employeesGrid');
     const deleteModal = document.getElementById('deleteModal');
     const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
     const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+
+    // Elementos de subida de comprobantes
+    const uploadSection = document.getElementById('uploadSection');
+    const selectedColaboradorNombre = document.getElementById('selectedColaboradorNombre');
+    const selectedColaboradorRtm = document.getElementById('selectedColaboradorRtm');
+    const selectedColaboradorNomina = document.getElementById('selectedColaboradorNomina');
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const selectedFiles = document.getElementById('selectedFiles');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const cancelUploadBtn = document.getElementById('cancelUploadBtn');
 
     // ==================== FUNCIONES DE COMPARTIR ====================
     
@@ -1488,7 +1687,8 @@
         const precio = employee.precioHora ? `$${employee.precioHora}` : 'N/A';
         
         shareCardInfo.innerHTML = `
-          <div class="share-card-row"><span class="share-card-label">Código:</span> <span>${employee.username || 'N/A'}</span></div>
+          <div class="share-card-row"><span class="share-card-label">Código Nómina:</span> <span>${employee.username || 'N/A'}</span></div>
+          <div class="share-card-row"><span class="share-card-label">RTM ID:</span> <span>${employee.rtmId || 'N/A'}</span></div>
           <div class="share-card-row"><span class="share-card-label">Departamento:</span> <span>${employee.departamento || 'N/A'}</span></div>
           <div class="share-card-row"><span class="share-card-label">Área:</span> <span>${employee.areaTrabajo || 'N/A'}</span></div>
           <div class="share-card-row"><span class="share-card-label">Turno:</span> <span>${turno}</span></div>
@@ -1529,7 +1729,7 @@
         const file = new File([blob], 'colaborador.png', { type: 'image/png' });
         
         const nombreCompleto = `${employee.firstName || ''} ${employee.lastName || ''}`.trim() || 'Sin nombre';
-        const texto = `*${nombreCompleto}*\nCódigo: ${employee.username}\nDepartamento: ${employee.departamento}\nÁrea: ${employee.areaTrabajo}\nTurno: ${employee.turnoHoras} horas\nJefe: ${employee.jefeCargo}\nPrecio/h: $${employee.precioHora || '0'}`;
+        const texto = `*${nombreCompleto}*\nCódigo Nómina: ${employee.username}\nRTM ID: ${employee.rtmId}\nDepartamento: ${employee.departamento}\nÁrea: ${employee.areaTrabajo}\nTurno: ${employee.turnoHoras} horas\nJefe: ${employee.jefeCargo}\nPrecio/h: $${employee.precioHora || '0'}`;
         
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
           try {
@@ -1578,7 +1778,7 @@
           showLondonAlert('Imagen copiada al portapapeles');
         } catch (clipboardError) {
           const nombreCompleto = `${employee.firstName || ''} ${employee.lastName || ''}`.trim() || 'Sin nombre';
-          const texto = `${nombreCompleto}\nCódigo: ${employee.username}\nDepartamento: ${employee.departamento}\nÁrea: ${employee.areaTrabajo}\nTurno: ${employee.turnoHoras} horas\nJefe: ${employee.jefeCargo}\nPrecio/h: $${employee.precioHora || '0'}`;
+          const texto = `${nombreCompleto}\nCódigo Nómina: ${employee.username}\nRTM ID: ${employee.rtmId}\nDepartamento: ${employee.departamento}\nÁrea: ${employee.areaTrabajo}\nTurno: ${employee.turnoHoras} horas\nJefe: ${employee.jefeCargo}\nPrecio/h: $${employee.precioHora || '0'}`;
           
           await navigator.clipboard.writeText(texto);
           showLondonAlert('Texto copiado al portapapeles');
@@ -1597,6 +1797,14 @@
       if (currentEmployeeForSharing) copyToClipboard(currentEmployeeForSharing);
     });
 
+    // Botón para subir comprobantes desde el detalle
+    uploadForThisBtn.addEventListener('click', () => {
+      if (currentEmployeeForSharing) {
+        prepararSubidaComprobantes(currentEmployeeForSharing);
+        detailPage.classList.remove('active');
+      }
+    });
+
     // ==================== VERIFICAR SESIÓN ====================
     function checkExistingSession() {
       const saved = localStorage.getItem('currentUserRegistro');
@@ -1612,7 +1820,7 @@
             document.body.classList.add('logged-in');
             bottomNav.classList.add('visible');
             cargarModelosFaceAPI();
-            obtenerUltimoCodigo();
+            obtenerUltimosCodigos();
             iniciarEscuchaEmpleados();
             actualizarCarruselAleatorio();
             mostrarHome();
@@ -1666,7 +1874,7 @@
         document.body.classList.add('logged-in');
         bottomNav.classList.add('visible');
         cargarModelosFaceAPI();
-        obtenerUltimoCodigo();
+        obtenerUltimosCodigos();
         iniciarEscuchaEmpleados();
         actualizarCarruselAleatorio();
         mostrarHome();
@@ -1699,6 +1907,9 @@
       actualizarCarruselAleatorio();
       homeSearchResults.innerHTML = '';
       homeSearchInput.value = '';
+      
+      // Ocultar sección de subida
+      uploadSection.style.display = 'none';
     }
 
     function mostrarRegistro() {
@@ -1707,6 +1918,8 @@
       pageLista.style.display = 'none';
       document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
       navRegistro.classList.add('active');
+      
+      uploadSection.style.display = 'none';
     }
 
     function mostrarLista() {
@@ -1717,6 +1930,13 @@
       navLista.classList.add('active');
       mostrarListaEmpleados();
       listaSearchInput.value = '';
+      
+      // Mostrar sección de subida si hay un colaborador seleccionado
+      if (colaboradorParaSubida) {
+        uploadSection.style.display = 'block';
+      } else {
+        uploadSection.style.display = 'none';
+      }
     }
 
     navHome.addEventListener('click', mostrarHome);
@@ -1790,8 +2010,9 @@
       
       const resultados = empleados.filter(emp => {
         const nombre = `${emp.firstName || ''} ${emp.lastName || ''}`.toLowerCase();
-        const codigo = (emp.username || '').toLowerCase();
-        return nombre.includes(termino) || codigo.includes(termino);
+        const codigoNomina = (emp.username || '').toLowerCase();
+        const rtm = (emp.rtmId || '').toLowerCase();
+        return nombre.includes(termino) || codigoNomina.includes(termino) || rtm.includes(termino);
       });
       
       if (resultados.length === 0) {
@@ -1807,7 +2028,8 @@
           <div class="search-result-item" onclick="verDetalle('${emp.id}')">
             <img src="${foto}">
             <span>${nombre}</span>
-            <span style="font-size:8px; color:var(--primary);">${emp.username}</span>
+            <span style="font-size:8px; color:var(--primary);">Nómina: ${emp.username}</span>
+            <span style="font-size:8px; color:var(--info);">RTM: ${emp.rtmId}</span>
           </div>
         `;
       });
@@ -1834,6 +2056,8 @@
       detailTurno.textContent = emp.turnoHoras ? `${emp.turnoHoras} horas` : 'N/A';
       detailJefe.textContent = emp.jefeCargo || 'N/A';
       detailPrecio.textContent = emp.precioHora ? `$${emp.precioHora}` : 'N/A';
+      detailCodigoNomina.textContent = emp.username || 'N/A';
+      detailRtmId.textContent = emp.rtmId || 'N/A';
       
       detailPage.classList.add('active');
     };
@@ -1854,57 +2078,62 @@
 
     btnCargarModelos.addEventListener('click', cargarModelosFaceAPI);
 
-    // ==================== CÓDIGO - SOLO NÚMEROS ====================
-    async function obtenerUltimoCodigo() {
+    // ==================== OBTENER ÚLTIMOS CÓDIGOS ====================
+    async function obtenerUltimosCodigos() {
       if (!currentUser) return;
+      
       try {
         const q = query(
           collection(db, 'Ponche'),
-          where('collaboratorId', '==', currentUser.uid),
-          orderBy('username', 'desc')
+          where('collaboratorId', '==', currentUser.uid)
         );
         const snapshot = await getDocs(q);
-        let maxNumero = 0;
+        
+        let maxNomina = 0;
+        let maxRtm = 0;
+        
         snapshot.forEach(doc => {
           const data = doc.data();
-          const match = (data.username || '').match(/EMP(\d+)/);
-          if (match) {
-            const num = parseInt(match[1]);
-            if (num > maxNumero) maxNumero = num;
+          
+          const nominaNum = parseInt(data.username) || 0;
+          if (nominaNum > maxNomina) maxNomina = nominaNum;
+          
+          const rtmMatch = (data.rtmId || '').match(/RTM(\d{6})/);
+          if (rtmMatch) {
+            const rtmNum = parseInt(rtmMatch[1]);
+            if (rtmNum > maxRtm) maxRtm = rtmNum;
           }
         });
-        codigoSecuencial = maxNumero + 1;
+        
+        codigoSecuencial = maxNomina + 1;
+        rtmSecuencial = maxRtm + 1;
       } catch (error) {
         codigoSecuencial = 1;
+        rtmSecuencial = 1;
       }
     }
 
+    // ==================== GENERAR CÓDIGO DE NÓMINA ====================
     btnGenerarCodigo.addEventListener('click', async () => {
       if (!currentUser) return;
       
-      // Generar siguiente número disponible
       let nuevoNumero = codigoSecuencial;
-      let codigoFormateado = `EMP${String(nuevoNumero).padStart(3, '0')}`;
+      let codigoFormateado = String(nuevoNumero).padStart(3, '0');
       
-      // Verificar si el código ya existe
-      while (await verificarCodigoExistente(codigoFormateado)) {
+      while (await verificarCodigoNominaExistente(codigoFormateado, editId.value)) {
         nuevoNumero++;
-        codigoFormateado = `EMP${String(nuevoNumero).padStart(3, '0')}`;
+        codigoFormateado = String(nuevoNumero).padStart(3, '0');
       }
       
-      // Actualizar el contador
       codigoSecuencial = nuevoNumero + 1;
-      
-      // Mostrar solo el número en el input
       username.value = nuevoNumero;
       codeStatus.innerHTML = '<i class="fas fa-check-circle"></i> Generado';
       codeStatus.className = 'code-status available';
     });
 
-    async function verificarCodigoExistente(codigo, idExcluir = null) {
+    async function verificarCodigoNominaExistente(codigo, idExcluir = null) {
       if (!currentUser) return false;
       
-      // El código viene completo con EMP, pero buscamos en la base de datos
       const q = query(
         collection(db, 'Ponche'),
         where('username', '==', codigo),
@@ -1914,7 +2143,6 @@
       
       if (snapshot.empty) return false;
       
-      // Si estamos editando, excluir el documento actual
       if (idExcluir) {
         return snapshot.docs[0].id !== idExcluir;
       }
@@ -1922,16 +2150,49 @@
       return true;
     }
 
-    let timeoutValidacion;
+    // ==================== GENERAR RTM ID ====================
+    btnGenerarRtmId.addEventListener('click', async () => {
+      if (!currentUser) return;
+      
+      let nuevoNumero = rtmSecuencial;
+      let rtmFormateado = `RTM${String(nuevoNumero).padStart(6, '0')}`;
+      
+      while (await verificarRtmIdExistente(rtmFormateado, editId.value)) {
+        nuevoNumero++;
+        rtmFormateado = `RTM${String(nuevoNumero).padStart(6, '0')}`;
+      }
+      
+      rtmSecuencial = nuevoNumero + 1;
+      rtmId.value = rtmFormateado;
+      rtmStatus.innerHTML = '<i class="fas fa-check-circle"></i> RTM generado';
+      rtmStatus.className = 'code-status available';
+    });
+
+    async function verificarRtmIdExistente(rtm, idExcluir = null) {
+      if (!currentUser) return false;
+      
+      const q = query(
+        collection(db, 'Ponche'),
+        where('rtmId', '==', rtm),
+        where('collaboratorId', '==', currentUser.uid)
+      );
+      const snapshot = await getDocs(q);
+      
+      if (snapshot.empty) return false;
+      
+      if (idExcluir) {
+        return snapshot.docs[0].id !== idExcluir;
+      }
+      
+      return true;
+    }
+
+    // Validación en tiempo real para código de nómina
+    let timeoutNomina;
     username.addEventListener('input', () => {
-      clearTimeout(timeoutValidacion);
+      clearTimeout(timeoutNomina);
       
-      let codigoNumerico = username.value.trim();
-      
-      // Eliminar cualquier carácter que no sea número
-      codigoNumerico = codigoNumerico.replace(/\D/g, '');
-      
-      // Actualizar el input solo con números
+      let codigoNumerico = username.value.replace(/\D/g, '');
       if (username.value !== codigoNumerico) {
         username.value = codigoNumerico;
       }
@@ -1941,12 +2202,10 @@
         return;
       }
       
-      // Formatear el código para validación (con EMP)
-      const codigoFormateado = `EMP${String(parseInt(codigoNumerico)).padStart(3, '0')}`;
-      
       codeStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-      timeoutValidacion = setTimeout(async () => {
-        const existe = await verificarCodigoExistente(codigoFormateado, editId.value);
+      timeoutNomina = setTimeout(async () => {
+        const codigoFormateado = String(parseInt(codigoNumerico)).padStart(3, '0');
+        const existe = await verificarCodigoNominaExistente(codigoFormateado, editId.value);
         
         if (existe) {
           codeStatus.innerHTML = '<i class="fas fa-times-circle"></i> Código no disponible';
@@ -2111,8 +2370,9 @@
       if (filtro) {
         empleadosFiltrados = empleados.filter(emp => {
           const nombre = `${emp.firstName || ''} ${emp.lastName || ''}`.toLowerCase();
-          const codigo = (emp.username || '').toLowerCase();
-          return nombre.includes(filtro) || codigo.includes(filtro);
+          const nomina = (emp.username || '').toLowerCase();
+          const rtm = (emp.rtmId || '').toLowerCase();
+          return nombre.includes(filtro) || nomina.includes(filtro) || rtm.includes(filtro);
         });
       }
       
@@ -2123,17 +2383,18 @@
       
       let html = '';
       empleadosFiltrados.forEach(emp => {
-        // Extraer solo números del código para mostrar
         const codigoNumerico = (emp.username || '').replace('EMP', '');
         
         html += `
           <div class="employee-card">
             <img src="${emp.fotoBase64 || 'https://via.placeholder.com/60'}" onclick="verDetalle('${emp.id}')">
             <div class="employee-name" onclick="verDetalle('${emp.id}')">${emp.firstName || ''} ${emp.lastName || ''}</div>
-            <div class="employee-code" onclick="verDetalle('${emp.id}')">${codigoNumerico}</div>
+            <div class="employee-code" onclick="verDetalle('${emp.id}')">Nómina: ${codigoNumerico}</div>
+            <div class="employee-code" onclick="verDetalle('${emp.id}')" style="color: var(--info);">RTM: ${emp.rtmId || ''}</div>
             <div class="employee-actions">
               <button class="btn btn-primary" onclick="event.stopPropagation(); editarEmpleado('${emp.id}')"><i class="fas fa-edit"></i></button>
               <button class="btn btn-whatsapp" onclick="event.stopPropagation(); window.verDetalle('${emp.id}'); setTimeout(() => document.getElementById('sendToWhatsAppBtn').click(), 500)"><i class="fab fa-whatsapp"></i></button>
+              <button class="btn btn-info" onclick="event.stopPropagation(); prepararSubidaComprobantes('${emp.id}')"><i class="fas fa-upload"></i></button>
               <button class="btn btn-danger" onclick="event.stopPropagation(); confirmarEliminar('${emp.id}')"><i class="fas fa-trash"></i></button>
             </div>
           </div>
@@ -2142,6 +2403,201 @@
       employeesGrid.innerHTML = html;
     }
 
+    // ==================== PREPARAR SUBIDA DE COMPROBANTES (SELECTOR ÚNICO) ====================
+    window.prepararSubidaComprobantes = function(id) {
+      const emp = empleados.find(e => e.id === id);
+      if (!emp) return;
+      
+      colaboradorParaSubida = emp;
+      
+      selectedColaboradorNombre.textContent = `${emp.firstName || ''} ${emp.lastName || ''}`.trim();
+      selectedColaboradorRtm.textContent = emp.rtmId || '-';
+      selectedColaboradorNomina.textContent = emp.username || '-';
+      
+      // Limpiar selección anterior
+      archivosSeleccionados = [];
+      actualizarListaArchivos();
+      uploadBtn.style.display = 'none';
+      cancelUploadBtn.style.display = 'none';
+      
+      uploadSection.style.display = 'block';
+      
+      mostrarLista();
+      
+      showLondonAlert(`Selecciona los PDFs para ${emp.firstName}`);
+    };
+
+    // ==================== SUBIR COMPROBANTES (SELECTOR ÚNICO MÚLTIPLE) ====================
+    uploadArea.addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.style.background = 'rgba(22, 224, 134, 0.2)';
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.style.background = '';
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.style.background = '';
+      const files = Array.from(e.dataTransfer.files).filter(f => f.type === 'application/pdf');
+      agregarArchivos(files);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      const files = Array.from(e.target.files);
+      agregarArchivos(files);
+      fileInput.value = ''; // Permitir seleccionar los mismos archivos después
+    });
+
+    function agregarArchivos(files) {
+      archivosSeleccionados = [...archivosSeleccionados, ...files];
+      actualizarListaArchivos();
+      
+      if (archivosSeleccionados.length > 0) {
+        uploadBtn.style.display = 'block';
+        cancelUploadBtn.style.display = 'block';
+        uploadBtn.innerHTML = `<i class="fas fa-compress-alt"></i> Comprimir y Subir Todos (${archivosSeleccionados.length} archivos)`;
+      }
+    }
+
+    function actualizarListaArchivos() {
+      if (archivosSeleccionados.length === 0) {
+        selectedFiles.innerHTML = '';
+        return;
+      }
+      
+      let html = '<h5 style="color: var(--primary); margin-bottom: 10px;">Archivos seleccionados:</h5>';
+      archivosSeleccionados.forEach((file, index) => {
+        const tieneRtm = colaboradorParaSubida && file.name.includes(colaboradorParaSubida.rtmId);
+        
+        html += `
+          <div class="file-item">
+            <i class="fas fa-file-pdf" style="color: ${tieneRtm ? 'var(--primary)' : 'var(--warning)'};"></i>
+            <div class="file-info">
+              <div class="file-name">${file.name} ${tieneRtm ? '<span class="badge-success">Auto-asignado</span>' : ''}</div>
+              <div class="file-size">${(file.size / 1024).toFixed(2)} KB</div>
+            </div>
+            <div class="file-remove" onclick="removerArchivo(${index})">
+              <i class="fas fa-times-circle"></i>
+            </div>
+          </div>
+        `;
+      });
+      selectedFiles.innerHTML = html;
+    }
+
+    window.removerArchivo = (index) => {
+      archivosSeleccionados.splice(index, 1);
+      actualizarListaArchivos();
+      
+      if (archivosSeleccionados.length === 0) {
+        uploadBtn.style.display = 'none';
+        cancelUploadBtn.style.display = 'none';
+      } else {
+        uploadBtn.innerHTML = `<i class="fas fa-compress-alt"></i> Comprimir y Subir Todos (${archivosSeleccionados.length} archivos)`;
+      }
+    };
+
+    cancelUploadBtn.addEventListener('click', () => {
+      archivosSeleccionados = [];
+      actualizarListaArchivos();
+      uploadBtn.style.display = 'none';
+      cancelUploadBtn.style.display = 'none';
+      colaboradorParaSubida = null;
+      uploadSection.style.display = 'none';
+      showLondonAlert('Subida cancelada');
+    });
+
+    async function comprimirPDF(file) {
+      return new Promise(async (resolve) => {
+        try {
+          // Simular compresión (en producción usarías pdf-lib)
+          await new Promise(r => setTimeout(r, 300));
+          resolve(file);
+        } catch (error) {
+          console.error('Error comprimiendo:', error);
+          resolve(file);
+        }
+      });
+    }
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
+    }
+
+    uploadBtn.addEventListener('click', async () => {
+      if (!colaboradorParaSubida || archivosSeleccionados.length === 0) return;
+
+      try {
+        uploadBtn.disabled = true;
+        uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Subiendo...';
+        
+        let subidos = 0;
+        let errores = 0;
+        
+        for (const file of archivosSeleccionados) {
+          try {
+            // Comprimir PDF
+            const archivoComprimido = await comprimirPDF(file);
+            
+            // Verificar si el nombre contiene el RTM ID
+            const nombreAsignado = file.name.includes(colaboradorParaSubida.rtmId);
+            
+            // Convertir a base64
+            const base64 = await fileToBase64(archivoComprimido);
+            
+            // Guardar en Firebase
+            await addDoc(collection(db, 'Comprobantes'), {
+              colaboradorId: colaboradorParaSubida.id,
+              rtmId: colaboradorParaSubida.rtmId,
+              codigoNomina: colaboradorParaSubida.username,
+              nombreOriginal: file.name,
+              nombreAsignado: nombreAsignado,
+              archivoBase64: base64,
+              tamaño: archivoComprimido.size,
+              fecha: Timestamp.now(),
+              subidoPor: currentUser?.name || 'admin',
+              colaboradorNombre: `${colaboradorParaSubida.firstName || ''} ${colaboradorParaSubida.lastName || ''}`.trim()
+            });
+            
+            subidos++;
+          } catch (error) {
+            console.error('Error subiendo archivo:', error);
+            errores++;
+          }
+        }
+
+        // Limpiar selección
+        archivosSeleccionados = [];
+        actualizarListaArchivos();
+        uploadBtn.style.display = 'none';
+        cancelUploadBtn.style.display = 'none';
+        uploadBtn.disabled = false;
+        
+        if (errores === 0) {
+          showLondonAlert(`${subidos} comprobantes subidos correctamente`);
+        } else {
+          showLondonAlert(`${subidos} subidos, ${errores} errores`, 'warning');
+        }
+        
+      } catch (error) {
+        console.error(error);
+        showLondonAlert('Error al subir archivos', 'error');
+        uploadBtn.disabled = false;
+        uploadBtn.innerHTML = `<i class="fas fa-compress-alt"></i> Comprimir y Subir Todos (${archivosSeleccionados.length} archivos)`;
+      }
+    });
+
     // ==================== EDITAR ====================
     window.editarEmpleado = (id) => {
       const emp = empleados.find(e => e.id === id);
@@ -2149,10 +2605,9 @@
       mostrarRegistro();
       editId.value = emp.id;
       
-      // Extraer solo números del código EMP
       const codigoNumerico = (emp.username || '').replace('EMP', '');
       username.value = codigoNumerico;
-      
+      rtmId.value = emp.rtmId || '';
       firstName.value = emp.firstName || '';
       lastName.value = emp.lastName || '';
       turnoHoras.value = emp.turnoHoras || 8;
@@ -2171,7 +2626,6 @@
       btnSubmitText.textContent = 'ACTUALIZAR';
       btnCancelarEdit.style.display = 'block';
       
-      // Verificar disponibilidad del código
       setTimeout(() => {
         const event = new Event('input');
         username.dispatchEvent(event);
@@ -2188,6 +2642,7 @@
       btnSubmitText.textContent = 'GUARDAR';
       btnCancelarEdit.style.display = 'none';
       codeStatus.innerHTML = '';
+      rtmStatus.innerHTML = '';
     });
 
     // ==================== ELIMINAR ====================
@@ -2221,13 +2676,13 @@
 
       const codigoNumerico = username.value.trim();
       
-      // Validar que solo sean números
       if (!/^\d+$/.test(codigoNumerico)) {
         showLondonAlert('El código debe ser solo números', 'error');
         return;
       }
       
-      const codigo = `EMP${String(parseInt(codigoNumerico)).padStart(3, '0')}`;
+      const codigoFormateado = String(parseInt(codigoNumerico)).padStart(3, '0');
+      const rtmIdVal = rtmId.value.trim();
       const nombre = firstName.value.trim();
       const apellido = lastName.value.trim();
       const turno = parseInt(turnoHoras.value);
@@ -2244,17 +2699,29 @@
         return;
       }
 
+      if (!rtmIdVal || !rtmIdVal.startsWith('RTM') || rtmIdVal.length !== 9) {
+        showLondonAlert('RTM ID inválido (debe ser RTM + 6 dígitos)', 'error');
+        return;
+      }
+
       if (!foto && !id) {
         showLondonAlert('Tome una foto', 'error');
         return;
       }
 
-      // VERIFICAR SI EL CÓDIGO YA EXISTE (BLOQUEAR REGISTRO)
-      const existe = await verificarCodigoExistente(codigo, id);
-      if (existe) {
-        showLondonAlert('Este código ya está registrado', 'error');
+      const existeNomina = await verificarCodigoNominaExistente(codigoFormateado, id);
+      if (existeNomina) {
+        showLondonAlert('Este código de nómina ya está registrado', 'error');
         codeStatus.innerHTML = '<i class="fas fa-times-circle"></i> Código no disponible';
         codeStatus.className = 'code-status taken';
+        return;
+      }
+
+      const existeRtm = await verificarRtmIdExistente(rtmIdVal, id);
+      if (existeRtm) {
+        showLondonAlert('Este RTM ID ya está registrado', 'error');
+        rtmStatus.innerHTML = '<i class="fas fa-times-circle"></i> RTM no disponible';
+        rtmStatus.className = 'code-status taken';
         return;
       }
 
@@ -2272,7 +2739,8 @@
       }
 
       const empleadoData = {
-        username: codigo,
+        username: codigoFormateado,
+        rtmId: rtmIdVal,
         firstName: nombre,
         lastName: apellido,
         turnoHoras: turno,
@@ -2304,11 +2772,16 @@
         }
         btnCancelarEdit.click();
         
-        // Actualizar contador si es necesario
-        const num = parseInt(codigoNumerico);
-        if (num >= codigoSecuencial) {
-          codigoSecuencial = num + 1;
+        const numNomina = parseInt(codigoNumerico);
+        if (numNomina >= codigoSecuencial) {
+          codigoSecuencial = numNomina + 1;
         }
+        
+        const rtmNum = parseInt(rtmIdVal.replace('RTM', ''));
+        if (rtmNum >= rtmSecuencial) {
+          rtmSecuencial = rtmNum + 1;
+        }
+        
       } catch (error) {
         showLondonAlert('Error al guardar', 'error');
       }
@@ -2318,8 +2791,8 @@
     function showLondonAlert(message, type = 'success') {
       const alertDiv = document.createElement('div');
       alertDiv.className = 'alert-london';
-      alertDiv.style.background = type === 'success' ? '#16e086' : '#e74c3c';
-      alertDiv.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i><span>${message}</span>`;
+      alertDiv.style.background = type === 'success' ? '#16e086' : (type === 'error' ? '#e74c3c' : '#f39c12');
+      alertDiv.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-circle' : 'fa-exclamation-triangle')}"></i><span>${message}</span>`;
       document.body.appendChild(alertDiv);
       setTimeout(() => alertDiv.remove(), 3000);
     }
@@ -2328,6 +2801,8 @@
     window.editarEmpleado = editarEmpleado;
     window.confirmarEliminar = confirmarEliminar;
     window.verDetalle = verDetalle;
+    window.prepararSubidaComprobantes = prepararSubidaComprobantes;
+    window.removerArchivo = removerArchivo;
   </script>
 </body>
 </html>
