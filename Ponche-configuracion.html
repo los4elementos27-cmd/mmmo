@@ -662,17 +662,46 @@
     }
     .settings-pin-card .pin-icon { font-size: 3rem; color: #f39c12; margin-bottom: var(--spacing-md); }
     .settings-pin-card h3 { color: white; font-size: var(--text-lg); font-weight: 700; margin-bottom: var(--spacing-xs); }
-    .settings-pin-card p { color: var(--text-secondary); font-size: var(--text-sm); margin-bottom: var(--spacing-lg); }
-    .settings-pin-display {
+    .settings-pin-card p { color: var(--text-secondary); font-size: var(--text-sm); margin-bottom: var(--spacing-md); line-height: 1.5; }
+    /* Display de puntos del PIN */
+    .cfg-pin-display {
       background: rgba(0,0,0,0.4); border: 2px solid rgba(243,156,18,0.4);
       border-radius: var(--border-radius-sm); padding: var(--spacing-md);
       text-align: center; margin-bottom: var(--spacing-sm);
-      color: var(--warning); font-size: 1.8rem; font-weight: 700;
-      letter-spacing: 8px; min-height: 60px; display: flex; align-items: center; justify-content: center;
+      color: var(--warning); font-size: 2rem; font-weight: 700;
+      letter-spacing: 10px; min-height: 62px;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .settings-pin-error { color: #ff8a7a; font-size: var(--text-xs); margin-bottom: var(--spacing-sm); display: none; min-height: 20px; }
+    .cfg-pin-display.has-value { border-color: var(--warning); box-shadow: 0 0 12px rgba(243,156,18,0.2); }
+    .cfg-pin-display--confirm  { border-color: rgba(22,224,134,0.4); color: var(--primary); }
+    .cfg-pin-display--confirm.has-value { border-color: var(--primary); box-shadow: 0 0 12px rgba(22,224,134,0.2); }
+    /* Teclado virtual cfg */
+    .cfg-vk {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: var(--spacing-sm); margin-bottom: var(--spacing-md);
+    }
+    .cfg-vk-btn {
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+      border-radius: var(--border-radius-sm); padding: 14px 0;
+      color: white; font-size: var(--text-xl); font-weight: 600;
+      cursor: pointer; transition: all 0.15s ease; text-align: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .cfg-vk-btn:hover  { background: rgba(255,255,255,0.16); border-color: var(--warning); color: var(--warning); }
+    .cfg-vk-btn:active { transform: scale(0.92); background: rgba(243,156,18,0.2); }
+    .cfg-vk-zero { grid-column: 1 / 3; }
+    .cfg-vk-del  { background: rgba(231,76,60,0.12); border-color: rgba(231,76,60,0.3); color: #ff8a7a; font-size: var(--text-base); }
+    .cfg-vk-del:hover { background: rgba(231,76,60,0.28); border-color: var(--danger); color: var(--danger); }
+    .settings-pin-error { color: #ff8a7a; font-size: var(--text-xs); margin-bottom: var(--spacing-sm); display: none; min-height: 18px; text-align: center; background: rgba(231,76,60,0.1); border-radius: 8px; padding: 4px 8px; }
     .settings-pin-error.show { display: block; }
-    .settings-pin-vk { display: grid; grid-template-columns: repeat(3,1fr); gap: var(--spacing-sm); margin-bottom: var(--spacing-md); }
+    .settings-pin-submit {
+      width: 100%; background: var(--warning); color: #000; border: none;
+      padding: var(--spacing-md); border-radius: 50px; font-weight: 700;
+      font-size: var(--text-base); cursor: pointer; transition: all 0.2s ease;
+      margin-bottom: var(--spacing-sm); display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .settings-pin-submit:hover { background: #e6890a; }
     .settings-pin-cancel {
       width: 100%; background: transparent; color: rgba(255,255,255,0.5);
       border: 1px solid rgba(255,255,255,0.15); padding: var(--spacing-sm);
@@ -951,25 +980,52 @@
   <!-- ===================== PIN GATE DE CONFIGURACIÓN ===================== -->
   <div class="settings-pin-overlay" id="settingsPinOverlay">
     <div class="settings-pin-card">
-      <div class="pin-icon"><i class="fas fa-lock"></i></div>
-      <h3>Acceso a Configuración</h3>
-      <p>Ingresa tu PIN para continuar</p>
-      <div class="settings-pin-display" id="settingsPinDisplay">_</div>
-      <div class="settings-pin-error" id="settingsPinError">PIN incorrecto</div>
-      <div class="settings-pin-vk" id="settingsPinVK">
-        <button class="vk-btn" data-val="1">1</button>
-        <button class="vk-btn" data-val="2">2</button>
-        <button class="vk-btn" data-val="3">3</button>
-        <button class="vk-btn" data-val="4">4</button>
-        <button class="vk-btn" data-val="5">5</button>
-        <button class="vk-btn" data-val="6">6</button>
-        <button class="vk-btn" data-val="7">7</button>
-        <button class="vk-btn" data-val="8">8</button>
-        <button class="vk-btn" data-val="9">9</button>
-        <button class="vk-btn vk-zero" data-val="0">0</button>
-        <button class="vk-btn vk-del" id="settingsPinDel"><i class="fas fa-delete-left"></i></button>
+
+      <!-- ícono y título dinámico -->
+      <div class="pin-icon" id="cfgPinIcon"><i class="fas fa-lock"></i></div>
+      <h3 id="cfgPinTitle">Acceso a Configuración</h3>
+      <p  id="cfgPinDesc">Ingresa tu PIN de configuración</p>
+
+      <!-- Pantalla 1: PIN de acceso (solo un display) -->
+      <div id="pinViewEnter">
+        <div class="cfg-pin-display" id="cfgPinDisplay1">_ _ _ _</div>
+        <div class="settings-pin-error" id="settingsPinError"></div>
       </div>
+
+      <!-- Pantalla 2: Crear PIN — paso 1 (nuevo) -->
+      <div id="pinViewCreate1" style="display:none;">
+        <div class="cfg-pin-display" id="cfgPinDisplay2">_ _ _ _</div>
+        <div class="settings-pin-error" id="settingsPinCreateError"></div>
+      </div>
+
+      <!-- Pantalla 2: Crear PIN — paso 2 (confirmar) -->
+      <div id="pinViewCreate2" style="display:none;">
+        <div class="cfg-pin-display cfg-pin-display--confirm" id="cfgPinDisplay3">_ _ _ _</div>
+        <div class="settings-pin-error" id="settingsPinConfirmError"></div>
+      </div>
+
+      <!-- Teclado virtual numérico (compartido entre vistas) -->
+      <div class="cfg-vk" id="cfgVK">
+        <button class="cfg-vk-btn" data-val="1">1</button>
+        <button class="cfg-vk-btn" data-val="2">2</button>
+        <button class="cfg-vk-btn" data-val="3">3</button>
+        <button class="cfg-vk-btn" data-val="4">4</button>
+        <button class="cfg-vk-btn" data-val="5">5</button>
+        <button class="cfg-vk-btn" data-val="6">6</button>
+        <button class="cfg-vk-btn" data-val="7">7</button>
+        <button class="cfg-vk-btn" data-val="8">8</button>
+        <button class="cfg-vk-btn" data-val="9">9</button>
+        <button class="cfg-vk-btn cfg-vk-zero" data-val="0">0</button>
+        <button class="cfg-vk-btn cfg-vk-del" id="cfgVkDel"><i class="fas fa-delete-left"></i></button>
+      </div>
+
+      <!-- Botón de acción dinámico -->
+      <button class="settings-pin-submit" id="cfgPinActionBtn">
+        <i class="fas fa-unlock-alt" id="cfgPinActionIcon"></i>
+        <span id="cfgPinActionText">Acceder</span>
+      </button>
       <button class="settings-pin-cancel" id="settingsPinCancel">Cancelar</button>
+
     </div>
   </div>
 
@@ -2311,60 +2367,247 @@
     document.getElementById('captureBtn').addEventListener('click', capturarManualmente);
 
     /* =================================================================
-       PANEL DE CONFIGURACIÓN — PIN GATE
+       PANEL DE CONFIGURACIÓN — PIN PROPIO con teclado virtual
+       -----------------------------------------------------------------
+       PIN INDEPENDIENTE del login. Se guarda en Firebase en el documento
+       del usuario logueado (colección 'Collaborators', campo 'configPin').
+
+       FLUJO:
+         • Sin PIN guardado → modo CREAR:
+             Paso 1: digitar nuevo PIN (4–6 dígitos)
+             Paso 2: confirmar PIN
+             Botón: "Crear PIN"
+         • Con PIN guardado → modo ACCEDER:
+             Digitar PIN
+             Botón: "Acceder"
     ================================================================= */
     const settingsPinOverlay = document.getElementById('settingsPinOverlay');
-    const settingsPinDisplay = document.getElementById('settingsPinDisplay');
-    const settingsPinError   = document.getElementById('settingsPinError');
     const settingsPanel      = document.getElementById('settingsPanel');
-    let   pinBuffer          = '';
 
-    document.getElementById('menuSettings').addEventListener('click', () => {
+    // Vistas
+    const pinViewEnter   = document.getElementById('pinViewEnter');
+    const pinViewCreate1 = document.getElementById('pinViewCreate1');
+    const pinViewCreate2 = document.getElementById('pinViewCreate2');
+
+    // Displays
+    const cfgPinDisplay1 = document.getElementById('cfgPinDisplay1');
+    const cfgPinDisplay2 = document.getElementById('cfgPinDisplay2');
+    const cfgPinDisplay3 = document.getElementById('cfgPinDisplay3');
+
+    // Errores
+    const settingsPinError       = document.getElementById('settingsPinError');
+    const settingsPinCreateError = document.getElementById('settingsPinCreateError');
+    const settingsPinConfirmError= document.getElementById('settingsPinConfirmError');
+
+    // Botón acción y textos dinámicos
+    const cfgPinActionBtn  = document.getElementById('cfgPinActionBtn');
+    const cfgPinActionIcon = document.getElementById('cfgPinActionIcon');
+    const cfgPinActionText = document.getElementById('cfgPinActionText');
+    const cfgPinTitle      = document.getElementById('cfgPinTitle');
+    const cfgPinDesc       = document.getElementById('cfgPinDesc');
+    const cfgPinIcon       = document.getElementById('cfgPinIcon');
+
+    // Estado del teclado virtual cfg
+    let cfgPinBuffer    = '';   // valor actual del campo activo
+    let cfgPinMode      = 'enter'; // 'enter' | 'create1' | 'create2'
+    let cfgPinStep1Val  = '';   // guarda el pin del paso 1 para comparar en paso 2
+
+    // Qué display está activo según modo
+    function cfgActiveDisplay() {
+      if (cfgPinMode === 'enter')   return cfgPinDisplay1;
+      if (cfgPinMode === 'create1') return cfgPinDisplay2;
+      if (cfgPinMode === 'create2') return cfgPinDisplay3;
+    }
+
+    function cfgRenderDisplay() {
+      const d = cfgActiveDisplay();
+      if (!d) return;
+      if (cfgPinBuffer.length === 0) {
+        d.textContent = '_ _ _ _';
+        d.classList.remove('has-value');
+      } else {
+        d.textContent = '●'.repeat(cfgPinBuffer.length);
+        d.classList.add('has-value');
+      }
+    }
+
+    function cfgShowError(el, msg) {
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 3000);
+    }
+
+    // Teclado virtual cfg — dígitos
+    document.querySelectorAll('#cfgVK .cfg-vk-btn[data-val]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (cfgPinBuffer.length >= 6) return;
+        cfgPinBuffer += btn.dataset.val;
+        cfgRenderDisplay();
+        // Limpiar error al escribir
+        settingsPinError.classList.remove('show');
+        settingsPinCreateError.classList.remove('show');
+        settingsPinConfirmError.classList.remove('show');
+      });
+    });
+
+    // Borrar
+    document.getElementById('cfgVkDel').addEventListener('click', () => {
+      cfgPinBuffer = cfgPinBuffer.slice(0, -1);
+      cfgRenderDisplay();
+    });
+
+    // Cancelar
+    document.getElementById('settingsPinCancel').addEventListener('click', () => {
+      settingsPinOverlay.classList.remove('show');
+      cfgPinBuffer   = '';
+      cfgPinStep1Val = '';
+      cfgPinMode     = 'enter';
+    });
+
+    // Leer configPin desde Firebase para el usuario logueado
+    async function getCfgPinFromFirebase() {
+      if (!currentUser) return null;
+      try {
+        const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js');
+        const snap = await getDoc(doc(db, 'Collaborators', currentUser.uid));
+        if (snap.exists()) return snap.data().configPin || null;
+      } catch (e) { console.error('getCfgPin error:', e); }
+      return null;
+    }
+
+    // Guardar configPin en Firebase
+    async function saveCfgPinToFirebase(pin) {
+      if (!currentUser) return;
+      try {
+        const { doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js');
+        await updateDoc(doc(db, 'Collaborators', currentUser.uid), { configPin: pin });
+      } catch (e) { console.error('saveCfgPin error:', e); }
+    }
+
+    // Abrir modal: determina si tiene PIN o no
+    document.getElementById('menuSettings').addEventListener('click', async () => {
       menuModal.classList.remove('show');
-      pinBuffer = '';
-      settingsPinDisplay.textContent = '_';
-      settingsPinError.classList.remove('show');
+      cfgPinBuffer   = '';
+      cfgPinStep1Val = '';
+      showLoading('Verificando PIN...');
+      const pinGuardado = await getCfgPinFromFirebase();
+      hideLoading();
+
+      if (pinGuardado) {
+        // Modo ACCEDER
+        cfgPinMode = 'enter';
+        cfgPinTitle.textContent   = 'Acceso a Configuración';
+        cfgPinDesc.textContent    = 'Ingresa tu PIN de configuración';
+        cfgPinIcon.innerHTML      = '<i class="fas fa-lock"></i>';
+        cfgPinIcon.style.color    = '#f39c12';
+        cfgPinActionIcon.className= 'fas fa-unlock-alt';
+        cfgPinActionText.textContent = 'Acceder';
+        cfgPinActionBtn.style.background = 'var(--warning)';
+
+        pinViewEnter.style.display   = '';
+        pinViewCreate1.style.display = 'none';
+        pinViewCreate2.style.display = 'none';
+        cfgPinDisplay1.textContent   = '_ _ _ _';
+        cfgPinDisplay1.classList.remove('has-value');
+        settingsPinError.classList.remove('show');
+      } else {
+        // Modo CREAR — paso 1
+        cfgPinMode = 'create1';
+        cfgPinTitle.textContent   = 'Crear PIN de Configuración';
+        cfgPinDesc.textContent    = 'Crea un PIN de 4 a 6 dígitos para proteger esta sección';
+        cfgPinIcon.innerHTML      = '<i class="fas fa-key"></i>';
+        cfgPinIcon.style.color    = 'var(--primary)';
+        cfgPinActionIcon.className= 'fas fa-arrow-right';
+        cfgPinActionText.textContent = 'Continuar';
+        cfgPinActionBtn.style.background = 'var(--primary)';
+
+        pinViewEnter.style.display   = 'none';
+        pinViewCreate1.style.display = '';
+        pinViewCreate2.style.display = 'none';
+        cfgPinDisplay2.textContent   = '_ _ _ _';
+        cfgPinDisplay2.classList.remove('has-value');
+        settingsPinCreateError.classList.remove('show');
+      }
+
       settingsPinOverlay.classList.add('show');
     });
 
-    document.getElementById('settingsPinCancel').addEventListener('click', () => {
-      settingsPinOverlay.classList.remove('show');
-      pinBuffer = '';
-    });
+    // Botón de acción dinámico
+    cfgPinActionBtn.addEventListener('click', async () => {
 
-    document.querySelectorAll('#settingsPinVK .vk-btn[data-val]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (pinBuffer.length >= 12) return;
-        pinBuffer += btn.dataset.val;
-        settingsPinDisplay.textContent = '•'.repeat(pinBuffer.length);
-        settingsPinError.classList.remove('show');
-      });
-    });
-
-    document.getElementById('settingsPinDel').addEventListener('click', () => {
-      pinBuffer = pinBuffer.slice(0, -1);
-      settingsPinDisplay.textContent = pinBuffer.length > 0 ? '•'.repeat(pinBuffer.length) : '_';
-    });
-
-    // Verificar PIN automáticamente al completar (misma longitud que pin del usuario)
-    const settingsPinVKBtns = document.querySelectorAll('#settingsPinVK .vk-btn[data-val]');
-    settingsPinVKBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        // Verificar después de cada tecla
-        if (currentUser && currentUser.pin && pinBuffer === currentUser.pin) {
+      /* ── MODO ACCEDER ── */
+      if (cfgPinMode === 'enter') {
+        if (cfgPinBuffer.length < 4) { cfgShowError(settingsPinError, 'PIN muy corto (mínimo 4 dígitos)'); return; }
+        showLoading('Verificando...');
+        const pinGuardado = await getCfgPinFromFirebase();
+        hideLoading();
+        if (cfgPinBuffer === pinGuardado) {
           settingsPinOverlay.classList.remove('show');
-          pinBuffer = '';
+          cfgPinBuffer = '';
           abrirConfiguracion();
-        } else if (pinBuffer.length >= (currentUser?.pin?.length || 8)) {
-          // PIN completo pero incorrecto
-          settingsPinError.classList.add('show');
-          setTimeout(() => {
-            pinBuffer = '';
-            settingsPinDisplay.textContent = '_';
-            settingsPinError.classList.remove('show');
-          }, 1500);
+        } else {
+          cfgShowError(settingsPinError, 'PIN incorrecto. Inténtalo de nuevo.');
+          cfgPinBuffer = '';
+          cfgRenderDisplay();
         }
-      });
+        return;
+      }
+
+      /* ── MODO CREAR — PASO 1 ── */
+      if (cfgPinMode === 'create1') {
+        if (cfgPinBuffer.length < 4) { cfgShowError(settingsPinCreateError, 'El PIN debe tener al menos 4 dígitos'); return; }
+        cfgPinStep1Val = cfgPinBuffer;
+        cfgPinBuffer   = '';
+
+        // Pasar a paso 2 (confirmar)
+        cfgPinMode = 'create2';
+        cfgPinTitle.textContent      = 'Confirmar PIN';
+        cfgPinDesc.textContent       = 'Ingresa el PIN nuevamente para confirmarlo';
+        cfgPinActionIcon.className   = 'fas fa-save';
+        cfgPinActionText.textContent = 'Crear PIN';
+        cfgPinActionBtn.style.background = 'var(--primary)';
+
+        pinViewCreate1.style.display = 'none';
+        pinViewCreate2.style.display = '';
+        cfgPinDisplay3.textContent   = '_ _ _ _';
+        cfgPinDisplay3.classList.remove('has-value');
+        settingsPinConfirmError.classList.remove('show');
+        return;
+      }
+
+      /* ── MODO CREAR — PASO 2 (confirmar) ── */
+      if (cfgPinMode === 'create2') {
+        if (cfgPinBuffer.length < 4) { cfgShowError(settingsPinConfirmError, 'Ingresa el PIN para confirmar'); return; }
+        if (cfgPinBuffer !== cfgPinStep1Val) {
+          cfgShowError(settingsPinConfirmError, 'Los PIN no coinciden. Vuelve a intentarlo.');
+          cfgPinBuffer   = '';
+          cfgPinStep1Val = '';
+          cfgRenderDisplay();
+          // Regresar al paso 1
+          setTimeout(() => {
+            cfgPinMode = 'create1';
+            cfgPinTitle.textContent      = 'Crear PIN de Configuración';
+            cfgPinDesc.textContent       = 'Crea un PIN de 4 a 6 dígitos';
+            cfgPinActionIcon.className   = 'fas fa-arrow-right';
+            cfgPinActionText.textContent = 'Continuar';
+            pinViewCreate2.style.display = 'none';
+            pinViewCreate1.style.display = '';
+            cfgPinDisplay2.textContent   = '_ _ _ _';
+            cfgPinDisplay2.classList.remove('has-value');
+          }, 1200);
+          return;
+        }
+        // PIN confirmado — guardar en Firebase
+        showLoading('Guardando PIN...');
+        await saveCfgPinToFirebase(cfgPinBuffer);
+        hideLoading();
+        settingsPinOverlay.classList.remove('show');
+        cfgPinBuffer   = '';
+        cfgPinStep1Val = '';
+        cfgPinMode     = 'enter';
+        showToast('✅ PIN de configuración creado correctamente', 'success');
+        abrirConfiguracion();
+      }
     });
 
     function abrirConfiguracion() {
