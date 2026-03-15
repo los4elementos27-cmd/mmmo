@@ -244,7 +244,8 @@
       overflow-y: auto;
       overflow-x: hidden;
       padding: 14px;
-      padding-bottom: calc(var(--nav-height) + 32px);
+      /* FIX MÓVIL: padding-bottom = nav + espacio extra + safe-area (notch/home indicator iOS/Android) */
+      padding-bottom: calc(var(--nav-height) + 48px + env(safe-area-inset-bottom, 0px));
       scroll-behavior: smooth;
       -webkit-overflow-scrolling: touch;
     }
@@ -864,13 +865,13 @@
     /* ===== NAV INFERIOR ===== */
     nav.bottom-nav {
       position: fixed; bottom: 0; left: 0; right: 0;
-      height: var(--nav-height);
+      height: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px));
       background: rgba(255,255,255,0.97);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       display: flex; justify-content: space-around; align-items: center;
       border-top: 1px solid var(--border-light);
-      padding-bottom: env(safe-area-inset-bottom);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
       z-index: 200;
       box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
     }
@@ -1144,7 +1145,8 @@
     }
 
     @media (max-width: 380px) {
-      main { padding: 10px; padding-bottom: calc(var(--nav-height) + 10px); }
+      /* FIX MÓVIL: mantener padding-bottom suficiente para que los datos no queden bajo la nav */
+      main { padding: 10px; padding-bottom: calc(var(--nav-height) + 48px + env(safe-area-inset-bottom, 0px)); }
       .welcome-card h1 { font-size: 15px; }
     }
 
