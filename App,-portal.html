@@ -1570,23 +1570,66 @@
     };
 
     // ===== FERIADOS DOMINICANOS =====
-    const FERIADOS_RD = [
-      { mes: 1,  dia: 1,  nombre: 'Año Nuevo',                  razon: 'Inicio del año civil' },
-      { mes: 1,  dia: 6,  nombre: 'Día de Reyes',               razon: 'Epifanía del Señor' },
-      { mes: 1,  dia: 21, nombre: 'Nuestra Señora de Altagracia', razon: 'Patrona de la República' },
-      { mes: 1,  dia: 26, nombre: 'Día de Duarte',              razon: 'Natalicio de Juan Pablo Duarte' },
-      { mes: 2,  dia: 27, nombre: 'Independencia Nacional',     razon: 'Proclamación de la República' },
-      { mes: 4,  dia: 14, nombre: 'Viernes Santo',              razon: 'Semana Santa - fecha variable' },
-      { mes: 5,  dia: 1,  nombre: 'Día del Trabajador',         razon: 'Día Internacional del Trabajo' },
-      { mes: 6,  dia: 11, nombre: 'Corpus Christi',             razon: 'Fiesta religiosa - fecha variable' },
-      { mes: 8,  dia: 16, nombre: 'Restauración Nacional',      razon: 'Restauración de la República' },
-      { mes: 9,  dia: 24, nombre: 'Las Mercedes',               razon: 'Festividad religiosa nacional' },
-      { mes: 11, dia: 6,  nombre: 'Constitución Nacional',      razon: 'Día de la Constitución Dominicana' },
-      { mes: 12, dia: 25, nombre: 'Navidad',                    razon: 'Natividad de Jesucristo' },
-    ];
 
+    // Algoritmo de Butcher: calcula el Domingo de Pascua para cualquier año
+    function calcularDomingoPascua(anio) {
+      const a = anio % 19;
+      const b = Math.floor(anio / 100);
+      const c = anio % 100;
+      const d = Math.floor(b / 4);
+      const e = b % 4;
+      const f = Math.floor((b + 8) / 25);
+      const g = Math.floor((b - f + 1) / 3);
+      const h = (19 * a + b - d - g + 15) % 30;
+      const i = Math.floor(c / 4);
+      const k = c % 4;
+      const l = (32 + 2 * e + 2 * i - h - k) % 7;
+      const m = Math.floor((a + 11 * h + 22 * l) / 451);
+      const mes = Math.floor((h + l - 7 * m + 114) / 31);   // 1-indexed
+      const dia = ((h + l - 7 * m + 114) % 31) + 1;
+      return new Date(anio, mes - 1, dia); // mes 0-indexed para Date
+    }
+
+    // Genera el array de feriados para un año específico
+    // Viernes Santo = Pascua - 2 días | Corpus Christi = Pascua + 60 días
+    function obtenerFeriadosAnio(anio) {
+      const pascua = calcularDomingoPascua(anio);
+
+      const viernesSanto = new Date(pascua);
+      viernesSanto.setDate(pascua.getDate() - 2);
+
+      const corpusChristi = new Date(pascua);
+      corpusChristi.setDate(pascua.getDate() + 60);
+
+      return [
+        { mes: 1,  dia: 1,                          nombre: 'Año Nuevo',                   razon: 'Inicio del año civil',                      fijo: true  },
+        { mes: 1,  dia: 6,                          nombre: 'Día de Reyes',                razon: 'Epifanía del Señor',                         fijo: true  },
+        { mes: 1,  dia: 21,                         nombre: 'Nuestra Señora de Altagracia',razon: 'Patrona de la República Dominicana',          fijo: true  },
+        { mes: 1,  dia: 26,                         nombre: 'Día de Duarte',               razon: 'Natalicio de Juan Pablo Duarte',              fijo: true  },
+        { mes: 2,  dia: 27,                         nombre: 'Independencia Nacional',      razon: 'Proclamación de la República Dominicana',     fijo: true  },
+        { mes: viernesSanto.getMonth() + 1,
+          dia:  viernesSanto.getDate(),             nombre: 'Viernes Santo',               razon: 'Semana Santa ' + anio + ' — fecha variable',  fijo: false },
+        { mes: 5,  dia: 1,                          nombre: 'Día del Trabajador',          razon: 'Día Internacional del Trabajo',               fijo: true  },
+        { mes: corpusChristi.getMonth() + 1,
+          dia:  corpusChristi.getDate(),            nombre: 'Corpus Christi',              razon: 'Fiesta religiosa ' + anio + ' — fecha variable', fijo: false },
+        { mes: 8,  dia: 16,                         nombre: 'Restauración Nacional',       razon: 'Restauración de la República',                fijo: true  },
+        { mes: 9,  dia: 24,                         nombre: 'Las Mercedes',                razon: 'Festividad religiosa nacional',               fijo: true  },
+        { mes: 11, dia: 6,                          nombre: 'Constitución Nacional',       razon: 'Día de la Constitución Dominicana',           fijo: true  },
+        { mes: 12, dia: 25,                         nombre: 'Navidad',                     razon: 'Natividad de Jesucristo',                     fijo: true  },
+      ].sort((a, b) => a.mes !== b.mes ? a.mes - b.mes : a.dia - b.dia);
+    }
+
+    // Cache para no recalcular en cada llamada
+    const _feriadosCache = {};
+    function getFeriados(anio) {
+      if (!_feriadosCache[anio]) _feriadosCache[anio] = obtenerFeriadosAnio(anio);
+      return _feriadosCache[anio];
+    }
+
+    // Comprueba si una fecha dada es feriado
+    // mes es 0-indexed (igual que Date.getMonth())
     function esFeriado(anio, mes, dia) {
-      return FERIADOS_RD.find(f => f.mes === mes + 1 && f.dia === dia);
+      return getFeriados(anio).find(f => f.mes === mes + 1 && f.dia === dia);
     }
 
     function renderizarFeriados() {
@@ -1595,9 +1638,11 @@
       const list = document.getElementById('holidaysList');
       if (!list) return;
 
-      const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+      const mesesCortos = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+      const feriadosAnio = getFeriados(anioActual);
 
-      const feriadoHoy = FERIADOS_RD.find(f =>
+      // ¿Hoy es feriado?
+      const feriadoHoy = feriadosAnio.find(f =>
         f.mes === hoy.getMonth() + 1 && f.dia === hoy.getDate()
       );
 
@@ -1606,7 +1651,7 @@
           <div class="holiday-card" style="border-left-color:var(--success);background:linear-gradient(135deg,var(--success-light),#f0fff4);">
             <div class="holiday-date-badge" style="background:var(--success-light);">
               <span class="day" style="color:var(--success);">${feriadoHoy.dia}</span>
-              <span class="month" style="color:var(--success);">${meses[feriadoHoy.mes-1]}</span>
+              <span class="month" style="color:var(--success);">${mesesCortos[feriadoHoy.mes-1]}</span>
             </div>
             <div class="holiday-info">
               <h5 style="color:var(--success);">🎉 ¡Hoy es feriado!</h5>
@@ -1617,21 +1662,25 @@
         return;
       }
 
-      const proximos = FERIADOS_RD
+      // Próximos feriados del año actual que aún no han pasado
+      const hoyNorm = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+      const proximos = feriadosAnio
         .map(f => ({ ...f, fecha: new Date(anioActual, f.mes - 1, f.dia) }))
-        .filter(f => f.fecha > new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate()))
+        .filter(f => f.fecha > hoyNorm)
         .sort((a, b) => a.fecha - b.fecha);
 
+      // Si ya pasaron todos, tomar el primero del año siguiente
       if (proximos.length === 0) {
-        const primerSiguiente = FERIADOS_RD
+        const feriadosSiguiente = getFeriados(anioActual + 1);
+        const primero = feriadosSiguiente
           .map(f => ({ ...f, fecha: new Date(anioActual + 1, f.mes - 1, f.dia) }))
           .sort((a, b) => a.fecha - b.fecha)[0];
-        if (!primerSiguiente) { list.innerHTML = ''; return; }
-        proximos.push(primerSiguiente);
+        if (!primero) { list.innerHTML = ''; return; }
+        proximos.push(primero);
       }
 
       const f = proximos[0];
-      const diffMs = f.fecha - hoy;
+      const diffMs = f.fecha - hoyNorm;
       const diffDias = Math.ceil(diffMs / 86400000);
       const etiqueta = diffDias === 1 ? 'Mañana' : `En ${diffDias} días`;
 
@@ -1639,7 +1688,7 @@
         <div class="holiday-card">
           <div class="holiday-date-badge">
             <span class="day">${f.dia}</span>
-            <span class="month">${meses[f.mes - 1]}</span>
+            <span class="month">${mesesCortos[f.mes - 1]}</span>
           </div>
           <div class="holiday-info">
             <h5>${f.nombre}</h5>
@@ -2234,26 +2283,28 @@
 
     // ===== SECCIÓN FERIADOS =====
     function generarSeccionFeriados() {
-      const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      const mesesLargos = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      const mesesCortos = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
       const anio = new Date().getFullYear();
+      const feriadosAnio = getFeriados(anio);
       return `
         <div class="pdf-header">
           <button onclick="volverAHome()"><i class="fas fa-arrow-left"></i></button>
           <h4>Feriados ${anio}</h4>
         </div>
         <div class="profile-section">
-          <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">Todos los feriados nacionales de la República Dominicana que se pagan a doble tasa.</p>
-          ${FERIADOS_RD.map(f => `
-            <div class="holiday-card" style="margin-bottom:8px;">
-              <div class="holiday-date-badge">
-                <span class="day">${f.dia}</span>
-                <span class="month">${meses[f.mes-1].substring(0,3)}</span>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">Feriados nacionales de la República Dominicana ${anio} que se pagan a doble tasa. Las fechas de Semana Santa y Corpus Christi son calculadas automáticamente.</p>
+          ${feriadosAnio.map(f => `
+            <div class="holiday-card" style="margin-bottom:8px;${!f.fijo ? 'border-left-color:var(--warning);' : ''}">
+              <div class="holiday-date-badge" style="${!f.fijo ? 'background:var(--warning-light);' : ''}">
+                <span class="day" style="${!f.fijo ? 'color:var(--warning);' : ''}">${f.dia}</span>
+                <span class="month" style="${!f.fijo ? 'color:var(--warning);' : ''}">${mesesCortos[f.mes-1]}</span>
               </div>
               <div class="holiday-info">
-                <h5>${f.nombre}</h5>
+                <h5>${f.nombre}${!f.fijo ? ' <span style="font-size:9px;background:var(--warning-light);color:var(--warning);padding:1px 5px;border-radius:6px;font-weight:700;">Variable</span>' : ''}</h5>
                 <p>${f.razon}</p>
               </div>
-              <div class="holiday-double-badge">2x</div>
+              <div class="holiday-double-badge" style="${!f.fijo ? 'background:var(--warning);' : ''}">2x</div>
             </div>`).join('')}
         </div>`;
     }
