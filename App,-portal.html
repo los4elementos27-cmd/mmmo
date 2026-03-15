@@ -979,10 +979,12 @@
       position: fixed; inset: 0;
       background: rgba(255,255,255,0.97);
       backdrop-filter: blur(5px);
-      z-index: 9999; display: none;
+      z-index: 9999;
+      display: none;
       align-items: center; justify-content: center;
       flex-direction: column; gap: 16px;
     }
+    .loading-overlay.visible { display: flex !important; }
     body.dark-mode .loading-overlay { background: rgba(13,17,23,0.97); }
     .spinner {
       width: 44px; height: 44px;
@@ -1139,7 +1141,7 @@
 </head>
 <body>
 
-  <div id="globalLoader" class="loading-overlay" style="display:flex;">
+  <div id="globalLoader" class="loading-overlay" style="display:none;">
     <div class="spinner"></div>
     <p style="color: var(--primary); font-weight: 700; font-size: 13px; font-family: var(--font-main);">Cargando Vizo Access...</p>
   </div>
@@ -1268,8 +1270,8 @@
                 </div>
               </div>
               <div class="welcome-chips">
-                <div class="welcome-chip"><i class="fas fa-id-card"></i> RTM: <span id="userRtm">---</span></div>
                 <div class="welcome-chip"><i class="fas fa-clock"></i> <span id="userTurno">---</span>h</div>
+                <div class="welcome-chip"><i class="fas fa-briefcase"></i> <span id="userPosicion">---</span></div>
               </div>
             </div>
           </div>
@@ -1687,28 +1689,33 @@
     const ROLES_ALTO_MANDO = ['DIRECTOR','CORPORATIVO','GERENTE'];
     function esAltoMando(pos) { return ROLES_ALTO_MANDO.includes((pos||'').toUpperCase().trim()); }
 
-    // ===== CONFIGURACIÓN =====
-    async function cargarConfiguracionUsuario() {
+    // ===== CONFIGURACIÓN EN TIEMPO REAL =====
+    let unsubConfig = null;
+    let birthdayAlertShown = false;
+
+    function cargarConfiguracionUsuario() {
       if (!session) return;
       const key = session.id || '';
       if (!key) return;
-      try {
-        const ref = doc(db, 'ConfiguracionesUsuario', key);
-        const d = await getDoc(ref);
-        if (d.exists()) {
-          configuracionesUsuario = d.data();
+      if (unsubConfig) unsubConfig();
+      const ref = doc(db, 'ConfiguracionesUsuario', key);
+      unsubConfig = onSnapshot(ref, async (snap) => {
+        if (snap.exists()) {
+          configuracionesUsuario = snap.data();
         } else {
           configuracionesUsuario = { notificacionesCumpleanos: true, fechaNacimiento: '', tema: 'light', idioma: 'es' };
           await setDoc(ref, { ...configuracionesUsuario, creadoEn: Timestamp.now() }).catch(()=>{});
         }
-        if (configuracionesUsuario.notificacionesCumpleanos && configuracionesUsuario.fechaNacimiento &&
+        if (!birthdayAlertShown && configuracionesUsuario.notificacionesCumpleanos &&
+            configuracionesUsuario.fechaNacimiento &&
             verificarCumpleaños(configuracionesUsuario.fechaNacimiento)) {
+          birthdayAlertShown = true;
           const edad = calcularEdad(configuracionesUsuario.fechaNacimiento);
           const b = document.getElementById('birthdayBanner');
           if (b) { b.style.display = 'flex'; document.getElementById('birthdayMessage').innerText = `Hoy cumples ${edad} años 🎉`; }
           showVizoAlert('🎂 ¡Feliz Cumpleaños!', `Hoy cumples ${edad} años. ¡Muchas felicidades!`, 'info');
         }
-      } catch(e) { console.error('Error config:', e); }
+      }, (e) => { console.error('Error config RT:', e); });
     }
 
     window.guardarConfiguracion = async function() {
@@ -2146,17 +2153,27 @@
       `;
     }
 
-    // ===== COLABORADORES =====
-    async function cargarTodosColaboradores() {
+    // ===== COLABORADORES EN TIEMPO REAL =====
+    let unsubColaboradores = null;
+
+    function escucharColaboradoresEnTiempoReal() {
       if (!session) return;
       const ownerUid = session.collaboratorId || session.uid || session.id || '';
       if (!ownerUid) return;
-      try {
-        const q = query(collection(db, 'Ponche'), where('collaboratorId', '==', ownerUid));
-        const snap = await getDocs(q);
+      if (unsubColaboradores) unsubColaboradores();
+      const q = query(collection(db, 'Ponche'), where('collaboratorId', '==', ownerUid));
+      unsubColaboradores = onSnapshot(q, (snap) => {
         allColaboradores = [];
         snap.forEach(d => allColaboradores.push({ id: d.id, ...d.data() }));
-      } catch(e) { console.error('Error cargando colaboradores:', e); }
+      }, (e) => { console.error('Error colaboradores RT:', e); });
+    }
+
+    // Mantener función legacy para llamadas explícitas desde buscador
+    async function cargarTodosColaboradores() {
+      if (allColaboradores.length === 0) {
+        // esperar a que onSnapshot cargue (máx 2s)
+        await new Promise(res => setTimeout(res, 800));
+      }
     }
 
     // ===== BUSCADOR =====
@@ -2463,7 +2480,7 @@
         const { fecha, hora } = formatFechaHora(n.fecha || n.timestamp);
         const noLeida = !notificationsRead.includes(n.id);
         return `
-          <div class="notif-item" onclick="irAComprobante('${n.id}')">
+          <div class="notif-item" data-id="${n.id}" onclick="irAComprobante('${n.id}')">
             <div class="notif-item-icon"><i class="fas fa-file-invoice-dollar"></i></div>
             <div class="notif-item-text" style="flex:1;">
               <h5>Nuevo Volante de Pago</h5>
@@ -2489,14 +2506,16 @@
 
     window.marcarTodasLeidas = function() {
       const key = session?.id || '';
-      const list = document.querySelectorAll('.notif-item');
-      list.forEach(el => {
-        const btn = el.querySelector('.notif-unread-dot');
-        if (btn) btn.remove();
+      if (!key) return;
+      // Obtener todos los IDs actuales de comprobantes del panel
+      const items = document.querySelectorAll('.notif-item[data-id]');
+      items.forEach(el => {
+        const id = el.getAttribute('data-id');
+        if (id && !notificationsRead.includes(id)) notificationsRead.push(id);
       });
-      // Marcar todos los ids actuales como leídos
-      document.querySelectorAll('.notif-item').forEach((_, i) => {});
-      // Simple approach: limpiar dot
+      localStorage.setItem('vizo_notif_read_' + key, JSON.stringify(notificationsRead));
+      // Quitar puntos rojos del panel
+      document.querySelectorAll('.notif-unread-dot').forEach(d => d.remove());
       document.getElementById('notifDot')?.classList.remove('visible');
       showVizoAlert('Listo','Notificaciones marcadas como leídas','success');
     };
@@ -2560,6 +2579,50 @@
       });
     }
 
+    // ===== ESCUCHAR SESIÓN EN TIEMPO REAL (datos propios) =====
+    let unsubSesion = null;
+
+    function escucharSesionEnTiempoReal() {
+      if (!session || !session.id) return;
+      if (unsubSesion) unsubSesion();
+      const ref = doc(db, 'Ponche', session.id);
+      unsubSesion = onSnapshot(ref, (snap) => {
+        if (!snap.exists()) return;
+        const data = snap.data();
+        // Actualizar sesión en memoria y localStorage
+        session = { ...session, ...data, id: session.id };
+        localStorage.setItem('vizo_session_3', JSON.stringify(session));
+        // Actualizar UI en tiempo real
+        const norm = normalizarFecha(session.fechaIngreso);
+        const dias = calcularDiasVacaciones(norm);
+        const antig = calcularAntiguedad(norm);
+        const el = (id) => document.getElementById(id);
+        if (el('userName')) el('userName').innerText = session.firstName || '';
+        if (el('headerUserName')) el('headerUserName').innerText = `${session.firstName||''} ${session.lastName||''}`.trim();
+        if (el('userImg')) el('userImg').src = session.fotoBase64 || 'https://via.placeholder.com/80';
+        if (el('userDepto')) el('userDepto').innerText = session.departamento || '';
+        if (el('userArea')) el('userArea').innerText = session.areaTrabajo || '';
+        if (el('userTurno')) el('userTurno').innerText = session.turnoHoras || '';
+        if (el('userPosicion')) el('userPosicion').innerText = session.posicionLaboral || '';
+        if (el('vacationDays')) el('vacationDays').innerText = dias;
+        if (el('vacationDetail')) el('vacationDetail').innerText = dias > 0 ? 'Generados' : 'Aún no genera';
+        if (el('antiguedadValue')) el('antiguedadValue').innerText = antig.split(' ')[0];
+        // Actualizar estado vacaciones
+        const statusVac = calcularEstadoVacaciones(norm, dias);
+        const statusCard = el('vacationStatusCard');
+        if (statusVac && statusCard) {
+          statusCard.style.display = 'flex';
+          statusCard.className = `vacation-status-card ${statusVac.tipo}`;
+          statusCard.innerHTML = `
+            <div class="vacation-status-icon"><i class="fas ${statusVac.icon}"></i></div>
+            <div class="vacation-status-text">
+              <h4>${statusVac.titulo}</h4>
+              <p>${statusVac.subtitulo}</p>
+            </div>`;
+        }
+      }, (e) => { console.error('Error sesión RT:', e); });
+    }
+
     // ===== INICIAR APP =====
     function startApp() {
       if (!session) return;
@@ -2574,8 +2637,8 @@
       document.getElementById('userImg').src = session.fotoBase64 || 'https://via.placeholder.com/80';
       document.getElementById('userDepto').innerText = session.departamento || '';
       document.getElementById('userArea').innerText = session.areaTrabajo || '';
-      document.getElementById('userRtm').innerText = session.rtmId || '';
       document.getElementById('userTurno').innerText = session.turnoHoras || '';
+      document.getElementById('userPosicion').innerText = session.posicionLaboral || '';
 
       const norm = normalizarFecha(session.fechaIngreso);
       const dias = calcularDiasVacaciones(norm);
@@ -2602,10 +2665,12 @@
 
       renderizarFeriados();
       cargarConfiguracionUsuario();
-      cargarTodosColaboradores();
+      escucharColaboradoresEnTiempoReal();
       loadMyFiles();
       iniciarListenerNotificaciones();
+      escucharSesionEnTiempoReal();
       switchView('viewHome');
+      showLoader(false);
     }
 
     // ===== NAVEGACIÓN =====
@@ -2643,7 +2708,9 @@
     };
 
     function showLoader(s) {
-      document.getElementById('globalLoader').style.display = s ? 'flex' : 'none';
+      const el = document.getElementById('globalLoader');
+      if (s) { el.style.display = 'flex'; }
+      else { el.style.display = 'none'; }
     }
 
     // Exponer utilidades globalmente
@@ -2654,6 +2721,7 @@
 
     // ===== INICIO =====
     if (session) {
+      showLoader(true);
       startApp();
     } else {
       showLoader(false);
