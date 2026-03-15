@@ -159,16 +159,23 @@
     body {
       background: var(--bg-light);
       color: var(--text-main);
+      height: 100dvh;
       height: 100vh;
       overflow: hidden;
       transition: background 0.3s, color 0.3s;
+      position: fixed;
+      width: 100%;
+      top: 0;
+      left: 0;
     }
 
     .app-container {
+      height: 100dvh;
       height: 100vh;
       display: flex;
       flex-direction: column;
       position: relative;
+      overflow: hidden;
     }
 
     /* ===== HEADER ===== */
@@ -241,13 +248,17 @@
     /* ===== MAIN ===== */
     main {
       flex: 1;
+      /* min-height:0 es CRÍTICO en flexbox — sin esto el hijo no scrollea correctamente */
+      min-height: 0;
       overflow-y: auto;
       overflow-x: hidden;
       padding: 14px;
-      /* FIX MÓVIL: padding-bottom = nav + espacio extra + safe-area (notch/home indicator iOS/Android) */
-      padding-bottom: calc(var(--nav-height) + 48px + env(safe-area-inset-bottom, 0px));
+      /* padding-bottom robusto: nav-height + espacio generoso + safe-area iOS/Android */
+      padding-bottom: calc(var(--nav-height) + 60px + env(safe-area-inset-bottom, 20px));
       scroll-behavior: smooth;
       -webkit-overflow-scrolling: touch;
+      /* Forzar que el scroll sea del elemento, no del body */
+      overscroll-behavior-y: contain;
     }
 
     .view { display: none; animation: fadeInUp 0.35s ease; }
@@ -865,13 +876,17 @@
     /* ===== NAV INFERIOR ===== */
     nav.bottom-nav {
       position: fixed; bottom: 0; left: 0; right: 0;
-      height: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px));
+      /* Altura base más safe-area para iPhone con home indicator */
+      height: auto;
+      min-height: var(--nav-height);
       background: rgba(255,255,255,0.97);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       display: flex; justify-content: space-around; align-items: center;
       border-top: 1px solid var(--border-light);
-      padding-bottom: env(safe-area-inset-bottom, 0px);
+      /* Padding-bottom para el home indicator de iOS */
+      padding-bottom: max(env(safe-area-inset-bottom, 0px), 4px);
+      padding-top: 4px;
       z-index: 200;
       box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
     }
@@ -1144,9 +1159,19 @@
       .stats-grid { grid-template-columns: 1fr; }
     }
 
+    @media (max-width: 480px) {
+      /* En CUALQUIER móvil: padding-bottom generoso para que el último elemento siempre sea visible */
+      main {
+        padding: 12px;
+        padding-bottom: calc(var(--nav-height) + 80px + env(safe-area-inset-bottom, 20px));
+      }
+    }
+
     @media (max-width: 380px) {
-      /* FIX MÓVIL: mantener padding-bottom suficiente para que los datos no queden bajo la nav */
-      main { padding: 10px; padding-bottom: calc(var(--nav-height) + 48px + env(safe-area-inset-bottom, 0px)); }
+      main {
+        padding: 10px;
+        padding-bottom: calc(var(--nav-height) + 80px + env(safe-area-inset-bottom, 20px));
+      }
       .welcome-card h1 { font-size: 15px; }
     }
 
@@ -3240,6 +3265,38 @@
         }
       }
     }, 1500);
+
+    // ===== FIX SCROLL MÓVIL: padding-bottom dinámico basado en altura REAL de la nav =====
+    // Esto garantiza que el último elemento siempre sea completamente visible
+    (function fixMobileScroll() {
+      const mainEl  = document.getElementById('mainContent');
+      const navEl   = document.getElementById('bottomNav');
+      if (!mainEl || !navEl) return;
+
+      function actualizarPaddingScroll() {
+        // Altura real de la nav (incluye safe-area en iPhones)
+        const navH = navEl.getBoundingClientRect().height || 68;
+        // Espacio extra generoso para que el último elemento respire
+        const extra = 32;
+        const total = navH + extra;
+        mainEl.style.paddingBottom = total + 'px';
+      }
+
+      // Ejecutar de inmediato
+      actualizarPaddingScroll();
+
+      // Re-ejecutar cuando cambie el tamaño de la ventana (rotación, teclado virtual)
+      window.addEventListener('resize', actualizarPaddingScroll, { passive: true });
+
+      // Si el navegador soporta ResizeObserver, observar la nav directamente
+      if (typeof ResizeObserver !== 'undefined') {
+        new ResizeObserver(actualizarPaddingScroll).observe(navEl);
+      }
+
+      // Re-ejecutar a los 500ms (por si la nav tarda en pintarse al cargar)
+      setTimeout(actualizarPaddingScroll, 500);
+      setTimeout(actualizarPaddingScroll, 1500);
+    })();
   </script>
 </body>
 </html>
