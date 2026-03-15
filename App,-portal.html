@@ -1208,10 +1208,20 @@
 </head>
 <body>
 
-  <div id="globalLoader" class="loading-overlay" style="display:flex;">
+  <div id="globalLoader" class="loading-overlay" style="display:none;">
     <div class="spinner"></div>
-    <p style="color: var(--primary); font-weight: 700; font-size: 13px; font-family: var(--font-main);">Cargando Vizo Access...</p>
+    <p style="color:#0a84ff;font-weight:700;font-size:13px;font-family:sans-serif;">Cargando Vizo Access...</p>
   </div>
+  <script>
+    // Script síncrono puro — activa loader ANTES de que cargue el módulo Firebase
+    try {
+      var _sesionGuardada = localStorage.getItem('vizo_session_3') || localStorage.getItem('vizo_home_user');
+      if (_sesionGuardada) {
+        var _loaderEl = document.getElementById('globalLoader');
+        if (_loaderEl) _loaderEl.style.display = 'flex';
+      }
+    } catch(e) {}
+  </script>
 
   <!-- Modal foto -->
   <div id="photoModal" class="photo-modal" onclick="this.classList.remove('active')">
@@ -1516,9 +1526,6 @@
     const firebaseApp = initializeApp(firebaseConfig);
     const db = getFirestore(firebaseApp);
 
-    // PDF.js
-    // PDF viewer: usa iframe con blob URL
-
     // ===== ESTADO GLOBAL =====
     let currentUser = null;
     let session = null;
@@ -1549,10 +1556,8 @@
       }
       localStorage.setItem('vizo_theme', tema);
     }
-    // Aplicar tema guardado al cargar
     aplicarTema(localStorage.getItem('vizo_theme') || 'light');
 
-    // Guardar en Firebase automáticamente al cambiar el select de tema
     window.cambiarTemaDirecto = async function(valor) {
       aplicarTema(valor);
       if (!session || !session.id) return;
@@ -1589,9 +1594,7 @@
       if (!list) return;
 
       const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-      const mesesCompletos = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
-      // Verificar si HOY es feriado
       const feriadoHoy = FERIADOS_RD.find(f =>
         f.mes === hoy.getMonth() + 1 && f.dia === hoy.getDate()
       );
@@ -1612,14 +1615,12 @@
         return;
       }
 
-      // Próximo feriado (solo 1)
       const proximos = FERIADOS_RD
         .map(f => ({ ...f, fecha: new Date(anioActual, f.mes - 1, f.dia) }))
         .filter(f => f.fecha > new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate()))
         .sort((a, b) => a.fecha - b.fecha);
 
       if (proximos.length === 0) {
-        // Buscar el primero del año siguiente
         const primerSiguiente = FERIADOS_RD
           .map(f => ({ ...f, fecha: new Date(anioActual + 1, f.mes - 1, f.dia) }))
           .sort((a, b) => a.fecha - b.fecha)[0];
@@ -1661,27 +1662,23 @@
       setTimeout(() => { el.style.animation='fadeOut 0.4s ease forwards'; setTimeout(()=>el.remove(),400); }, 4700);
     };
 
-    // ===== NORMALIZAR FECHA — usa hora LOCAL (no UTC) =====
+    // ===== NORMALIZAR FECHA =====
     function _padZero(n) { return String(n).padStart(2,'0'); }
     function _dateToLocalISO(d) {
       return d.getFullYear() + '-' + _padZero(d.getMonth()+1) + '-' + _padZero(d.getDate());
     }
     function normalizarFecha(valor) {
       if (!valor) return '';
-      // Timestamp de Firestore — usar getFullYear/getMonth/getDate (LOCAL, no UTC)
       if (typeof valor === 'object' && typeof valor.toDate === 'function') {
         return _dateToLocalISO(valor.toDate());
       }
       if (typeof valor === 'string') {
         const s = valor.trim();
-        // Ya es YYYY-MM-DD
         if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-        // DD/MM/YYYY
         if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) {
           const pts = s.split('/');
           return pts[2] + '-' + _padZero(parseInt(pts[1])) + '-' + _padZero(parseInt(pts[0]));
         }
-        // Cualquier otro string parseable — usar hora local
         const d = new Date(s);
         if (!isNaN(d.getTime())) return _dateToLocalISO(d);
       }
@@ -1741,7 +1738,6 @@
       if (isNaN(inicio.getTime())) return null;
       const hoy = new Date();
 
-      // Fecha recomendada: a los 6 meses del aniversario anual
       const añosActuales = Math.floor(((hoy.getFullYear() - inicio.getFullYear()) * 12 + (hoy.getMonth() - inicio.getMonth())) / 12);
       const ultimoAniversario = new Date(inicio);
       ultimoAniversario.setFullYear(inicio.getFullYear() + añosActuales);
@@ -1778,53 +1774,102 @@
       }
     }
 
-    // ===== CUMPLEAÑOS — usa normalizarFecha igual que fechaIngreso =====
+    // ===== CUMPLEAÑOS =====
     function verificarCumpleaños(fecha) {
       if (!fecha) return false;
       try {
-        let mesNac, diaNac;
-        if (typeof fecha === 'object' && typeof fecha.toDate === 'function') {
+        let mesNac = -1, diaNac = -1;
+        if (fecha && typeof fecha === 'object' && typeof fecha.toDate === 'function') {
           const d = fecha.toDate();
           mesNac = d.getMonth(); diaNac = d.getDate();
         } else {
-          const norm = normalizarFecha(fecha);
-          if (!norm || norm.length < 8) return false;
-          const pts = norm.split('-');
-          mesNac = parseInt(pts[1], 10) - 1; // 0-indexed
-          diaNac = parseInt(pts[2], 10);
+          const s = String(fecha).trim();
+          const isoMatch = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+          if (isoMatch) {
+            mesNac = Number(isoMatch[2]) - 1;
+            diaNac = Number(isoMatch[3]);
+          } else if (/^\d{1,2}\/\d{1,2}\/\d{4}/.test(s)) {
+            const p = s.split('/');
+            mesNac = Number(p[1]) - 1;
+            diaNac = Number(p[0]);
+          }
         }
+        if (mesNac < 0 || diaNac < 0) return false;
         const hoy = new Date();
         return hoy.getDate() === diaNac && hoy.getMonth() === mesNac;
       } catch(e) { return false; }
     }
 
+    // ============================================================
+    // FIX #2 — calcularEdad: lógica corregida para no devolver 0
+    // Soporta: Timestamp Firestore, "YYYY-MM-DD", "DD/MM/YYYY", número (ms)
+    // ============================================================
     function calcularEdad(fecha) {
       if (!fecha) return 0;
       try {
-        // Obtener partes directamente sin pasar por Date() para evitar timezone
-        let anioNac, mesNac, diaNac;
-        if (typeof fecha === 'object' && typeof fecha.toDate === 'function') {
+        let anioNac = 0, mesNac = 0, diaNac = 1;
+
+        // Caso 1: Timestamp de Firestore
+        if (fecha && typeof fecha === 'object' && typeof fecha.toDate === 'function') {
           const d = fecha.toDate();
-          anioNac = d.getFullYear(); mesNac = d.getMonth(); diaNac = d.getDate();
-        } else {
-          const norm = normalizarFecha(fecha);
-          if (!norm || norm.length < 8) return 0;
-          const pts = norm.split('-');
-          anioNac = parseInt(pts[0], 10);
-          mesNac  = parseInt(pts[1], 10) - 1; // 0-indexed para comparar con getMonth()
-          diaNac  = parseInt(pts[2], 10);
+          anioNac = d.getFullYear();
+          mesNac  = d.getMonth();      // 0-indexed
+          diaNac  = d.getDate();
         }
-        if (!anioNac || isNaN(anioNac) || anioNac < 1900) return 0;
+        // Caso 2: string o número
+        else {
+          const s = String(fecha).trim();
+
+          // YYYY-MM-DD  (formato input type="date" y Firebase string)
+          const isoMatch = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+          if (isoMatch) {
+            anioNac = Number(isoMatch[1]);
+            mesNac  = Number(isoMatch[2]) - 1;   // convertir a 0-indexed
+            diaNac  = Number(isoMatch[3]);
+          }
+          // DD/MM/YYYY
+          else if (/^\d{1,2}\/\d{1,2}\/\d{4}/.test(s)) {
+            const p = s.split('/');
+            anioNac = Number(p[2]);
+            mesNac  = Number(p[1]) - 1;           // convertir a 0-indexed
+            diaNac  = Number(p[0]);
+          }
+          // número puro (timestamp ms)
+          else if (!isNaN(Number(s)) && Number(s) > 0) {
+            const d = new Date(Number(s));
+            anioNac = d.getFullYear();
+            mesNac  = d.getMonth();
+            diaNac  = d.getDate();
+          }
+          // fallback: intentar parsear con Date
+          else {
+            const d = new Date(s);
+            if (!isNaN(d.getTime())) {
+              anioNac = d.getFullYear();
+              mesNac  = d.getMonth();
+              diaNac  = d.getDate();
+            }
+          }
+        }
+
+        // Validar año mínimo razonable
+        if (!anioNac || isNaN(anioNac) || anioNac < 1900 || anioNac > new Date().getFullYear()) return 0;
+
         const hoy = new Date();
         let edad = hoy.getFullYear() - anioNac;
-        // Si este año el cumpleaños aún no ha pasado, restar 1
+
+        // Si el cumpleaños todavía no ha llegado este año → restar 1
         if (hoy.getMonth() < mesNac) {
           edad--;
         } else if (hoy.getMonth() === mesNac && hoy.getDate() < diaNac) {
           edad--;
         }
-        return edad > 0 ? edad : 0;
-      } catch(e) { console.warn('calcularEdad error:', e); return 0; }
+
+        return edad >= 0 ? edad : 0;
+      } catch(e) {
+        console.error('calcularEdad error con fecha:', fecha, e);
+        return 0;
+      }
     }
 
     // ===== BADGES =====
@@ -1861,6 +1906,7 @@
         if (fn && !birthdayAlertShown && configuracionesUsuario.notificacionesCumpleanos !== false) {
           if (verificarCumpleaños(fn)) {
             birthdayAlertShown = true;
+            // FIX #2: pasar el valor RAW de fechaNacimiento a calcularEdad
             const edad = calcularEdad(fn);
             const b = document.getElementById('birthdayBanner');
             if (b) {
@@ -1897,7 +1943,6 @@
       try {
         await setDoc(doc(db, 'ConfiguracionesUsuario', key), nuevaConfig, { merge: true });
         configuracionesUsuario = { ...configuracionesUsuario, ...nuevaConfig };
-        // Aplicar tema inmediatamente y guardar en localStorage
         localStorage.setItem('vizo_theme', nuevaConfig.tema);
         aplicarTema(nuevaConfig.tema);
         showVizoAlert('¡Guardado!', 'Configuración actualizada correctamente', 'success');
@@ -2324,10 +2369,8 @@
       }, (e) => { console.error('Error colaboradores RT:', e); });
     }
 
-    // Mantener función legacy para llamadas explícitas desde buscador
     async function cargarTodosColaboradores() {
       if (allColaboradores.length === 0) {
-        // esperar a que onSnapshot cargue (máx 2s)
         await new Promise(res => setTimeout(res, 800));
       }
     }
@@ -2492,11 +2535,13 @@
       showLoader(false);
     };
 
-    // ===== VISOR PDF — usa PDF.js con canvas (renderizado real) =====
+    // ============================================================
+    // FIX #1 — PDF: descargar/abrir usa el URL original de Firebase
+    // Storage cuando está disponible, sin convertir a base64/blob
+    // ============================================================
+
     let _pdfWorkerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-    // Convertir base64 a Uint8Array
-    // Detectar tipo de contenido PDF
     function _detectarTipoPDF(v) {
       if (!v) return 'vacio';
       const s = String(v).trim();
@@ -2505,89 +2550,101 @@
       return 'base64';
     }
 
-        function _b64ToUint8(base64) {
+    function _b64ToUint8(base64) {
       const bin = atob(base64.replace(/\s/g, ''));
       const buf = new Uint8Array(bin.length);
       for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
       return buf;
     }
 
-    // Convertir base64 a Blob URL (para descargar y abrir externo)
-    function _b64ToBlobUrl(base64) {
-      const buf = _b64ToUint8(base64);
-      const blob = new Blob([buf], { type: 'application/pdf' });
-      return URL.createObjectURL(blob);
-    }
-
-    // ===== ABRIR EN NAVEGADOR EXTERNO =====
-    // Usa <a download> con blob URL — funciona en Chrome/Android/iOS
+    // ===== ABRIR PDF EN NAVEGADOR EXTERNO =====
+    // FIX #1: si es URL directa (Firebase Storage) → window.open directo
+    // Si es base64 → data URI
     window.abrirPDFExterno = function() {
-      if (!currentPdfBase64) { showVizoAlert('Sin archivo','No hay PDF cargado','error'); return; }
+      // Prioridad 1: usar URL original si está disponible
+      const urlDirecta = currentPdfUrl || (currentPdfBase64 && _detectarTipoPDF(currentPdfBase64) === 'url' ? currentPdfBase64.trim() : null);
+      if (urlDirecta) {
+        window.open(urlDirecta, '_blank');
+        return;
+      }
+
+      if (!currentPdfBase64) {
+        showVizoAlert('Sin archivo', 'No hay PDF disponible', 'error');
+        return;
+      }
+
       try {
         const tipo = _detectarTipoPDF(currentPdfBase64);
-        let href;
-        if (tipo === 'url') {
-          href = currentPdfBase64.trim();
-        } else if (tipo === 'datauri') {
-          href = currentPdfBase64.trim();
-        } else {
-          // base64 puro → convertir a blob
-          href = _b64ToBlobUrl(currentPdfBase64);
-          setTimeout(() => { try { URL.revokeObjectURL(href); } catch(e){} }, 12000);
+        const rawB64 = tipo === 'datauri'
+          ? currentPdfBase64.split(',')[1]
+          : currentPdfBase64.replace(/\s/g, '');
+
+        const dataUri = 'data:application/pdf;base64,' + rawB64;
+        const win = window.open(dataUri, '_blank');
+        if (!win) {
+          const a = document.createElement('a');
+          a.href = dataUri;
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          a.style.cssText = 'position:fixed;left:-9999px;opacity:0;';
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => { try { document.body.removeChild(a); } catch(e){} }, 1000);
         }
-        const a = document.createElement('a');
-        a.href = href;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => { try { document.body.removeChild(a); } catch(e){} }, 1000);
       } catch(e) {
         console.error('abrirPDFExterno:', e);
-        showVizoAlert('Error','No se pudo abrir el PDF: ' + (e.message||''), 'error');
+        showVizoAlert('Error', 'No se pudo abrir: ' + (e.message||''), 'error');
       }
     };
 
     // ===== DESCARGAR PDF =====
+    // FIX #1: si es URL directa → fetch y descarga con nombre correcto,
+    // nunca intenta abrir una pestaña que se cierra inmediatamente
     window.descargarPDF = function() {
-      if (!currentPdfBase64) return;
+      const nombreArchivo = (currentPdfName || 'volante').replace(/\.pdf$/i, '') + '.pdf';
+
+      // Prioridad 1: URL directa (Firebase Storage)
+      const urlDirecta = currentPdfUrl || (currentPdfBase64 && _detectarTipoPDF(currentPdfBase64) === 'url' ? currentPdfBase64.trim() : null);
+      if (urlDirecta) {
+        showVizoAlert('Descargando...', 'Preparando el archivo...', 'info');
+        fetch(urlDirecta)
+          .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.blob(); })
+          .then(blob => {
+            const blobUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = nombreArchivo;
+            a.style.cssText = 'position:fixed;left:-9999px;opacity:0;';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(blobUrl); }, 3000);
+            showVizoAlert('Descargado', 'El archivo se guardó correctamente', 'success');
+          })
+          .catch(err => {
+            console.error('fetch descarga:', err);
+            // Fallback si CORS bloquea: abrir en nueva pestaña
+            window.open(urlDirecta, '_blank');
+          });
+        return;
+      }
+
+      if (!currentPdfBase64) { showVizoAlert('Error','No hay PDF disponible','error'); return; }
+
       try {
         const tipo = _detectarTipoPDF(currentPdfBase64);
+        const rawB64 = tipo === 'datauri' ? currentPdfBase64.split(',')[1] : currentPdfBase64.replace(/\s/g,'');
+        const dataUri = 'data:application/pdf;base64,' + rawB64;
         const a = document.createElement('a');
-        a.download = currentPdfName || 'volante.pdf';
-        if (tipo === 'url') {
-          // Para URL de Firebase Storage, fetch → blob → descarga
-          fetch(currentPdfBase64)
-            .then(r => r.blob())
-            .then(blob => {
-              const url = URL.createObjectURL(blob);
-              a.href = url;
-              document.body.appendChild(a); a.click();
-              setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 3000);
-            })
-            .catch(() => {
-              // fallback: abrir en pestaña
-              a.href = currentPdfBase64;
-              a.target = '_blank';
-              a.removeAttribute('download');
-              document.body.appendChild(a); a.click();
-              setTimeout(() => document.body.removeChild(a), 1000);
-            });
-          return;
-        } else if (tipo === 'datauri') {
-          a.href = currentPdfBase64;
-        } else {
-          // base64
-          const blobUrl = _b64ToBlobUrl(currentPdfBase64);
-          a.href = blobUrl;
-          document.body.appendChild(a); a.click();
-          setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(blobUrl); }, 3000);
-          return;
-        }
-        document.body.appendChild(a); a.click();
-        setTimeout(() => document.body.removeChild(a), 1000);
+        a.href = dataUri;
+        a.download = nombreArchivo;
+        a.style.cssText = 'position:fixed;left:-9999px;opacity:0;';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { try { document.body.removeChild(a); } catch(e){} }, 1000);
+        showVizoAlert('Descargando', 'El PDF se está descargando', 'success');
       } catch(e) {
-        showVizoAlert('Error','No se pudo descargar','error');
+        console.error('descargarPDF:', e);
+        showVizoAlert('Error', 'No se pudo descargar: ' + (e.message||''), 'error');
       }
     };
 
@@ -2599,7 +2656,6 @@
         const page = await pdfDoc.getPage(num);
         const containerW = (document.getElementById('pdfScrollWrapper').clientWidth || 340) - 20;
         const vp1 = page.getViewport({ scale: 1 });
-        // Escala: ajustar al ancho del contenedor, mínimo la escala manual
         const autoScale = containerW / vp1.width;
         const scale = Math.max(autoScale, pdfScale);
         const viewport = page.getViewport({ scale });
@@ -2624,12 +2680,19 @@
       if (n >= 1 && n <= pdfDoc.numPages) renderizarPaginaPDF(n);
     }
 
-    // ===== VISOR PRINCIPAL =====
-    window.viewPdfInApp = async function(base64, name) {
-      if (!base64) { showVizoAlert('Error','El documento no tiene contenido','error'); return; }
+    // ============================================================
+    // FIX #1 — viewPdfInApp: guarda el URL original en currentPdfUrl
+    // para que descargar/abrir siempre use la URL de Firebase Storage
+    // ============================================================
+    window.viewPdfInApp = async function(base64OrUrl, name) {
+      if (!base64OrUrl) { showVizoAlert('Error','El documento no tiene contenido','error'); return; }
 
-      currentPdfBase64 = base64;
+      currentPdfBase64 = base64OrUrl;
       currentPdfName   = name || 'documento.pdf';
+
+      // Detectar si es URL directa y guardarla aparte
+      const tipoContenido = _detectarTipoPDF(base64OrUrl);
+      currentPdfUrl = tipoContenido === 'url' ? base64OrUrl.trim() : null;
 
       document.getElementById('pdfTitle').innerText = currentPdfName;
       switchView('viewPdf');
@@ -2639,7 +2702,7 @@
       const errEl    = document.getElementById('pdfErrorState');
       const ctrlBar  = document.getElementById('pdfControlsBar');
 
-      // Limpiar iframes previos
+      // Limpiar objetos previos
       const old = document.getElementById('pdfIframeEl');
       if (old) old.remove();
 
@@ -2654,58 +2717,82 @@
       document.getElementById('pdfNextPage').disabled = true;
       document.getElementById('pdfPageInfo').textContent = 'Cargando...';
 
-      // — Intentar con PDF.js 3.11 (versión estable, worker clásico) —
-      try {
-        // Configurar worker
-        if (typeof pdfjsLib !== 'undefined') {
-          pdfjsLib.GlobalWorkerOptions.workerSrc = _pdfWorkerSrc;
-        } else {
-          throw new Error('pdfjsLib no cargado');
-        }
+      // — Intentar con PDF.js (solo si es base64, no URL para evitar CORS) —
+      if (tipoContenido !== 'url') {
+        try {
+          if (typeof pdfjsLib !== 'undefined') {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = _pdfWorkerSrc;
+          } else {
+            throw new Error('pdfjsLib no cargado');
+          }
 
-        const data = _b64ToUint8(base64);
-        const task = pdfjsLib.getDocument({ data: data.buffer });
-        pdfDoc = await task.promise;
+          const rawB64 = tipoContenido === 'datauri' ? base64OrUrl.split(',')[1] : base64OrUrl;
+          const data = _b64ToUint8(rawB64);
+          const task = pdfjsLib.getDocument({ data: data.buffer });
+          pdfDoc = await task.promise;
 
-        // Éxito: mostrar canvas
-        loadEl.style.display = 'none';
-        scrollEl.style.display = 'flex';
-        if (ctrlBar) {
-          ctrlBar.style.display = 'flex';
-          // Restaurar botones originales de navegación
-          ctrlBar.innerHTML = `
-            <button id="pdfZoomOut" class="pdf-zoom-btn" onclick="if(pdfScale>0.5){pdfScale-=0.2;renderizarPaginaPDF(pdfPageNum);}"><i class="fas fa-search-minus"></i></button>
-            <button id="pdfPrevPage" disabled onclick="cambiarPaginaPDF(-1)"><i class="fas fa-chevron-left"></i></button>
-            <span id="pdfPageInfo">Pág 1/${pdfDoc.numPages}</span>
-            <button id="pdfNextPage" ${pdfDoc.numPages<=1?'disabled':''} onclick="cambiarPaginaPDF(1)"><i class="fas fa-chevron-right"></i></button>
-            <button id="pdfZoomIn" class="pdf-zoom-btn" onclick="if(pdfScale<3.0){pdfScale+=0.2;renderizarPaginaPDF(pdfPageNum);}"><i class="fas fa-search-plus"></i></button>
-            <button onclick="abrirPDFExterno()" style="background:var(--primary);color:white;border:none;border-radius:16px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;margin-left:4px;">
-              <i class="fas fa-arrow-up-right-from-square"></i> Abrir
-            </button>`;
+          loadEl.style.display = 'none';
+          scrollEl.style.display = 'flex';
+          if (ctrlBar) {
+            ctrlBar.style.display = 'flex';
+            ctrlBar.innerHTML = `
+              <button id="pdfZoomOut" class="pdf-zoom-btn" onclick="if(pdfScale>0.5){pdfScale-=0.2;renderizarPaginaPDF(pdfPageNum);}"><i class="fas fa-search-minus"></i></button>
+              <button id="pdfPrevPage" disabled onclick="cambiarPaginaPDF(-1)"><i class="fas fa-chevron-left"></i></button>
+              <span id="pdfPageInfo">Pág 1/${pdfDoc.numPages}</span>
+              <button id="pdfNextPage" ${pdfDoc.numPages<=1?'disabled':''} onclick="cambiarPaginaPDF(1)"><i class="fas fa-chevron-right"></i></button>
+              <button id="pdfZoomIn" class="pdf-zoom-btn" onclick="if(pdfScale<3.0){pdfScale+=0.2;renderizarPaginaPDF(pdfPageNum);}"><i class="fas fa-search-plus"></i></button>
+              <button onclick="abrirPDFExterno()" style="background:var(--primary);color:white;border:none;border-radius:16px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;margin-left:4px;">
+                <i class="fas fa-arrow-up-right-from-square"></i> Abrir
+              </button>`;
+          }
+          await renderizarPaginaPDF(1);
+          return;
+        } catch(pdfErr) {
+          console.warn('PDF.js falló, usando fallback:', pdfErr.message || pdfErr);
         }
-        await renderizarPaginaPDF(1);
-        return;
-      } catch(pdfErr) {
-        console.warn('PDF.js falló, usando iframe:', pdfErr.message || pdfErr);
       }
 
-      // — Fallback: iframe con blob URL —
+      // — Fallback: <object> embebido o URL directa —
       try {
-        const _tipoContenido = _detectarTipoPDF(base64);
-        const blobUrl = (_tipoContenido === 'url' || _tipoContenido === 'datauri') ? base64.trim() : _b64ToBlobUrl(base64);
+        let embedUrl;
+        let cleanupBlobUrl = null;
+
+        if (tipoContenido === 'url') {
+          // URL directa de Firebase: usar directo sin pasar por blob
+          embedUrl = currentPdfUrl;
+        } else {
+          const rawB64 = tipoContenido === 'datauri' ? base64OrUrl.split(',')[1] : base64OrUrl;
+          const buf = _b64ToUint8(rawB64);
+          const blob = new Blob([buf], { type: 'application/pdf' });
+          embedUrl = URL.createObjectURL(blob);
+          cleanupBlobUrl = embedUrl;
+          setTimeout(() => { try { URL.revokeObjectURL(cleanupBlobUrl); } catch(e){} }, 120000);
+        }
+
         const container = document.getElementById('pdfViewerContainer');
 
-        const iframe = document.createElement('iframe');
-        iframe.id = 'pdfIframeEl';
-        iframe.style.cssText = 'flex:1;width:100%;min-height:350px;border:none;background:#1e2230;';
-        iframe.title = currentPdfName;
-        container.insertBefore(iframe, errEl);
+        const objEl = document.createElement('object');
+        objEl.id = 'pdfIframeEl';
+        objEl.type = 'application/pdf';
+        objEl.style.cssText = 'flex:1;width:100%;min-height:350px;border:none;background:#1e2230;display:block;';
+        objEl.innerHTML = `
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+                      height:100%;padding:30px;color:white;gap:14px;text-align:center;background:#1e2230;">
+            <i class="fas fa-file-pdf" style="font-size:50px;color:#ff6b6b;"></i>
+            <p style="font-size:13px;font-weight:600;">${currentPdfName}</p>
+            <p style="font-size:11px;opacity:0.7;">Tu navegador no puede mostrar el PDF aquí.</p>
+            <button onclick="abrirPDFExterno()"
+              style="background:#0a84ff;color:white;border:none;border-radius:20px;
+                     padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;">
+              <i class="fas fa-external-link-alt"></i> Abrir PDF
+            </button>
+          </div>`;
+        container.insertBefore(objEl, errEl);
 
-        iframe.addEventListener('load', () => { loadEl.style.display = 'none'; }, { once: true });
-        setTimeout(() => { loadEl.style.display = 'none'; }, 3000);
+        objEl.addEventListener('load', () => { loadEl.style.display = 'none'; }, { once: true });
+        setTimeout(() => { if (loadEl.style.display !== 'none') loadEl.style.display = 'none'; }, 2500);
 
-        iframe.src = blobUrl;
-        setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+        objEl.data = embedUrl;
 
         if (ctrlBar) {
           ctrlBar.style.display = 'flex';
@@ -2713,13 +2800,19 @@
             <button onclick="abrirPDFExterno()"
               style="background:var(--primary);color:white;border:none;border-radius:18px;
                      padding:9px 22px;font-size:12px;font-weight:700;cursor:pointer;
-                     display:flex;align-items:center;gap:6px;margin:0 auto;
+                     display:flex;align-items:center;gap:6px;margin:4px auto;
                      box-shadow:0 3px 10px rgba(10,132,255,0.3);">
-              <i class="fas fa-arrow-up-right-from-square"></i> Abrir en pantalla completa
+              <i class="fas fa-up-right-from-square"></i> Abrir en pantalla completa
+            </button>
+            <button onclick="descargarPDF()"
+              style="background:rgba(255,255,255,0.12);color:white;border:none;border-radius:18px;
+                     padding:9px 18px;font-size:12px;font-weight:600;cursor:pointer;
+                     display:flex;align-items:center;gap:6px;margin:4px auto;">
+              <i class="fas fa-download"></i> Descargar
             </button>`;
         }
-      } catch(iframeErr) {
-        console.error('iframe también falló:', iframeErr);
+      } catch(fallbackErr) {
+        console.error('Fallback también falló:', fallbackErr);
         loadEl.style.display = 'none';
         errEl.style.display = 'flex';
         document.getElementById('pdfErrorName').textContent = currentPdfName;
@@ -2730,7 +2823,7 @@
               style="background:var(--primary);color:white;border:none;border-radius:18px;
                      padding:9px 22px;font-size:12px;font-weight:700;cursor:pointer;
                      display:flex;align-items:center;gap:6px;margin:0 auto;">
-              <i class="fas fa-arrow-up-right-from-square"></i> Abrir en navegador
+              <i class="fas fa-external-link-alt"></i> Abrir PDF en navegador
             </button>`;
         }
       }
@@ -2811,7 +2904,6 @@
         notificationsRead.push(id);
         localStorage.setItem('vizo_notif_read_' + key, JSON.stringify(notificationsRead));
       }
-      const dot = document.getElementById('notifDot');
       document.getElementById('notificationPanel').classList.remove('active');
       switchView('viewDocs');
       document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
@@ -2821,14 +2913,12 @@
     window.marcarTodasLeidas = function() {
       const key = session?.id || '';
       if (!key) return;
-      // Obtener todos los IDs actuales de comprobantes del panel
       const items = document.querySelectorAll('.notif-item[data-id]');
       items.forEach(el => {
         const id = el.getAttribute('data-id');
         if (id && !notificationsRead.includes(id)) notificationsRead.push(id);
       });
       localStorage.setItem('vizo_notif_read_' + key, JSON.stringify(notificationsRead));
-      // Quitar puntos rojos del panel
       document.querySelectorAll('.notif-unread-dot').forEach(d => d.remove());
       document.getElementById('notifDot')?.classList.remove('visible');
       showVizoAlert('Listo','Notificaciones marcadas como leídas','success');
@@ -2837,7 +2927,6 @@
     window.toggleNotifications = function() {
       const panel = document.getElementById('notificationPanel');
       panel.classList.toggle('active');
-      // Cerrar al hacer click fuera
       if (panel.classList.contains('active')) {
         setTimeout(() => {
           document.addEventListener('click', function closePanel(e) {
@@ -2850,7 +2939,10 @@
       }
     };
 
-    // ===== CARGAR VOLANTES =====
+    // ============================================================
+    // FIX #1 — loadMyFiles: guarda archivoUrl (Firebase Storage URL)
+    // en el card para que viewPdfInApp reciba la URL directa
+    // ============================================================
     function loadMyFiles() {
       if (!session) return;
       const collabId = session.id || '';
@@ -2873,9 +2965,16 @@
         });
         docs.forEach(data => {
           const { fecha, hora } = formatFechaHora(data.fecha || data.timestamp);
+
+          // FIX #1: Preferir URL directa sobre base64
+          // Campos posibles: archivoUrl, pdfUrl, url, fileUrl, downloadUrl
+          const urlDirecta = data.archivoUrl || data.pdfUrl || data.url || data.fileUrl || data.downloadUrl || null;
+          const contenidoPDF = urlDirecta || data.archivoBase64 || '';
+          const nombreDoc = data.nombreOriginal || data.nombre || 'Volante de Pago';
+
           const card = document.createElement('div');
           card.className = 'document-card';
-          card.onclick = () => window.viewPdfInApp(data.archivoBase64, data.nombreOriginal || 'Documento');
+          card.onclick = () => window.viewPdfInApp(contenidoPDF, nombreDoc);
           card.innerHTML = `
             <div class="doc-icon"><i class="fas fa-file-pdf"></i></div>
             <div class="doc-info" style="flex:1;min-width:0;">
@@ -2893,7 +2992,7 @@
       });
     }
 
-    // ===== ESCUCHAR SESIÓN EN TIEMPO REAL (datos propios) =====
+    // ===== ESCUCHAR SESIÓN EN TIEMPO REAL =====
     let unsubSesion = null;
 
     function escucharSesionEnTiempoReal() {
@@ -2903,10 +3002,8 @@
       unsubSesion = onSnapshot(ref, (snap) => {
         if (!snap.exists()) return;
         const data = snap.data();
-        // Actualizar sesión en memoria y localStorage
         session = { ...session, ...data, id: session.id };
         localStorage.setItem('vizo_session_3', JSON.stringify(session));
-        // Actualizar UI en tiempo real
         const norm = normalizarFecha(session.fechaIngreso);
         const dias = calcularDiasVacaciones(norm);
         const antig = calcularAntiguedad(norm);
@@ -2921,7 +3018,6 @@
         if (el('vacationDays')) el('vacationDays').innerText = dias;
         if (el('vacationDetail')) el('vacationDetail').innerText = dias > 0 ? 'Generados' : 'Aún no genera';
         if (el('antiguedadValue')) el('antiguedadValue').innerText = antig.split(' ')[0];
-        // Actualizar estado vacaciones
         const statusVac = calcularEstadoVacaciones(norm, dias);
         const statusCard = el('vacationStatusCard');
         if (statusVac && statusCard) {
@@ -2937,15 +3033,22 @@
       }, (e) => { console.error('Error sesión RT:', e); });
     }
 
-    // ===== INICIAR APP =====
+    // ============================================================
+    // FIX #3 — startApp: ocultar loader INMEDIATAMENTE con datos
+    // de sesión en caché, sin esperar respuestas de Firebase
+    // ============================================================
     function startApp() {
       if (!session) return;
+
+      // Ocultar loader INMEDIATAMENTE — usar datos en caché sin esperar Firebase
+      showLoader(false);
 
       document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
       document.getElementById('viewAuth').style.display = 'none';
       document.getElementById('appHeader').style.display = 'flex';
       document.getElementById('bottomNav').style.display = 'flex';
 
+      // Renderizar UI con datos de localStorage (instantáneo)
       document.getElementById('headerUserName').innerText = `${session.firstName||''} ${session.lastName||''}`.trim();
       document.getElementById('userName').innerText = session.firstName || '';
       document.getElementById('userImg').src = session.fotoBase64 || 'https://via.placeholder.com/80';
@@ -2963,7 +3066,6 @@
       document.getElementById('antiguedadValue').innerText = antig.split(' ')[0];
       document.getElementById('antiguedadDetail').innerText = 'en la empresa';
 
-      // Estado vacaciones
       const statusVac = calcularEstadoVacaciones(norm, dias);
       const statusCard = document.getElementById('vacationStatusCard');
       if (statusVac && statusCard) {
@@ -2978,14 +3080,14 @@
       }
 
       renderizarFeriados();
+      switchView('viewHome');
+
+      // Iniciar listeners de Firebase en background (no bloquean la UI)
       cargarConfiguracionUsuario();
       escucharColaboradoresEnTiempoReal();
       loadMyFiles();
       iniciarListenerNotificaciones();
       escucharSesionEnTiempoReal();
-      switchView('viewHome');
-      // Ocultar loader tras dos frames para garantizar que el DOM está pintado
-      requestAnimationFrame(() => requestAnimationFrame(() => showLoader(false)));
     }
 
     // ===== NAVEGACIÓN =====
@@ -2998,10 +3100,8 @@
         element.classList.add('active');
       }
       if (viewId !== 'viewPdf') {
-        // Limpiar iframe PDF al salir de la vista
         const oldIframe = document.getElementById('pdfIframeEl');
         if (oldIframe) oldIframe.remove();
-        _liberarBlobUrl && _liberarBlobUrl();
       }
     };
 
@@ -3034,6 +3134,8 @@
     window.normalizarFecha = normalizarFecha;
     window.formatearFechaLegible = formatearFechaLegible;
     window.calcularAntiguedad = calcularAntiguedad;
+    window.renderizarPaginaPDF = renderizarPaginaPDF;
+    window.cambiarPaginaPDF = cambiarPaginaPDF;
 
     // ===== SCROLL: header se oculta al bajar, reaparece al subir =====
     (function initScrollBehavior() {
@@ -3048,11 +3150,9 @@
             const cur = mainEl.scrollTop;
             const delta = cur - lastY;
             if (delta > 6 && cur > 60) {
-              // Bajando — ocultar header suavemente
               headerEl.style.transform = 'translateY(-100%)';
               headerEl.style.opacity = '0';
             } else if (delta < -4) {
-              // Subiendo — mostrar header
               headerEl.style.transform = 'translateY(0)';
               headerEl.style.opacity = '1';
             }
@@ -3066,12 +3166,27 @@
 
     // ===== INICIO =====
     if (session) {
-      // Loader ya visible desde HTML — arrancar la app
-      startApp();
+      try {
+        startApp();
+      } catch(e) {
+        console.error('startApp error:', e);
+        showLoader(false);
+      }
     } else {
-      // Sin sesión: ocultar loader y mostrar pantalla de login
       showLoader(false);
     }
+
+    // FIX #3 — Timeout de emergencia reducido a 1.5s (antes 2.5s)
+    setTimeout(() => {
+      const gl = document.getElementById('globalLoader');
+      if (gl && gl.style.display !== 'none') {
+        gl.style.display = 'none';
+        if (!document.querySelector('.view.active')) {
+          const auth = document.getElementById('viewAuth');
+          if (auth) { auth.style.display = 'flex'; auth.classList.add('active'); }
+        }
+      }
+    }, 1500);
   </script>
 </body>
 </html>
