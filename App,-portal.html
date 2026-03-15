@@ -74,7 +74,7 @@
       border-bottom-color: #30363d;
     }
     body.dark-mode nav.bottom-nav {
-      background: rgba(13,17,23,0.97) !important;
+      background: rgba(13,17,23,0.98) !important;
       border-top-color: #30363d;
     }
     body.dark-mode .nav-item { color: #6e7891; }
@@ -163,10 +163,8 @@
       height: 100vh;
       overflow: hidden;
       transition: background 0.3s, color 0.3s;
-      position: fixed;
-      width: 100%;
-      top: 0;
-      left: 0;
+      margin: 0;
+      padding: 0;
     }
 
     .app-container {
@@ -248,16 +246,15 @@
     /* ===== MAIN ===== */
     main {
       flex: 1;
-      /* min-height:0 es CRÍTICO en flexbox — sin esto el hijo no scrollea correctamente */
+      /* min-height:0 CRÍTICO en flexbox para que el scroll funcione en móvil */
       min-height: 0;
       overflow-y: auto;
       overflow-x: hidden;
       padding: 14px;
-      /* padding-bottom robusto: nav-height + espacio generoso + safe-area iOS/Android */
-      padding-bottom: calc(var(--nav-height) + 60px + env(safe-area-inset-bottom, 20px));
+      /* padding-bottom: espacio al final del contenido + safe-area */
+      padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px));
       scroll-behavior: smooth;
       -webkit-overflow-scrolling: touch;
-      /* Forzar que el scroll sea del elemento, no del body */
       overscroll-behavior-y: contain;
     }
 
@@ -875,17 +872,20 @@
 
     /* ===== NAV INFERIOR ===== */
     nav.bottom-nav {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      /* Altura base más safe-area para iPhone con home indicator */
-      height: auto;
+      /* SOLUCIÓN DEFINITIVA: la nav es parte del flex column, no position:fixed
+         Así el main sabe exactamente cuánto espacio tiene sin necesitar padding-bottom grande */
+      position: relative;
+      flex-shrink: 0;
+      width: 100%;
       min-height: var(--nav-height);
+      height: auto;
       background: rgba(255,255,255,0.97);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       display: flex; justify-content: space-around; align-items: center;
       border-top: 1px solid var(--border-light);
-      /* Padding-bottom para el home indicator de iOS */
-      padding-bottom: max(env(safe-area-inset-bottom, 0px), 4px);
+      /* Safe-area para iPhone con home indicator */
+      padding-bottom: env(safe-area-inset-bottom, 0px);
       padding-top: 4px;
       z-index: 200;
       box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
@@ -1160,17 +1160,16 @@
     }
 
     @media (max-width: 480px) {
-      /* En CUALQUIER móvil: padding-bottom generoso para que el último elemento siempre sea visible */
       main {
         padding: 12px;
-        padding-bottom: calc(var(--nav-height) + 80px + env(safe-area-inset-bottom, 20px));
+        padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
       }
     }
 
     @media (max-width: 380px) {
       main {
         padding: 10px;
-        padding-bottom: calc(var(--nav-height) + 80px + env(safe-area-inset-bottom, 20px));
+        padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
       }
       .welcome-card h1 { font-size: 15px; }
     }
@@ -3266,37 +3265,8 @@
       }
     }, 1500);
 
-    // ===== FIX SCROLL MÓVIL: padding-bottom dinámico basado en altura REAL de la nav =====
-    // Esto garantiza que el último elemento siempre sea completamente visible
-    (function fixMobileScroll() {
-      const mainEl  = document.getElementById('mainContent');
-      const navEl   = document.getElementById('bottomNav');
-      if (!mainEl || !navEl) return;
-
-      function actualizarPaddingScroll() {
-        // Altura real de la nav (incluye safe-area en iPhones)
-        const navH = navEl.getBoundingClientRect().height || 68;
-        // Espacio extra generoso para que el último elemento respire
-        const extra = 32;
-        const total = navH + extra;
-        mainEl.style.paddingBottom = total + 'px';
-      }
-
-      // Ejecutar de inmediato
-      actualizarPaddingScroll();
-
-      // Re-ejecutar cuando cambie el tamaño de la ventana (rotación, teclado virtual)
-      window.addEventListener('resize', actualizarPaddingScroll, { passive: true });
-
-      // Si el navegador soporta ResizeObserver, observar la nav directamente
-      if (typeof ResizeObserver !== 'undefined') {
-        new ResizeObserver(actualizarPaddingScroll).observe(navEl);
-      }
-
-      // Re-ejecutar a los 500ms (por si la nav tarda en pintarse al cargar)
-      setTimeout(actualizarPaddingScroll, 500);
-      setTimeout(actualizarPaddingScroll, 1500);
-    })();
+    // Nav es parte del flex column — el scroll del main es automáticamente correcto
+    // No necesita ajuste dinámico de padding-bottom
   </script>
 </body>
 </html>
