@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <!-- PDF viewer via iframe -->
   <style>
     :root {
       --primary: #0a84ff;
@@ -62,35 +62,93 @@
       --text-main: #e6edf3;
       --text-muted: #8b949e;
       --text-light: #6e7891;
-      --border-light: #21262d;
+      --border-light: #30363d;
       --primary-light: #0d2040;
       --shadow-sm: 0 2px 10px rgba(0,0,0,0.3);
       --shadow-md: 0 4px 20px rgba(0,0,0,0.4);
       --shadow-lg: 0 8px 30px rgba(0,0,0,0.5);
     }
-    body.dark-mode header { background: rgba(22,27,34,0.95); }
-    body.dark-mode nav.bottom-nav { background: rgba(22,27,34,0.97); }
-    body.dark-mode .modal-menu { background: #161b22; }
-    body.dark-mode .search-input { background: var(--bg-card2); color: var(--text-main); }
-    body.dark-mode .search-results-section { background: var(--bg-card); }
-    body.dark-mode .search-result-item { background: var(--bg-card2); }
-    body.dark-mode .stat-card { background: var(--bg-gradient); }
-    body.dark-mode .quick-actions { background: var(--bg-card); }
-    body.dark-mode .profile-section { background: var(--bg-card); }
-    body.dark-mode .settings-section { background: var(--bg-card); }
-    body.dark-mode .document-card { background: var(--bg-card2); }
-    body.dark-mode .profile-info-item { background: var(--bg-card2); }
-    body.dark-mode .action-item:hover { background: rgba(10,132,255,0.15); }
-    body.dark-mode .vizo-alert { background: var(--bg-card); }
-    body.dark-mode select, body.dark-mode input[type="date"] {
-      background: var(--bg-card2); color: var(--text-main); border-color: var(--border-light);
+    body.dark-mode { background: #0d1117; color: #e6edf3; }
+    body.dark-mode header {
+      background: rgba(13,17,23,0.97) !important;
+      border-bottom-color: #30363d;
     }
-    body.dark-mode .calendar-day:not(.empty):not(.other-month) { color: var(--text-main); }
-    body.dark-mode .cal-header { color: var(--text-main); }
-    body.dark-mode .notification-panel { background: var(--bg-card); }
-    body.dark-mode .notif-item { background: var(--bg-card2); border-color: var(--border-light); }
-    body.dark-mode .holiday-card { background: var(--bg-card2); }
-    body.dark-mode .vacation-request-modal { background: var(--bg-card); }
+    body.dark-mode nav.bottom-nav {
+      background: rgba(13,17,23,0.97) !important;
+      border-top-color: #30363d;
+    }
+    body.dark-mode .nav-item { color: #6e7891; }
+    body.dark-mode .nav-item.active { color: var(--primary); }
+    body.dark-mode .modal-menu { background: #161b22 !important; border-top-color: #30363d; }
+    body.dark-mode .modal-overlay { background: rgba(0,0,0,0.7); }
+    body.dark-mode .search-input { background: #1c2230 !important; color: #e6edf3 !important; border-color: #30363d; }
+    body.dark-mode .search-input::placeholder { color: #6e7891; }
+    body.dark-mode .search-results-section { background: #161b22; border-color: #30363d; }
+    body.dark-mode .search-result-item { background: #1c2230; border-color: #30363d; }
+    body.dark-mode .search-result-info h4 { color: #e6edf3; }
+    body.dark-mode .stat-card { background: #161b22; border-color: #30363d; }
+    body.dark-mode .stat-label { color: #8b949e; }
+    body.dark-mode .stat-detail { color: #8b949e; }
+    body.dark-mode .quick-actions { background: #161b22; border-color: #30363d; }
+    body.dark-mode .action-label { color: #e6edf3; }
+    body.dark-mode .action-item:hover { background: rgba(10,132,255,0.12); }
+    body.dark-mode .profile-section { background: #161b22; border-color: #30363d; }
+    body.dark-mode .profile-title h2 { color: #e6edf3; }
+    body.dark-mode .profile-title p { color: #8b949e; }
+    body.dark-mode .profile-info-item { background: #1c2230; border-color: #30363d; }
+    body.dark-mode .profile-info-label { color: #8b949e; }
+    body.dark-mode .settings-section { background: #161b22; border-color: #30363d; }
+    body.dark-mode .settings-text h4 { color: #e6edf3; }
+    body.dark-mode .settings-text p { color: #8b949e; }
+    body.dark-mode .settings-item { border-bottom-color: #30363d; }
+    body.dark-mode .settings-icon { background: #1c2230; }
+    body.dark-mode .document-card { background: #1c2230; border-color: #30363d; }
+    body.dark-mode .doc-info h4 { color: #e6edf3; }
+    body.dark-mode .doc-meta { color: #8b949e; }
+    body.dark-mode .profile-info-item { background: #1c2230; border-color: #30363d; }
+    body.dark-mode .vizo-alert { background: #161b22; border-color: #30363d; }
+    body.dark-mode .alert-title { color: #e6edf3; }
+    body.dark-mode .alert-message { color: #8b949e; }
+    body.dark-mode select, body.dark-mode input[type="date"], body.dark-mode input[type="text"],
+    body.dark-mode input[type="password"], body.dark-mode textarea {
+      background: #1c2230 !important; color: #e6edf3 !important; border-color: #30363d !important;
+    }
+    body.dark-mode .auth-input-wrap { background: #1c2230 !important; border-color: #30363d !important; }
+    body.dark-mode .auth-input-wrap input { color: #e6edf3 !important; }
+    body.dark-mode .auth-card { background: #161b22 !important; border-color: #30363d; }
+    body.dark-mode .calendar-day { color: #e6edf3; }
+    body.dark-mode .calendar-day.empty { color: transparent; }
+    body.dark-mode .calendar-day.other-month { color: #6e7891; }
+    body.dark-mode .calendar-day:not(.empty):not(.other-month):not(.today):not(.holiday):not(.vacation-approved):not(.vacation-requested):hover { background: #1c2230; }
+    body.dark-mode .cal-header { color: #e6edf3; }
+    body.dark-mode .cal-weekday { color: #8b949e; }
+    body.dark-mode .calendar-container { background: #161b22; border-color: #30363d; }
+    body.dark-mode .cal-legend-item { color: #8b949e; }
+    body.dark-mode .notification-panel { background: #161b22; border-color: #30363d; }
+    body.dark-mode .notif-header { border-bottom-color: #30363d; }
+    body.dark-mode .notif-header h4 { color: #e6edf3; }
+    body.dark-mode .notif-item { background: transparent; border-bottom-color: #30363d; }
+    body.dark-mode .notif-item:hover { background: #1c2230; }
+    body.dark-mode .notif-item-text h5 { color: #e6edf3; }
+    body.dark-mode .notif-item-text p { color: #8b949e; }
+    body.dark-mode .holiday-card { background: #1c2230; }
+    body.dark-mode .holiday-info h5 { color: #e6edf3; }
+    body.dark-mode .holiday-info p { color: #8b949e; }
+    body.dark-mode .holidays-section { background: #161b22; border-color: #30363d; }
+    body.dark-mode .section-title { color: #e6edf3; }
+    body.dark-mode .welcome-card { box-shadow: 0 8px 30px rgba(0,0,0,0.5); }
+    body.dark-mode .vacation-request-inner { background: #161b22; }
+    body.dark-mode .form-field label { color: #8b949e; }
+    body.dark-mode .btn-secondary { background: #1c2230; color: #e6edf3; border-color: #30363d; }
+    body.dark-mode .vacation-tab { background: #1c2230; color: #8b949e; border-color: #30363d; }
+    body.dark-mode .vacation-request-item { background: #1c2230; border-color: #30363d; }
+    body.dark-mode .vacation-status-card { opacity: 0.95; }
+    body.dark-mode .restricted-notice { background: #1c2230; border-color: #30363d; color: #8b949e; }
+    body.dark-mode .birthday-banner { box-shadow: 0 8px 30px rgba(0,0,0,0.5); }
+    body.dark-mode .loading-overlay { background: rgba(13,17,23,0.97); }
+    body.dark-mode .loading-overlay p { color: var(--primary); }
+    body.dark-mode .menu-option span { color: #8b949e; }
+    body.dark-mode .menu-option .icon-wrap { background: #1c2230; border-color: #30363d; }
 
     * {
       margin: 0; padding: 0; box-sizing: border-box;
@@ -126,6 +184,12 @@
       border-bottom: 1px solid var(--border-light);
       box-shadow: var(--shadow-xs);
       gap: 10px;
+      transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s;
+      will-change: transform, opacity;
+    }
+    body.dark-mode header {
+      background: rgba(13,17,23,0.97);
+      border-bottom-color: var(--border-light);
     }
 
     .logo-mini {
@@ -180,7 +244,7 @@
       overflow-y: auto;
       overflow-x: hidden;
       padding: 14px;
-      padding-bottom: calc(var(--nav-height) + 14px);
+      padding-bottom: calc(var(--nav-height) + 32px);
       scroll-behavior: smooth;
       -webkit-overflow-scrolling: touch;
     }
@@ -657,49 +721,51 @@
     }
     .btn-download-float:hover { transform: translateY(-2px); box-shadow: var(--shadow-xl); }
 
-    /* ===== CALENDARIO ELEGANTE ===== */
+    /* ===== CALENDARIO COMPACTO Y ELEGANTE ===== */
     .calendar-container {
       background: var(--bg-card);
-      border-radius: var(--radius-xl);
-      padding: 14px;
-      margin-bottom: 14px;
+      border-radius: var(--radius-md);
+      padding: 8px 10px;
+      margin-bottom: 12px;
       border: 1px solid var(--border-light);
-      box-shadow: var(--shadow-sm);
+      box-shadow: var(--shadow-xs);
+      max-width: 100%;
     }
     .cal-header {
       display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 14px; color: var(--text-main);
+      margin-bottom: 8px; color: var(--text-main);
     }
-    .cal-header h3 { font-size: 15px; font-weight: 700; font-family: var(--font-main); }
+    .cal-header h3 { font-size: 13px; font-weight: 700; font-family: var(--font-main); }
     .cal-nav-btn {
-      width: 30px; height: 30px;
+      width: 24px; height: 24px;
       background: var(--bg-card2); border: 1px solid var(--border-light);
-      border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition);
+      border-radius: var(--radius-xs); cursor: pointer; transition: var(--transition);
       display: flex; align-items: center; justify-content: center;
-      color: var(--primary); font-size: 12px;
+      color: var(--primary); font-size: 10px;
     }
     .cal-nav-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
     .cal-weekdays {
       display: grid; grid-template-columns: repeat(7, 1fr);
-      gap: 2px; margin-bottom: 4px;
+      gap: 1px; margin-bottom: 2px;
     }
-    .cal-weekday { text-align: center; font-size: 9px; font-weight: 700; color: var(--text-muted); padding: 4px 0; text-transform: uppercase; }
-    .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+    .cal-weekday { text-align: center; font-size: 8px; font-weight: 700; color: var(--text-muted); padding: 2px 0; text-transform: uppercase; }
+    .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; }
     .calendar-day {
       aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
-      font-size: 12px; border-radius: var(--radius-sm); cursor: pointer;
+      font-size: 9px; border-radius: 5px; cursor: pointer;
       transition: var(--transition); font-weight: 500; position: relative;
+      max-height: 28px;
     }
     .calendar-day.empty { cursor: default; }
     .calendar-day:not(.empty):hover { background: var(--primary-light); color: var(--primary); }
     .calendar-day.today {
-      background: var(--primary); color: white; font-weight: 700;
-      box-shadow: 0 3px 10px rgba(10,132,255,0.3);
+      background: var(--primary); color: white; font-weight: 800;
+      box-shadow: 0 2px 8px rgba(10,132,255,0.35);
     }
     .calendar-day.holiday { color: var(--holiday); font-weight: 700; }
     .calendar-day.holiday::after {
-      content: ''; position: absolute; bottom: 2px;
-      width: 4px; height: 4px; background: var(--holiday); border-radius: 50%;
+      content: ''; position: absolute; bottom: 1px;
+      width: 3px; height: 3px; background: var(--holiday); border-radius: 50%;
     }
     .calendar-day.vacation-requested {
       background: var(--success-light); color: var(--success); font-weight: 700;
@@ -708,14 +774,14 @@
       background: var(--success); color: white; font-weight: 700;
     }
     .calendar-day.other-month { color: var(--text-light); }
-    .calendar-day.selected { background: var(--primary-light); color: var(--primary); font-weight: 700; border: 1.5px solid var(--primary); }
+    .calendar-day.selected { background: var(--primary-light); color: var(--primary); font-weight: 700; border: 1px solid var(--primary); }
 
     .cal-legend {
-      display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; padding-top: 10px;
+      display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; padding-top: 7px;
       border-top: 1px solid var(--border-light);
     }
-    .cal-legend-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--text-muted); }
-    .cal-legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .cal-legend-item { display: flex; align-items: center; gap: 3px; font-size: 9px; color: var(--text-muted); }
+    .cal-legend-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 
     /* ===== SOLICITUD VACACIONES ===== */
     .vacation-request-modal {
@@ -1188,19 +1254,19 @@
   <div class="app-container">
 
     <header id="appHeader" style="display:none;">
-      <div class="logo-mini">
+      <div class="logo-mini" style="flex-shrink:0;">
         <img src="https://firebasestorage.googleapis.com/v0/b/formulario-2-8929a.appspot.com/o/Vizo%20Access.png?alt=media&token=2e31c49c-ca38-4b5e-b35e-43dee12c16da" alt="Vizo">
       </div>
-      <div class="header-center">
-        <span class="lbl">Bienvenido</span>
-        <span class="name" id="headerUserName">Cargando...</span>
+      <div class="header-center" style="min-width:0;flex:1;overflow:hidden;padding:0 6px;">
+        <span class="lbl" style="font-size:9px;letter-spacing:0.8px;">BIENVENIDO</span>
+        <span class="name" id="headerUserName" style="font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">Cargando...</span>
       </div>
-      <div class="header-actions">
-        <div class="header-btn" onclick="toggleNotifications()" id="notifBtn">
+      <div class="header-actions" style="flex-shrink:0;gap:5px;">
+        <div class="header-btn" onclick="toggleNotifications()" id="notifBtn" style="width:32px;height:32px;font-size:13px;">
           <i class="fas fa-bell"></i>
           <span class="notif-dot" id="notifDot"></span>
         </div>
-        <div class="header-btn" onclick="toggleMenu(true)">
+        <div class="header-btn" onclick="toggleMenu(true)" style="width:32px;height:32px;font-size:13px;">
           <i class="fas fa-th-large"></i>
         </div>
       </div>
@@ -1418,7 +1484,7 @@
           <span>Configuración</span>
         </div>
         <div class="menu-option" onclick="mostrarSeccion('feriados');toggleMenu(false);">
-          <div class="icon-wrap"><i class="fas fa-calendar-star"></i></div>
+          <div class="icon-wrap" style="font-size:18px;"><i class="fas fa-calendar-days"></i></div>
           <span>Feriados</span>
         </div>
         <div class="menu-option" onclick="cerrarSesion()">
@@ -1450,9 +1516,7 @@
     const db = getFirestore(firebaseApp);
 
     // PDF.js
-    if (typeof pdfjsLib !== 'undefined') {
-      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    }
+    // PDF viewer: usa iframe con blob URL
 
     // ===== ESTADO GLOBAL =====
     let currentUser = null;
@@ -1475,13 +1539,27 @@
       localStorage.removeItem('vizo_session_3');
     }
 
-    // ===== DARK MODE (localStorage) =====
+    // ===== DARK MODE (localStorage + Firebase) =====
     function aplicarTema(tema) {
-      if (tema === 'dark') document.body.classList.add('dark-mode');
-      else document.body.classList.remove('dark-mode');
+      if (tema === 'dark') {
+        document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
+      }
+      localStorage.setItem('vizo_theme', tema);
     }
-    const temaGuardado = localStorage.getItem('vizo_theme') || 'light';
-    aplicarTema(temaGuardado);
+    // Aplicar tema guardado al cargar
+    aplicarTema(localStorage.getItem('vizo_theme') || 'light');
+
+    // Guardar en Firebase automáticamente al cambiar el select de tema
+    window.cambiarTemaDirecto = async function(valor) {
+      aplicarTema(valor);
+      if (!session || !session.id) return;
+      try {
+        await setDoc(doc(db, 'ConfiguracionesUsuario', session.id),
+          { tema: valor, updatedAt: Timestamp.now() }, { merge: true });
+      } catch(e) { console.error('Error guardando tema:', e); }
+    };
 
     // ===== FERIADOS DOMINICANOS =====
     const FERIADOS_RD = [
@@ -1509,19 +1587,51 @@
       const list = document.getElementById('holidaysList');
       if (!list) return;
 
-      const proximos = FERIADOS_RD
-        .map(f => ({ ...f, fecha: new Date(anioActual, f.mes - 1, f.dia) }))
-        .filter(f => f.fecha >= new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate()))
-        .sort((a, b) => a.fecha - b.fecha)
-        .slice(0, 5);
+      const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+      const mesesCompletos = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
-      if (proximos.length === 0) {
-        list.innerHTML = '<p style="font-size:12px;color:var(--text-muted);text-align:center;padding:10px;">No hay feriados próximos este año</p>';
+      // Verificar si HOY es feriado
+      const feriadoHoy = FERIADOS_RD.find(f =>
+        f.mes === hoy.getMonth() + 1 && f.dia === hoy.getDate()
+      );
+
+      if (feriadoHoy) {
+        list.innerHTML = `
+          <div class="holiday-card" style="border-left-color:var(--success);background:linear-gradient(135deg,var(--success-light),#f0fff4);">
+            <div class="holiday-date-badge" style="background:var(--success-light);">
+              <span class="day" style="color:var(--success);">${feriadoHoy.dia}</span>
+              <span class="month" style="color:var(--success);">${meses[feriadoHoy.mes-1]}</span>
+            </div>
+            <div class="holiday-info">
+              <h5 style="color:var(--success);">🎉 ¡Hoy es feriado!</h5>
+              <p>${feriadoHoy.nombre} — ${feriadoHoy.razon}</p>
+            </div>
+            <div class="holiday-double-badge" style="background:var(--success);">2x Hoy</div>
+          </div>`;
         return;
       }
 
-      const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-      list.innerHTML = proximos.map(f => `
+      // Próximo feriado (solo 1)
+      const proximos = FERIADOS_RD
+        .map(f => ({ ...f, fecha: new Date(anioActual, f.mes - 1, f.dia) }))
+        .filter(f => f.fecha > new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate()))
+        .sort((a, b) => a.fecha - b.fecha);
+
+      if (proximos.length === 0) {
+        // Buscar el primero del año siguiente
+        const primerSiguiente = FERIADOS_RD
+          .map(f => ({ ...f, fecha: new Date(anioActual + 1, f.mes - 1, f.dia) }))
+          .sort((a, b) => a.fecha - b.fecha)[0];
+        if (!primerSiguiente) { list.innerHTML = ''; return; }
+        proximos.push(primerSiguiente);
+      }
+
+      const f = proximos[0];
+      const diffMs = f.fecha - hoy;
+      const diffDias = Math.ceil(diffMs / 86400000);
+      const etiqueta = diffDias === 1 ? 'Mañana' : `En ${diffDias} días`;
+
+      list.innerHTML = `
         <div class="holiday-card">
           <div class="holiday-date-badge">
             <span class="day">${f.dia}</span>
@@ -1529,11 +1639,10 @@
           </div>
           <div class="holiday-info">
             <h5>${f.nombre}</h5>
-            <p>${f.razon}</p>
+            <p>${f.razon} · <strong style="color:var(--primary);">${etiqueta}</strong></p>
           </div>
           <div class="holiday-double-badge">2x Pago</div>
-        </div>
-      `).join('');
+        </div>`;
     }
 
     // ===== ALERTAS =====
@@ -1658,22 +1767,71 @@
     }
 
     // ===== CUMPLEAÑOS =====
+    // Extraer partes de fecha de nacimiento SIN conversiones de timezone
+    // ===== CUMPLEAÑOS — parse robusto sin timezone issues =====
+    function _parseFechaNac(fecha) {
+      if (!fecha) return null;
+      // Timestamp de Firestore
+      if (typeof fecha === 'object' && typeof fecha.toDate === 'function') {
+        const d = fecha.toDate();
+        return { anio: parseInt(d.getFullYear()), mes: parseInt(d.getMonth()), dia: parseInt(d.getDate()) };
+      }
+      if (typeof fecha === 'string' && fecha.trim().length >= 8) {
+        const s = fecha.trim();
+        // DD/MM/YYYY
+        if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) {
+          const pts = s.split('/');
+          const dd = parseInt(pts[0], 10);
+          const mm = parseInt(pts[1], 10);
+          const yyyy = parseInt(pts[2], 10);
+          if (!isNaN(yyyy) && !isNaN(mm) && !isNaN(dd))
+            return { anio: yyyy, mes: mm - 1, dia: dd };
+        }
+        // YYYY-MM-DD (formato ISO, el más común del <input type="date">)
+        const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (iso) {
+          const yyyy = parseInt(iso[1], 10);
+          const mm   = parseInt(iso[2], 10);
+          const dd   = parseInt(iso[3], 10);
+          if (!isNaN(yyyy) && !isNaN(mm) && !isNaN(dd))
+            return { anio: yyyy, mes: mm - 1, dia: dd };
+        }
+      }
+      if (typeof fecha === 'number' && fecha > 0) {
+        const d = new Date(fecha);
+        return { anio: parseInt(d.getFullYear()), mes: parseInt(d.getMonth()), dia: parseInt(d.getDate()) };
+      }
+      return null;
+    }
+
     function verificarCumpleaños(fecha) {
       if (!fecha) return false;
-      const hoy = new Date();
-      const norm = normalizarFecha(fecha);
-      const nac = new Date(norm + 'T00:00:00');
-      return hoy.getDate() === nac.getDate() && hoy.getMonth() === nac.getMonth();
+      try {
+        const p = _parseFechaNac(fecha);
+        if (!p || !p.anio) return false;
+        const hoy = new Date();
+        return hoy.getDate() === p.dia && hoy.getMonth() === p.mes;
+      } catch(e) { return false; }
     }
+
     function calcularEdad(fecha) {
       if (!fecha) return 0;
-      const norm = normalizarFecha(fecha);
-      const nac = new Date(norm + 'T00:00:00');
-      const hoy = new Date();
-      let e = hoy.getFullYear() - nac.getFullYear();
-      const m = hoy.getMonth() - nac.getMonth();
-      if (m < 0 || (m === 0 && hoy.getDate() < nac.getDate())) e--;
-      return e;
+      try {
+        const p = _parseFechaNac(fecha);
+        if (!p || !p.anio || p.anio < 1900) return 0;
+        const hoy = new Date();
+        const anioActual = hoy.getFullYear();
+        const mesActual  = hoy.getMonth();    // 0-indexed
+        const diaActual  = hoy.getDate();
+        let edad = anioActual - p.anio;
+        // Si este año todavía no ha llegado el cumpleaños, restar 1
+        if (mesActual < p.mes) {
+          edad--;
+        } else if (mesActual === p.mes && diaActual < p.dia) {
+          edad--;
+        }
+        return edad < 0 ? 0 : edad;
+      } catch(e) { console.error('calcularEdad error:', e, fecha); return 0; }
     }
 
     // ===== BADGES =====
@@ -2093,7 +2251,7 @@
               <div class="settings-text"><h4>Tema de la app</h4><p>Modo claro u oscuro</p></div>
             </div>
             <div class="settings-control">
-              <select id="themeSelect">
+              <select id="themeSelect" onchange="cambiarTemaDirecto(this.value)">
                 <option value="light" ${tema==='light'?'selected':''}>☀️ Claro</option>
                 <option value="dark" ${tema==='dark'?'selected':''}>🌙 Oscuro</option>
               </select>
@@ -2336,85 +2494,141 @@
       showLoader(false);
     };
 
-    // ===== VISOR PDF MEJORADO =====
-    async function renderizarPaginaPDF(num) {
-      if (!pdfDoc) return;
-      pdfPageRendering = true;
+    // ===== VISOR PDF — iframe con data URI (máxima compatibilidad) =====
+    let _currentBlobUrl = null;
+
+    function _base64ToBlob(base64) {
       try {
-        const page = await pdfDoc.getPage(num);
-        const viewport = page.getViewport({ scale: pdfScale });
-        const canvas = document.getElementById('pdfCanvas');
-        const ctx = canvas.getContext('2d');
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-        await page.render({ canvasContext: ctx, viewport }).promise;
-        document.getElementById('pdfPageInfo').textContent = `Pág ${num}/${pdfDoc.numPages}`;
-        document.getElementById('pdfPrevPage').disabled = (num <= 1);
-        document.getElementById('pdfNextPage').disabled = (num >= pdfDoc.numPages);
-        pdfPageNum = num;
-      } catch(err) { console.error('Error renderizando PDF:', err); }
-      finally { pdfPageRendering = false; }
+        const bin = atob(base64);
+        const buf = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+        return new Blob([buf], { type: 'application/pdf' });
+      } catch(e) { console.error('base64ToBlob:', e); return null; }
     }
 
-    function cambiarPaginaPDF(delta) {
-      if (pdfPageRendering || !pdfDoc) return;
-      const nueva = pdfPageNum + delta;
-      if (nueva >= 1 && nueva <= pdfDoc.numPages) renderizarPaginaPDF(nueva);
+    function _liberarBlobUrl() {
+      if (_currentBlobUrl) { try { URL.revokeObjectURL(_currentBlobUrl); } catch(e){} _currentBlobUrl = null; }
     }
 
+    // Abrir PDF en nueva pestaña — método más confiable
     window.abrirPDFExterno = function() {
-      if (!currentPdfBase64) return;
+      if (!currentPdfBase64) {
+        showVizoAlert('Sin archivo', 'No hay PDF cargado', 'error');
+        return;
+      }
       try {
-        const binary = atob(currentPdfBase64);
-        const bytes = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-        const blob = new Blob([bytes], { type: 'application/pdf' });
-        const url = URL.createObjectURL(blob);
-        window.open(url, '_blank');
+        const blob = _base64ToBlob(currentPdfBase64);
+        if (!blob) throw new Error('No se pudo crear el blob');
+        const blobUrl = URL.createObjectURL(blob);
+        // Abrir en nueva pestaña
+        const win = window.open(blobUrl, '_blank');
+        if (!win || win.closed || typeof win.closed === 'undefined') {
+          // Bloqueador de popups — usar link visible
+          const a = document.createElement('a');
+          a.href = blobUrl;
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          a.download = ''; // vacío = no descarga, solo abre
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(blobUrl); }, 5000);
+        } else {
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 8000);
+        }
       } catch(e) {
-        showVizoAlert('Error', 'No se pudo abrir el archivo', 'error');
+        console.error('abrirPDFExterno:', e);
+        // Último recurso: data URI
+        try {
+          const dataUri = 'data:application/pdf;base64,' + currentPdfBase64;
+          window.open(dataUri, '_blank');
+        } catch(e2) {
+          showVizoAlert('Error', 'Activa los popups para abrir el PDF', 'warning');
+        }
       }
     };
 
-    window.viewPdfInApp = async (base64, name) => {
-      if (!base64) { showVizoAlert('Error','El documento no tiene contenido','error'); return; }
+    // Visor en app — usa iframe con blob URL
+    window.viewPdfInApp = function(base64, name) {
+      if (!base64) { showVizoAlert('Error', 'El documento no tiene contenido', 'error'); return; }
+
+      _liberarBlobUrl();
       currentPdfBase64 = base64;
       currentPdfName = name || 'documento.pdf';
+
       document.getElementById('pdfTitle').innerText = currentPdfName;
       switchView('viewPdf');
 
-      const loadEl = document.getElementById('pdfLoadingState');
+      const loadEl   = document.getElementById('pdfLoadingState');
       const scrollEl = document.getElementById('pdfScrollWrapper');
-      const errEl = document.getElementById('pdfErrorState');
-      const ctrlBar = document.getElementById('pdfControlsBar');
+      const errEl    = document.getElementById('pdfErrorState');
+      const ctrlBar  = document.getElementById('pdfControlsBar');
 
       loadEl.style.display = 'flex';
       scrollEl.style.display = 'none';
       errEl.style.display = 'none';
+      if (ctrlBar) ctrlBar.style.display = 'flex';
 
-      pdfScale = 1.5; pdfPageNum = 1;
-      document.getElementById('pdfPrevPage').disabled = true;
-      document.getElementById('pdfNextPage').disabled = true;
-      document.getElementById('pdfPageInfo').textContent = 'Cargando...';
+      // Limpiar iframe/canvas previos
+      const oldIframe = document.getElementById('pdfIframeEl');
+      if (oldIframe) oldIframe.remove();
 
       try {
-        if (typeof pdfjsLib === 'undefined') throw new Error('PDF.js no disponible');
-        const binary = atob(base64);
-        const bytes = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-        pdfDoc = await pdfjsLib.getDocument({ data: bytes.buffer }).promise;
+        const blob = _base64ToBlob(base64);
+        if (!blob) throw new Error('blob nulo');
+        _currentBlobUrl = URL.createObjectURL(blob);
+
+        const container = document.getElementById('pdfViewerContainer');
+
+        // Crear iframe y colocarlo ANTES del errEl
+        const iframe = document.createElement('iframe');
+        iframe.id = 'pdfIframeEl';
+        iframe.setAttribute('type', 'application/pdf');
+        iframe.style.cssText = [
+          'flex:1', 'width:100%', 'border:none',
+          'background:#1e2230', 'min-height:300px',
+          'display:block'
+        ].join(';');
+        iframe.title = currentPdfName;
+        container.insertBefore(iframe, errEl);
+
+        // Ocultar estado de carga cuando iframe carga
+        let loaded = false;
+        const onLoad = () => {
+          if (loaded) return; loaded = true;
+          loadEl.style.display = 'none';
+        };
+        iframe.addEventListener('load', onLoad);
+
+        // Asignar src tras insertar en DOM (crítico)
+        iframe.src = _currentBlobUrl;
+
+        // Botón externo en la barra inferior
+        if (ctrlBar) {
+          ctrlBar.innerHTML = `
+            <button onclick="abrirPDFExterno()"
+              style="background:var(--primary);color:white;border:none;border-radius:20px;
+                     padding:9px 22px;font-size:12px;font-weight:700;cursor:pointer;
+                     display:flex;align-items:center;gap:7px;margin:0 auto;
+                     box-shadow:0 3px 10px rgba(10,132,255,0.3);">
+              <i class="fas fa-up-right-from-square"></i> Abrir pantalla completa
+            </button>`;
+        }
+
+        // Timeout seguro: ocultar spinner si el iframe no dispara onload
+        setTimeout(() => { if (loadEl.style.display !== 'none') loadEl.style.display = 'none'; }, 3500);
+
+      } catch(e) {
+        console.error('viewPdfInApp:', e);
         loadEl.style.display = 'none';
-        scrollEl.style.display = 'flex';
-        await renderizarPaginaPDF(1);
-      } catch(err) {
-        console.error('Error PDF:', err);
-        loadEl.style.display = 'none';
-        ctrlBar.style.display = 'none';
+        if (ctrlBar) ctrlBar.style.display = 'none';
         errEl.style.display = 'flex';
         document.getElementById('pdfErrorName').textContent = currentPdfName;
-        showVizoAlert('PDF no disponible','Se abrirá en otra página como alternativa','warning');
+        showVizoAlert('PDF','Usa el botón para abrir el documento','info');
       }
     };
+
+    // Limpiar blob al salir del visor
+    function cambiarPaginaPDF() {} // legacy stub
 
     document.getElementById('pdfPrevPage').onclick = () => cambiarPaginaPDF(-1);
     document.getElementById('pdfNextPage').onclick = () => cambiarPaginaPDF(1);
@@ -2682,10 +2896,11 @@
         document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
         element.classList.add('active');
       }
-      // Restaurar pdf controls si volvemos al visor
       if (viewId !== 'viewPdf') {
-        const cb = document.getElementById('pdfControlsBar');
-        if (cb) cb.style.display = 'flex';
+        // Limpiar iframe PDF al salir de la vista
+        const oldIframe = document.getElementById('pdfIframeEl');
+        if (oldIframe) oldIframe.remove();
+        _liberarBlobUrl && _liberarBlobUrl();
       }
     };
 
@@ -2718,6 +2933,35 @@
     window.normalizarFecha = normalizarFecha;
     window.formatearFechaLegible = formatearFechaLegible;
     window.calcularAntiguedad = calcularAntiguedad;
+
+    // ===== SCROLL: header se oculta al bajar, reaparece al subir =====
+    (function initScrollBehavior() {
+      const mainEl = document.getElementById('mainContent');
+      const headerEl = document.getElementById('appHeader');
+      if (!mainEl || !headerEl) return;
+      let lastY = 0;
+      let ticking = false;
+      mainEl.addEventListener('scroll', () => {
+        if (!ticking) {
+          requestAnimationFrame(() => {
+            const cur = mainEl.scrollTop;
+            const delta = cur - lastY;
+            if (delta > 6 && cur > 60) {
+              // Bajando — ocultar header suavemente
+              headerEl.style.transform = 'translateY(-100%)';
+              headerEl.style.opacity = '0';
+            } else if (delta < -4) {
+              // Subiendo — mostrar header
+              headerEl.style.transform = 'translateY(0)';
+              headerEl.style.opacity = '1';
+            }
+            lastY = cur;
+            ticking = false;
+          });
+          ticking = true;
+        }
+      });
+    })();
 
     // ===== INICIO =====
     if (session) {
