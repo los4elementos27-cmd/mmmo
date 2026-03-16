@@ -156,23 +156,20 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    body {
+    html, body {
+      margin: 0; padding: 0;
+      height: 100%; overflow: hidden;
       background: var(--bg-light);
       color: var(--text-main);
-      height: 100dvh;
-      height: 100vh;
-      overflow: hidden;
       transition: background 0.3s, color 0.3s;
-      margin: 0;
-      padding: 0;
     }
 
+    /* app-container ocupa EXACTAMENTE la pantalla visible con position:fixed */
     .app-container {
-      height: 100dvh;
-      height: 100vh;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
       display: flex;
       flex-direction: column;
-      position: relative;
       overflow: hidden;
     }
 
@@ -246,12 +243,12 @@
     /* ===== MAIN ===== */
     main {
       flex: 1;
-      min-height: 0;
+      min-height: 0;          /* CRÍTICO en flexbox para que el scroll funcione */
       overflow-y: auto;
       overflow-x: hidden;
       padding: 14px;
-      /* padding-bottom GENEROSO: el ultimo elemento siempre visible sobre la nav */
-      padding-bottom: 160px;
+      /* padding-bottom MUY generoso — el JS lo ajusta al valor exacto en tiempo real */
+      padding-bottom: 180px;
       scroll-behavior: smooth;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-y: contain;
@@ -871,11 +868,8 @@
 
     /* ===== NAV INFERIOR ===== */
     nav.bottom-nav {
-      /* SOLUCIÓN DEFINITIVA: la nav es parte del flex column, no position:fixed
-         Así el main sabe exactamente cuánto espacio tiene sin necesitar padding-bottom grande */
-      position: relative;
-      flex-shrink: 0;
-      width: 100%;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
       min-height: var(--nav-height);
       height: auto;
       background: rgba(255,255,255,0.97);
@@ -883,7 +877,6 @@
       -webkit-backdrop-filter: blur(20px);
       display: flex; justify-content: space-around; align-items: center;
       border-top: 1px solid var(--border-light);
-      /* Safe-area para iPhone con home indicator */
       padding-bottom: env(safe-area-inset-bottom, 0px);
       padding-top: 4px;
       z-index: 200;
@@ -1161,14 +1154,15 @@
     @media (max-width: 480px) {
       main {
         padding: 12px;
-        padding-bottom: 160px;
+        /* padding-bottom enorme en móvil — el JS lo calcula exacto encima */
+        padding-bottom: 200px;
       }
     }
 
     @media (max-width: 380px) {
       main {
         padding: 10px;
-        padding-bottom: 160px;
+        padding-bottom: 200px;
       }
       .welcome-card h1 { font-size: 15px; }
     }
@@ -3270,32 +3264,36 @@
       }
     }, 1500);
 
-    // ===== FIX SCROLL MÓVIL: padding-bottom dinamico basado en altura REAL de la nav =====
-    (function fixMobileScroll() {
+    // ===== FIX SCROLL MÓVIL DEFINITIVO =====
+    // Mide la nav real + safe-area y aplica padding-bottom exacto al main
+    // para que TODOS los elementos sean completamente visibles al deslizar
+    (function fixMobileScrollDefinitivo() {
       var mainEl = document.getElementById('mainContent');
       var navEl  = document.getElementById('bottomNav');
-      if (!mainEl || !navEl) return;
+      if (!mainEl) return;
 
       function aplicarPadding() {
-        // Medir la nav real (incluye safe-area en iPhone)
-        var navH = navEl.getBoundingClientRect().height;
-        if (!navH || navH < 50) navH = 68;
-        // Espacio extra generoso para que el último elemento quede bien visible
-        var extra = 100;
-        var total = Math.round(navH + extra);
+        var navH = 0;
+        if (navEl) {
+          navH = navEl.getBoundingClientRect().height;
+          if (!navH || navH < 50) navH = 68;
+        } else {
+          navH = 68;
+        }
+        // Extra de 80px para que el último elemento tenga espacio visual suficiente
+        var total = Math.round(navH + 80);
         mainEl.style.paddingBottom = total + 'px';
       }
 
-      // Ejecutar inmediatamente
       aplicarPadding();
-      // Re-ejecutar tras render completo
-      setTimeout(aplicarPadding, 100);
-      setTimeout(aplicarPadding, 500);
-      setTimeout(aplicarPadding, 1500);
-      // Escuchar cambios de tamaño (rotacion, teclado virtual)
+      setTimeout(aplicarPadding, 50);
+      setTimeout(aplicarPadding, 300);
+      setTimeout(aplicarPadding, 800);
+      setTimeout(aplicarPadding, 2000);
       window.addEventListener('resize', aplicarPadding, { passive: true });
+      window.addEventListener('orientationchange', function(){ setTimeout(aplicarPadding, 300); }, { passive: true });
       if (typeof ResizeObserver !== 'undefined') {
-        try { new ResizeObserver(aplicarPadding).observe(navEl); } catch(e) {}
+        try { new ResizeObserver(aplicarPadding).observe(document.body); } catch(e) {}
       }
     })();
   </script>
