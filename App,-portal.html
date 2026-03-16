@@ -246,13 +246,12 @@
     /* ===== MAIN ===== */
     main {
       flex: 1;
-      /* min-height:0 CRÍTICO en flexbox para que el scroll funcione en móvil */
       min-height: 0;
       overflow-y: auto;
       overflow-x: hidden;
       padding: 14px;
-      /* padding-bottom: espacio al final del contenido + safe-area */
-      padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+      /* padding-bottom GENEROSO: el ultimo elemento siempre visible sobre la nav */
+      padding-bottom: 160px;
       scroll-behavior: smooth;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-y: contain;
@@ -1162,14 +1161,14 @@
     @media (max-width: 480px) {
       main {
         padding: 12px;
-        padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+        padding-bottom: 160px;
       }
     }
 
     @media (max-width: 380px) {
       main {
         padding: 10px;
-        padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+        padding-bottom: 160px;
       }
       .welcome-card h1 { font-size: 15px; }
     }
@@ -1438,17 +1437,20 @@
         </div>
 
         <div id="dynamicSection" style="display:none;"></div>
+        <div style="height:80px;"></div>
       </section>
 
       <!-- ====== DOCS ====== -->
       <section id="viewDocs" class="view">
         <div class="view-title"><i class="fas fa-wallet"></i> Mis Volantes de Pago</div>
         <div id="listaVolantes"></div>
+        <div style="height:80px;"></div>
       </section>
 
       <!-- ====== PERFIL COLABORADOR BUSCADO ====== -->
       <section id="viewColaboradorPerfil" class="view">
         <div id="colaboradorPerfilContent"></div>
+        <div style="height:80px;"></div>
       </section>
 
       <!-- ====== VISOR PDF ====== -->
@@ -2101,7 +2103,8 @@
             ${infoItem('fa-clock','Turno', (session.turnoHoras||'N/A')+' h')}
             ${infoItem('fa-user-tie','Jefe', session.jefeCargo||'N/A')}
           </div>
-        </div>`;
+        </div>
+        <div style="height:80px;"></div>`;
     }
 
     function infoItem(icon, label, value) {
@@ -2178,6 +2181,7 @@
             <div class="empty-state"><i class="fas fa-umbrella-beach"></i><p>No tienes solicitudes</p></div>
           </div>
         </div>
+        <div style="height:80px;"></div>
       `;
     }
 
@@ -2330,7 +2334,8 @@
               </div>
               <div class="holiday-double-badge" style="${!f.fijo ? 'background:var(--warning);' : ''}">2x</div>
             </div>`).join('')}
-        </div>`;
+        </div>
+        <div style="height:80px;"></div>`;
     }
 
     // ===== CONFIGURACIÓN =====
@@ -2427,7 +2432,7 @@
           </div>
         </div>
         <button class="btn-action" onclick="guardarConfiguracion()"><i class="fas fa-save"></i> Guardar Cambios</button>
-        <div style="height:20px;"></div>
+        <div style="height:100px;"></div>
       `;
     }
 
@@ -3265,8 +3270,34 @@
       }
     }, 1500);
 
-    // Nav es parte del flex column — el scroll del main es automáticamente correcto
-    // No necesita ajuste dinámico de padding-bottom
+    // ===== FIX SCROLL MÓVIL: padding-bottom dinamico basado en altura REAL de la nav =====
+    (function fixMobileScroll() {
+      var mainEl = document.getElementById('mainContent');
+      var navEl  = document.getElementById('bottomNav');
+      if (!mainEl || !navEl) return;
+
+      function aplicarPadding() {
+        // Medir la nav real (incluye safe-area en iPhone)
+        var navH = navEl.getBoundingClientRect().height;
+        if (!navH || navH < 50) navH = 68;
+        // Espacio extra generoso para que el último elemento quede bien visible
+        var extra = 100;
+        var total = Math.round(navH + extra);
+        mainEl.style.paddingBottom = total + 'px';
+      }
+
+      // Ejecutar inmediatamente
+      aplicarPadding();
+      // Re-ejecutar tras render completo
+      setTimeout(aplicarPadding, 100);
+      setTimeout(aplicarPadding, 500);
+      setTimeout(aplicarPadding, 1500);
+      // Escuchar cambios de tamaño (rotacion, teclado virtual)
+      window.addEventListener('resize', aplicarPadding, { passive: true });
+      if (typeof ResizeObserver !== 'undefined') {
+        try { new ResizeObserver(aplicarPadding).observe(navEl); } catch(e) {}
+      }
+    })();
   </script>
 </body>
 </html>
