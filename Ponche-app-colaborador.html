@@ -170,20 +170,21 @@
       overflow: hidden;
     }
 
-    /* ===== HEADER CON ANIMACIONES Y BUSCADOR ===== */
+    /* ===== HEADER CON ANIMACIONES (SOLO OCULTAR) ===== */
     header {
       padding: max(env(safe-area-inset-top), 8px) 14px 8px;
       display: flex;
-      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
       background: rgba(255,255,255,0.95);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       z-index: 100;
       border-bottom: 1px solid var(--border-light);
       box-shadow: var(--shadow-xs);
-      gap: 6px;
-      transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s, box-shadow 0.3s ease, padding 0.3s ease;
-      will-change: transform, opacity, padding;
+      gap: 10px;
+      transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s, box-shadow 0.3s ease;
+      will-change: transform, opacity;
       transform: translateY(0);
       opacity: 1;
     }
@@ -191,14 +192,6 @@
       transform: translateY(-100%);
       opacity: 0;
       box-shadow: none;
-    }
-
-    .header-top-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 100%;
-      gap: 10px;
     }
 
     .logo-mini {
@@ -219,18 +212,18 @@
       text-align: center;
       min-width: 0;
     }
-    .header-center .lbl { font-size: 9px; font-weight: 700; color: var(--primary); letter-spacing: 1px; text-transform: uppercase; font-family: var(--font-main); }
-    .header-center .name { font-size: 13px; font-weight: 700; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: var(--font-main); }
+    .header-center .lbl { font-size: 8px; font-weight: 700; color: var(--primary); letter-spacing: 1px; text-transform: uppercase; font-family: var(--font-main); }
+    .header-center .name { font-size: 12px; font-weight: 700; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: var(--font-main); }
 
     .header-actions { display: flex; gap: 6px; align-items: center; }
 
     .header-btn {
-      width: 36px; height: 36px;
+      width: 34px; height: 34px;
       background: var(--bg-card2);
       border-radius: 10px;
       display: flex; align-items: center; justify-content: center;
       color: var(--primary);
-      font-size: 15px;
+      font-size: 14px;
       cursor: pointer;
       transition: var(--transition);
       border: 1px solid var(--border-light);
@@ -256,43 +249,6 @@
     @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
     .notif-dot.visible { display: block; }
 
-    /* Buscador en el header */
-    .header-search-container {
-      width: 100%;
-      transition: opacity 0.3s ease, transform 0.3s ease, margin 0.3s ease;
-      opacity: 1;
-      transform: translateY(0);
-    }
-    .header-search-container.search-hidden {
-      opacity: 0;
-      transform: translateY(-10px);
-      margin-top: -50px; /* Se esconde */
-      pointer-events: none;
-    }
-
-    .header-search-input {
-      width: 100%;
-      padding: 8px 34px 8px 12px;
-      background: var(--bg-card);
-      border: 1.5px solid var(--border-light);
-      border-radius: var(--radius-full);
-      font-size: 12px;
-      color: var(--text-main);
-      outline: none;
-      transition: var(--transition);
-      box-shadow: var(--shadow-xs);
-    }
-    .header-search-input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(10,132,255,0.12);
-    }
-    .header-search-input::placeholder { color: var(--text-light); font-size: 12px; }
-
-    .header-search-icon {
-      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
-      color: var(--primary); font-size: 12px; pointer-events: none;
-    }
-
     /* ===== MAIN ===== */
     main {
       flex: 1;
@@ -300,7 +256,7 @@
       overflow-y: auto;
       overflow-x: hidden;
       padding: 14px;
-      padding-bottom: 180px;
+      padding-bottom: calc(var(--nav-height) + 20px); /* Espacio para nav fijo */
       scroll-behavior: smooth;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-y: contain;
@@ -318,7 +274,7 @@
       100% { opacity: 1; transform: translateY(0); }
     }
 
-    /* ===== BUSCADOR (resultados) ===== */
+    /* ===== BUSCADOR (en main, como antes) ===== */
     .search-container { position: relative; margin-bottom: 14px; }
 
     .search-input {
@@ -746,7 +702,7 @@
       border-top-color: var(--primary);
       border-radius: 50%; animation: spin 0.8s linear infinite;
     }
-    #pdfLoadingState p { font-size: 13px; opacity: 0.8; font-weight: 500; }
+    #pdfLoadingState p { font-size: 12px; opacity: 0.8; font-weight: 500; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     .pdf-controls {
@@ -941,7 +897,7 @@
     .badge-asistente { background: var(--success); color: white; }
     .badge-linea { background: var(--text-muted); color: white; }
 
-    /* ===== NAV INFERIOR CON ANIMACIONES ===== */
+    /* ===== NAV INFERIOR (FIJA SIN ANIMACIONES) ===== */
     nav.bottom-nav {
       position: fixed;
       bottom: 0; left: 0; right: 0;
@@ -956,14 +912,7 @@
       padding-top: 4px;
       z-index: 200;
       box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
-      transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s, box-shadow 0.3s ease;
-      transform: translateY(0);
-      opacity: 1;
-    }
-    nav.bottom-nav.nav-hidden {
-      transform: translateY(100%);
-      opacity: 0;
-      box-shadow: none;
+      /* Sin transformaciones para que sea fija */
     }
 
     .nav-item {
@@ -1238,14 +1187,14 @@
     @media (max-width: 480px) {
       main {
         padding: 12px;
-        padding-bottom: 200px;
+        padding-bottom: calc(var(--nav-height) + 20px);
       }
     }
 
     @media (max-width: 380px) {
       main {
         padding: 10px;
-        padding-bottom: 200px;
+        padding-bottom: calc(var(--nav-height) + 20px);
       }
       .welcome-card h1 { font-size: 14px; }
     }
@@ -1390,29 +1339,20 @@
   <div class="app-container">
 
     <header id="appHeader" style="display:none;">
-      <div class="header-top-row">
-        <div class="logo-mini" style="flex-shrink:0;">
-          <img src="https://firebasestorage.googleapis.com/v0/b/formulario-2-8929a.appspot.com/o/Vizo%20Access.png?alt=media&token=2e31c49c-ca38-4b5e-b35e-43dee12c16da" alt="Vizo">
-        </div>
-        <div class="header-center" style="min-width:0;flex:1;overflow:hidden;padding:0 6px;">
-          <span class="lbl" style="font-size:8px;letter-spacing:0.8px;" data-i18n="bienvenido">BIENVENIDO</span>
-          <span class="name" id="headerUserName" style="font-size:11px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">Cargando...</span>
-        </div>
-        <div class="header-actions" style="flex-shrink:0;gap:4px;">
-          <div class="header-btn" onclick="toggleNotifications()" id="notifBtn" style="width:30px;height:30px;font-size:12px;">
-            <i class="fas fa-bell"></i>
-            <span class="notif-dot" id="notifDot"></span>
-          </div>
-          <div class="header-btn" onclick="toggleMenu(true)" style="width:30px;height:30px;font-size:12px;">
-            <i class="fas fa-th-large"></i>
-          </div>
-        </div>
+      <div class="logo-mini" style="flex-shrink:0;">
+        <img src="https://firebasestorage.googleapis.com/v0/b/formulario-2-8929a.appspot.com/o/Vizo%20Access.png?alt=media&token=2e31c49c-ca38-4b5e-b35e-43dee12c16da" alt="Vizo">
       </div>
-      <!-- Buscador en el header -->
-      <div class="header-search-container" id="headerSearchContainer">
-        <div style="position:relative; width:100%;">
-          <input type="text" id="headerGlobalSearchInput" class="header-search-input" placeholder="Buscar colaborador...">
-          <i class="fas fa-search header-search-icon"></i>
+      <div class="header-center" style="min-width:0;flex:1;overflow:hidden;padding:0 6px;">
+        <span class="lbl" style="font-size:8px;letter-spacing:0.8px;" data-i18n="bienvenido">BIENVENIDO</span>
+        <span class="name" id="headerUserName" style="font-size:11px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">Cargando...</span>
+      </div>
+      <div class="header-actions" style="flex-shrink:0;gap:4px;">
+        <div class="header-btn" onclick="toggleNotifications()" id="notifBtn" style="width:30px;height:30px;font-size:12px;">
+          <i class="fas fa-bell"></i>
+          <span class="notif-dot" id="notifDot"></span>
+        </div>
+        <div class="header-btn" onclick="toggleMenu(true)" style="width:30px;height:30px;font-size:12px;">
+          <i class="fas fa-th-large"></i>
         </div>
       </div>
     </header>
@@ -1462,7 +1402,11 @@
 
       <!-- ====== HOME ====== -->
       <section id="viewHome" class="view">
-        <!-- El buscador principal ya no está aquí, está en el header -->
+        <!-- Buscador en el main -->
+        <div class="search-container">
+          <input type="text" id="globalSearchInput" class="search-input" placeholder="Buscar colaborador...">
+          <i class="fas fa-search search-icon"></i>
+        </div>
 
         <div id="searchResults" class="search-results-section" style="display:none;"></div>
 
@@ -1594,7 +1538,7 @@
 
     </main>
 
-    <!-- NAV INFERIOR -->
+    <!-- NAV INFERIOR (FIJA) -->
     <nav class="bottom-nav" id="bottomNav" style="display:none;">
       <a href="javascript:void(0)" class="nav-item active" onclick="switchView('viewHome',this);resetHome();scrollToTop()">
         <i class="fas fa-house-chimney"></i><span data-i18n="inicio">Inicio</span>
@@ -1687,7 +1631,7 @@
         enviar: "Enviar",
         // Auth
         portalExclusivo: "Portal exclusivo para colaboradores",
-        ingresarRtm: "Ingresa tu RTM ID para continuar",
+        ingresaRtm: "Ingresa tu RTM ID para continuar",
         validarAcceso: "Validar Acceso",
         entrarPortal: "Entrar al Portal",
         usarOtroRtm: "← Usar otro RTM",
@@ -1716,19 +1660,23 @@
         jefe: "Jefe a cargo",
         // Docs
         misVolantesPago: "Mis Volantes de Pago",
+        sinPagos: "No tienes pagos registrados.",
         // Config
         configuracion: "Configuración",
         perfilPersonal: "Perfil personal",
         fechaNacimiento: "Fecha de nacimiento",
+        paraCelebrar: "Para celebrar tu cumpleaños",
         notifCumpleanos: "Notif. cumpleaños",
         alertaDia: "Alerta en tu día",
         apariencia: "Apariencia",
         temaApp: "Tema de la app",
+        modoClaroOscuro: "Modo claro u oscuro",
         claro: "Claro",
         oscuro: "Oscuro",
         idioma: "Idioma",
+        espanolIngles: "Español / English",
         español: "Español",
-        ingles: "Inglés",
+        ingles: "English",
         notificaciones: "Notificaciones",
         nuevosVolantes: "Nuevos volantes",
         alertaPago: "Alerta al llegar un pago",
@@ -1748,6 +1696,7 @@
         salirCuenta: "Salir de la cuenta",
         // Feriados
         feriados: "Feriados",
+        feriadosDesc: "Feriados nacionales de la República Dominicana {anio} que se pagan a doble tasa. Las fechas de Semana Santa y Corpus Christi son calculadas automáticamente.",
         // Vacaciones
         solicitarVacaciones: "Solicitar Vacaciones",
         fechaInicio: "Fecha de Inicio",
@@ -1755,13 +1704,18 @@
         motivo: "Motivo / Comentario",
         calendario: "Calendario",
         misSolicitudes: "Mis Solicitudes",
+        sinSolicitudes: "No tienes solicitudes",
         // Notificaciones
         marcarLeidas: "Marcar leídas",
         sinNotificaciones: "Sin notificaciones",
+        nuevoVolante: "Nuevo Volante de Pago",
         // PDF
         cargandoDocumento: "Cargando documento...",
         noCargarVisor: "No se pudo cargar el visor en el dispositivo",
         abrirNavegador: "Abrir en navegador",
+        abrirPDF: "Abrir PDF",
+        abrirPantallaCompleta: "Abrir en pantalla completa",
+        descargar: "Descargar",
         descargarOriginal: "Descargar Original",
         // Alertas
         exito: "¡Éxito!",
@@ -1775,6 +1729,7 @@
         salir: "Salir",
         felizCumpleanos: "¡Feliz Cumpleaños!",
         diaMaravilloso: "Que tengas un día maravilloso",
+        abrir: "Abrir",
       },
       en: {
         // General
@@ -1786,7 +1741,7 @@
         enviar: "Send",
         // Auth
         portalExclusivo: "Exclusive portal for employees",
-        ingresarRtm: "Enter your RTM ID to continue",
+        ingresaRtm: "Enter your RTM ID to continue",
         validarAcceso: "Validate Access",
         entrarPortal: "Enter Portal",
         usarOtroRtm: "← Use another RTM",
@@ -1815,17 +1770,21 @@
         jefe: "Supervisor",
         // Docs
         misVolantesPago: "My Pay Stubs",
+        sinPagos: "You have no registered payments.",
         // Config
         configuracion: "Settings",
         perfilPersonal: "Personal profile",
         fechaNacimiento: "Birth date",
+        paraCelebrar: "To celebrate your birthday",
         notifCumpleanos: "Birthday notif.",
         alertaDia: "Alert on your day",
         apariencia: "Appearance",
         temaApp: "App theme",
+        modoClaroOscuro: "Light or dark mode",
         claro: "Light",
         oscuro: "Dark",
         idioma: "Language",
+        espanolIngles: "Spanish / English",
         español: "Spanish",
         ingles: "English",
         notificaciones: "Notifications",
@@ -1847,6 +1806,7 @@
         salirCuenta: "Exit account",
         // Feriados
         feriados: "Holidays",
+        feriadosDesc: "National holidays of the Dominican Republic {anio} that are paid at double rate. Easter and Corpus Christi dates are automatically calculated.",
         // Vacaciones
         solicitarVacaciones: "Request Vacation",
         fechaInicio: "Start Date",
@@ -1854,13 +1814,18 @@
         motivo: "Reason / Comment",
         calendario: "Calendar",
         misSolicitudes: "My Requests",
+        sinSolicitudes: "You have no requests",
         // Notificaciones
         marcarLeidas: "Mark as read",
         sinNotificaciones: "No notifications",
+        nuevoVolante: "New Pay Stub",
         // PDF
         cargandoDocumento: "Loading document...",
         noCargarVisor: "Could not load viewer on device",
         abrirNavegador: "Open in browser",
+        abrirPDF: "Open PDF",
+        abrirPantallaCompleta: "Open full screen",
+        descargar: "Download",
         descargarOriginal: "Download Original",
         // Alertas
         exito: "Success!",
@@ -1874,6 +1839,7 @@
         salir: "Logout",
         felizCumpleanos: "Happy Birthday!",
         diaMaravilloso: "Have a wonderful day",
+        abrir: "Open",
       }
     };
 
@@ -1883,8 +1849,11 @@
       document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
         if (translations[lang] && translations[lang][key]) {
-          if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-            el.placeholder = translations[lang][key];
+          if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT') {
+            // Para inputs, solo manejamos placeholder si existe
+            if (el.placeholder) {
+              el.placeholder = translations[lang][key];
+            }
           } else {
             el.innerText = translations[lang][key];
           }
@@ -2302,14 +2271,14 @@
     window.guardarConfiguracion = async function() {
       if (!session) return;
       const key = session.id || '';
-      if (!key) { showVizoAlert('Error', 'ID de usuario no encontrado', 'error'); return; }
+      if (!key) { showVizoAlert(translations[currentLanguage].error, 'ID de usuario no encontrado', 'error'); return; }
 
       const fn = document.getElementById('fechaNacimientoInput');
       const nc = document.getElementById('notifCumpleanos');
       const ts = document.getElementById('themeSelect');
       const is = document.getElementById('idiomaSelect');
       const ns = document.getElementById('notifPagosSelect');
-      if (!fn) { showVizoAlert('Error', 'Campos no encontrados', 'error'); return; }
+      if (!fn) { showVizoAlert(translations[currentLanguage].error, 'Campos no encontrados', 'error'); return; }
 
       const nuevaConfig = {
         fechaNacimiento: fn.value || '',
@@ -2413,7 +2382,7 @@
       document.getElementById('dynamicSection').style.display = 'none';
       document.getElementById('dynamicSection').innerHTML = '';
       document.getElementById('searchResults').style.display = 'none';
-      document.getElementById('headerGlobalSearchInput').value = ''; // Limpiar buscador del header
+      document.getElementById('globalSearchInput').value = ''; // Limpiar buscador
     };
 
     // ===== SECCIONES DINÁMICAS =====
@@ -2678,13 +2647,14 @@
       const mesesCortos = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
       const anio = new Date().getFullYear();
       const feriadosAnio = getFeriados(anio);
+      const descripcion = translations[currentLanguage].feriadosDesc.replace('{anio}', anio);
       return `
         <div class="pdf-header">
           <button onclick="volverAHome()"><i class="fas fa-arrow-left"></i></button>
           <h4 data-i18n="feriados">Feriados ${anio}</h4>
         </div>
         <div class="profile-section">
-          <p style="font-size:11px;color:var(--text-muted);margin-bottom:12px;" data-i18n="feriadosDesc">Feriados nacionales de la República Dominicana ${anio} que se pagan a doble tasa. Las fechas de Semana Santa y Corpus Christi son calculadas automáticamente.</p>
+          <p style="font-size:11px;color:var(--text-muted);margin-bottom:12px;">${descripcion}</p>
           ${feriadosAnio.map(f => `
             <div class="holiday-card" style="margin-bottom:6px;${!f.fijo ? 'border-left-color:var(--warning);' : ''}">
               <div class="holiday-date-badge" style="${!f.fijo ? 'background:var(--warning-light);' : ''}">
@@ -2752,7 +2722,7 @@
             </div>
             <div class="settings-control">
               <select id="idiomaSelect" onchange="cambiarIdioma(this.value)">
-                <option value="es" ${idioma==='es'?'selected':''}>🇩🇴 <span data-i18n="espanol">Español</span></option>
+                <option value="es" ${idioma==='es'?'selected':''}>🇩🇴 <span data-i18n="español">Español</span></option>
                 <option value="en" ${idioma==='en'?'selected':''}>🇺🇸 <span data-i18n="ingles">English</span></option>
               </select>
             </div>
@@ -2788,7 +2758,7 @@
           <div class="settings-item">
             <div class="settings-info">
               <div class="settings-icon"><i class="fas fa-code-branch"></i></div>
-              <div class="settings-text"><h4 data-i18n="version">Versión</h4><p>Vizo Access v3.2</p></div>
+              <div class="settings-text"><h4 data-i18n="version">Versión</h4><p>Vizo Access v3.3</p></div>
             </div>
           </div>
           <div class="settings-item">
@@ -2830,67 +2800,62 @@
       }
     }
 
-    // ===== BUSCADOR (unificado para header y resultados) =====
-    function setupSearchListeners() {
-      const headerInput = document.getElementById('headerGlobalSearchInput');
-      if (!headerInput) return;
+    // ===== BUSCADOR (en main) =====
+    document.getElementById('globalSearchInput')?.addEventListener('input', async (e) => {
+      const t = e.target.value.trim().toLowerCase();
+      const resultsDiv = document.getElementById('searchResults');
+      const homeMain = document.getElementById('homeMainContent');
+      const dynSection = document.getElementById('dynamicSection');
 
-      headerInput.addEventListener('input', async (e) => {
-        const t = e.target.value.trim().toLowerCase();
-        const resultsDiv = document.getElementById('searchResults');
-        const homeMain = document.getElementById('homeMainContent');
-        const dynSection = document.getElementById('dynamicSection');
+      if (t.length < 2) {
+        resultsDiv.style.display = 'none';
+        if (dynSection.innerHTML === '') homeMain.style.display = 'block';
+        return;
+      }
 
-        if (t.length < 2) {
-          resultsDiv.style.display = 'none';
-          if (dynSection.innerHTML === '') homeMain.style.display = 'block';
-          return;
-        }
+      homeMain.style.display = 'none';
+      dynSection.style.display = 'none';
 
-        homeMain.style.display = 'none';
-        dynSection.style.display = 'none';
+      if (allColaboradores.length === 0) await cargarTodosColaboradores();
 
-        if (allColaboradores.length === 0) await cargarTodosColaboradores();
-
-        const res = allColaboradores.filter(c => {
-          const n = `${c.firstName||''} ${c.lastName||''}`.toLowerCase();
-          return n.includes(t) || (c.username||'').toLowerCase().includes(t) || (c.rtmId||'').toLowerCase().includes(t);
-        });
-
-        const alto = esAltoMando(session?.posicionLaboral);
-
-        let html = `<div class="search-results-header">
-          <h4>Resultados (${res.length})</h4>
-          <span style="font-size:9px;background:${alto?'var(--success-light)':'var(--warning-light)'};color:${alto?'var(--success)':'var(--warning)'};padding:2px 8px;border-radius:20px;">
-            <i class="fas fa-${alto?'unlock':'lock'}"></i> ${alto?'Acceso completo':'Vista básica'}
-          </span>
-        </div>`;
-
-        if (res.length === 0) {
-          html += `<div class="empty-state"><i class="fas fa-search"></i><p>Sin resultados</p></div>`;
-        } else {
-          res.forEach(c => {
-            const nombre = `${c.firstName||''} ${c.lastName||''}`.trim()||'Sin nombre';
-            const fi = formatearFechaLegible(c.fechaIngreso);
-            html += `
-              <div class="search-result-item" onclick="verPerfilColaborador('${c.id}')">
-                <img src="${c.fotoBase64||'https://via.placeholder.com/60'}" class="search-result-img" onerror="this.src='https://via.placeholder.com/60'">
-                <div class="search-result-info">
-                  <h4>${nombre}</h4>
-                  <p><i class="fas fa-tag"></i>${c.posicionLaboral||'N/A'} · <i class="fas fa-building"></i>${c.departamento||'N/A'}</p>
-                  ${alto?`<p><i class="fas fa-calendar-alt"></i>Ingreso: ${fi}</p>`:''}
-                </div>
-                <i class="fas fa-chevron-right" style="color:var(--primary);font-size:11px;flex-shrink:0;"></i>
-              </div>`;
-          });
-        }
-
-        resultsDiv.innerHTML = html;
-        resultsDiv.style.display = 'block';
+      const res = allColaboradores.filter(c => {
+        const n = `${c.firstName||''} ${c.lastName||''}`.toLowerCase();
+        return n.includes(t) || (c.username||'').toLowerCase().includes(t) || (c.rtmId||'').toLowerCase().includes(t);
       });
-    }
 
-    // ===== VER PERFIL COLABORADOR (MODIFICADO: SIN TURNO, PRECIO, DIAS VAC) =====
+      const alto = esAltoMando(session?.posicionLaboral);
+
+      let html = `<div class="search-results-header">
+        <h4>Resultados (${res.length})</h4>
+        <span style="font-size:9px;background:${alto?'var(--success-light)':'var(--warning-light)'};color:${alto?'var(--success)':'var(--warning)'};padding:2px 8px;border-radius:20px;">
+          <i class="fas fa-${alto?'unlock':'lock'}"></i> ${alto?'Acceso completo':'Vista básica'}
+        </span>
+      </div>`;
+
+      if (res.length === 0) {
+        html += `<div class="empty-state"><i class="fas fa-search"></i><p>Sin resultados</p></div>`;
+      } else {
+        res.forEach(c => {
+          const nombre = `${c.firstName||''} ${c.lastName||''}`.trim()||'Sin nombre';
+          const fi = formatearFechaLegible(c.fechaIngreso);
+          html += `
+            <div class="search-result-item" onclick="verPerfilColaborador('${c.id}')">
+              <img src="${c.fotoBase64||'https://via.placeholder.com/60'}" class="search-result-img" onerror="this.src='https://via.placeholder.com/60'">
+              <div class="search-result-info">
+                <h4>${nombre}</h4>
+                <p><i class="fas fa-tag"></i>${c.posicionLaboral||'N/A'} · <i class="fas fa-building"></i>${c.departamento||'N/A'}</p>
+                ${alto?`<p><i class="fas fa-calendar-alt"></i>Ingreso: ${fi}</p>`:''}
+              </div>
+              <i class="fas fa-chevron-right" style="color:var(--primary);font-size:11px;flex-shrink:0;"></i>
+            </div>`;
+        });
+      }
+
+      resultsDiv.innerHTML = html;
+      resultsDiv.style.display = 'block';
+    });
+
+    // ===== VER PERFIL COLABORADOR (SIN TURNO, PRECIO, DIAS VAC) =====
     window.verPerfilColaborador = async function(id) {
       const c = allColaboradores.find(x => x.id === id);
       if (!c) return;
@@ -3562,7 +3527,6 @@
       loadMyFiles();
       iniciarListenerNotificaciones();
       escucharSesionEnTiempoReal();
-      setupSearchListeners();
 
       // Cargar información de la cuenta de usuario
       (async () => {
@@ -3579,17 +3543,14 @@
       setLanguage(configuracionesUsuario.idioma || 'es');
     }
 
-    // ===== SCROLL: header se oculta al bajar, reaparece al subir (con buscador) =====
+    // ===== SCROLL: header se oculta al bajar, reaparece al subir (sin afectar buscador) =====
     (function initScrollBehavior() {
       const mainEl = document.getElementById('mainContent');
       const headerEl = document.getElementById('appHeader');
-      const navEl = document.getElementById('bottomNav');
-      const headerSearch = document.getElementById('headerSearchContainer');
-      if (!mainEl || !headerEl || !navEl || !headerSearch) return;
+      if (!mainEl || !headerEl) return;
 
       let lastY = 0;
       let ticking = false;
-      const searchThreshold = 40; // Umbral para ocultar/mostrar buscador
 
       mainEl.addEventListener('scroll', () => {
         if (!ticking) {
@@ -3597,20 +3558,11 @@
             const cur = mainEl.scrollTop;
             const delta = cur - lastY;
 
-            // Control de header y nav
+            // Control de header
             if (delta > 8 && cur > 80) {
               headerEl.classList.add('header-hidden');
-              navEl.classList.add('nav-hidden');
             } else if (delta < -5) {
               headerEl.classList.remove('header-hidden');
-              navEl.classList.remove('nav-hidden');
-            }
-
-            // Control del buscador en el header
-            if (cur > searchThreshold) {
-              headerSearch.classList.add('search-hidden');
-            } else {
-              headerSearch.classList.remove('search-hidden');
             }
 
             lastY = cur;
