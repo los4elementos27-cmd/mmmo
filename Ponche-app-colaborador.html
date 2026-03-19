@@ -176,6 +176,75 @@
       overflow: hidden;
     }
 
+    /* ===== BOTÓN DESCARGA ACCESO DIRECTO (NUEVO) ===== */
+    .install-direct-banner {
+      background: var(--primary-gradient);
+      color: white;
+      padding: 12px 16px;
+      border-radius: var(--radius-xl);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: var(--shadow-lg);
+      animation: slideDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      border: 1px solid rgba(255,255,255,0.2);
+      cursor: pointer;
+      transition: var(--transition-elegant);
+    }
+    .install-direct-banner:hover {
+      transform: translateY(-2px) scale(1.01);
+      box-shadow: var(--shadow-xl);
+    }
+    .install-direct-icon {
+      width: 44px;
+      height: 44px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+    .install-direct-text {
+      flex: 1;
+    }
+    .install-direct-text h4 {
+      font-size: 14px;
+      font-weight: 700;
+      font-family: var(--font-main);
+      margin-bottom: 2px;
+    }
+    .install-direct-text p {
+      font-size: 11px;
+      opacity: 0.9;
+    }
+    .install-direct-arrow {
+      width: 32px;
+      height: 32px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     /* ===== HEADER CON ANIMACIONES ELEGANTES ===== */
     header {
       padding: max(env(safe-area-inset-top), 8px) 14px 0;
@@ -1764,27 +1833,69 @@
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script>
-    // Service Worker para PWA
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed:', err));
-      });
-    }
-
-    // Detectar si se puede instalar como PWA
+    // ===== PWA - VERSIÓN CORREGIDA CON LIMPIEZA DE CACHÉ =====
     let deferredPrompt;
+    const isInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+    // LIMPIAR CACHÉ SI FUE DESINSTALADA
+    (async function limpiarCacheSiEsNecesario() {
+      try {
+        const pwaInstalada = localStorage.getItem('pwa_installed') === 'true';
+        
+        if (!isInstalled && pwaInstalada) {
+          console.log('🔍 Detectada desinstalación - limpiando caché...');
+          localStorage.removeItem('pwa_installed');
+          
+          // Limpiar Service Workers
+          if ('serviceWorker' in navigator) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (let registration of registrations) {
+              await registration.unregister();
+              console.log('✅ Service Worker eliminado');
+            }
+          }
+          
+          // Limpiar caché del navegador
+          if ('caches' in window) {
+            const cacheNames = await caches.keys();
+            await Promise.all(
+              cacheNames.map(cacheName => caches.delete(cacheName))
+            );
+            console.log('✅ Caché limpiado');
+          }
+        }
+      } catch (e) {
+        console.error('Error limpiando caché:', e);
+      }
+    })();
+
+    // Evento de instalación
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      // Mostrar banner de instalación después de 2 segundos si no está instalada
-      setTimeout(() => {
-        if (!localStorage.getItem('pwa_installed')) {
+      
+      // Solo mostrar banner si NO está instalada
+      if (!isInstalled && !localStorage.getItem('pwa_installed')) {
+        setTimeout(() => {
           showInstallBanner();
-        }
-      }, 2000);
+        }, 2000);
+      }
     });
 
+    // Evento cuando se instala
+    window.addEventListener('appinstalled', () => {
+      console.log('✅ PWA instalada correctamente');
+      localStorage.setItem('pwa_installed', 'true');
+      deferredPrompt = null;
+      
+      const banner = document.getElementById('installBanner');
+      if (banner) banner.remove();
+    });
+
+    // Función para mostrar banner
     function showInstallBanner() {
+      if (document.getElementById('installBanner')) return;
+      
       const banner = document.createElement('div');
       banner.className = 'install-banner';
       banner.id = 'installBanner';
@@ -1801,17 +1912,20 @@
           <i class="fas fa-arrow-down"></i>
         </button>
       `;
+      
       const homeMain = document.getElementById('homeMainContent');
       if (homeMain) {
         homeMain.insertBefore(banner, homeMain.firstChild);
       }
     }
 
+    // Función para instalar
     window.installApp = function() {
       if (deferredPrompt) {
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then((choiceResult) => {
           if (choiceResult.outcome === 'accepted') {
+            console.log('✅ Usuario aceptó la instalación');
             localStorage.setItem('pwa_installed', 'true');
           }
           deferredPrompt = null;
@@ -1820,7 +1934,58 @@
       const banner = document.getElementById('installBanner');
       if (banner) banner.remove();
     };
-  </script>
+
+    // Service Worker (solo registrar si no está instalada)
+    if ('serviceWorker' in navigator && !isInstalled) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(err => {
+          console.log('⚠️ Service Worker no registrado:', err);
+        });
+      });
+    }
+
+    // ===== NUEVA FUNCIÓN PARA DESCARGA DE ACCESO DIRECTO =====
+    window.crearAccesoDirecto = function() {
+      // Verificar si ya está instalada como PWA
+      if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+        showVizoAlert('Información', 'La aplicación ya está instalada en tu dispositivo', 'info');
+        return;
+      }
+
+      // Para iOS
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      if (isIOS) {
+        showVizoAlert(
+          '📱 Acceso directo iOS',
+          'En Safari: pulsa "Compartir" → "Añadir a Pantalla de Inicio"',
+          'info'
+        );
+        return;
+      }
+
+      // Para Android/Chrome
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('✅ Usuario aceptó la instalación');
+            localStorage.setItem('pwa_installed', 'true');
+            showVizoAlert('¡Éxito!', 'Acceso directo creado correctamente', 'success');
+          } else {
+            showVizoAlert('Información', 'Puedes instalar desde el menú del navegador', 'info');
+          }
+          deferredPrompt = null;
+        });
+      } else {
+        // Si no hay evento beforeinstallprompt, mostrar instrucciones
+        showVizoAlert(
+          '📱 Crear acceso directo',
+          'En Chrome: Menú (3 puntos) → "Instalar aplicación" o "Añadir a pantalla de inicio"',
+          'info'
+        );
+      }
+    };
+</script>
 </head>
 <body>
 
@@ -2001,6 +2166,20 @@
         <div id="searchResults" class="search-results-section" style="display:none;"></div>
 
         <div id="homeMainContent">
+          <!-- NUEVO BOTÓN DE ACCESO DIRECTO A LA WEB -->
+          <div class="install-direct-banner" onclick="crearAccesoDirecto()">
+            <div class="install-direct-icon">
+              <i class="fas fa-download"></i>
+            </div>
+            <div class="install-direct-text">
+              <h4>📱 Acceso directo a Vizo Access</h4>
+              <p>Descarga un acceso directo en tu escritorio para entrar más rápido</p>
+            </div>
+            <div class="install-direct-arrow">
+              <i class="fas fa-arrow-down"></i>
+            </div>
+          </div>
+
           <!-- Welcome -->
           <div class="welcome-card">
             <div class="welcome-content">
@@ -2211,6 +2390,12 @@
     let vacacionesSolicitadas = [];
     let userAccountInfo = null;
 
+    // ===== CONFIGURACIÓN DE VACACIONES (nueva) =====
+    let configVacaciones = {
+      incluirFinSemana: true, // Por defecto incluir fines de semana
+      diasFinSemana: ['sabado', 'domingo'] // Días considerados fin de semana
+    };
+
     // ===== IDIOMA =====
     let currentLanguage = 'es';
     const translations = {
@@ -2316,6 +2501,14 @@
         solicitudActualizada: "Solicitud actualizada",
         confirmarCancelacion: "¿Estás seguro de cancelar esta solicitud?",
         confirmarTitulo: "Confirmar acción",
+        // Nuevas traducciones para configuración de vacaciones
+        configVacaciones: "Configuración de Vacaciones",
+        incluirFinSemana: "Incluir fines de semana",
+        diasFinSemana: "Días considerados fin de semana",
+        sabado: "Sábado",
+        domingo: "Domingo",
+        ambos: "Ambos",
+        guardarConfigVacaciones: "Guardar configuración"
       },
       en: {
         bienvenido: "WELCOME",
@@ -2419,6 +2612,14 @@
         solicitudActualizada: "Request updated",
         confirmarCancelacion: "Are you sure you want to cancel this request?",
         confirmarTitulo: "Confirm action",
+        // New translations for vacation config
+        configVacaciones: "Vacation Settings",
+        incluirFinSemana: "Include weekends",
+        diasFinSemana: "Weekend days",
+        sabado: "Saturday",
+        domingo: "Sunday",
+        ambos: "Both",
+        guardarConfigVacaciones: "Save settings"
       }
     };
 
@@ -2837,8 +3038,19 @@
           if (configuracionesUsuario.idioma) {
             setLanguage(configuracionesUsuario.idioma);
           }
+          // Cargar configuración de vacaciones si existe
+          if (configuracionesUsuario.configVacaciones) {
+            configVacaciones = configuracionesUsuario.configVacaciones;
+          }
         } else {
-          configuracionesUsuario = { notificacionesCumpleanos: true, fechaNacimiento: '', tema: 'light', idioma: 'es', notificacionesPagos: 'siempre' };
+          configuracionesUsuario = { 
+            notificacionesCumpleanos: true, 
+            fechaNacimiento: '', 
+            tema: 'light', 
+            idioma: 'es', 
+            notificacionesPagos: 'siempre',
+            configVacaciones: configVacaciones
+          };
           await setDoc(ref, { ...configuracionesUsuario, creadoEn: Timestamp.now() }).catch(()=>{});
         }
         const fn = configuracionesUsuario.fechaNacimiento || '';
@@ -2876,6 +3088,7 @@
         tema: ts ? ts.value : 'light',
         idioma: is ? is.value : 'es',
         notificacionesPagos: ns ? ns.value : 'siempre',
+        configVacaciones: configVacaciones, // Incluir la configuración de vacaciones
         updatedAt: Timestamp.now()
       };
       try {
@@ -3268,6 +3481,7 @@
           fechaFin: fin,
           motivo,
           estado: 'pendiente',
+          configVacaciones: configVacaciones, // Guardar configuración usada
           actualizadoEn: Timestamp.now()
         };
         
