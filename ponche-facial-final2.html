@@ -763,7 +763,7 @@
 
     const DEFAULT_SETTINGS = {
       UMBRAL_PRECISION: 0.45,
-      DETECTION_INTERVAL: 2500,
+      DETECTION_INTERVAL: 2000,
       COOLDOWN_SEGUNDOS: 30,
       MIN_CONFIDENCE: 0.70,
       MULTI_SCAN_ENABLED: true,
@@ -790,9 +790,10 @@
     let lastMultiLabel = null;
     let pendingConfirmData = null;
     let snapshotDebounceTimer = null;
+    let detectionActive = false;
 
     const MODEL_URL = 'https://raw.githubusercontent.com/vladmandic/face-api/master/model/';
-    const NOMBRES_DIAS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    const NOMBRES_DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
     const video = document.getElementById('videoFacial');
     const loadingOverlay = document.getElementById('loadingOverlay');
@@ -884,6 +885,85 @@
         fecha: `${year}-${month}-${day}`,
         hora: `${hours}:${minutes}:${seconds}`
       };
+    }
+
+    // ========== FUNCIONES CORREGIDAS DEL CÓDIGO DE GESTIÓN DE LIBRES ==========
+    function getWorkLimitTime(horarioValue) {
+      if (!horarioValue || horarioValue === 'libre') return null;
+      
+      const hourMatch = horarioValue.match(/^(\d+(?:\.\d+)?)h$/);
+      if (hourMatch) {
+        const workHours = parseFloat(hourMatch[1]);
+        const startHour = 8;
+        const limitHour = startHour + workHours;
+        return limitHour * 60;
+      }
+      
+      const hastaMatch = horarioValue.match(/hasta\s*(\d{1,2})(?::(\d{2}))?/i);
+      if (hastaMatch) {
+        const limitHour = parseInt(hastaMatch[1]);
+        const limitMinute = hastaMatch[2] ? parseInt(hastaMatch[2]) : 0;
+        return limitHour * 60 + limitMinute;
+      }
+      
+      if (horarioValue.toLowerCase().includes('mañana')) return 12 * 60;
+      if (horarioValue.toLowerCase().includes('tarde')) return 20 * 60;
+      return 12 * 60;
+    }
+
+    function verificarBloqueosConHorario(codigo) {
+      const emp = employeesData.get(codigo);
+      if (!emp) {
+        return { bloqueado: true, mensaje: 'Colaborador no encontrado', detalle: 'Verifica el código', tipo: 'no_encontrado' };
+      }
+      
+      const ahora = new Date();
+      const hoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
+      const diaSemana = hoy.getDay();
+      const diaDelMes = hoy.getDate();
+      const horaActual = ahora.getHours() * 60 + ahora.getMinutes();
+
+      if (emp.activo === false || emp.status === 'inactive') {
+        return { bloqueado: true, mensaje: 'Cuenta inactiva', detalle: 'Contacta al administrador', tipo: 'inactivo' };
+      }
+      
+      const diasMensuales = emp.diasMensualesLibres || [];
+      if (emp.menMode !== 'manual' && diasMensuales.includes(diaDelMes)) {
+        return { bloqueado: true, mensaje: `Día libre mensual (día ${diaDelMes})`, detalle: 'No necesitas registrar hoy', tipo: 'libre-mensual' };
+      }
+      
+      if (emp.tipoLibre && emp.fechaInicioLibre && emp.fechaFinLibre) {
+        const inicio = new Date(emp.fechaInicioLibre + 'T00:00:00');
+        const fin = new Date(emp.fechaFinLibre + 'T00:00:00');
+        fin.setHours(23, 59, 59, 999);
+        if (hoy >= inicio && hoy <= fin) {
+          const diasRestantes = Math.ceil((fin - hoy) / 86400000);
+          const info = {
+            vacaciones: { mensaje: '🏖 De vacaciones', detalle: `${emp.fechaInicioLibre} → ${emp.fechaFinLibre} (${diasRestantes} día(s) restantes)`, tipo: 'vacaciones' },
+            licencia: { mensaje: '🏥 Licencia médica', detalle: `${emp.fechaInicioLibre} → ${emp.fechaFinLibre} (${diasRestantes} día(s) restantes)`, tipo: 'licencia' },
+            permiso: { mensaje: '⏱ Permiso autorizado', detalle: `${emp.fechaInicioLibre} → ${emp.fechaFinLibre} (${diasRestantes} día(s) restantes)`, tipo: 'permiso' },
+            diaslibres: { mensaje: '☀ Días libres', detalle: `${emp.fechaInicioLibre} → ${emp.fechaFinLibre} (${diasRestantes} día(s) restantes)`, tipo: 'diaslibres' }
+          };
+          return { bloqueado: true, ...(info[emp.tipoLibre] || { mensaje: 'No disponible', detalle: '', tipo: 'ausencia' }) };
+        }
+      }
+      
+      const diasNoLab = emp.diasSemanaNoLaborables || [];
+      if (diasNoLab.includes(diaSemana)) {
+        const horarioPersonalizado = (emp.wdayHorario || {})[diaSemana];
+        
+        if (horarioPersonalizado && horarioPersonalizado !== 'libre') {
+          const limitTime = getWorkLimitTime(horarioPersonalizado);
+          if (limitTime !== null && horaActual < limitTime) {
+            return { bloqueado: false, emp, esParcial: true, limitTime, horarioPersonalizado };
+          } else if (limitTime !== null && horaActual >= limitTime) {
+            return { bloqueado: true, mensaje: `${NOMBRES_DIAS[diaSemana]} - Horario completado`, detalle: `Tu horario era: ${horarioPersonalizado}. Ya pasó tu hora límite.`, tipo: 'dia-semana-parcial' };
+          }
+        }
+        return { bloqueado: true, mensaje: `${NOMBRES_DIAS[diaSemana]} no laborable`, detalle: `Días: ${diasNoLab.map(d => NOMBRES_DIAS[d]).join(', ')}`, tipo: 'dia-semana' };
+      }
+      
+      return { bloqueado: false, emp };
     }
 
     const faceConfidenceBar = document.getElementById('faceConfidenceBar');
@@ -1012,6 +1092,7 @@
                 activo: data.activo !== false,
                 status: data.status || 'active',
                 diasSemanaNoLaborables: data.diasSemanaNoLaborables || [],
+                wdayHorario: data.wdayHorario || {},
                 diasMensualesLibres: data.diasMensualesLibres || [],
                 menMode: data.menMode || 'auto',
                 tipoLibre: data.tipoLibre || null,
@@ -1055,47 +1136,16 @@
       }
     }
 
-    function verificarBloqueos(codigo) {
-      const emp = employeesData.get(codigo);
-      if (!emp) {
-        return { bloqueado: true, mensaje: 'Colaborador no encontrado', detalle: 'Verifica el código', tipo: 'no_encontrado' };
-      }
-      const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
-      const diaSemana = hoy.getDay();
-      const diaDelMes = hoy.getDate();
-
-      if (emp.activo === false || emp.status === 'inactive') {
-        return { bloqueado: true, mensaje: 'Cuenta inactiva', detalle: 'Contacta al administrador', tipo: 'inactivo' };
-      }
-      const diasMensuales = emp.diasMensualesLibres || [];
-      if (emp.menMode !== 'manual' && diasMensuales.includes(diaDelMes)) {
-        return { bloqueado: true, mensaje: `Día libre mensual (día ${diaDelMes})`, detalle: 'No necesitas registrar hoy', tipo: 'libre-mensual' };
-      }
-      if (emp.tipoLibre && emp.fechaInicioLibre && emp.fechaFinLibre) {
-        const inicio = new Date(emp.fechaInicioLibre + 'T00:00:00');
-        const fin = new Date(emp.fechaFinLibre + 'T00:00:00'); fin.setHours(23, 59, 59, 999);
-        if (hoy >= inicio && hoy <= fin) {
-          const diasRestantes = Math.ceil((fin - hoy) / 86400000);
-          const info = {
-            vacaciones: { mensaje: '🏖 De vacaciones', detalle: `${emp.fechaInicioLibre} → ${emp.fechaFinLibre} (${diasRestantes} día(s) restantes)`, tipo: 'vacaciones' },
-            licencia: { mensaje: '🏥 Licencia médica', detalle: `${emp.fechaInicioLibre} → ${emp.fechaFinLibre} (${diasRestantes} día(s) restantes)`, tipo: 'licencia' },
-            permiso: { mensaje: '⏱ Permiso autorizado', detalle: `${emp.fechaInicioLibre} → ${emp.fechaFinLibre} (${diasRestantes} día(s) restantes)`, tipo: 'permiso' },
-            diaslibres: { mensaje: '☀ Días libres', detalle: `${emp.fechaInicioLibre} → ${emp.fechaFinLibre} (${diasRestantes} día(s) restantes)`, tipo: 'diaslibres' }
-          };
-          return { bloqueado: true, ...(info[emp.tipoLibre] || { mensaje: 'No disponible', detalle: '', tipo: 'ausencia' }) };
-        }
-      }
-      const diasNoLab = emp.diasSemanaNoLaborables || [];
-      if (diasNoLab.includes(diaSemana)) {
-        return { bloqueado: true, mensaje: `${NOMBRES_DIAS[diaSemana]} no laborable`, detalle: `Días: ${diasNoLab.map(d => NOMBRES_DIAS[d]).join(', ')}`, tipo: 'dia-semana' };
-      }
-      return { bloqueado: false, emp };
-    }
-
     function mostrarBloqueo(info) {
       const alertEl = document.getElementById('bloqueoAlert');
       const iconEl = document.getElementById('bloqueoIconEl');
-      const iconos = { inactivo: 'fas fa-user-slash', vacaciones: 'fas fa-umbrella-beach', licencia: 'fas fa-file-medical', permiso: 'fas fa-clock', diaslibres: 'fas fa-sun', 'libre-mensual': 'fas fa-rotate', 'dia-semana': 'fas fa-ban', no_encontrado: 'fas fa-user-question' };
+      const iconos = { 
+        inactivo: 'fas fa-user-slash', vacaciones: 'fas fa-umbrella-beach', 
+        licencia: 'fas fa-file-medical', permiso: 'fas fa-clock', 
+        diaslibres: 'fas fa-sun', 'libre-mensual': 'fas fa-rotate', 
+        'dia-semana': 'fas fa-ban', 'dia-semana-parcial': 'fas fa-hourglass-end',
+        no_encontrado: 'fas fa-user-question' 
+      };
       alertEl.className = 'bloqueo-alert';
       if (info.tipo) alertEl.classList.add(`tipo-${info.tipo}`);
       iconEl.className = `${iconos[info.tipo] || 'fas fa-ban'} bloqueo-icon`;
@@ -1142,7 +1192,7 @@
     }
 
     async function guardarRegistroFirebase(codigo, confianza, metodo) {
-      const verificacion = verificarBloqueos(codigo);
+      const verificacion = verificarBloqueosConHorario(codigo);
       if (verificacion.bloqueado) { mostrarBloqueo(verificacion); return false; }
       const userData = verificacion.emp;
       if (!userData) { showToast('❌ Empleado no encontrado', 'error'); return false; }
@@ -1228,7 +1278,7 @@
 
     async function procesarRegistro(codigo, confianza = 1.0, metodo = 'facial') {
       if (isProcessing || !currentUser) return;
-      const verificacion = verificarBloqueos(codigo);
+      const verificacion = verificarBloqueosConHorario(codigo);
       if (verificacion.bloqueado) { mostrarBloqueo(verificacion); return; }
       if (!verificarCooldown(codigo)) return;
       if (CONFIG.CONFIRM_MODE === 'modal') {
@@ -1274,7 +1324,7 @@
       searchInput.value = '';
       searchResults.innerHTML = '';
       if (CONFIG.CONFIRM_SEARCH) {
-        const verificacion = verificarBloqueos(codigo);
+        const verificacion = verificarBloqueosConHorario(codigo);
         if (verificacion.bloqueado) { mostrarBloqueo(verificacion); return; }
         if (!verificarCooldown(codigo)) return;
         isProcessing = true;
@@ -1359,7 +1409,7 @@
       codeSearchOverlay.classList.remove('show');
       currentCodeValue = '';
       if (CONFIG.CONFIRM_SEARCH) {
-        const verificacion = verificarBloqueos(codigo);
+        const verificacion = verificarBloqueosConHorario(codigo);
         if (verificacion.bloqueado) { mostrarBloqueo(verificacion); return; }
         if (!verificarCooldown(codigo)) return;
         isProcessing = true;
@@ -1427,7 +1477,7 @@
       reconfirmValue = '';
       reconfirmTarget = '';
       if (CONFIG.CONFIRM_SEARCH) {
-        const verificacion = verificarBloqueos(codigo);
+        const verificacion = verificarBloqueosConHorario(codigo);
         if (verificacion.bloqueado) { mostrarBloqueo(verificacion); return; }
         if (!verificarCooldown(codigo)) return;
         isProcessing = true;
@@ -1448,8 +1498,9 @@
 
     function iniciarDeteccion() {
       if (detectionInterval) clearInterval(detectionInterval);
+      detectionActive = true;
       detectionInterval = setInterval(async () => {
-        if (!faceMatcher || !videoStarted || !modelosCargados || isProcessing || !currentUser) return;
+        if (!detectionActive || !faceMatcher || !videoStarted || !modelosCargados || isProcessing || !currentUser) return;
         try {
           const detection = await faceapi.detectSingleFace(video).withFaceLandmarks().withFaceDescriptor();
           if (detection) {
@@ -1802,6 +1853,9 @@
     });
 
     logoutBtn.addEventListener('click', () => {
+      detectionActive = false;
+      if (detectionInterval) clearInterval(detectionInterval);
+      if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
       localStorage.removeItem('currentUserAsistencia');
       currentUser = null;
       appScreen.style.display = 'none';
@@ -1809,8 +1863,6 @@
       usernameInput.value = '';
       passwordInput.value = '';
       menuModal.classList.remove('show');
-      if (detectionInterval) clearInterval(detectionInterval);
-      if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
       updateStatusIndicator('idle');
     });
 
