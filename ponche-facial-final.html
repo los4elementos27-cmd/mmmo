@@ -1,0 +1,2041 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Asistencia Facial - TensorFlow.js</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1/dist/face-api.js"></script>
+  <style>
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    :root {
+      --primary: #16e086; --primary-dark: #0da85c; --secondary: #2e4a55;
+      --dark: #0e1c22; --danger: #e74c3c; --warning: #f39c12;
+      --success: #16e086; --error: #e74c3c;
+      --text-secondary: rgba(255,255,255,0.7);
+      --card-bg: rgba(30,41,48,0.95);
+      --text-xs:   clamp(0.7rem,  2vw,   0.8rem);
+      --text-sm:   clamp(0.8rem,  2.5vw, 0.9rem);
+      --text-base: clamp(0.9rem,  3vw,   1rem);
+      --text-lg:   clamp(1.1rem,  4vw,   1.2rem);
+      --text-xl:   clamp(1.3rem,  5vw,   1.5rem);
+      --text-3xl:  clamp(2rem,    8vw,   2.5rem);
+      --spacing-xs: clamp(6px,  1.5vw, 8px);
+      --spacing-sm: clamp(8px,  2vw,   12px);
+      --spacing-md: clamp(12px, 3vw,   18px);
+      --spacing-lg: clamp(18px, 4vw,   24px);
+      --spacing-xl: clamp(24px, 5vw,   32px);
+      --border-radius:    clamp(16px, 5vw, 28px);
+      --border-radius-sm: clamp(10px, 3vw, 16px);
+      --border-radius-lg: clamp(24px, 6vw, 36px);
+      --safe-area-inset-top:    env(safe-area-inset-top,    0px);
+      --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    body {
+      background: #000; min-height: 100vh; display: flex;
+      justify-content: center; align-items: center; overflow: hidden;
+      font-size: var(--text-base); position: fixed; width: 100%; height: 100%;
+    }
+    .fullscreen-container { position: relative; width: 100vw; height: 100vh; background: #000; overflow: hidden; }
+    .camera-full { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+    #videoFacial { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+    .overlay-content {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10;
+      display: flex; flex-direction: column; justify-content: space-between;
+      padding: var(--spacing-md);
+      padding-top:    max(var(--spacing-md), var(--safe-area-inset-top));
+      padding-bottom: max(var(--spacing-md), var(--safe-area-inset-bottom));
+      pointer-events: none;
+    }
+    .overlay-content * { pointer-events: auto; }
+    .top-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--border-radius-lg);
+      border: 1px solid rgba(22,224,134,0.3); color: white;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4); transition: all 0.3s ease;
+    }
+    .title { display: flex; align-items: center; gap: var(--spacing-xs); }
+    .title i { font-size: var(--text-xl); color: var(--primary); text-shadow: 0 0 10px rgba(22,224,134,0.5); }
+    .title h1 { font-size: var(--text-lg); font-weight: 600; letter-spacing: -0.3px; }
+    .menu-container { position: relative; }
+    .menu-button {
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 30px; padding: var(--spacing-xs) var(--spacing-sm);
+      display: flex; align-items: center; gap: var(--spacing-xs);
+      cursor: pointer; transition: all 0.2s ease;
+    }
+    .menu-button:hover, .menu-button:active { background: rgba(255,255,255,0.2); }
+    .user-name-short { font-weight: 600; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--text-sm); }
+    .menu-button i { font-size: var(--text-base); color: var(--primary); }
+    .menu-modal {
+      position: absolute; top: calc(100% + 8px); right: 0;
+      background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-radius: var(--border-radius); border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5); min-width: 280px; max-width: 320px;
+      padding: var(--spacing-sm); z-index: 100; display: none;
+      transform-origin: top right; animation: menuAppear 0.2s ease;
+      max-height: 70vh; overflow-y: auto;
+    }
+    @keyframes menuAppear { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
+    .menu-modal.show { display: block; }
+    .menu-item {
+      display: flex; align-items: center; gap: var(--spacing-sm);
+      padding: var(--spacing-md); border-radius: var(--border-radius-sm);
+      color: white; text-decoration: none; transition: all 0.2s ease;
+      cursor: pointer; border: none; background: transparent;
+      width: 100%; font-size: var(--text-base);
+    }
+    .menu-item:hover, .menu-item:active { background: rgba(255,255,255,0.1); }
+    .menu-item i { width: 24px; font-size: var(--text-lg); }
+    .menu-item.logout { color: var(--danger); border-top: 1px solid rgba(255,255,255,0.1); margin-top: var(--spacing-xs); }
+    .menu-item.logout i { color: var(--danger); }
+    .menu-item.settings-item i { color: #f39c12; }
+    .menu-divider { height: 1px; background: rgba(255,255,255,0.1); margin: var(--spacing-xs) 0; }
+    .menu-section-title { color: var(--text-secondary); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 1px; padding: var(--spacing-xs) var(--spacing-md); margin-top: var(--spacing-xs); }
+    .status-led { width: clamp(10px,2vw,12px); height: clamp(10px,2vw,12px); background: var(--primary); border-radius: 50%; display: inline-block; animation: pulse 2s infinite; box-shadow: 0 0 10px var(--primary); }
+    @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.6; transform:scale(0.95); } }
+    .status-indicator-large {
+      position: absolute;
+      bottom: max(var(--spacing-xl), var(--safe-area-inset-bottom));
+      left: 50%; transform: translateX(-50%);
+      width: clamp(70px,15vw,90px); height: clamp(70px,15vw,90px); border-radius: 50%;
+      background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 2px solid rgba(255,255,255,0.2); display: flex; justify-content: center; align-items: center;
+      z-index: 40; transition: all 0.3s cubic-bezier(0.175,0.885,0.32,1.275); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .status-icon { font-size: var(--text-3xl); transition: all 0.3s ease; }
+    .status-icon.success { color: var(--success); filter: drop-shadow(0 0 15px var(--success)); animation: successPop 0.4s ease; }
+    .status-icon.error   { color: var(--error);   filter: drop-shadow(0 0 15px var(--error));   animation: errorShake 0.4s ease; }
+    .status-icon.idle    { color: rgba(255,255,255,0.3); }
+    @keyframes successPop { 0% { transform:scale(0); opacity:0; } 50% { transform:scale(1.2); } 100% { transform:scale(1); opacity:1; } }
+    @keyframes errorShake { 0%,100% { transform:translateX(0); } 10%,30%,50%,70%,90% { transform:translateX(-5px); } 20%,40%,60%,80% { transform:translateX(5px); } }
+    .status-label {
+      position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%);
+      color: white; font-size: var(--text-xs); white-space: nowrap;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+      padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); opacity: 0.8;
+    }
+    .resultado-flotante {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      width: 90%; max-width: 400px; background: var(--card-bg);
+      backdrop-filter: blur(25px) saturate(180%); -webkit-backdrop-filter: blur(25px) saturate(180%);
+      border-radius: var(--border-radius-lg); padding: var(--spacing-xl);
+      border: 1.5px solid var(--primary);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 0 2px rgba(22,224,134,0.1) inset;
+      display: none; flex-direction: column; align-items: center; gap: var(--spacing-lg); z-index: 50; animation: modalAppear 0.3s ease;
+    }
+    @keyframes modalAppear { from { opacity:0; transform:translate(-50%,-40%); } to { opacity:1; transform:translate(-50%,-50%); } }
+    .resultado-header { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-md); width: 100%; }
+    .foto-colaborador { width: clamp(110px,25vw,140px); height: clamp(110px,25vw,140px); border-radius: 50%; object-fit: cover; border: 4px solid var(--primary); box-shadow: 0 0 30px rgba(22,224,134,0.4); }
+    .info-colaborador { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-xs); width: 100%; text-align: center; }
+    .nombre-colaborador { color: white; font-size: var(--text-xl); font-weight: 700; line-height: 1.3; letter-spacing: -0.5px; }
+    #codigoDisplay { color: var(--primary); font-size: var(--text-sm); opacity: 0.9; }
+    .tipo-registro { display: inline-block; padding: var(--spacing-xs) var(--spacing-lg); border-radius: 40px; font-weight: 700; font-size: var(--text-sm); letter-spacing: 0.5px; }
+    .entrada { background: var(--primary); color: #000; box-shadow: 0 0 15px var(--primary); }
+    .salida  { background: var(--danger);  color: white; box-shadow: 0 0 15px var(--danger); }
+    .fecha-hora { color: rgba(255,255,255,0.7); font-size: var(--text-sm); background: rgba(0,0,0,0.3); padding: var(--spacing-xs) var(--spacing-md); border-radius: 30px; width: fit-content; }
+    #parIdDisplay { color: var(--warning); font-size: var(--text-xs); background: rgba(243,156,18,0.1); padding: var(--spacing-xs) var(--spacing-sm); border-radius: 30px; }
+    .search-section-menu { background: rgba(0,0,0,0.2); border-radius: var(--border-radius-sm); padding: var(--spacing-sm); margin: var(--spacing-xs) 0; }
+    .search-box-menu { display: flex; gap: var(--spacing-xs); }
+    .search-input-menu { flex: 1; padding: 10px 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--secondary); border-radius: 20px; color: white; font-size: var(--text-sm); }
+    .search-input-menu:focus { outline: none; border-color: var(--primary); }
+    .search-btn-menu { background: var(--primary); border: none; color: #000; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: var(--text-sm); }
+    .search-results-menu { margin-top: var(--spacing-xs); max-height: 200px; overflow-y: auto; }
+    .search-result-item { display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm); border-radius: var(--border-radius-sm); cursor: pointer; transition: all 0.2s ease; }
+    .search-result-item:hover { background: rgba(255,255,255,0.1); }
+    .search-result-item img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); }
+    .search-result-info { flex: 1; }
+    .search-result-name { font-size: var(--text-sm); font-weight: 500; }
+    .search-result-code { font-size: var(--text-xs); color: var(--text-secondary); }
+    .search-result-punch { background: var(--primary); border: none; color: #000; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+    .bloqueo-alert {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      width: 90%; max-width: 380px;
+      background: linear-gradient(135deg,rgba(231,76,60,0.98),rgba(192,57,43,0.98));
+      border-radius: var(--border-radius-lg); padding: var(--spacing-xl);
+      border: 3px solid var(--danger); box-shadow: 0 0 50px rgba(231,76,60,0.6),0 20px 40px rgba(0,0,0,0.5);
+      display: none; flex-direction: column; align-items: center; gap: var(--spacing-md); z-index: 60; text-align: center; animation: bloqueoAppear 0.3s ease;
+    }
+    .bloqueo-alert.tipo-vacaciones { background: linear-gradient(135deg,rgba(198,149,0,0.98),rgba(160,120,0,0.98)); border-color: #c69500; }
+    .bloqueo-alert.tipo-licencia   { background: linear-gradient(135deg,rgba(135,100,184,0.98),rgba(100,70,150,0.98)); border-color: #8764b8; }
+    .bloqueo-alert.tipo-permiso    { background: linear-gradient(135deg,rgba(0,120,212,0.98),rgba(0,90,158,0.98)); border-color: #0078d4; }
+    .bloqueo-alert.tipo-diaslibres { background: linear-gradient(135deg,rgba(202,80,16,0.98),rgba(160,60,10,0.98)); border-color: #ca5010; }
+    .bloqueo-icon { font-size: 4rem; color: white; animation: bloqueoPulse 1.5s infinite; }
+    @keyframes bloqueoPulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.1); } }
+    .bloqueo-title   { color: white; font-size: var(--text-xl); font-weight: bold; }
+    .bloqueo-message { color: rgba(255,255,255,0.95); font-size: var(--text-base); line-height: 1.5; }
+    .bloqueo-detail  { background: rgba(0,0,0,0.3); padding: var(--spacing-md); border-radius: var(--border-radius-sm); color: white; font-size: var(--text-sm); width: 100%; line-height: 1.6; }
+    .bloqueo-close   { background: white; border: none; padding: var(--spacing-sm) var(--spacing-xl); border-radius: 30px; font-weight: bold; cursor: pointer; margin-top: var(--spacing-xs); font-size: var(--text-base); }
+
+    .loading-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; padding: var(--spacing-lg); }
+    .spinner { border: 3px solid rgba(22,224,134,0.1); border-top: 3px solid var(--primary); border-radius: 50%; width: clamp(45px,10vw,55px); height: clamp(45px,10vw,55px); animation: spin 0.8s linear infinite; margin-bottom: var(--spacing-md); }
+    @keyframes spin { 0% { transform:rotate(0deg); } 100% { transform:rotate(360deg); } }
+    .toast { position: fixed; bottom: max(calc(var(--spacing-xl) * 2.5),var(--safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); padding: var(--spacing-sm) var(--spacing-xl); border-radius: 40px; background: var(--card-bg); backdrop-filter: blur(20px); border: 1px solid var(--primary); color: white; z-index: 200; display: none; font-size: var(--text-sm); max-width: 90%; white-space: nowrap; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    @keyframes toastAppear { from { opacity:0; transform:translateX(-50%) translateY(20px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
+    .login-container { position: fixed; top:0; left:0; width:100%; height:100%; background: linear-gradient(135deg,#0a1a20,#1a2f38); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+    .login-card { background: var(--card-bg); backdrop-filter: blur(20px); border-radius: var(--border-radius-lg); padding: var(--spacing-xl); width: 90%; max-width: 380px; border: 1px solid rgba(22,224,134,0.3); }
+    .login-card h2 { color: var(--primary); text-align: center; margin-bottom: var(--spacing-xl); font-size: var(--text-xl); }
+    .login-input { width: 100%; padding: var(--spacing-md); margin-bottom: var(--spacing-md); background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--border-radius-sm); color: white; font-size: var(--text-base); }
+    .login-input:focus { outline: none; border-color: var(--primary); }
+    .alert { padding: var(--spacing-sm); border-radius: var(--border-radius-sm); margin-bottom: var(--spacing-md); display: none; font-size: var(--text-sm); text-align: center; }
+    .alert-error { background: rgba(231,76,60,0.2); border: 1px solid var(--danger); color: white; }
+    .btn { background: var(--primary); color: #000; border: none; padding: var(--spacing-md); border-radius: 50px; font-weight: 700; font-size: var(--text-base); cursor: pointer; transition: all 0.2s ease; width: 100%; }
+    .btn:hover, .btn:active { background: var(--primary-dark); transform: scale(0.98); }
+
+    .capture-btn-wrapper {
+      position: absolute;
+      bottom: max(calc(var(--spacing-xl) + clamp(70px,15vw,90px) + 20px), calc(var(--safe-area-inset-bottom) + clamp(70px,15vw,90px) + 20px));
+      left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      z-index: 41; pointer-events: auto;
+    }
+    .capture-btn {
+      width: clamp(52px, 12vw, 64px); height: clamp(52px, 12vw, 64px);
+      border-radius: 50%; background: linear-gradient(135deg, rgba(22,224,134,0.25), rgba(22,224,134,0.1));
+      border: 2px solid rgba(22,224,134,0.7); backdrop-filter: blur(20px);
+      color: var(--primary); font-size: clamp(1.2rem, 4vw, 1.5rem);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .capture-btn:active { transform: scale(0.94); }
+    .capture-btn-label { color: rgba(255,255,255,0.85); font-size: var(--text-xs); background: rgba(0,0,0,0.55); backdrop-filter: blur(5px); padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+    .capture-flash { position: fixed; inset: 0; background: white; opacity: 0; pointer-events: none; z-index: 5; transition: opacity 0.05s ease; }
+    .capture-flash.active { opacity: 0.45; }
+
+    .confirm-modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px);
+      z-index: 500; display: none; justify-content: center; align-items: center; padding: var(--spacing-md);
+    }
+    .confirm-modal-overlay.show { display: flex; }
+    .confirm-modal {
+      background: var(--card-bg); border-radius: var(--border-radius-lg); padding: var(--spacing-xl);
+      width: 90%; max-width: 380px; border: 2px solid var(--primary); text-align: center;
+      animation: modalAppear 0.3s ease;
+    }
+    .confirm-modal h3 { color: var(--primary); font-size: var(--text-lg); margin-bottom: var(--spacing-md); }
+    .confirm-photo-wrap { position: relative; display: inline-block; margin-bottom: var(--spacing-md); }
+    .confirm-photo { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid var(--primary); }
+    .confirm-confidence-badge { position: absolute; bottom: 4px; right: 4px; background: linear-gradient(135deg,#0da85c,#16e086); color: #000; font-size: 0.7rem; font-weight: 800; padding: 3px 8px; border-radius: 20px; }
+    .confirm-name { color: white; font-size: var(--text-xl); font-weight: 700; margin-bottom: 4px; }
+    .confirm-code { color: var(--primary); font-size: var(--text-sm); margin-bottom: var(--spacing-sm); }
+    .confirm-tipo-badge { display: inline-block; padding: 6px 20px; border-radius: 30px; font-weight: 700; font-size: var(--text-sm); margin-bottom: var(--spacing-md); }
+    .confirm-info-row { display: flex; justify-content: center; gap: var(--spacing-sm); margin-bottom: var(--spacing-lg); flex-wrap: wrap; }
+    .confirm-info-chip { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 20px; padding: 5px 12px; font-size: var(--text-xs); color: rgba(255,255,255,0.8); }
+    .confirm-warning { background: rgba(231,76,60,0.15); border: 1px solid rgba(231,76,60,0.4); border-radius: var(--border-radius-sm); padding: var(--spacing-sm) var(--spacing-md); color: #ff8a7a; font-size: var(--text-xs); margin-bottom: var(--spacing-md); display: none; }
+    .confirm-actions { display: flex; gap: var(--spacing-sm); }
+    .confirm-btn-yes { flex: 1; background: var(--primary); color: #000; border: none; padding: var(--spacing-md); border-radius: 50px; font-weight: 700; cursor: pointer; }
+    .confirm-btn-no { flex: 1; background: transparent; color: var(--danger); border: 2px solid var(--danger); padding: var(--spacing-md); border-radius: 50px; font-weight: 700; cursor: pointer; }
+
+    .code-search-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.82); backdrop-filter: blur(10px);
+      z-index: 480; display: none; justify-content: center; align-items: center; padding: var(--spacing-md);
+    }
+    .code-search-overlay.show { display: flex; }
+    .code-search-modal {
+      background: var(--card-bg); border-radius: var(--border-radius-lg); padding: var(--spacing-xl);
+      width: 90%; max-width: 400px; border: 2px solid rgba(22,224,134,0.4);
+      animation: modalAppear 0.3s ease;
+    }
+    .code-search-modal h3 { color: white; font-size: var(--text-lg); text-align: center; margin-bottom: var(--spacing-lg); display: flex; align-items: center; justify-content: center; gap: var(--spacing-sm); }
+    .code-display {
+      background: rgba(0,0,0,0.5); border: 2px solid rgba(22,224,134,0.4);
+      border-radius: var(--border-radius-sm); padding: var(--spacing-md) var(--spacing-lg);
+      text-align: center; margin-bottom: var(--spacing-sm);
+      color: var(--primary); font-size: 2rem; font-weight: 700;
+      letter-spacing: 6px; min-height: 64px;
+    }
+    .code-preview { display: none; background: rgba(22,224,134,0.08); border: 1px solid rgba(22,224,134,0.3); border-radius: var(--border-radius-sm); padding: var(--spacing-sm); margin-bottom: var(--spacing-md); flex-direction: row; align-items: center; gap: var(--spacing-sm); }
+    .code-preview.show { display: flex; }
+    .code-preview img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); }
+    .code-preview-info { flex: 1; }
+    .code-preview-name { color: white; font-size: var(--text-sm); font-weight: 600; }
+    .code-preview-code { color: var(--primary); font-size: var(--text-xs); }
+    .virtual-keyboard { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-sm); margin-bottom: var(--spacing-md); }
+    .vk-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: var(--border-radius-sm); padding: var(--spacing-md); color: white; font-size: var(--text-xl); font-weight: 600; cursor: pointer; text-align: center; }
+    .vk-btn:active { transform: scale(0.92); }
+    .vk-btn.vk-zero { grid-column: 1 / 3; }
+    .code-search-actions { display: flex; gap: var(--spacing-sm); }
+    .code-search-btn-register { flex: 1; background: var(--primary); color: #000; border: none; padding: var(--spacing-md); border-radius: 50px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .code-search-btn-cancel { background: transparent; color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.2); padding: var(--spacing-md) var(--spacing-lg); border-radius: 50px; cursor: pointer; }
+
+    .code-reconfirm-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px);
+      z-index: 490; display: none; justify-content: center; align-items: center;
+    }
+    .code-reconfirm-overlay.show { display: flex; }
+    .code-reconfirm-modal {
+      background: var(--card-bg); border-radius: var(--border-radius-lg); padding: var(--spacing-xl);
+      width: 90%; max-width: 400px; border: 2px solid var(--warning);
+      animation: modalAppear 0.3s ease; text-align: center;
+    }
+    .code-reconfirm-modal h3 { color: var(--warning); font-size: var(--text-lg); margin-bottom: var(--spacing-sm); }
+    .reconfirm-display {
+      background: rgba(0,0,0,0.5); border: 2px solid rgba(243,156,18,0.4);
+      border-radius: var(--border-radius-sm); padding: var(--spacing-md);
+      text-align: center; margin-bottom: var(--spacing-sm);
+      color: var(--warning); font-size: 2rem; font-weight: 700;
+      letter-spacing: 6px; min-height: 64px;
+    }
+    .reconfirm-error { background: rgba(231,76,60,0.15); border: 1px solid rgba(231,76,60,0.4); border-radius: var(--border-radius-sm); padding: var(--spacing-xs) var(--spacing-sm); color: #ff8a7a; font-size: var(--text-xs); text-align: center; margin-bottom: var(--spacing-sm); display: none; }
+    .reconfirm-error.show { display: block; }
+    .reconfirm-vk { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-sm); margin-bottom: var(--spacing-md); }
+
+    .settings-panel {
+      position: fixed; inset: 0; background: linear-gradient(135deg,#0a1a20,#1a2f38);
+      z-index: 900; display: none; flex-direction: column; overflow: hidden;
+    }
+    .settings-panel.show { display: flex; }
+    .settings-header { display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-lg) var(--spacing-xl); background: rgba(0,0,0,0.3); border-bottom: 1px solid rgba(255,255,255,0.1); flex-shrink: 0; }
+    .settings-back-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 40px; height: 40px; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .settings-header-title { flex: 1; }
+    .settings-header-title h2 { color: white; font-size: var(--text-xl); }
+    .settings-header-title p { color: var(--text-secondary); font-size: var(--text-sm); }
+    .settings-body { flex: 1; overflow-y: auto; padding: var(--spacing-lg) var(--spacing-xl); }
+    .settings-section { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--border-radius); margin-bottom: var(--spacing-lg); overflow: hidden; }
+    .settings-section-header { display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-md) var(--spacing-lg); background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .settings-section-header i { color: var(--primary); }
+    .settings-section-header span { color: white; font-weight: 600; }
+    .settings-row { display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-md) var(--spacing-lg); border-bottom: 1px solid rgba(255,255,255,0.05); gap: var(--spacing-md); }
+    .settings-row-info { flex: 1; }
+    .settings-row-label { color: white; font-size: var(--text-sm); font-weight: 500; margin-bottom: 3px; }
+    .settings-row-desc { color: var(--text-secondary); font-size: var(--text-xs); }
+    .toggle-switch { position: relative; width: 52px; height: 28px; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; cursor: pointer; inset: 0; background: rgba(255,255,255,0.15); border-radius: 28px; transition: 0.3s; }
+    .toggle-slider::before { content: ''; position: absolute; height: 20px; width: 20px; left: 3px; bottom: 3px; background: rgba(255,255,255,0.7); border-radius: 50%; transition: 0.3s; }
+    .toggle-switch input:checked + .toggle-slider { background: var(--primary); }
+    .toggle-switch input:checked + .toggle-slider::before { transform: translateX(24px); background: white; }
+    .settings-slider-wrap { display: flex; align-items: center; gap: var(--spacing-sm); width: 100%; flex-direction: column; }
+    .settings-slider-row { display: flex; align-items: center; gap: var(--spacing-sm); width: 100%; }
+    .settings-slider { flex: 1; -webkit-appearance: none; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.15); cursor: pointer; }
+    .settings-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--primary); cursor: pointer; }
+    .settings-slider-val { background: rgba(22,224,134,0.15); border: 1px solid rgba(22,224,134,0.3); border-radius: 8px; padding: 3px 10px; color: var(--primary); font-size: var(--text-sm); font-weight: 700; min-width: 52px; text-align: center; }
+    .confirm-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-sm); padding: var(--spacing-md) var(--spacing-lg); }
+    .confirm-type-btn { background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.12); border-radius: var(--border-radius-sm); padding: var(--spacing-md); color: rgba(255,255,255,0.7); cursor: pointer; text-align: center; font-size: var(--text-xs); }
+    .confirm-type-btn i { display: block; font-size: var(--text-xl); margin-bottom: 6px; }
+    .confirm-type-btn.active { background: rgba(22,224,134,0.15); border-color: var(--primary); color: white; }
+    .confirm-type-btn.active i { color: var(--primary); }
+    .settings-save-bar { padding: var(--spacing-md) var(--spacing-xl); background: rgba(0,0,0,0.4); border-top: 1px solid rgba(255,255,255,0.1); flex-shrink: 0; }
+    .settings-save-btn { width: 100%; background: var(--primary); color: #000; border: none; padding: var(--spacing-md); border-radius: 50px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+
+    .settings-pin-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(15px);
+      z-index: 895; display: none; justify-content: center; align-items: center;
+    }
+    .settings-pin-overlay.show { display: flex; }
+    .settings-pin-card { background: var(--card-bg); border-radius: var(--border-radius-lg); padding: var(--spacing-xl); width: 90%; max-width: 360px; border: 2px solid rgba(243,156,18,0.5); text-align: center; }
+    .settings-pin-card .pin-icon { font-size: 3rem; color: #f39c12; margin-bottom: var(--spacing-md); }
+    .settings-pin-card h3 { color: white; font-size: var(--text-lg); margin-bottom: var(--spacing-xs); }
+    .settings-pin-card p { color: var(--text-secondary); font-size: var(--text-sm); margin-bottom: var(--spacing-md); }
+    .cfg-pin-display { background: rgba(0,0,0,0.4); border: 2px solid rgba(243,156,18,0.4); border-radius: var(--border-radius-sm); padding: var(--spacing-md); text-align: center; margin-bottom: var(--spacing-sm); color: var(--warning); font-size: 2rem; font-weight: 700; letter-spacing: 10px; min-height: 62px; }
+    .cfg-vk { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-sm); margin-bottom: var(--spacing-md); }
+    .cfg-vk-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: var(--border-radius-sm); padding: 14px 0; color: white; font-size: var(--text-xl); font-weight: 600; cursor: pointer; text-align: center; }
+    .cfg-vk-zero { grid-column: 1 / 3; }
+    .cfg-vk-del { background: rgba(231,76,60,0.12); border-color: rgba(231,76,60,0.3); color: #ff8a7a; font-size: var(--text-base); }
+    .settings-pin-error { color: #ff8a7a; font-size: var(--text-xs); margin-bottom: var(--spacing-sm); display: none; }
+    .settings-pin-submit { width: 100%; background: var(--warning); color: #000; border: none; padding: var(--spacing-md); border-radius: 50px; font-weight: 700; cursor: pointer; margin-bottom: var(--spacing-sm); display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .settings-pin-cancel { width: 100%; background: transparent; color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.15); padding: var(--spacing-sm); border-radius: 50px; cursor: pointer; }
+
+    .face-confidence-bar { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 20; pointer-events: none; display: none; flex-direction: column; align-items: center; gap: 6px; }
+    .face-confidence-bar.show { display: flex; }
+    .face-confidence-ring { width: clamp(140px,35vw,180px); height: clamp(140px,35vw,180px); border-radius: 50%; border: 3px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; position: relative; }
+    .face-confidence-arc { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(var(--primary) 0deg, transparent 0deg); opacity: 0.5; }
+    .face-confidence-pct { color: white; font-size: clamp(1rem,3.5vw,1.3rem); font-weight: 800; position: relative; z-index: 1; }
+    .face-confidence-label { background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); border-radius: 20px; padding: 3px 12px; color: rgba(255,255,255,0.9); font-size: var(--text-xs); font-weight: 600; border: 1px solid rgba(255,255,255,0.15); }
+
+    @media (max-width: 480px) {
+      .top-bar { padding: var(--spacing-xs) var(--spacing-sm); }
+      .title h1 { font-size: var(--text-base); }
+      .menu-button .user-name-short { max-width: 70px; }
+      .status-indicator-large { width: 60px; height: 60px; }
+      .status-icon { font-size: 2rem; }
+      .capture-btn-wrapper { bottom: max(calc(var(--spacing-xl) + 60px + 16px), calc(var(--safe-area-inset-bottom) + 60px + 16px)); }
+      .confirm-type-grid { grid-template-columns: 1fr 1fr; }
+      .settings-body { padding: var(--spacing-md); }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="loginScreen" class="login-container">
+    <div class="login-card">
+      <h2><i class="fas fa-building"></i> Acceso Empresa</h2>
+      <input type="text" id="username" class="login-input" placeholder="Usuario" autocomplete="off">
+      <input type="password" id="password" class="login-input" placeholder="PIN (8 dígitos)" inputmode="numeric" pattern="[0-9]*">
+      <div id="loginAlert" class="alert alert-error"></div>
+      <button id="loginBtn" class="btn">Ingresar</button>
+    </div>
+  </div>
+
+  <div id="appScreen" style="display:none;">
+    <div class="fullscreen-container">
+      <div class="camera-full">
+        <video id="videoFacial" autoplay muted playsinline></video>
+      </div>
+      <div class="overlay-content">
+
+        <div class="top-bar">
+          <div class="title">
+            <i class="fas fa-user-shield"></i>
+            <h1>Asistencia</h1>
+          </div>
+          <div class="menu-container">
+            <div class="menu-button" id="menuButton">
+              <span class="user-name-short" id="companyName"></span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="menu-modal" id="menuModal">
+              <div class="menu-item" style="pointer-events:none;opacity:0.7;">
+                <div class="status-led"></div>
+                <span>Sistema activo</span>
+              </div>
+              <div class="menu-item" id="menuUserInfo">
+                <i class="fas fa-user-circle"></i>
+                <span id="menuUserName">Usuario</span>
+              </div>
+              <div class="menu-divider"></div>
+
+              <div class="menu-section-title"><i class="fas fa-search"></i> Buscar Colaborador</div>
+              <div class="search-section-menu">
+                <div class="search-box-menu">
+                  <input type="text" id="searchInput" class="search-input-menu" placeholder="Nombre del colaborador..." autocomplete="off">
+                  <button class="search-btn-menu" id="searchBtn"><i class="fas fa-search"></i></button>
+                </div>
+                <div class="search-results-menu" id="searchResults"></div>
+              </div>
+
+              <div class="menu-divider"></div>
+              <button class="menu-item" id="menuCodeSearch">
+                <i class="fas fa-keyboard" style="color:var(--primary)"></i>
+                <span>Registrar por Código</span>
+              </button>
+              <div class="menu-divider"></div>
+              <button class="menu-item settings-item" id="menuSettings">
+                <i class="fas fa-sliders-h"></i>
+                <span>Configuración</span>
+              </button>
+              <div class="menu-divider"></div>
+              <div class="menu-item" id="menuReports">
+                <i class="fas fa-chart-bar"></i>
+                <span>Ver mis reportes</span>
+              </div>
+              <button class="menu-item logout" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Cerrar sesión</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="face-confidence-bar" id="faceConfidenceBar">
+          <div class="face-confidence-ring">
+            <div class="face-confidence-arc" id="faceConfidenceArc"></div>
+            <span class="face-confidence-pct" id="faceConfidencePct">0%</span>
+          </div>
+          <div class="face-confidence-label" id="faceConfidenceLabel">Analizando...</div>
+        </div>
+
+        <div id="resultadoFlotante" class="resultado-flotante">
+          <div class="resultado-header">
+            <img id="fotoColaborador" class="foto-colaborador" src="" alt="Foto">
+            <div class="info-colaborador">
+              <div id="nombreDisplay" class="nombre-colaborador">---</div>
+              <div id="codigoDisplay">---</div>
+              <div id="tipoDisplay" class="tipo-registro">---</div>
+              <div id="fechaHoraDisplay" class="fecha-hora">---</div>
+              <div id="parIdDisplay">---</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="bloqueoAlert" class="bloqueo-alert">
+          <i class="fas fa-ban bloqueo-icon" id="bloqueoIconEl"></i>
+          <div class="bloqueo-title" id="bloqueoTitle">Registro Bloqueado</div>
+          <div class="bloqueo-message" id="bloqueoMessage">---</div>
+          <div class="bloqueo-detail" id="bloqueoDetail">---</div>
+          <button class="bloqueo-close" onclick="cerrarBloqueo()">
+            <i class="fas fa-check"></i> Entendido
+          </button>
+        </div>
+
+        <div class="capture-btn-wrapper" id="captureBtnWrapper">
+          <button class="capture-btn" id="captureBtn" title="Captura manual">
+            <i class="fas fa-camera-retro"></i>
+          </button>
+          <span class="capture-btn-label">Captura manual</span>
+        </div>
+
+        <div class="status-indicator-large" id="statusIndicator">
+          <div class="status-icon idle" id="statusIcon"><i class="fas fa-circle"></i></div>
+          <div class="status-label" id="statusLabel">Esperando...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="confirm-modal-overlay" id="confirmModalOverlay">
+    <div class="confirm-modal">
+      <h3><i class="fas fa-shield-alt" style="color:var(--primary)"></i> Confirmar Identidad</h3>
+      <div class="confirm-photo-wrap">
+        <img id="confirmPhoto" class="confirm-photo" src="" alt="">
+        <span class="confirm-confidence-badge" id="confirmConfidenceBadge">99%</span>
+      </div>
+      <div class="confirm-name" id="confirmName">---</div>
+      <div class="confirm-code" id="confirmCode">---</div>
+      <div class="confirm-tipo-badge entrada" id="confirmTipo">ENTRADA</div>
+      <div class="confirm-info-row">
+        <span class="confirm-info-chip" id="confirmFecha">---</span>
+        <span class="confirm-info-chip" id="confirmHora">---</span>
+      </div>
+      <div class="confirm-warning" id="confirmWarning">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span id="confirmWarningText"></span>
+      </div>
+      <div class="confirm-actions">
+        <button class="confirm-btn-no" id="confirmBtnNo"><i class="fas fa-times"></i> No soy yo</button>
+        <button class="confirm-btn-yes" id="confirmBtnYes"><i class="fas fa-check"></i> Sí, soy yo</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-search-overlay" id="codeSearchOverlay">
+    <div class="code-search-modal">
+      <h3><i class="fas fa-keyboard"></i> Registrar por Código</h3>
+      <div class="code-display" id="codeDisplay">_</div>
+      <div class="code-preview" id="codePreview">
+        <img id="codePreviewImg" src="" alt="">
+        <div class="code-preview-info">
+          <div class="code-preview-name" id="codePreviewName">---</div>
+          <div class="code-preview-code" id="codePreviewCode">---</div>
+        </div>
+      </div>
+      <div class="virtual-keyboard" id="virtualKeyboard">
+        <button class="vk-btn" data-val="1">1</button>
+        <button class="vk-btn" data-val="2">2</button>
+        <button class="vk-btn" data-val="3">3</button>
+        <button class="vk-btn" data-val="4">4</button>
+        <button class="vk-btn" data-val="5">5</button>
+        <button class="vk-btn" data-val="6">6</button>
+        <button class="vk-btn" data-val="7">7</button>
+        <button class="vk-btn" data-val="8">8</button>
+        <button class="vk-btn" data-val="9">9</button>
+        <button class="vk-btn vk-zero" data-val="0">0</button>
+        <button class="vk-btn vk-del" id="vkDel"><i class="fas fa-delete-left"></i></button>
+      </div>
+      <div class="code-search-actions">
+        <button class="code-search-btn-cancel" id="codeSearchCancel"><i class="fas fa-times"></i> Cancelar</button>
+        <button class="code-search-btn-register" id="codeSearchRegister" disabled>
+          <i class="fas fa-fingerprint"></i> Registrar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-reconfirm-overlay" id="codeReconfirmOverlay">
+    <div class="code-reconfirm-modal">
+      <h3><i class="fas fa-lock"></i> Confirmar Código</h3>
+      <p class="code-reconfirm-desc">Ingresa el código nuevamente para confirmar:</p>
+      <div class="reconfirm-display" id="reconfirmDisplay">_</div>
+      <div class="reconfirm-error" id="reconfirmError">❌ El código no coincide</div>
+      <div class="reconfirm-vk" id="reconfirmVK">
+        <button class="vk-btn" data-val="1">1</button>
+        <button class="vk-btn" data-val="2">2</button>
+        <button class="vk-btn" data-val="3">3</button>
+        <button class="vk-btn" data-val="4">4</button>
+        <button class="vk-btn" data-val="5">5</button>
+        <button class="vk-btn" data-val="6">6</button>
+        <button class="vk-btn" data-val="7">7</button>
+        <button class="vk-btn" data-val="8">8</button>
+        <button class="vk-btn" data-val="9">9</button>
+        <button class="vk-btn vk-zero" data-val="0">0</button>
+        <button class="vk-btn vk-del" id="reconfirmDel"><i class="fas fa-delete-left"></i></button>
+      </div>
+      <div style="display:flex;gap:var(--spacing-sm)">
+        <button class="code-search-btn-cancel" id="reconfirmCancel" style="flex:1;"><i class="fas fa-arrow-left"></i> Atrás</button>
+        <button class="code-search-btn-register" id="reconfirmConfirm" disabled style="flex:2;"><i class="fas fa-check"></i> Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-pin-overlay" id="settingsPinOverlay">
+    <div class="settings-pin-card">
+      <div class="pin-icon" id="cfgPinIcon"><i class="fas fa-lock"></i></div>
+      <h3 id="cfgPinTitle">Acceso a Configuración</h3>
+      <p id="cfgPinDesc">Ingresa tu PIN de configuración</p>
+      <div id="pinViewEnter">
+        <div class="cfg-pin-display" id="cfgPinDisplay1">_ _ _ _</div>
+        <div class="settings-pin-error" id="settingsPinError"></div>
+      </div>
+      <div id="pinViewCreate1" style="display:none;">
+        <div class="cfg-pin-display" id="cfgPinDisplay2">_ _ _ _</div>
+        <div class="settings-pin-error" id="settingsPinCreateError"></div>
+      </div>
+      <div id="pinViewCreate2" style="display:none;">
+        <div class="cfg-pin-display" id="cfgPinDisplay3">_ _ _ _</div>
+        <div class="settings-pin-error" id="settingsPinConfirmError"></div>
+      </div>
+      <div class="cfg-vk" id="cfgVK">
+        <button class="cfg-vk-btn" data-val="1">1</button>
+        <button class="cfg-vk-btn" data-val="2">2</button>
+        <button class="cfg-vk-btn" data-val="3">3</button>
+        <button class="cfg-vk-btn" data-val="4">4</button>
+        <button class="cfg-vk-btn" data-val="5">5</button>
+        <button class="cfg-vk-btn" data-val="6">6</button>
+        <button class="cfg-vk-btn" data-val="7">7</button>
+        <button class="cfg-vk-btn" data-val="8">8</button>
+        <button class="cfg-vk-btn" data-val="9">9</button>
+        <button class="cfg-vk-btn cfg-vk-zero" data-val="0">0</button>
+        <button class="cfg-vk-btn cfg-vk-del" id="cfgVkDel"><i class="fas fa-delete-left"></i></button>
+      </div>
+      <button class="settings-pin-submit" id="cfgPinActionBtn">
+        <i class="fas fa-unlock-alt" id="cfgPinActionIcon"></i>
+        <span id="cfgPinActionText">Acceder</span>
+      </button>
+      <button class="settings-pin-cancel" id="settingsPinCancel">Cancelar</button>
+    </div>
+  </div>
+
+  <div class="settings-panel" id="settingsPanel">
+    <div class="settings-header">
+      <button class="settings-back-btn" id="settingsBackBtn"><i class="fas fa-arrow-left"></i></button>
+      <div class="settings-header-title">
+        <h2>Configuración</h2>
+        <p>Ajustes del sistema de asistencia</p>
+      </div>
+      <i class="fas fa-sliders-h settings-header-icon"></i>
+    </div>
+    <div class="settings-body">
+
+      <div class="settings-section">
+        <div class="settings-section-header">
+          <i class="fas fa-brain"></i>
+          <span>Reconocimiento Facial</span>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Umbral de confianza mínimo</div>
+            <div class="settings-row-desc">Porcentaje mínimo para aceptar un rostro como válido.</div>
+          </div>
+        </div>
+        <div style="padding:0 var(--spacing-lg) var(--spacing-md);">
+          <div class="settings-slider-wrap">
+            <div class="settings-slider-row">
+              <span style="color:var(--text-secondary);">50%</span>
+              <input type="range" class="settings-slider" id="sliderMinConf" min="50" max="99" step="1" value="70">
+              <span style="color:var(--text-secondary);">99%</span>
+              <div class="settings-slider-val" id="sliderMinConfVal">70%</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Precisión del matcher</div>
+            <div class="settings-row-desc">Distancia máxima para considerar dos rostros iguales (menor = más estricto).</div>
+          </div>
+        </div>
+        <div style="padding:0 var(--spacing-lg) var(--spacing-md);">
+          <div class="settings-slider-wrap">
+            <div class="settings-slider-row">
+              <span style="color:var(--text-secondary);">0.30</span>
+              <input type="range" class="settings-slider" id="sliderPrecision" min="30" max="65" step="1" value="45">
+              <span style="color:var(--text-secondary);">0.65</span>
+              <div class="settings-slider-val" id="sliderPrecisionVal">0.45</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Escaneo múltiple</div>
+            <div class="settings-row-desc">Requiere detecciones consecutivas antes de registrar.</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggleMultiScan" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div style="padding:0 var(--spacing-lg) var(--spacing-md);" id="sliderMultiScanWrap">
+          <div class="settings-slider-wrap">
+            <div class="settings-slider-row">
+              <span>2</span>
+              <input type="range" class="settings-slider" id="sliderMultiScan" min="2" max="5" step="1" value="3">
+              <span>5</span>
+              <div class="settings-slider-val" id="sliderMultiScanVal">3</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Intervalo de detección</div>
+            <div class="settings-row-desc">Velocidad de análisis (menor = más rápido pero más CPU).</div>
+          </div>
+        </div>
+        <div style="padding:0 var(--spacing-lg) var(--spacing-md);">
+          <div class="settings-slider-wrap">
+            <div class="settings-slider-row">
+              <span>0.5s</span>
+              <input type="range" class="settings-slider" id="sliderInterval" min="500" max="3000" step="100" value="1500">
+              <span>3s</span>
+              <div class="settings-slider-val" id="sliderIntervalVal">1.5s</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Mostrar confianza</div>
+            <div class="settings-row-desc">Muestra el porcentaje de coincidencia en pantalla.</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggleShowConfidence" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-header">
+          <i class="fas fa-shield-check"></i>
+          <span>Confirmaciones</span>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Modo de confirmación</div>
+            <div class="settings-row-desc">Elige cómo confirmar la identidad.</div>
+          </div>
+        </div>
+        <div class="confirm-type-grid">
+          <button class="confirm-type-btn active" data-conf="none">
+            <i class="fas fa-bolt"></i>
+            Sin confirmación
+          </button>
+          <button class="confirm-type-btn" data-conf="modal">
+            <i class="fas fa-question-circle"></i>
+            Confirmar modal
+          </button>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Confirmar en búsqueda</div>
+            <div class="settings-row-desc">Muestra confirmación al registrar desde el buscador.</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggleConfirmSearch" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Doble verificación código</div>
+            <div class="settings-row-desc">Pide ingresar el código dos veces.</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggleDoubleCode" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Cooldown entre registros</div>
+            <div class="settings-row-desc">Tiempo de espera por colaborador.</div>
+          </div>
+        </div>
+        <div style="padding:0 var(--spacing-lg) var(--spacing-md);">
+          <div class="settings-slider-wrap">
+            <div class="settings-slider-row">
+              <span>10s</span>
+              <input type="range" class="settings-slider" id="sliderCooldown" min="10" max="120" step="5" value="30">
+              <span>120s</span>
+              <div class="settings-slider-val" id="sliderCooldownVal">30s</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Límite de horas turno</div>
+            <div class="settings-row-desc">Si pasan estas horas, la próxima marcación será entrada.</div>
+          </div>
+        </div>
+        <div style="padding:0 var(--spacing-lg) var(--spacing-md);">
+          <div class="settings-slider-wrap">
+            <div class="settings-slider-row">
+              <span>6h</span>
+              <input type="range" class="settings-slider" id="sliderShiftLimit" min="6" max="24" step="1" value="16">
+              <span>24h</span>
+              <div class="settings-slider-val" id="sliderShiftLimitVal">16h</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Sonido al registrar</div>
+            <div class="settings-row-desc">Emite un pitido de confirmación.</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggleSound">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Flash de captura</div>
+            <div class="settings-row-desc">Muestra un destello visual.</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggleFlash" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+    </div>
+    <div class="settings-save-bar">
+      <button class="settings-save-btn" id="settingsSaveBtn">
+        <i class="fas fa-save"></i> Guardar configuración
+      </button>
+    </div>
+  </div>
+
+  <div class="toast" id="toastNotification"></div>
+  <div class="capture-flash" id="captureFlash"></div>
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div id="loadingText">Cargando...</div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import {
+      getFirestore, collection, getDocs, addDoc, query, where, Timestamp, onSnapshot, doc, getDoc, updateDoc, setDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAMTWJr3mISmNiP-e_KjCO9BdBPi7Uuug4",
+      authDomain: "formulario-2-8929a.firebaseapp.com",
+      projectId: "formulario-2-8929a",
+      storageBucket: "formulario-2-8929a.appspot.com",
+      messagingSenderId: "136908102526",
+      appId: "1:136908102526:web:d0a3bc1e3cb91a3fcab12f"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const DEFAULT_SETTINGS = {
+      UMBRAL_PRECISION: 0.45,
+      DETECTION_INTERVAL: 1500,
+      COOLDOWN_SEGUNDOS: 30,
+      MIN_CONFIDENCE: 0.70,
+      MULTI_SCAN_ENABLED: true,
+      MULTI_SCAN_COUNT: 3,
+      CONFIRM_MODE: 'none',
+      CONFIRM_SEARCH: true,
+      DOUBLE_CODE: true,
+      SHIFT_LIMIT_HOURS: 16,
+      SOUND_ENABLED: false,
+      FLASH_ENABLED: true,
+      SHOW_CONFIDENCE: true
+    };
+
+    let CONFIG = { ...DEFAULT_SETTINGS };
+    let faceMatcher = null;
+    let employeesData = new Map();
+    let isProcessing = false;
+    let processingMap = new Map();
+    let videoStarted = false;
+    let detectionInterval = null;
+    let modelosCargados = false;
+    let currentUser = null;
+    let multiScanBuffer = {};
+    let lastMultiLabel = null;
+    let pendingConfirmData = null;
+
+    const MODEL_URL = 'https://raw.githubusercontent.com/vladmandic/face-api/master/model/';
+    const NOMBRES_DIAS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+
+    const video = document.getElementById('videoFacial');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const loadingText = document.getElementById('loadingText');
+    const toastEl = document.getElementById('toastNotification');
+    const resultadoFlotante = document.getElementById('resultadoFlotante');
+    const loginScreen = document.getElementById('loginScreen');
+    const appScreen = document.getElementById('appScreen');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const loginBtn = document.getElementById('loginBtn');
+    const loginAlert = document.getElementById('loginAlert');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const companyNameSpan = document.getElementById('companyName');
+    const menuButton = document.getElementById('menuButton');
+    const menuModal = document.getElementById('menuModal');
+    const menuUserName = document.getElementById('menuUserName');
+    const menuReports = document.getElementById('menuReports');
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const searchResults = document.getElementById('searchResults');
+    const statusIcon = document.getElementById('statusIcon');
+    const statusLabel = document.getElementById('statusLabel');
+
+    function showToast(message, type = 'success') {
+      toastEl.textContent = message;
+      toastEl.style.background = type === 'success' ? 'rgba(22,224,134,0.2)' : 'rgba(231,76,60,0.2)';
+      toastEl.style.borderColor = type === 'success' ? 'var(--primary)' : 'var(--danger)';
+      toastEl.style.display = 'block';
+      setTimeout(() => { toastEl.style.display = 'none'; }, 2500);
+    }
+
+    function showLoading(msg = 'Cargando...') { loadingText.textContent = msg; loadingOverlay.style.display = 'flex'; }
+    function hideLoading() { loadingOverlay.style.display = 'none'; }
+
+    function updateStatusIndicator(type, message) {
+      if (!statusIcon || !statusLabel) return;
+      statusIcon.className = 'status-icon';
+      if (type === 'success') {
+        statusIcon.classList.add('success');
+        statusIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
+        statusLabel.textContent = message || 'Registro exitoso';
+      } else if (type === 'error') {
+        statusIcon.classList.add('error');
+        statusIcon.innerHTML = '<i class="fas fa-times-circle"></i>';
+        statusLabel.textContent = message || 'Error en registro';
+      } else {
+        statusIcon.classList.add('idle');
+        statusIcon.innerHTML = '<i class="fas fa-circle"></i>';
+        statusLabel.textContent = message || 'Esperando...';
+      }
+      if (type !== 'idle') {
+        setTimeout(() => {
+          statusIcon.className = 'status-icon idle';
+          statusIcon.innerHTML = '<i class="fas fa-circle"></i>';
+          statusLabel.textContent = 'Esperando...';
+        }, 2000);
+      }
+    }
+
+    function playBeep() {
+      if (!CONFIG.SOUND_ENABLED) return;
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.3);
+      } catch (e) {}
+    }
+
+    function getFechaHora() {
+      const ahora = Timestamp.now();
+      const fechaActual = ahora.toDate();
+      const year = fechaActual.getFullYear();
+      const month = String(fechaActual.getMonth() + 1).padStart(2, '0');
+      const day = String(fechaActual.getDate()).padStart(2, '0');
+      const hours = String(fechaActual.getHours()).padStart(2, '0');
+      const minutes = String(fechaActual.getMinutes()).padStart(2, '0');
+      const seconds = String(fechaActual.getSeconds()).padStart(2, '0');
+      return {
+        timestamp: ahora,
+        fecha: `${year}-${month}-${day}`,
+        hora: `${hours}:${minutes}:${seconds}`
+      };
+    }
+
+    const faceConfidenceBar = document.getElementById('faceConfidenceBar');
+    const faceConfidenceArc = document.getElementById('faceConfidenceArc');
+    const faceConfidencePct = document.getElementById('faceConfidencePct');
+    const faceConfidenceLbl = document.getElementById('faceConfidenceLabel');
+    let confidenceHideTimer = null;
+
+    function showConfidenceIndicator(confidence, label) {
+      if (!CONFIG.SHOW_CONFIDENCE) return;
+      const pct = Math.round(confidence * 100);
+      const degrees = Math.round(pct * 3.6);
+      const color = pct >= 85 ? '#16e086' : pct >= 70 ? '#f39c12' : '#e74c3c';
+      faceConfidenceArc.style.background = `conic-gradient(${color} ${degrees}deg, transparent ${degrees}deg)`;
+      faceConfidencePct.textContent = `${pct}%`;
+      faceConfidencePct.style.color = color;
+      faceConfidenceLbl.textContent = label || 'Analizando...';
+      faceConfidenceBar.classList.add('show');
+      if (confidenceHideTimer) clearTimeout(confidenceHideTimer);
+      confidenceHideTimer = setTimeout(() => faceConfidenceBar.classList.remove('show'), 2000);
+    }
+
+    document.addEventListener('click', (e) => {
+      if (menuModal && menuButton && !menuButton.contains(e.target) && !menuModal.contains(e.target)) {
+        menuModal.classList.remove('show');
+      }
+    });
+    if (menuButton) {
+      menuButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        menuModal.classList.toggle('show');
+      });
+    }
+
+    async function authenticateUser(username, pin) {
+      showLoading('Verificando credenciales...');
+      try {
+        const q = query(collection(db, 'Collaborators'), where('username', '==', username), where('pin', '==', pin));
+        const snapshot = await getDocs(q);
+        if (snapshot.empty) throw new Error('Usuario o PIN incorrectos');
+        const userDoc = snapshot.docs[0];
+        const userData = userDoc.data();
+        return {
+          uid: userDoc.id,
+          username: userData.username,
+          pin: pin,
+          name: userData.companyName || `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || username,
+          tipo: 'admin'
+        };
+      } catch (error) {
+        console.error('Login error:', error);
+        throw error;
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function loadUserConfig(uid) {
+      try {
+        const snap = await getDoc(doc(db, 'Collaborators', uid));
+        if (snap.exists() && snap.data().appConfig) {
+          CONFIG = { ...DEFAULT_SETTINGS, ...snap.data().appConfig };
+          console.log('Config cargada:', CONFIG);
+        }
+      } catch (e) {
+        console.error('loadUserConfig error:', e);
+      }
+    }
+
+    async function saveUserConfig() {
+      if (!currentUser) return;
+      try {
+        await updateDoc(doc(db, 'Collaborators', currentUser.uid), { appConfig: CONFIG });
+      } catch (e) {
+        try {
+          await setDoc(doc(db, 'Collaborators', currentUser.uid), { appConfig: CONFIG }, { merge: true });
+        } catch (e2) { console.error('saveUserConfig error:', e2); }
+      }
+    }
+
+    async function cargarModelos() {
+      showLoading('Cargando modelos...');
+      try {
+        await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+        modelosCargados = true;
+        console.log('Modelos cargados');
+      } catch (error) {
+        console.error('Error cargando modelos:', error);
+        showToast('Error cargando modelos', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function iniciarCamara() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
+        });
+        video.srcObject = stream;
+        return new Promise((resolve) => {
+          video.onloadedmetadata = () => { video.play(); videoStarted = true; resolve(); };
+        });
+      } catch (error) {
+        console.error('Error cámara:', error);
+        showToast('Error al acceder a la cámara', 'error');
+      }
+    }
+
+    function iniciarEscuchaEmpleados() {
+      if (!currentUser) return;
+      const q = query(collection(db, 'Ponche'), where('collaboratorId', '==', currentUser.uid));
+      onSnapshot(q, (snapshot) => {
+        const descriptors = [];
+        employeesData.clear();
+        const promises = [];
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          if (data.fotoBase64 && data.username) {
+            employeesData.set(data.username, {
+              id: docSnap.id,
+              firstName: data.firstName || '',
+              lastName: data.lastName || '',
+              fotoBase64: data.fotoBase64,
+              turnoHoras: data.turnoHoras || 8,
+              collaboratorId: data.collaboratorId,
+              activo: data.activo !== false,
+              status: data.status || 'active',
+              diasSemanaNoLaborables: data.diasSemanaNoLaborables || [],
+              diasMensualesLibres: data.diasMensualesLibres || [],
+              menMode: data.menMode || 'auto',
+              tipoLibre: data.tipoLibre || null,
+              fechaInicioLibre: data.fechaInicioLibre || null,
+              fechaFinLibre: data.fechaFinLibre || null,
+              motivoLibre: data.motivoLibre || ''
+            });
+
+            if (data.activo !== false && data.status !== 'inactive') {
+              const img = new Image();
+              img.src = data.fotoBase64;
+              const promise = new Promise((resolve) => {
+                img.onload = async () => {
+                  try {
+                    const detection = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+                    if (detection) {
+                      descriptors.push(new faceapi.LabeledFaceDescriptors(data.username, [detection.descriptor]));
+                    }
+                  } catch (err) { console.error('Error detectando rostro:', err); }
+                  resolve();
+                };
+                img.onerror = resolve;
+              });
+              promises.push(promise);
+            }
+          }
+        });
+
+        Promise.all(promises).then(() => {
+          if (descriptors.length > 0) {
+            faceMatcher = new faceapi.FaceMatcher(descriptors, CONFIG.UMBRAL_PRECISION);
+            console.log('FaceMatcher actualizado con', descriptors.length, 'empleados');
+          }
+        });
+      });
+    }
+
+    function reconstruirFaceMatcher() {
+      if (!faceMatcher) return;
+      const descriptors = faceMatcher.labeledDescriptors;
+      if (descriptors && descriptors.length > 0) {
+        faceMatcher = new faceapi.FaceMatcher(descriptors, CONFIG.UMBRAL_PRECISION);
+      }
+    }
+
+    function verificarBloqueos(codigo) {
+      const emp = employeesData.get(codigo);
+      if (!emp) {
+        return { bloqueado: true, mensaje: 'Colaborador no encontrado', detalle: 'Verifica el código ingresado.', tipo: 'no_encontrado' };
+      }
+      const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+      const diaSemana = hoy.getDay();
+      const diaDelMes = hoy.getDate();
+
+      if (emp.activo === false || emp.status === 'inactive') {
+        return { bloqueado: true, mensaje: 'Tu cuenta está inactiva', detalle: 'Contacta al administrador para reactivarla.', tipo: 'inactivo' };
+      }
+      const diasMensuales = emp.diasMensualesLibres || [];
+      if (emp.menMode !== 'manual' && diasMensuales.includes(diaDelMes)) {
+        return { bloqueado: true, mensaje: `Hoy es tu día libre mensual (día ${diaDelMes})`, detalle: `Modo automático - No necesitas registrar asistencia hoy.`, tipo: 'libre-mensual' };
+      }
+      if (emp.tipoLibre && emp.fechaInicioLibre && emp.fechaFinLibre) {
+        const inicio = new Date(emp.fechaInicioLibre + 'T00:00:00'); inicio.setHours(0, 0, 0, 0);
+        const fin = new Date(emp.fechaFinLibre + 'T00:00:00'); fin.setHours(23, 59, 59, 999);
+        if (hoy >= inicio && hoy <= fin) {
+          const diasRestantes = Math.ceil((fin - hoy) / (1000 * 60 * 60 * 24));
+          const info = {
+            vacaciones: { mensaje: '🏖 Estás de vacaciones', detalle: `📅 ${emp.fechaInicioLibre} → ${emp.fechaFinLibre}\n⏳ ${diasRestantes} día(s) restantes`, tipo: 'vacaciones' },
+            licencia: { mensaje: '🏥 Tienes una licencia médica activa', detalle: `📅 ${emp.fechaInicioLibre} → ${emp.fechaFinLibre}\n⏳ ${diasRestantes} día(s) restantes`, tipo: 'licencia' },
+            permiso: { mensaje: '⏱ Tienes un permiso autorizado', detalle: `📅 ${emp.fechaInicioLibre} → ${emp.fechaFinLibre}\n⏳ ${diasRestantes} día(s) restantes`, tipo: 'permiso' },
+            diaslibres: { mensaje: '☀ Tienes días libres asignados', detalle: `📅 ${emp.fechaInicioLibre} → ${emp.fechaFinLibre}\n⏳ ${diasRestantes} día(s) restantes`, tipo: 'diaslibres' }
+          };
+          const datosBloq = info[emp.tipoLibre] || { mensaje: '📵 No disponible hoy', detalle: `${diasRestantes} día(s) restantes.`, tipo: 'ausencia' };
+          return { bloqueado: true, ...datosBloq };
+        }
+      }
+      const diasNoLab = emp.diasSemanaNoLaborables || [];
+      if (diasNoLab.includes(diaSemana)) {
+        return { bloqueado: true, mensaje: `Hoy es ${NOMBRES_DIAS[diaSemana]} — día no laborable`, detalle: `Días no laborables: ${diasNoLab.map(d => NOMBRES_DIAS[d]).join(', ')}`, tipo: 'dia-semana' };
+      }
+      return { bloqueado: false, emp };
+    }
+
+    function mostrarBloqueo(info) {
+      const alertEl = document.getElementById('bloqueoAlert');
+      const iconEl = document.getElementById('bloqueoIconEl');
+      const iconos = { inactivo: 'fas fa-user-slash', vacaciones: 'fas fa-umbrella-beach', licencia: 'fas fa-file-medical', permiso: 'fas fa-clock', diaslibres: 'fas fa-sun', 'libre-mensual': 'fas fa-rotate', 'dia-semana': 'fas fa-ban', no_encontrado: 'fas fa-user-question' };
+      alertEl.className = 'bloqueo-alert';
+      if (info.tipo) alertEl.classList.add(`tipo-${info.tipo}`);
+      iconEl.className = `${iconos[info.tipo] || 'fas fa-ban'} bloqueo-icon`;
+      document.getElementById('bloqueoTitle').textContent = '⛔ Registro No Permitido';
+      document.getElementById('bloqueoMessage').textContent = info.mensaje;
+      document.getElementById('bloqueoDetail').textContent = info.detalle || '';
+      alertEl.style.display = 'flex';
+      updateStatusIndicator('error', 'Registro bloqueado');
+    }
+
+    window.cerrarBloqueo = function() {
+      document.getElementById('bloqueoAlert').style.display = 'none';
+    };
+
+    function verificarCooldown(codigo) {
+      const ultimoRegistro = processingMap.get(codigo);
+      if (!ultimoRegistro) return true;
+      const diffSeg = (new Date() - ultimoRegistro) / 1000;
+      if (diffSeg < CONFIG.COOLDOWN_SEGUNDOS) {
+        const seg = Math.ceil(CONFIG.COOLDOWN_SEGUNDOS - diffSeg);
+        showToast(`⏳ ${seg}s para próximo registro`, 'error');
+        return false;
+      }
+      return true;
+    }
+
+    function marcarCooldown(codigo) { processingMap.set(codigo, new Date()); }
+
+    async function determinarTipoRegistro(codigo) {
+      if (!currentUser) return { tipo: 'entry', parId: `PAR_${codigo}_${Date.now()}` };
+      try {
+        const q = query(collection(db, 'facialAttendance'), where('collaboratorCode', '==', codigo), where('collaboratorId', '==', currentUser.uid));
+        const snapshot = await getDocs(q);
+        if (snapshot.empty) return { tipo: 'entry', parId: `PAR_${codigo}_${Date.now()}` };
+        const docs = snapshot.docs.map(d => ({ ...d.data(), _ts: d.data().timestamp?.toDate() || new Date(0) })).sort((a, b) => b._ts - a._ts);
+        const ultimo = docs[0];
+        const ultimoTipo = ultimo.type;
+        const ultimoParId = ultimo.parId;
+        const diffHoras = (new Date() - ultimo._ts) / 3600000;
+        if (ultimoTipo === 'entry' && diffHoras <= CONFIG.SHIFT_LIMIT_HOURS) return { tipo: 'exit', parId: ultimoParId };
+        return { tipo: 'entry', parId: `PAR_${codigo}_${Date.now()}` };
+      } catch (error) {
+        console.error('Error determinando tipo:', error);
+        return { tipo: 'entry', parId: `PAR_${codigo}_${Date.now()}` };
+      }
+    }
+
+    async function guardarRegistroFirebase(codigo, confianza, metodo) {
+      const verificacion = verificarBloqueos(codigo);
+      if (verificacion.bloqueado) { mostrarBloqueo(verificacion); return false; }
+      const userData = verificacion.emp;
+      if (!userData) { showToast('❌ Empleado no encontrado', 'error'); return false; }
+      if (!verificarCooldown(codigo)) return false;
+      const { tipo, parId } = await determinarTipoRegistro(codigo);
+      const { timestamp, fecha, hora } = getFechaHora();
+      const attendanceData = {
+        collaboratorId: currentUser.uid,
+        collaboratorName: currentUser.name,
+        collaboratorCode: codigo,
+        employeeName: `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || codigo,
+        employeeId: userData.id,
+        timestamp, fecha, hora,
+        type: tipo,
+        confidence: confianza,
+        method: metodo,
+        turnoHoras: userData.turnoHoras || 8,
+        device: 'TensorFlow.js',
+        parId,
+        registroId: `${codigo}_${Date.now()}`
+      };
+      await addDoc(collection(db, 'facialAttendance'), attendanceData);
+      marcarCooldown(codigo);
+      mostrarResultadoUI(codigo, tipo, parId, fecha, hora, userData);
+      playBeep();
+      return true;
+    }
+
+    function mostrarResultadoUI(codigo, tipo, parId, fecha, hora, userData) {
+      document.getElementById('nombreDisplay').textContent = `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || codigo;
+      document.getElementById('codigoDisplay').textContent = `Código: ${codigo}`;
+      if (userData.fotoBase64) document.getElementById('fotoColaborador').src = userData.fotoBase64;
+      const tipoLabel = document.getElementById('tipoDisplay');
+      tipoLabel.textContent = tipo === 'entry' ? '✅ ENTRADA' : '🚪 SALIDA';
+      tipoLabel.className = `tipo-registro ${tipo === 'entry' ? 'entrada' : 'salida'}`;
+      document.getElementById('fechaHoraDisplay').textContent = `📅 ${fecha} ${hora}`;
+      document.getElementById('parIdDisplay').textContent = `Par: ${parId.slice(-8)}`;
+      resultadoFlotante.style.display = 'flex';
+      setTimeout(() => { resultadoFlotante.style.display = 'none'; }, 4000);
+      updateStatusIndicator('success', tipo === 'entry' ? 'Entrada registrada' : 'Salida registrada');
+      showToast(`✅ ${tipo === 'entry' ? 'ENTRADA' : 'SALIDA'} registrada`, 'success');
+    }
+
+    const confirmModalOverlay = document.getElementById('confirmModalOverlay');
+    const confirmPhoto = document.getElementById('confirmPhoto');
+    const confirmConfBadge = document.getElementById('confirmConfidenceBadge');
+    const confirmName = document.getElementById('confirmName');
+    const confirmCode = document.getElementById('confirmCode');
+    const confirmTipo = document.getElementById('confirmTipo');
+    const confirmFecha = document.getElementById('confirmFecha');
+    const confirmHora = document.getElementById('confirmHora');
+    const confirmWarning = document.getElementById('confirmWarning');
+    const confirmWarningText = document.getElementById('confirmWarningText');
+    const confirmBtnYes = document.getElementById('confirmBtnYes');
+    const confirmBtnNo = document.getElementById('confirmBtnNo');
+
+    async function mostrarConfirmacionFacial(codigo, confianza, metodo) {
+      const emp = employeesData.get(codigo);
+      if (!emp) return;
+      const { tipo } = await determinarTipoRegistro(codigo);
+      const now = new Date();
+      const fecha = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const hora = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+      confirmPhoto.src = emp.fotoBase64 || '';
+      confirmConfBadge.textContent = `${Math.round(confianza * 100)}%`;
+      confirmConfBadge.style.background = confianza >= 0.90 ? 'linear-gradient(135deg,#0da85c,#16e086)' : confianza >= 0.75 ? 'linear-gradient(135deg,#ca8a04,#f59e0b)' : 'linear-gradient(135deg,#b91c1c,#ef4444)';
+      confirmName.textContent = `${emp.firstName || ''} ${emp.lastName || ''}`.trim() || codigo;
+      confirmCode.textContent = `Código: ${codigo}`;
+      confirmTipo.textContent = tipo === 'entry' ? '✅ ENTRADA' : '🚪 SALIDA';
+      confirmTipo.className = `confirm-tipo-badge ${tipo === 'entry' ? 'entrada' : 'salida'}`;
+      confirmFecha.textContent = `📅 ${fecha}`;
+      confirmHora.textContent = `🕐 ${hora}`;
+
+      if (confianza < 0.82) {
+        confirmWarningText.textContent = `Confianza baja: ${Math.round(confianza * 100)}%. ¿Eres realmente tú?`;
+        confirmWarning.classList.add('show');
+      } else {
+        confirmWarning.classList.remove('show');
+      }
+
+      pendingConfirmData = { codigo, confianza, metodo };
+      confirmModalOverlay.classList.add('show');
+    }
+
+    confirmBtnYes.addEventListener('click', async () => {
+      confirmModalOverlay.classList.remove('show');
+      if (!pendingConfirmData) return;
+      const { codigo, confianza, metodo } = pendingConfirmData;
+      pendingConfirmData = null;
+      isProcessing = true;
+      try {
+        await guardarRegistroFirebase(codigo, confianza, metodo);
+      } catch (e) {
+        console.error(e);
+        showToast('❌ Error al registrar', 'error');
+      } finally {
+        isProcessing = false;
+      }
+    });
+
+    confirmBtnNo.addEventListener('click', () => {
+      confirmModalOverlay.classList.remove('show');
+      pendingConfirmData = null;
+      isProcessing = false;
+      showToast('❌ Registro cancelado', 'error');
+      updateStatusIndicator('error', 'Cancelado por usuario');
+    });
+
+    async function procesarRegistro(codigo, confianza = 1.0, metodo = 'facial') {
+      if (isProcessing || !currentUser) return;
+      const verificacion = verificarBloqueos(codigo);
+      if (verificacion.bloqueado) {
+        mostrarBloqueo(verificacion);
+        return;
+      }
+      if (!verificarCooldown(codigo)) return;
+
+      const modo = CONFIG.CONFIRM_MODE;
+      if (modo === 'none') {
+        isProcessing = true;
+        try {
+          await guardarRegistroFirebase(codigo, confianza, metodo);
+        } catch (e) {
+          console.error(e);
+          showToast('❌ Error al registrar', 'error');
+        } finally {
+          isProcessing = false;
+        }
+      } else if (modo === 'modal') {
+        isProcessing = true;
+        await mostrarConfirmacionFacial(codigo, confianza, metodo);
+      }
+    }
+
+    function realizarBusqueda() {
+      const termino = searchInput.value.trim().toLowerCase();
+      if (!termino) { searchResults.innerHTML = ''; return; }
+      const resultados = [];
+      employeesData.forEach((emp, codigo) => {
+        const nombre = `${emp.firstName || ''} ${emp.lastName || ''}`.toLowerCase();
+        if (nombre.includes(termino)) {
+          resultados.push({ codigo, ...emp });
+        }
+      });
+      if (resultados.length === 0) {
+        searchResults.innerHTML = '<div style="padding:10px;color:var(--text-secondary);text-align:center;">No encontrado</div>';
+        return;
+      }
+      searchResults.innerHTML = resultados.map(emp => {
+        const blqCheck = verificarBloqueos(emp.codigo);
+        const blqBadge = blqCheck.bloqueado
+          ? `<span style="background:rgba(231,76,60,0.2);color:#e74c3c;font-size:10px;padding:2px 6px;border-radius:10px;">⛔ Bloqueado</span>`
+          : `<span style="background:rgba(22,224,134,0.15);color:#16e086;font-size:10px;padding:2px 6px;border-radius:10px;">✅ Activo</span>`;
+        return `
+          <div class="search-result-item">
+            <img src="${emp.fotoBase64 || 'https://via.placeholder.com/35'}" alt="">
+            <div class="search-result-info">
+              <div class="search-result-name">${emp.firstName || ''} ${emp.lastName || ''}</div>
+              <div class="search-result-code">${emp.codigo} &nbsp;${blqBadge}</div>
+            </div>
+            <button class="search-result-punch" onclick="window.registrarDesdeBusqueda('${emp.codigo}')" title="Registrar">
+              <i class="fas fa-fingerprint"></i>
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.registrarDesdeBusqueda = async function(codigo) {
+      menuModal.classList.remove('show');
+      searchInput.value = '';
+      searchResults.innerHTML = '';
+      if (CONFIG.CONFIRM_SEARCH) {
+        const verificacion = verificarBloqueos(codigo);
+        if (verificacion.bloqueado) { mostrarBloqueo(verificacion); return; }
+        if (!verificarCooldown(codigo)) return;
+        isProcessing = true;
+        await mostrarConfirmacionFacial(codigo, 1.0, 'manual');
+      } else {
+        isProcessing = true;
+        try {
+          await guardarRegistroFirebase(codigo, 1.0, 'manual');
+        } catch (e) {
+          console.error(e);
+          showToast('❌ Error al registrar', 'error');
+        } finally {
+          isProcessing = false;
+        }
+      }
+    };
+
+    searchBtn.addEventListener('click', realizarBusqueda);
+    searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') realizarBusqueda(); });
+
+    const codeSearchOverlay = document.getElementById('codeSearchOverlay');
+    const codeDisplay = document.getElementById('codeDisplay');
+    const codePreview = document.getElementById('codePreview');
+    const codePreviewImg = document.getElementById('codePreviewImg');
+    const codePreviewName = document.getElementById('codePreviewName');
+    const codePreviewCode = document.getElementById('codePreviewCode');
+    const codeSearchRegister = document.getElementById('codeSearchRegister');
+    const codeSearchCancel = document.getElementById('codeSearchCancel');
+    let currentCodeValue = '';
+    let codeSearchTarget = null;
+
+    function abrirBuscadorCodigo(targetCode = null) {
+      currentCodeValue = '';
+      codeSearchTarget = targetCode;
+      codeDisplay.textContent = '_';
+      codeDisplay.classList.remove('has-value');
+      codePreview.classList.remove('show');
+      codeSearchRegister.disabled = true;
+      codeSearchOverlay.classList.add('show');
+    }
+
+    function actualizarCodeDisplay() {
+      codeDisplay.textContent = currentCodeValue || '_';
+      codeDisplay.classList.toggle('has-value', currentCodeValue.length > 0);
+      if (currentCodeValue.length > 0) {
+        const emp = employeesData.get(currentCodeValue);
+        if (emp) {
+          codePreviewImg.src = emp.fotoBase64 || '';
+          codePreviewName.textContent = `${emp.firstName || ''} ${emp.lastName || ''}`.trim() || currentCodeValue;
+          codePreviewCode.textContent = `Código: ${currentCodeValue}`;
+          codePreview.classList.add('show');
+          codeSearchRegister.disabled = false;
+        } else {
+          codePreview.classList.remove('show');
+          codeSearchRegister.disabled = false;
+        }
+      } else {
+        codePreview.classList.remove('show');
+        codeSearchRegister.disabled = true;
+      }
+    }
+
+    document.querySelectorAll('#virtualKeyboard .vk-btn[data-val]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (currentCodeValue.length >= 12) return;
+        currentCodeValue += btn.dataset.val;
+        actualizarCodeDisplay();
+      });
+    });
+    document.getElementById('vkDel').addEventListener('click', () => {
+      currentCodeValue = currentCodeValue.slice(0, -1);
+      actualizarCodeDisplay();
+    });
+
+    codeSearchCancel.addEventListener('click', () => {
+      codeSearchOverlay.classList.remove('show');
+      currentCodeValue = '';
+      codeSearchTarget = null;
+      isProcessing = false;
+    });
+
+    codeSearchRegister.addEventListener('click', async () => {
+      if (!currentCodeValue) return;
+      const codigo = currentCodeValue;
+      const emp = employeesData.get(codigo);
+      if (!emp) {
+        showToast('❌ Código no encontrado', 'error');
+        return;
+      }
+      if (codeSearchTarget && codigo !== codeSearchTarget) {
+        showToast('❌ Código incorrecto', 'error');
+        codeSearchOverlay.classList.remove('show');
+        currentCodeValue = '';
+        codeSearchTarget = null;
+        isProcessing = false;
+        return;
+      }
+      if (CONFIG.DOUBLE_CODE) {
+        codeSearchOverlay.classList.remove('show');
+        abrirReconfirmacionCodigo(codigo);
+        return;
+      }
+      codeSearchOverlay.classList.remove('show');
+      currentCodeValue = '';
+      codeSearchTarget = null;
+      if (CONFIG.CONFIRM_SEARCH) {
+        const verificacion = verificarBloqueos(codigo);
+        if (verificacion.bloqueado) { mostrarBloqueo(verificacion); return; }
+        if (!verificarCooldown(codigo)) return;
+        isProcessing = true;
+        await mostrarConfirmacionFacial(codigo, 1.0, 'code');
+      } else {
+        isProcessing = true;
+        try {
+          await guardarRegistroFirebase(codigo, 1.0, 'code');
+        } catch (e) {
+          console.error(e);
+          showToast('❌ Error al registrar', 'error');
+        } finally {
+          isProcessing = false;
+        }
+      }
+    });
+
+    const codeReconfirmOverlay = document.getElementById('codeReconfirmOverlay');
+    const reconfirmDisplay = document.getElementById('reconfirmDisplay');
+    const reconfirmError = document.getElementById('reconfirmError');
+    const reconfirmConfirm = document.getElementById('reconfirmConfirm');
+    const reconfirmCancel = document.getElementById('reconfirmCancel');
+    let reconfirmValue = '';
+    let reconfirmTarget = '';
+
+    function abrirReconfirmacionCodigo(codigo) {
+      reconfirmTarget = codigo;
+      reconfirmValue = '';
+      reconfirmDisplay.textContent = '_';
+      reconfirmError.classList.remove('show');
+      reconfirmConfirm.disabled = true;
+      codeReconfirmOverlay.classList.add('show');
+    }
+
+    function actualizarReconfirmDisplay() {
+      reconfirmDisplay.textContent = reconfirmValue || '_';
+      reconfirmError.classList.remove('show');
+      reconfirmConfirm.disabled = reconfirmValue.length === 0;
+    }
+
+    document.querySelectorAll('#reconfirmVK .vk-btn[data-val]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (reconfirmValue.length >= 12) return;
+        reconfirmValue += btn.dataset.val;
+        actualizarReconfirmDisplay();
+      });
+    });
+    document.getElementById('reconfirmDel').addEventListener('click', () => {
+      reconfirmValue = reconfirmValue.slice(0, -1);
+      actualizarReconfirmDisplay();
+    });
+
+    reconfirmCancel.addEventListener('click', () => {
+      codeReconfirmOverlay.classList.remove('show');
+      reconfirmValue = '';
+      reconfirmTarget = '';
+      abrirBuscadorCodigo(codeSearchTarget);
+    });
+
+    reconfirmConfirm.addEventListener('click', async () => {
+      if (reconfirmValue !== reconfirmTarget) {
+        reconfirmError.classList.add('show');
+        reconfirmValue = '';
+        reconfirmDisplay.textContent = '_';
+        reconfirmConfirm.disabled = true;
+        return;
+      }
+      const codigo = reconfirmTarget;
+      codeReconfirmOverlay.classList.remove('show');
+      reconfirmValue = '';
+      reconfirmTarget = '';
+      codeSearchTarget = null;
+      currentCodeValue = '';
+      if (CONFIG.CONFIRM_SEARCH) {
+        const verificacion = verificarBloqueos(codigo);
+        if (verificacion.bloqueado) { mostrarBloqueo(verificacion); return; }
+        if (!verificarCooldown(codigo)) return;
+        isProcessing = true;
+        await mostrarConfirmacionFacial(codigo, 1.0, 'code');
+      } else {
+        isProcessing = true;
+        try {
+          await guardarRegistroFirebase(codigo, 1.0, 'code');
+        } catch (e) {
+          console.error(e);
+          showToast('❌ Error al registrar', 'error');
+        } finally {
+          isProcessing = false;
+        }
+      }
+    });
+
+    document.getElementById('menuCodeSearch').addEventListener('click', () => {
+      menuModal.classList.remove('show');
+      abrirBuscadorCodigo();
+    });
+
+    function iniciarDeteccion() {
+      if (detectionInterval) clearInterval(detectionInterval);
+      detectionInterval = setInterval(async () => {
+        if (!faceMatcher || !videoStarted || !modelosCargados || isProcessing || !currentUser) return;
+        try {
+          const detection = await faceapi.detectSingleFace(video).withFaceLandmarks().withFaceDescriptor();
+          if (detection) {
+            const match = faceMatcher.findBestMatch(detection.descriptor);
+            const confidence = 1 - match.distance;
+            if (match.label !== 'unknown' && confidence >= CONFIG.MIN_CONFIDENCE) {
+              showConfidenceIndicator(confidence, employeesData.get(match.label)?.firstName || match.label);
+              if (CONFIG.MULTI_SCAN_ENABLED) {
+                if (match.label !== lastMultiLabel) {
+                  multiScanBuffer = {};
+                  lastMultiLabel = match.label;
+                }
+                multiScanBuffer[match.label] = (multiScanBuffer[match.label] || 0) + 1;
+                if (multiScanBuffer[match.label] < CONFIG.MULTI_SCAN_COUNT) {
+                  updateStatusIndicator('idle', `Escaneando... ${multiScanBuffer[match.label]}/${CONFIG.MULTI_SCAN_COUNT}`);
+                  return;
+                }
+                multiScanBuffer[match.label] = 0;
+                lastMultiLabel = null;
+              }
+              await procesarRegistro(match.label, confidence, 'facial');
+            } else {
+              showConfidenceIndicator(confidence, 'Desconocido');
+            }
+          }
+        } catch (error) { }
+      }, CONFIG.DETECTION_INTERVAL);
+    }
+
+    async function init() {
+      try {
+        await iniciarCamara();
+        showToast('✅ Sistema activo');
+        updateStatusIndicator('idle');
+      } catch (error) {
+        console.error('Error init:', error);
+      }
+    }
+
+    async function capturarManualmente() {
+      const captureBtn = document.getElementById('captureBtn');
+      const captureFlash = document.getElementById('captureFlash');
+      if (!currentUser) { showToast('⚠️ Inicia sesión primero', 'error'); return; }
+      if (isProcessing) { showToast('⏳ Procesando, espera...', 'error'); return; }
+      if (!modelosCargados || !videoStarted) { showToast('⚠️ Cámara no lista', 'error'); return; }
+      if (!faceMatcher) {
+        updateStatusIndicator('idle', 'Cargando...');
+        showToast('⏳ Cargando colaboradores', 'error');
+        let intentos = 0;
+        await new Promise(resolve => {
+          const esperar = setInterval(() => {
+            intentos++;
+            if (faceMatcher || intentos >= 20) { clearInterval(esperar); resolve(); }
+          }, 300);
+        });
+        if (!faceMatcher) { showToast('⚠️ No hay colaboradores con foto', 'error'); return; }
+      }
+      captureBtn.classList.add('capturing');
+      if (CONFIG.FLASH_ENABLED) {
+        captureFlash.classList.add('active');
+        setTimeout(() => captureFlash.classList.remove('active'), 150);
+      }
+      setTimeout(() => captureBtn.classList.remove('capturing'), 400);
+      updateStatusIndicator('idle', 'Detectando...');
+      try {
+        const detection = await faceapi.detectSingleFace(video).withFaceLandmarks().withFaceDescriptor();
+        if (!detection) { showToast('🔍 No se detectó ningún rostro', 'error'); return; }
+        const match = faceMatcher.findBestMatch(detection.descriptor);
+        const confidence = 1 - match.distance;
+        showConfidenceIndicator(confidence, employeesData.get(match.label)?.firstName || match.label);
+        if (match.label === 'unknown' || confidence < CONFIG.MIN_CONFIDENCE) {
+          showToast(`❓ Rostro no reconocido (${(confidence * 100).toFixed(0)}%)`, 'error');
+          return;
+        }
+        await procesarRegistro(match.label, confidence, 'capture');
+      } catch (error) {
+        console.error('Error captura manual:', error);
+        showToast('❌ Error en captura', 'error');
+      }
+    }
+
+    document.getElementById('captureBtn').addEventListener('click', capturarManualmente);
+
+    const settingsPinOverlay = document.getElementById('settingsPinOverlay');
+    const settingsPanel = document.getElementById('settingsPanel');
+    const pinViewEnter = document.getElementById('pinViewEnter');
+    const pinViewCreate1 = document.getElementById('pinViewCreate1');
+    const pinViewCreate2 = document.getElementById('pinViewCreate2');
+    const cfgPinDisplay1 = document.getElementById('cfgPinDisplay1');
+    const cfgPinDisplay2 = document.getElementById('cfgPinDisplay2');
+    const cfgPinDisplay3 = document.getElementById('cfgPinDisplay3');
+    const settingsPinError = document.getElementById('settingsPinError');
+    const settingsPinCreateError = document.getElementById('settingsPinCreateError');
+    const settingsPinConfirmError = document.getElementById('settingsPinConfirmError');
+    const cfgPinActionBtn = document.getElementById('cfgPinActionBtn');
+    const cfgPinActionIcon = document.getElementById('cfgPinActionIcon');
+    const cfgPinActionText = document.getElementById('cfgPinActionText');
+    const cfgPinTitle = document.getElementById('cfgPinTitle');
+    const cfgPinDesc = document.getElementById('cfgPinDesc');
+    const cfgPinIcon = document.getElementById('cfgPinIcon');
+    let cfgPinBuffer = '';
+    let cfgPinMode = 'enter';
+    let cfgPinStep1Val = '';
+
+    function cfgActiveDisplay() {
+      if (cfgPinMode === 'enter') return cfgPinDisplay1;
+      if (cfgPinMode === 'create1') return cfgPinDisplay2;
+      if (cfgPinMode === 'create2') return cfgPinDisplay3;
+    }
+
+    function cfgRenderDisplay() {
+      const d = cfgActiveDisplay();
+      if (!d) return;
+      if (cfgPinBuffer.length === 0) {
+        d.textContent = '_ _ _ _';
+        d.classList.remove('has-value');
+      } else {
+        d.textContent = '●'.repeat(cfgPinBuffer.length);
+        d.classList.add('has-value');
+      }
+    }
+
+    function cfgShowError(el, msg) {
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 3000);
+    }
+
+    document.querySelectorAll('#cfgVK .cfg-vk-btn[data-val]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (cfgPinBuffer.length >= 6) return;
+        cfgPinBuffer += btn.dataset.val;
+        cfgRenderDisplay();
+        settingsPinError.classList.remove('show');
+        settingsPinCreateError.classList.remove('show');
+        settingsPinConfirmError.classList.remove('show');
+      });
+    });
+    document.getElementById('cfgVkDel').addEventListener('click', () => {
+      cfgPinBuffer = cfgPinBuffer.slice(0, -1);
+      cfgRenderDisplay();
+    });
+    document.getElementById('settingsPinCancel').addEventListener('click', () => {
+      settingsPinOverlay.classList.remove('show');
+      cfgPinBuffer = '';
+      cfgPinStep1Val = '';
+      cfgPinMode = 'enter';
+    });
+
+    async function getCfgPinFromFirebase() {
+      if (!currentUser) return null;
+      try {
+        const snap = await getDoc(doc(db, 'Collaborators', currentUser.uid));
+        if (snap.exists()) return snap.data().configPin || null;
+      } catch (e) { console.error('getCfgPin error:', e); }
+      return null;
+    }
+
+    async function saveCfgPinToFirebase(pin) {
+      if (!currentUser) return;
+      try {
+        await updateDoc(doc(db, 'Collaborators', currentUser.uid), { configPin: pin });
+      } catch (e) {
+        try {
+          await setDoc(doc(db, 'Collaborators', currentUser.uid), { configPin: pin }, { merge: true });
+        } catch (e2) { console.error('saveCfgPin error:', e2); }
+      }
+    }
+
+    document.getElementById('menuSettings').addEventListener('click', async () => {
+      menuModal.classList.remove('show');
+      cfgPinBuffer = '';
+      cfgPinStep1Val = '';
+      showLoading('Verificando...');
+      const pinGuardado = await getCfgPinFromFirebase();
+      hideLoading();
+      if (pinGuardado) {
+        cfgPinMode = 'enter';
+        cfgPinTitle.textContent = 'Acceso a Configuración';
+        cfgPinDesc.textContent = 'Ingresa tu PIN de configuración';
+        cfgPinIcon.innerHTML = '<i class="fas fa-lock"></i>';
+        cfgPinActionIcon.className = 'fas fa-unlock-alt';
+        cfgPinActionText.textContent = 'Acceder';
+        pinViewEnter.style.display = '';
+        pinViewCreate1.style.display = 'none';
+        pinViewCreate2.style.display = 'none';
+        cfgPinDisplay1.textContent = '_ _ _ _';
+        settingsPinError.classList.remove('show');
+      } else {
+        cfgPinMode = 'create1';
+        cfgPinTitle.textContent = 'Crear PIN de Configuración';
+        cfgPinDesc.textContent = 'Crea un PIN de 4 a 6 dígitos';
+        cfgPinIcon.innerHTML = '<i class="fas fa-key"></i>';
+        cfgPinActionIcon.className = 'fas fa-arrow-right';
+        cfgPinActionText.textContent = 'Continuar';
+        pinViewEnter.style.display = 'none';
+        pinViewCreate1.style.display = '';
+        pinViewCreate2.style.display = 'none';
+        cfgPinDisplay2.textContent = '_ _ _ _';
+      }
+      settingsPinOverlay.classList.add('show');
+    });
+
+    cfgPinActionBtn.addEventListener('click', async () => {
+      if (cfgPinMode === 'enter') {
+        if (cfgPinBuffer.length < 4) { cfgShowError(settingsPinError, 'PIN muy corto (mínimo 4 dígitos)'); return; }
+        showLoading('Verificando...');
+        const pinGuardado = await getCfgPinFromFirebase();
+        hideLoading();
+        if (cfgPinBuffer === pinGuardado) {
+          settingsPinOverlay.classList.remove('show');
+          cfgPinBuffer = '';
+          abrirConfiguracion();
+        } else {
+          cfgShowError(settingsPinError, 'PIN incorrecto');
+          cfgPinBuffer = '';
+          cfgRenderDisplay();
+        }
+        return;
+      }
+      if (cfgPinMode === 'create1') {
+        if (cfgPinBuffer.length < 4) { cfgShowError(settingsPinCreateError, 'El PIN debe tener al menos 4 dígitos'); return; }
+        cfgPinStep1Val = cfgPinBuffer;
+        cfgPinBuffer = '';
+        cfgPinMode = 'create2';
+        cfgPinTitle.textContent = 'Confirmar PIN';
+        cfgPinDesc.textContent = 'Ingresa el PIN nuevamente';
+        cfgPinActionIcon.className = 'fas fa-save';
+        cfgPinActionText.textContent = 'Crear PIN';
+        pinViewCreate1.style.display = 'none';
+        pinViewCreate2.style.display = '';
+        cfgPinDisplay3.textContent = '_ _ _ _';
+        return;
+      }
+      if (cfgPinMode === 'create2') {
+        if (cfgPinBuffer.length < 4) { cfgShowError(settingsPinConfirmError, 'Ingresa el PIN para confirmar'); return; }
+        if (cfgPinBuffer !== cfgPinStep1Val) {
+          cfgShowError(settingsPinConfirmError, 'Los PIN no coinciden');
+          cfgPinBuffer = '';
+          cfgPinStep1Val = '';
+          cfgRenderDisplay();
+          setTimeout(() => {
+            cfgPinMode = 'create1';
+            cfgPinTitle.textContent = 'Crear PIN de Configuración';
+            cfgPinDesc.textContent = 'Crea un PIN de 4 a 6 dígitos';
+            cfgPinActionIcon.className = 'fas fa-arrow-right';
+            cfgPinActionText.textContent = 'Continuar';
+            pinViewCreate2.style.display = 'none';
+            pinViewCreate1.style.display = '';
+            cfgPinDisplay2.textContent = '_ _ _ _';
+          }, 1200);
+          return;
+        }
+        showLoading('Guardando PIN...');
+        await saveCfgPinToFirebase(cfgPinBuffer);
+        hideLoading();
+        settingsPinOverlay.classList.remove('show');
+        cfgPinBuffer = '';
+        cfgPinStep1Val = '';
+        cfgPinMode = 'enter';
+        showToast('✅ PIN creado correctamente', 'success');
+        abrirConfiguracion();
+      }
+    });
+
+    function abrirConfiguracion() {
+      applySettingsToUI();
+      settingsPanel.classList.add('show');
+    }
+
+    document.getElementById('settingsBackBtn').addEventListener('click', () => {
+      settingsPanel.classList.remove('show');
+    });
+
+    document.getElementById('settingsSaveBtn').addEventListener('click', async () => {
+      await guardarConfiguracionDesdeUI();
+      settingsPanel.classList.remove('show');
+      showToast('✅ Configuración guardada', 'success');
+    });
+
+    function applySettingsToUI() {
+      document.getElementById('sliderMinConf').value = Math.round(CONFIG.MIN_CONFIDENCE * 100);
+      document.getElementById('sliderMinConfVal').textContent = `${Math.round(CONFIG.MIN_CONFIDENCE * 100)}%`;
+      document.getElementById('sliderPrecision').value = Math.round(CONFIG.UMBRAL_PRECISION * 100);
+      document.getElementById('sliderPrecisionVal').textContent = CONFIG.UMBRAL_PRECISION.toFixed(2);
+      document.getElementById('sliderMultiScan').value = CONFIG.MULTI_SCAN_COUNT;
+      document.getElementById('sliderMultiScanVal').textContent = CONFIG.MULTI_SCAN_COUNT;
+      document.getElementById('sliderInterval').value = CONFIG.DETECTION_INTERVAL;
+      document.getElementById('sliderIntervalVal').textContent = `${(CONFIG.DETECTION_INTERVAL / 1000).toFixed(1)}s`;
+      document.getElementById('sliderCooldown').value = CONFIG.COOLDOWN_SEGUNDOS;
+      document.getElementById('sliderCooldownVal').textContent = `${CONFIG.COOLDOWN_SEGUNDOS}s`;
+      document.getElementById('sliderShiftLimit').value = CONFIG.SHIFT_LIMIT_HOURS;
+      document.getElementById('sliderShiftLimitVal').textContent = `${CONFIG.SHIFT_LIMIT_HOURS}h`;
+      document.getElementById('toggleMultiScan').checked = CONFIG.MULTI_SCAN_ENABLED;
+      document.getElementById('toggleShowConfidence').checked = CONFIG.SHOW_CONFIDENCE;
+      document.getElementById('toggleConfirmSearch').checked = CONFIG.CONFIRM_SEARCH;
+      document.getElementById('toggleDoubleCode').checked = CONFIG.DOUBLE_CODE;
+      document.getElementById('toggleSound').checked = CONFIG.SOUND_ENABLED;
+      document.getElementById('toggleFlash').checked = CONFIG.FLASH_ENABLED;
+      document.querySelectorAll('.confirm-type-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.conf === CONFIG.CONFIRM_MODE);
+      });
+    }
+
+    async function guardarConfiguracionDesdeUI() {
+      CONFIG.MIN_CONFIDENCE = parseInt(document.getElementById('sliderMinConf').value) / 100;
+      CONFIG.UMBRAL_PRECISION = parseInt(document.getElementById('sliderPrecision').value) / 100;
+      CONFIG.MULTI_SCAN_COUNT = parseInt(document.getElementById('sliderMultiScan').value);
+      CONFIG.DETECTION_INTERVAL = parseInt(document.getElementById('sliderInterval').value);
+      CONFIG.COOLDOWN_SEGUNDOS = parseInt(document.getElementById('sliderCooldown').value);
+      CONFIG.SHIFT_LIMIT_HOURS = parseInt(document.getElementById('sliderShiftLimit').value);
+      CONFIG.MULTI_SCAN_ENABLED = document.getElementById('toggleMultiScan').checked;
+      CONFIG.SHOW_CONFIDENCE = document.getElementById('toggleShowConfidence').checked;
+      CONFIG.CONFIRM_SEARCH = document.getElementById('toggleConfirmSearch').checked;
+      CONFIG.DOUBLE_CODE = document.getElementById('toggleDoubleCode').checked;
+      CONFIG.SOUND_ENABLED = document.getElementById('toggleSound').checked;
+      CONFIG.FLASH_ENABLED = document.getElementById('toggleFlash').checked;
+      const confActivo = document.querySelector('.confirm-type-btn.active');
+      if (confActivo) CONFIG.CONFIRM_MODE = confActivo.dataset.conf;
+      await saveUserConfig();
+      reconstruirFaceMatcher();
+      iniciarDeteccion();
+      if (!CONFIG.SHOW_CONFIDENCE) {
+        document.getElementById('faceConfidenceBar').classList.remove('show');
+      }
+      if (!CONFIG.MULTI_SCAN_ENABLED) {
+        multiScanBuffer = {};
+        lastMultiLabel = null;
+      }
+    }
+
+    document.getElementById('sliderMinConf').addEventListener('input', function() {
+      document.getElementById('sliderMinConfVal').textContent = `${this.value}%`;
+    });
+    document.getElementById('sliderPrecision').addEventListener('input', function() {
+      document.getElementById('sliderPrecisionVal').textContent = (parseInt(this.value) / 100).toFixed(2);
+    });
+    document.getElementById('sliderMultiScan').addEventListener('input', function() {
+      document.getElementById('sliderMultiScanVal').textContent = this.value;
+    });
+    document.getElementById('sliderInterval').addEventListener('input', function() {
+      document.getElementById('sliderIntervalVal').textContent = `${(parseInt(this.value) / 1000).toFixed(1)}s`;
+    });
+    document.getElementById('sliderCooldown').addEventListener('input', function() {
+      document.getElementById('sliderCooldownVal').textContent = `${this.value}s`;
+    });
+    document.getElementById('sliderShiftLimit').addEventListener('input', function() {
+      document.getElementById('sliderShiftLimitVal').textContent = `${this.value}h`;
+    });
+    document.querySelectorAll('.confirm-type-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.confirm-type-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        CONFIG.CONFIRM_MODE = btn.dataset.conf;
+      });
+    });
+
+    async function initWithUser(user) {
+      currentUser = user;
+      companyNameSpan.textContent = user.name.split(' ')[0];
+      if (menuUserName) menuUserName.textContent = user.name;
+      loginScreen.style.display = 'none';
+      appScreen.style.display = 'block';
+      await loadUserConfig(user.uid);
+      await cargarModelos();
+      await iniciarCamara();
+      await iniciarEscuchaEmpleados();
+      iniciarDeteccion();
+      passwordInput.value = '';
+      loginAlert.style.display = 'none';
+      updateStatusIndicator('idle');
+      showToast(`Bienvenido, ${user.name}`, 'success');
+      applySettingsToUI();
+    }
+
+    const savedUser = localStorage.getItem('currentUserAsistencia');
+    if (savedUser) {
+      try {
+        const user = JSON.parse(savedUser);
+        initWithUser(user);
+      } catch (e) { console.error('Error al cargar usuario guardado:', e); }
+    }
+
+    loginBtn.addEventListener('click', async () => {
+      const username = usernameInput.value.trim();
+      const pin = passwordInput.value.trim();
+      if (!username || !pin) {
+        loginAlert.textContent = 'Complete todos los campos';
+        loginAlert.style.display = 'block';
+        return;
+      }
+      try {
+        const userData = await authenticateUser(username, pin);
+        localStorage.setItem('currentUserAsistencia', JSON.stringify(userData));
+        await initWithUser(userData);
+      } catch (error) {
+        loginAlert.textContent = error.message;
+        loginAlert.style.display = 'block';
+        updateStatusIndicator('error', 'Error de login');
+      }
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('currentUserAsistencia');
+      currentUser = null;
+      appScreen.style.display = 'none';
+      loginScreen.style.display = 'flex';
+      usernameInput.value = '';
+      passwordInput.value = '';
+      menuModal.classList.remove('show');
+      if (detectionInterval) clearInterval(detectionInterval);
+      if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+      updateStatusIndicator('idle');
+    });
+
+    if (menuReports) {
+      menuReports.addEventListener('click', () => {
+        if (currentUser) { window.location.href = 'reportes.html'; }
+        else { showToast('Debe iniciar sesión primero', 'error'); }
+      });
+    }
+
+    usernameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') passwordInput.focus(); });
+    passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') loginBtn.click(); });
+
+    init();
+  </script>
+</body>
+</html>
