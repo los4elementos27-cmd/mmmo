@@ -2,1600 +2,711 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>Reportes de Asistencia - PlusMoney</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>Vizo Access - Admin Premium</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1/dist/face-api.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
-    /* Los estilos se mantienen igual que antes */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
 
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
     :root {
-      --primary: #16e086;
-      --primary-dark: #15a086;
-      --secondary: #3498db;
-      --danger: #e74c3c;
-      --warning: #f39c12;
-      --success: #2ecc71;
-      --dark-bg: #1a2b3c;
-      --darker-bg: #0d1824;
-      --card-bg: rgba(255,255,255,0.05);
-      --text: #ffffff;
-      --text-muted: rgba(255,255,255,0.7);
-      --border: rgba(255,255,255,0.1);
-      --shadow: 0 4px 12px rgba(0,0,0,0.2);
-      --radius: 12px;
+      --primary: #00ff9d;
+      --primary-dark: #00cc7a;
+      --primary-glow: rgba(0, 255, 157, 0.4);
+      --secondary: #2e4a55;
+      --dark: #0a0f12;
+      --darker: #050708;
+      --danger: #ff4757;
+      --warning: #ffa502;
+      --info: #00d2ff;
+      --success: #00ff9d;
+      --whatsapp: #25D366;
+      --text-secondary: rgba(255,255,255,0.7);
+      --bg-dark: #0a0f12;
+      --bg-light: #141a1f;
+      --glass-bg: rgba(20, 26, 31, 0.85);
     }
 
     body {
-      background: linear-gradient(135deg, var(--darker-bg), var(--dark-bg));
-      color: var(--text);
+      background: radial-gradient(circle at 10% 20%, var(--bg-dark), var(--darker));
       min-height: 100vh;
-      padding: 10px;
-      font-size: 13px;
+      color: white;
+      overflow-x: hidden;
     }
 
-    .login-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 10px;
-    }
-
-    .login-card {
-      background: #233445;
-      border-radius: var(--radius);
-      padding: 20px;
-      width: 100%;
-      max-width: 350px;
-      border: 1px solid rgba(22,224,134,0.2);
-      text-align: center;
-    }
-
-    .logo {
-      width: 50px;
-      height: 50px;
-      background: white;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      color: var(--primary);
-      margin: 0 auto 10px;
-    }
-
-    .login-card h1 {
-      color: var(--primary);
-      margin-bottom: 5px;
-      font-size: 18px;
-    }
-
-    .login-card p {
-      color: var(--text-muted);
-      margin-bottom: 15px;
-      font-size: 12px;
-    }
-
-    .input {
-      width: 100%;
-      background: rgba(255,255,255,0.08);
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      padding: 10px;
-      color: var(--text);
-      margin-bottom: 10px;
-      font-size: 13px;
-      outline: none;
-    }
-
-    .input:focus {
-      border-color: var(--primary);
-    }
-
-    .btn {
-      width: 100%;
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      border: none;
-      border-radius: 8px;
+    .container {
+      max-width: 100%;
+      margin: 0 auto;
       padding: 12px;
-      color: white;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      transition: all 0.3s;
+      padding-bottom: 80px;
+      position: relative;
+      z-index: 1;
     }
 
-    .btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 10px rgba(22,224,134,0.3);
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateX(30px); }
+      to { opacity: 1; transform: translateX(0); }
     }
 
-    .btn-success {
-      background: var(--success);
-      color: white;
-    }
-
-    .btn-success:hover {
-      box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
-    }
-
-    .alert {
-      padding: 10px;
-      border-radius: 8px;
-      margin-top: 10px;
-      display: flex;
-      align-items: center;
-      border-left: 4px solid;
-      font-size: 12px;
-      background: rgba(231,76,60,0.15);
-      border-left-color: var(--danger);
-    }
-
-    .report-container {
-      display: none;
-    }
-
-    .header {
-      background: rgba(255,255,255,0.05);
-      border-radius: var(--radius);
-      padding: 12px;
-      margin-bottom: 15px;
-      border: 1px solid rgba(22,224,134,0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .header h1 {
-      color: var(--primary);
-      font-size: 16px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .user-badge {
-      background: rgba(22,224,134,0.1);
-      border: 1px solid var(--primary);
-      color: var(--primary);
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .btn-logout, .btn-back, .btn-delete-all {
-      background: transparent;
-      border: 1px solid var(--danger);
-      color: var(--danger);
-      padding: 6px 12px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-size: 12px;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .btn-back {
-      border-color: var(--primary);
-      color: var(--primary);
-    }
-
-    .btn-delete-all:hover {
-      background: rgba(231,76,60,0.1);
-    }
-
-    .header-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .filters {
-      background: rgba(255,255,255,0.05);
-      padding: 12px;
-      border-radius: var(--radius);
-      margin-bottom: 15px;
-      border: 1px solid rgba(22,224,134,0.1);
-    }
-
-    .filters h3 {
-      color: var(--primary);
-      font-size: 14px;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .filter-group {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 10px;
-    }
-
-    .filter-item {
-      flex: 1;
-      min-width: 120px;
-    }
-
-    .filter-item label {
-      display: block;
-      color: var(--primary);
-      margin-bottom: 3px;
-      font-size: 11px;
-      font-weight: bold;
-    }
-
-    .filter-item input, .filter-item select {
-      width: 100%;
-      padding: 8px;
-      background: rgba(0,0,0,0.5);
-      border: 1px solid rgba(22,224,134,0.2);
-      border-radius: 6px;
-      color: white;
-      font-size: 12px;
-      outline: none;
-    }
-
-    .filter-actions {
-      display: flex;
-      gap: 8px;
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: #000;
-      padding: 8px 12px;
-      font-size: 12px;
-      border: none;
-      border-radius: 6px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .btn-secondary {
-      background: transparent;
-      border: 1px solid var(--primary);
-      color: var(--primary);
-      padding: 8px 12px;
-      font-size: 12px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      margin-bottom: 15px;
-    }
-
-    .stat-card {
-      background: rgba(255,255,255,0.05);
-      padding: 10px 5px;
-      border-radius: 8px;
-      border: 1px solid rgba(22,224,134,0.1);
-      text-align: center;
-    }
-
-    .stat-number {
-      font-size: 16px;
-      font-weight: bold;
-      color: var(--primary);
-    }
-
-    .stat-label {
-      font-size: 10px;
-      color: var(--text-muted);
-      margin-top: 3px;
-    }
-
-    .table-container {
-      background: rgba(255,255,255,0.05);
-      border-radius: var(--radius);
-      border: 1px solid rgba(22,224,134,0.1);
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      margin-bottom: 15px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 400px;
-    }
-
-    thead {
-      background: var(--primary);
-      color: #000;
-      position: sticky;
-      top: 0;
-    }
-
-    th {
-      padding: 10px 6px;
-      font-size: 11px;
-      font-weight: 600;
-      text-align: left;
-      white-space: nowrap;
-    }
-
-    td {
-      padding: 8px 6px;
-      font-size: 11px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      white-space: nowrap;
-    }
-
-    tr:hover {
-      background: rgba(255,255,255,0.1);
-    }
-
-    .horas-extra {
-      color: var(--warning);
-      font-weight: 600;
-    }
-
-    .btn-ver {
-      background: var(--secondary);
-      border: none;
-      color: white;
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-size: 10px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-    }
-
-    .modal {
-      display: none;
+    .loading-overlay {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0,0,0,0.95);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-      padding: 10px;
-    }
-
-    .modal-content {
-      background: #233445;
-      border-radius: var(--radius);
-      width: 100%;
-      max-width: 700px;
-      max-height: 85vh;
-      overflow-y: auto;
-      border: 1px solid var(--primary);
-      padding: 15px;
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .modal-header h2 {
-      color: var(--primary);
-      font-size: 16px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .close-modal {
-      background: transparent;
-      border: none;
-      color: white;
-      font-size: 18px;
-      cursor: pointer;
-      width: 30px;
-      height: 30px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal-body {
-      margin-bottom: 15px;
-    }
-
-    .info-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 15px;
-    }
-
-    .info-item {
-      background: rgba(255,255,255,0.05);
-      padding: 10px;
-      border-radius: 8px;
-    }
-
-    .info-label {
-      color: var(--primary);
-      font-size: 10px;
-      margin-bottom: 3px;
-    }
-
-    .info-value {
-      font-size: 13px;
-      font-weight: 600;
-    }
-
-    .detalle-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px 0;
-      border-bottom: 1px solid var(--border);
-      font-size: 12px;
-    }
-
-    .total-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 0;
-      font-weight: bold;
-      color: var(--primary);
-      border-top: 2px solid var(--primary);
-      margin-top: 10px;
-    }
-
-    .modal-table-container {
-      background: rgba(255,255,255,0.03);
-      border-radius: 8px;
-      overflow-x: auto;
-      margin: 15px 0;
-      max-height: 300px;
-      overflow-y: auto;
-    }
-
-    .modal-table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 600px;
-    }
-
-    .modal-table th {
-      background: var(--primary);
-      color: #000;
-      padding: 8px 6px;
-      font-size: 11px;
-      font-weight: 600;
-      text-align: left;
-      position: sticky;
-      top: 0;
-    }
-
-    .modal-table td {
-      padding: 8px 6px;
-      font-size: 11px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .modal-table tr:hover {
-      background: rgba(255,255,255,0.05);
-    }
-
-    .extras-cell {
-      color: var(--warning);
-      font-weight: 600;
-    }
-
-    .ampm-badge {
-      font-size: 9px;
-      color: var(--text-muted);
-      margin-left: 2px;
-    }
-
-    .modal-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-top: 15px;
-      padding-top: 10px;
-      border-top: 1px solid var(--border);
-    }
-
-    .btn-save {
-      background: var(--success);
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn-save:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
-    }
-
-    .loading-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.95);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 2000;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .spinner {
-      width: 35px;
-      height: 35px;
-      border: 3px solid rgba(255,255,255,0.1);
-      border-top: 3px solid var(--primary);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 8px 16px;
-      border-radius: 20px;
-      background: rgba(0,0,0,0.9);
-      border: 1px solid var(--primary);
-      color: white;
-      font-size: 12px;
+      background: rgba(5, 7, 8, 0.95);
+      backdrop-filter: blur(10px);
       z-index: 3000;
       display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      gap: 20px;
     }
+    .loading-overlay.active { display: flex; }
+    .loading-spinner { width: 60px; height: 60px; border: 3px solid rgba(0,255,157,0.2); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { color: var(--primary); font-size: 14px; letter-spacing: 2px; }
 
-    .confirm-dialog {
+    .success-modal {
       position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: #233445;
-      padding: 20px;
-      border-radius: var(--radius);
-      border: 2px solid var(--danger);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(8px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 3500;
+    }
+    .success-modal.active { display: flex; }
+    .success-content {
+      background: linear-gradient(135deg, var(--bg-light), var(--dark));
+      border-radius: 40px;
+      padding: 35px 40px;
+      text-align: center;
+      border: 1px solid var(--primary);
+      animation: fadeSlideIn 0.4s ease;
+      max-width: 300px;
+    }
+    .success-content i { font-size: 60px; color: var(--primary); margin-bottom: 15px; }
+    .success-content h3 { color: var(--primary); margin-bottom: 10px; }
+    .success-content p { color: var(--text-secondary); margin-bottom: 20px; }
+
+    .login-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 30% 20%, #0a0f12, #050708);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .login-box { width: 90%; max-width: 340px; display: flex; flex-direction: column; align-items: center; }
+    .login-logo img { width: 100px; height: 100px; object-fit: contain; filter: drop-shadow(0 0 15px var(--primary-glow)); }
+    .login-title { color: var(--primary); font-size: 28px; font-weight: 800; margin: 20px 0; }
+    .login-input { width: 100%; padding: 12px 20px; margin-bottom: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,157,0.3); border-radius: 50px; color: white; }
+    .login-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #000; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: var(--glass-bg); backdrop-filter: blur(12px); padding: 10px 15px; border-radius: 25px; border: 1px solid rgba(0,255,157,0.2); }
+    .header-logo { display: flex; align-items: center; gap: 10px; }
+    .header-logo img { width: 35px; height: 35px; }
+    .header-logo span { font-size: 16px; font-weight: bold; background: linear-gradient(135deg, var(--primary), #fff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .btn { padding: 8px 15px; border: none; border-radius: 50px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s; font-size: 12px; }
+    .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #000; }
+    .btn-secondary { background: rgba(255,255,255,0.1); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-whatsapp { background: var(--whatsapp); color: white; }
+
+    .search-section { margin-bottom: 20px; position: sticky; top: 0; z-index: 100; background: rgba(5,7,8,0.9); backdrop-filter: blur(10px); padding: 8px 0; border-radius: 50px; }
+    .search-container { position: relative; width: 100%; }
+    .search-input { width: 100%; padding: 12px 20px 12px 45px; background: var(--glass-bg); border: 1px solid rgba(0,255,157,0.3); border-radius: 50px; color: white; }
+    .search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--primary); }
+
+    .carousel-section { margin-bottom: 20px; }
+    .section-title { color: white; font-size: 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .carousel-container { position: relative; width: 100%; overflow: hidden; border-radius: 30px; }
+    .carousel-track { display: flex; gap: 15px; overflow-x: auto; scroll-behavior: smooth; scroll-snap-type: x mandatory; padding: 12px 8px; scrollbar-width: none; transition: all 0.3s ease; justify-content: flex-start; }
+    .carousel-track::-webkit-scrollbar { display: none; }
+    .carousel-item { flex: 0 0 auto; scroll-snap-align: start; text-align: center; cursor: pointer; transition: transform 0.3s, filter 0.3s; display: flex; flex-direction: column; align-items: center; }
+    .carousel-item:hover { transform: scale(1.05); }
+    .carousel-item img { width: 80px; height: 80px; object-fit: cover; transition: all 0.3s; display: block; margin: 0 auto; border-radius: 50%; border: 2px solid var(--primary); }
+    .carousel-item span { display: block; font-size: 12px; color: white; margin-top: 6px; font-weight: 500; width: 100%; text-align: center; }
+    .carousel-controls { display: flex; justify-content: center; gap: 12px; margin-top: 10px; }
+    .carousel-control-btn { background: rgba(0,255,157,0.2); border: none; color: var(--primary); width: 40px; height: 40px; border-radius: 50%; cursor: pointer; transition: all 0.3s; font-size: 18px; }
+    .carousel-control-btn:hover { background: var(--primary); color: #000; transform: scale(1.1); }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+    .stat-card { background: var(--glass-bg); backdrop-filter: blur(12px); border-radius: 20px; padding: 15px 10px; text-align: center; border: 1px solid rgba(0,255,157,0.2); }
+    .stat-card i { font-size: 28px; color: var(--primary); margin-bottom: 8px; display: block; }
+    .stat-number { font-size: 24px; font-weight: 700; color: white; }
+    .stat-label { font-size: 10px; color: var(--text-secondary); }
+
+    .recent-list { background: var(--glass-bg); border-radius: 20px; padding: 12px; margin-top: 20px; }
+    .recent-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1); cursor: pointer; }
+    .recent-item img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
+
+    .card { background: var(--glass-bg); backdrop-filter: blur(12px); border-radius: 25px; padding: 18px; border: 1px solid rgba(0,255,157,0.2); margin-bottom: 15px; }
+    .search-results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-top: 15px; max-height: 350px; overflow-y: auto; }
+    .employees-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; max-height: 55vh; overflow-y: auto; padding: 5px; }
+    .employee-card { background: rgba(255,255,255,0.03); border-radius: 20px; padding: 12px; text-align: center; cursor: pointer; transition: all 0.3s; border: 1px solid rgba(0,255,157,0.1); }
+    .employee-card:hover { transform: translateY(-5px); border-color: var(--primary); }
+    .employee-card img { width: 70px; height: 70px; object-fit: cover; border: 2px solid var(--primary); margin-bottom: 10px; border-radius: 50%; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .form-group { margin-bottom: 8px; }
+    .form-group label { display: block; margin-bottom: 5px; color: var(--primary); font-weight: 600; font-size: 11px; }
+    .form-control { width: 100%; padding: 10px 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(0,255,157,0.2); border-radius: 15px; color: white; font-size: 13px; }
+    .form-control:disabled { opacity: 0.5; cursor: not-allowed; background: rgba(0,0,0,0.6); }
+    .code-status.available { color: var(--success); }
+    .code-status.taken { color: var(--danger); }
+
+    .config-section { background: var(--glass-bg); backdrop-filter: blur(12px); border-radius: 25px; padding: 20px; margin-bottom: 20px; }
+    .config-group { margin-bottom: 20px; }
+    .config-group label { display: block; color: var(--primary); font-weight: 600; margin-bottom: 8px; }
+    .config-select, .config-input { width: 100%; padding: 10px; background: rgba(0,0,0,0.4); border: 1px solid rgba(0,255,157,0.3); border-radius: 15px; color: white; }
+
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(5,7,8,0.95); backdrop-filter: blur(20px); display: none; justify-content: space-around; padding: 8px 0 12px; border-top: 1px solid var(--primary); z-index: 1000; }
+    .bottom-nav.visible { display: flex; }
+    .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: var(--text-secondary); font-size: 10px; padding: 5px 0; cursor: pointer; background: none; border: none; transition: all 0.3s; }
+    .nav-item i { font-size: 22px; margin-bottom: 3px; transition: transform 0.3s; }
+    .nav-item.active { color: var(--primary); text-shadow: 0 0 10px var(--primary-glow); }
+    .nav-item.active i { transform: translateY(-3px); }
+
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 2000; }
+    .modal.active { display: flex; }
+    .modal-content { background: var(--bg-light); border-radius: 30px; padding: 25px; max-width: 280px; width: 90%; border: 1px solid var(--primary); text-align: center; }
+
+    .welcome-section { background: linear-gradient(135deg, rgba(0,255,157,0.1), rgba(0,0,0,0.3)); border-radius: 20px; padding: 15px; margin-bottom: 20px; }
+    .detail-page { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); z-index: 1100; overflow-y: auto; padding: 20px; display: none; }
+    .detail-header { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; }
+    .detail-header button { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.1); border: none; color: white; cursor: pointer; }
+    .detail-avatar { text-align: center; margin-bottom: 25px; }
+    .detail-avatar img { width: 120px; height: 120px; object-fit: cover; border: 3px solid var(--primary); border-radius: 50%; margin-bottom: 10px; }
+    .detail-name { font-size: 22px; font-weight: 700; color: var(--primary); }
+    .detail-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
+    .detail-info-item { background: rgba(255,255,255,0.08); padding: 12px; border-radius: 15px; border-left: 2px solid var(--primary); }
+
+    /* Cámara fullscreen */
+    .camera-fullscreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
       z-index: 4000;
       display: none;
-      max-width: 300px;
-      text-align: center;
+      flex-direction: column;
     }
-
-    .confirm-dialog p {
-      margin-bottom: 15px;
-      color: white;
-    }
-
-    .confirm-dialog-actions {
+    .camera-fullscreen.active { display: flex; }
+    .camera-header {
+      padding: 15px;
       display: flex;
-      gap: 10px;
+      justify-content: space-between;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent);
+    }
+    .camera-footer {
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      background: linear-gradient(to top, rgba(0,0,0,0.5), transparent);
+    }
+    .camera-preview-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+    #cameraVideo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .camera-overlay {
+      position: absolute;
+      bottom: 100px;
+      left: 0;
+      right: 0;
+      display: flex;
       justify-content: center;
     }
-
-    .btn-confirm {
-      background: var(--danger);
+    .face-message {
+      background: rgba(0,0,0,0.7);
       color: white;
-      border: none;
-      padding: 8px 15px;
-      border-radius: 6px;
+      padding: 8px 16px;
+      border-radius: 50px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+    .btn-camera-circle {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: white;
+      border: 4px solid var(--primary);
       cursor: pointer;
     }
-
-    .btn-cancel {
-      background: transparent;
-      border: 1px solid var(--primary);
-      color: var(--primary);
-      padding: 8px 15px;
-      border-radius: 6px;
+    .btn-camera-icon {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.6);
+      border: 1px solid white;
+      color: white;
       cursor: pointer;
+    }
+    .preview-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      z-index: 4000;
+      display: none;
+      flex-direction: column;
+    }
+    .preview-screen.active { display: flex; }
+    .preview-image {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .preview-image img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    .preview-footer {
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.5), transparent);
+    }
+    .foto-thumbnail {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0,0,0,0.3);
+      padding: 5px 10px;
+      border-radius: 50px;
+    }
+    .foto-thumbnail img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--primary);
+    }
+    .btn-icon-camera {
+      background: var(--primary);
+      color: #000;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      border: none;
     }
   </style>
 </head>
 <body>
-  <!-- LOGIN SCREEN -->
+  <div id="loadingOverlay" class="loading-overlay"><div class="loading-spinner"></div><div class="loading-text">PROCESANDO...</div></div>
+  <div id="successModal" class="success-modal"><div class="success-content"><i class="fas fa-check-circle"></i><h3>¡Éxito!</h3><p id="successMessage">Operación completada</p><button class="btn btn-primary" onclick="document.getElementById('successModal').classList.remove('active')">Aceptar</button></div></div>
+  
   <div id="loginScreen" class="login-container">
-    <div class="login-card">
-      <div class="logo">
-        <i class="fas fa-chart-bar"></i>
+    <div class="login-box">
+      <div class="login-logo"><img src="https://firebasestorage.googleapis.com/v0/b/formulario-2-8929a.appspot.com/o/Vizo%20Access.png?alt=media&token=2e31c49c-ca38-4b5e-b35e-43dee12c16da"></div>
+      <div class="login-title">VIZO ACCESS</div>
+      <input type="text" id="loginUsername" class="login-input" placeholder="Usuario">
+      <input type="text" id="loginPassword" class="login-input" placeholder="PIN">
+      <div id="loginAlert" style="color: var(--danger); font-size: 12px; display: none;"></div>
+      <button id="loginBtn" class="login-btn"><i class="fas fa-sign-in-alt"></i> INGRESAR</button>
+    </div>
+  </div>
+
+  <div id="appScreen" style="display: none;">
+    <div class="container">
+      <div class="header">
+        <div class="header-logo"><img src="https://firebasestorage.googleapis.com/v0/b/formulario-2-8929a.appspot.com/o/Vizo%20Access.png?alt=media&token=2e31c49c-ca38-4b5e-b35e-43dee12c16da"><span>Vizo Access</span></div>
+        <div class="user-info"><span id="companyDisplay"></span><button id="logoutBtn" class="btn btn-secondary"><i class="fas fa-sign-out-alt"></i></button></div>
       </div>
-      <h1>Reportes de Asistencia</h1>
-      <p>Inicia sesión como administrador</p>
 
-      <input type="text" id="username" class="input" placeholder="Usuario">
-      <input type="password" id="password" class="input" placeholder="PIN">
-      <button id="loginBtn" class="btn">
-        <i class="fas fa-sign-in-alt"></i> Ver Reportes
-      </button>
+      <div class="search-section">
+        <div class="search-container"><i class="fas fa-search search-icon"></i><input type="text" id="globalSearchInput" class="search-input" placeholder="Buscar por código, nombre, RTM ID o área..."></div>
+        <div id="globalSearchResults" class="search-results-grid"></div>
+      </div>
 
-      <div id="loginAlert" class="alert" style="display: none;">
-        <i class="fas fa-exclamation-circle"></i>
-        <span id="loginMessage"></span>
+      <div id="homeSection" class="session-content">
+        <div class="welcome-section"><div style="font-size: 18px; font-weight: 600;">¡Bienvenido!</div><div id="welcomeUserName" style="color: var(--primary);"></div></div>
+        
+        <div class="stats-grid" id="statsGrid">
+          <div class="stat-card"><i class="fas fa-users"></i><div class="stat-number" id="statTotal">0</div><div class="stat-label">Total Colaboradores</div></div>
+          <div class="stat-card"><i class="fas fa-calendar-plus"></i><div class="stat-number" id="statRecent">0</div><div class="stat-label">Últimos 7 días</div></div>
+          <div class="stat-card"><i class="fas fa-chart-line"></i><div class="stat-number" id="statAreas">0</div><div class="stat-label">Áreas distintas</div></div>
+        </div>
+        
+        <div class="carousel-section">
+          <div class="section-title"><i class="fas fa-star"></i> Colaboradores Destacados</div>
+          <div class="carousel-container"><div class="carousel-track" id="carouselTrack"></div></div>
+          <div class="carousel-controls" id="carouselControls"></div>
+        </div>
+        
+        <div class="recent-list"><div class="section-title"><i class="fas fa-clock"></i> Últimos incorporados</div><div id="recentEmployees"></div></div>
+      </div>
+
+      <div id="pageRegistro" class="session-content" style="display: none;">
+        <div class="card">
+          <form id="registroForm">
+            <input type="hidden" id="editId">
+            <div class="form-row">
+              <div class="form-group"><label>Código Nómina</label><input type="number" id="username" class="form-control" required><div id="codeStatus" class="code-status"></div></div>
+              <div class="form-group"><label>RTM ID</label><div style="display: flex; gap: 8px;"><input type="text" id="rtmId" class="form-control" maxlength="9" style="flex:1;"><button type="button" id="btnGenerarRtmId" class="btn btn-primary"><i class="fas fa-sync-alt"></i></button></div><div id="rtmStatus" class="code-status"></div></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Nombre</label><input type="text" id="firstName" class="form-control" required></div>
+              <div class="form-group"><label>Apellido</label><input type="text" id="lastName" class="form-control" required></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Posición</label><select id="posicionLaboral" class="form-control"><option value="">Seleccionar</option><option value="DIRECTOR">DIRECTOR</option><option value="GERENTE">GERENTE</option><option value="SUPERVISOR">SUPERVISOR</option><option value="MANDO MEDIO">MANDO MEDIO</option><option value="DE LINEA">DE LINEA</option></select></div>
+              <div class="form-group"><label>Turno</label><select id="turnoHoras" class="form-control"><option value="8">8 horas</option><option value="12">12 horas</option></select></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Fecha Ingreso</label><input type="date" id="fechaIngreso" class="form-control"></div>
+              <div class="form-group"><label>Departamento</label><input type="text" id="departamento" class="form-control"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Área Trabajo</label><input type="text" id="areaTrabajo" class="form-control"></div>
+              <div class="form-group"><label>Jefe Inmediato</label><input type="text" id="jefeCargo" class="form-control"></div>
+            </div>
+            <div class="form-group"><label>Foto</label><button type="button" id="btnAbrirCamara" class="btn-icon-camera"><i class="fas fa-camera"></i></button><input type="hidden" id="fotoBase64"><div id="fotoPreview" style="margin-top: 10px;"></div></div>
+            <div style="display: flex; gap: 10px;"><button type="submit" class="btn btn-primary" style="flex:1;"><i class="fas fa-save"></i> <span id="btnSubmitText">GUARDAR</span></button><button type="button" id="btnCancelarEdit" class="btn btn-secondary" style="display: none;">CANCELAR</button></div>
+          </form>
+        </div>
+      </div>
+
+      <div id="pageLista" class="session-content" style="display: none;">
+        <div class="card"><input type="text" id="listaSearchInput" class="search-input" placeholder="Filtrar colaboradores..." style="margin-bottom: 15px;"><div id="employeesGrid" class="employees-grid"></div></div>
+      </div>
+
+      <div id="pageConfiguracion" class="session-content" style="display: none;">
+        <div class="config-section">
+          <h3 style="color: var(--primary); margin-bottom: 20px;"><i class="fas fa-sliders-h"></i> Configuración del Carrusel</h3>
+          <div class="config-group"><label>Forma de imagen</label><select id="configImgShape" class="config-select"><option value="circle">Redondo</option><option value="square">Cuadrado</option><option value="rounded">Esquinas redondeadas</option></select></div>
+          <div class="config-group"><label>Número de items visibles</label><select id="configRows" class="config-select"><option value="2">2 items</option><option value="3">3 items</option><option value="4">4 items</option><option value="6">6 items</option><option value="1">1 item centrado (más grande)</option></select></div>
+          <div class="config-group"><label>Posición del nombre</label><select id="configNamePosition" class="config-select"><option value="bottom">Debajo de la foto</option><option value="top">Encima de la foto</option></select></div>
+          <div class="config-group"><label>Modo de navegación</label><select id="configNavMode" class="config-select"><option value="auto">Automático</option><option value="manual">Solo manual</option><option value="both">Ambos</option></select></div>
+          <div class="config-group"><label>Comportamiento al final</label><select id="configLoopMode" class="config-select"><option value="loop">Loop infinito</option><option value="stop">Detener al final</option><option value="back">Regresar al inicio</option></select></div>
+          <div class="config-group"><label>Velocidad automática (ms)</label><input type="number" id="configAutoSpeed" class="config-input" value="3000" step="500"></div>
+          <button id="saveConfigBtn" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Configuración</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- CONTENIDO PRINCIPAL -->
-  <div id="reportContainer" class="report-container">
-    <div class="header">
-      <h1><i class="fas fa-chart-bar"></i> Reportes de Asistencia</h1>
-      <div class="header-actions">
-        <span class="user-badge" id="adminName">Administrador</span>
-        <button class="btn-delete-all" id="deleteAllBtn"><i class="fas fa-trash-alt"></i> Eliminar Todos</button>
-        <button class="btn-logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Salir</button>
-        <a href="index.html" class="btn-back"><i class="fas fa-camera"></i> Cámara</a>
-      </div>
-    </div>
+  <nav class="bottom-nav" id="bottomNav">
+    <button class="nav-item active" id="navHome"><i class="fas fa-home"></i><span>Home</span></button>
+    <button class="nav-item" id="navRegistro"><i class="fas fa-user-plus"></i><span>Registro</span></button>
+    <button class="nav-item" id="navLista"><i class="fas fa-list"></i><span>Lista</span></button>
+    <button class="nav-item" id="navConfig"><i class="fas fa-cog"></i><span>Config</span></button>
+  </nav>
 
-    <div class="filters">
-      <h3><i class="fas fa-filter"></i> Filtrar Registros</h3>
-      <div class="filter-group">
-        <div class="filter-item">
-          <label>FECHA INICIO</label>
-          <input type="date" id="fechaInicio">
-        </div>
-        <div class="filter-item">
-          <label>FECHA FIN</label>
-          <input type="date" id="fechaFin">
-        </div>
-        <div class="filter-item">
-          <label>ESTADO</label>
-          <select id="filtroEstado">
-            <option value="todos">Todos</option>
-            <option value="completo">Completos</option>
-            <option value="incompleto">Incompletos</option>
-          </select>
+  <div id="detailPage" class="detail-page"><div class="detail-header"><button id="backFromDetail"><i class="fas fa-arrow-left"></i></button><h3>Detalle</h3></div><div class="detail-avatar"><img id="detailImg"><div class="detail-name" id="detailName"></div></div><div class="detail-info-grid" id="detailInfoGrid"></div><div class="detail-actions"><button id="sendToWhatsAppBtn" class="btn-whatsapp" style="background:#25D366; padding:10px 20px; border-radius:50px;"><i class="fab fa-whatsapp"></i> WhatsApp</button><button id="editFromDetailBtn" class="btn btn-primary">Editar</button></div></div>
+  
+  <div id="deleteModal" class="modal"><div class="modal-content"><h3>Confirmar</h3><p>¿Eliminar este colaborador?</p><div style="display:flex; gap:10px;"><button id="confirmDeleteBtn" class="btn btn-danger">Eliminar</button><button id="cancelDeleteBtn" class="btn btn-secondary">Cancelar</button></div></div></div>
+
+  <!-- Elementos de cámara -->
+  <div id="cameraFullscreen" class="camera-fullscreen">
+    <div class="camera-header">
+      <button class="btn-camera-icon" id="btnCerrarCamara"><i class="fas fa-times"></i></button>
+      <button class="btn-camera-icon" id="btnSwitchCamara"><i class="fas fa-sync-alt"></i></button>
+    </div>
+    <div class="camera-preview-container">
+      <video id="cameraVideo" autoplay playsinline></video>
+      <div class="camera-overlay">
+        <div class="face-message" id="faceMessage">
+          <i class="fas fa-info-circle"></i>
+          <span>Alinea el rostro</span>
         </div>
       </div>
-      <div class="filter-actions">
-        <button class="btn-primary" onclick="aplicarFiltros()">Aplicar</button>
-        <button class="btn-secondary" onclick="limpiarFiltros()">Limpiar</button>
-      </div>
     </div>
-
-    <div class="stats">
-      <div class="stat-card">
-        <div class="stat-number" id="totalRegistros">0</div>
-        <div class="stat-label">REGISTROS</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number" id="totalEntradas">0</div>
-        <div class="stat-label">ENTRADAS</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number" id="totalSalidas">0</div>
-        <div class="stat-label">SALIDAS</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number" id="totalPares">0</div>
-        <div class="stat-label">COMPLETOS</div>
-      </div>
-    </div>
-
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>COLABORADOR</th>
-            <th>HORAS EXTRAS</th>
-            <th>ACCIÓN</th>
-          </tr>
-        </thead>
-        <tbody id="tablaBody">
-          <tr><td colspan="3" style="text-align: center; padding: 30px;">Inicia sesión para ver los reportes</td></tr>
-        </tbody>
-      </table>
+    <div class="camera-footer">
+      <button class="btn-camera-circle" id="btnCapturarFoto"></button>
     </div>
   </div>
 
-  <div id="detalleModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2><i class="fas fa-user"></i> <span id="modalTitulo"></span></h2>
-        <button class="close-modal" onclick="cerrarModal()"><i class="fas fa-times"></i></button>
-      </div>
-      <div class="modal-body">
-        <div class="info-grid">
-          <div class="info-item">
-            <div class="info-label">CÓDIGO</div>
-            <div class="info-value" id="modalCodigo"></div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">TURNO</div>
-            <div class="info-value" id="modalTurno"></div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">TOTAL EXTRAS</div>
-            <div class="info-value" id="modalTotalExtras">0h</div>
-          </div>
-        </div>
-
-        <h3 style="color: var(--primary); font-size: 13px; margin: 10px 0;">Último Registro</h3>
-        <div id="modalRegistros"></div>
-        <div class="total-row" id="modalTotales"></div>
-
-        <h3 style="color: var(--primary); font-size: 13px; margin: 20px 0 10px 0;">Historial por Día</h3>
-        <div class="modal-table-container">
-          <table class="modal-table">
-            <thead>
-              <tr>
-                <th>FECHA</th>
-                <th>ENTRADA</th>
-                <th>SALIDA</th>
-                <th>HORAS</th>
-                <th>EXTRAS</th>
-                <th>ESTADO</th>
-              </tr>
-            </thead>
-            <tbody id="modalTablaBody"></tbody>
-          </table>
-        </div>
-
-        <div class="total-row" id="modalHistorialTotales">
-          <span>Total días: 0</span>
-          <span>Horas totales: 0h</span>
-        </div>
-        <div class="total-row" style="color: var(--warning);" id="modalExtrasTotales">
-          <span>Total horas extras:</span>
-          <span>0h</span>
-        </div>
-      </div>
-      
-      <div class="modal-footer">
-        <button class="btn-save" id="btnGuardarRegistro">
-          <i class="fas fa-save"></i> Guardar Registro en Firebase
-        </button>
-      </div>
+  <div id="previewScreen" class="preview-screen">
+    <div class="camera-header">
+      <button class="btn-camera-icon" id="btnCerrarPreview"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="preview-image">
+      <img id="previewImage" src="" alt="Preview">
+    </div>
+    <div class="preview-footer">
+      <button class="btn btn-secondary" id="btnRepetirFoto"><i class="fas fa-redo-alt"></i> Repetir</button>
+      <button class="btn btn-primary" id="btnGuardarFoto"><i class="fas fa-check"></i> Guardar</button>
     </div>
   </div>
-
-  <div id="confirmDialog" class="confirm-dialog">
-    <p>¿Estás seguro de eliminar TODOS los registros de asistencia?</p>
-    <p style="font-size: 11px; color: var(--warning);">Esta acción no se puede deshacer</p>
-    <div class="confirm-dialog-actions">
-      <button class="btn-confirm" id="confirmDeleteBtn">Eliminar</button>
-      <button class="btn-cancel" id="cancelDeleteBtn">Cancelar</button>
-    </div>
-  </div>
-
-  <div class="loading-overlay" id="loadingOverlay">
-    <div class="spinner"></div>
-    <div id="loadingText">Cargando...</div>
-  </div>
-
-  <div class="toast" id="toast"></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-    import { 
-      getFirestore, 
-      collection, 
-      getDocs, 
-      query, 
-      where, 
-      orderBy,
-      writeBatch,
-      addDoc,
-      serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+    import { getFirestore, collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, doc, Timestamp, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAMTWJr3mISmNiP-e_KjCO9BdBPi7Uuug4",
-      authDomain: "formulario-2-8929a.firebaseapp.com",
-      projectId: "formulario-2-8929a",
-      storageBucket: "formulario-2-8929a.appspot.com",
-      messagingSenderId: "136908102526",
-      appId: "1:136908102526:web:d0a3bc1e3cb91a3fcab12f"
-    };
-
+    const firebaseConfig = { apiKey: "AIzaSyAMTWJr3mISmNiP-e_KjCO9BdBPi7Uuug4", authDomain: "formulario-2-8929a.firebaseapp.com", projectId: "formulario-2-8929a", storageBucket: "formulario-2-8929a.appspot.com", messagingSenderId: "136908102526", appId: "1:136908102526:web:d0a3bc1e3cb91a3fcab12f" };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Elementos DOM
-    const loginScreen = document.getElementById('loginScreen');
-    const reportContainer = document.getElementById('reportContainer');
-    const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
-    const loginBtn = document.getElementById('loginBtn');
-    const loginAlert = document.getElementById('loginAlert');
-    const loginMessage = document.getElementById('loginMessage');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const deleteAllBtn = document.getElementById('deleteAllBtn');
-    const confirmDialog = document.getElementById('confirmDialog');
-    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
-    const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
-    const adminName = document.getElementById('adminName');
-    const tablaBody = document.getElementById('tablaBody');
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    const loadingText = document.getElementById('loadingText');
-    const toast = document.getElementById('toast');
-    const detalleModal = document.getElementById('detalleModal');
-    const btnGuardarRegistro = document.getElementById('btnGuardarRegistro');
+    let currentUser = null, empleados = [], empleadoAEliminar = null, carruselInterval = null;
+    let stream = null;
+    let currentFacingMode = 'environment'; // CAMBIADO: Ahora abre por defecto en cámara trasera
+    let modelosCargados = false;
+    
+    const configDefaults = { imgShape: "circle", rows: "3", namePosition: "bottom", navMode: "both", loopMode: "loop", autoSpeed: 3000 };
+    let userConfig = { ...configDefaults };
 
-    // Variables
-    let currentAdmin = null;
-    let todosLosRegistros = [];
-    let empleadosMap = new Map();
-    let todosLosPares = [];
-    let colaboradorActual = null;
+    const showLoading = (show) => document.getElementById('loadingOverlay').classList.toggle('active', show);
+    const showSuccess = (msg) => { document.getElementById('successMessage').innerText = msg; document.getElementById('successModal').classList.add('active'); };
+    
+    function showAlert(message, type = 'success') {
+      const alertDiv = document.createElement('div');
+      alertDiv.style.cssText = `position:fixed;top:20px;right:20px;background:${type === 'success' ? '#00ff9d' : '#ff4757'};color:#000;padding:12px 20px;border-radius:50px;z-index:5000;font-size:14px;animation:slideIn 0.3s ease;`;
+      alertDiv.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> ${msg}`;
+      document.body.appendChild(alertDiv);
+      setTimeout(() => alertDiv.remove(), 3000);
+    }
 
-    // Constantes
-    const UMBRAL_16_HORAS = 16;
-    const UMBRAL_5_MINUTOS = 5; // 5 minutos en minutos
-
-    // ============ FUNCIÓN PARA CONVERTIR A FORMATO AM/PM CON SEGUNDOS ============
-    function convertirA12HConSegundos(hora24) {
-      if (!hora24) return '---';
+    async function cargarConfiguracion() { if(!currentUser) return; const docRef = doc(db, 'UserConfig', currentUser.uid); const docSnap = await getDoc(docRef); if(docSnap.exists()) userConfig = { ...configDefaults, ...docSnap.data() }; else await setDoc(docRef, configDefaults); cargarValoresConfigUI(); aplicarConfigCarruselCompleto(); }
+    function cargarValoresConfigUI() { document.getElementById('configImgShape').value = userConfig.imgShape; document.getElementById('configRows').value = userConfig.rows; document.getElementById('configNamePosition').value = userConfig.namePosition; document.getElementById('configNavMode').value = userConfig.navMode; document.getElementById('configLoopMode').value = userConfig.loopMode; document.getElementById('configAutoSpeed').value = userConfig.autoSpeed; }
+    async function guardarConfiguracion() { if(!currentUser) return; const nuevaConfig = { imgShape: document.getElementById('configImgShape').value, rows: document.getElementById('configRows').value, namePosition: document.getElementById('configNamePosition').value, navMode: document.getElementById('configNavMode').value, loopMode: document.getElementById('configLoopMode').value, autoSpeed: parseInt(document.getElementById('configAutoSpeed').value) }; await setDoc(doc(db, 'UserConfig', currentUser.uid), nuevaConfig); userConfig = nuevaConfig; aplicarConfigCarruselCompleto(); showSuccess('Configuración guardada y aplicada'); }
+    
+    function aplicarConfigCarruselCompleto() {
+      const items = document.querySelectorAll('#carouselTrack .carousel-item');
+      const rowsVal = parseInt(userConfig.rows);
+      let itemWidth;
+      if(rowsVal === 1) itemWidth = 220;
+      else if(rowsVal === 2) itemWidth = 140;
+      else if(rowsVal === 3) itemWidth = 105;
+      else if(rowsVal === 4) itemWidth = 85;
+      else itemWidth = 75;
       
-      let horaCompleta = hora24;
-      if (horaCompleta.split(':').length === 2) {
-        horaCompleta = horaCompleta + ':00';
-      }
+      const track = document.querySelector('#carouselTrack');
+      if(rowsVal === 1) { track.style.justifyContent = 'center'; track.style.gap = '0px'; }
+      else { track.style.justifyContent = 'flex-start'; track.style.gap = '15px'; }
       
-      const [horas, minutos, segundos] = horaCompleta.split(':');
-      let hora = parseInt(horas);
-      const ampm = hora >= 12 ? 'PM' : 'AM';
-      
-      hora = hora % 12;
-      hora = hora ? hora : 12;
-      
-      return `${hora.toString().padStart(2, '0')}:${minutos}:${segundos} <span class="ampm-badge">${ampm}</span>`;
-    }
-
-    // ============ FUNCIONES UTILIDAD ============
-    function showLoading(msg) {
-      loadingText.textContent = msg;
-      loadingOverlay.style.display = 'flex';
-    }
-
-    function hideLoading() {
-      loadingOverlay.style.display = 'none';
-    }
-
-    function showToast(msg, type = 'success') {
-      toast.textContent = msg;
-      toast.style.background = type === 'success' ? 'rgba(22,224,134,0.95)' : 'rgba(231,76,60,0.95)';
-      toast.style.display = 'block';
-      setTimeout(() => toast.style.display = 'none', 3000);
-    }
-
-    function calcularHoras(entrada, salida) {
-      if (!entrada || !salida || !entrada.hora || !salida.hora) return 0;
-
-      try {
-        const entradaHora = entrada.hora.includes(':') ? 
-          (entrada.hora.split(':').length === 2 ? entrada.hora + ':00' : entrada.hora) : 
-          entrada.hora + ':00';
-        const salidaHora = salida.hora.includes(':') ? 
-          (salida.hora.split(':').length === 2 ? salida.hora + ':00' : salida.hora) : 
-          salida.hora + ':00';
-        
-        const fechaE = entrada.fecha || '2000-01-01';
-        const fechaS = salida.fecha || fechaE;
-        const entradaDate = new Date(`${fechaE}T${entradaHora}`);
-        const salidaDate = new Date(`${fechaS}T${salidaHora}`);
-        
-        let diffMs = salidaDate - entradaDate;
-        if (diffMs < 0) diffMs += 24 * 60 * 60 * 1000;
-        
-        return Math.round((diffMs / (1000 * 60 * 60)) * 100) / 100;
-      } catch (e) {
-        console.error("Error calculando horas:", e);
-        return 0;
-      }
-    }
-
-    function calcularDiferenciaHoras(fecha1, hora1, fecha2, hora2) {
-      try {
-        const date1 = new Date(`${fecha1}T${hora1}`);
-        const date2 = new Date(`${fecha2}T${hora2}`);
-        const diffMs = date2 - date1;
-        return diffMs / (1000 * 60 * 60);
-      } catch (e) {
-        return 0;
-      }
-    }
-
-    // ============ LOGIN ============
-    async function authenticateUser(username, pin) {
-      showLoading('Verificando...');
-
-      const q = query(
-        collection(db, "Collaborators"),
-        where("username", "==", username),
-        where("pin", "==", pin)
-      );
-
-      const snapshot = await getDocs(q);
-
-      if (snapshot.empty) {
-        throw new Error('Usuario o PIN incorrectos');
-      }
-
-      const data = snapshot.docs[0].data();
-      return {
-        uid: snapshot.docs[0].id,
-        username: data.username,
-        name: `${data.firstName || ''} ${data.lastName || ''}`.trim() || username
-      };
-    }
-
-    loginBtn.addEventListener('click', async () => {
-      const username = usernameInput.value.trim();
-      const pin = passwordInput.value.trim();
-
-      if (!username || !pin) {
-        loginMessage.textContent = 'Complete todos los campos';
-        loginAlert.style.display = 'flex';
-        return;
-      }
-
-      try {
-        currentAdmin = await authenticateUser(username, pin);
-        adminName.textContent = currentAdmin.name;
-        loginScreen.style.display = 'none';
-        reportContainer.style.display = 'block';
-        await cargarRegistros();
-        passwordInput.value = '';
-        loginAlert.style.display = 'none';
-        hideLoading();
-      } catch (error) {
-        hideLoading();
-        loginMessage.textContent = error.message;
-        loginAlert.style.display = 'flex';
-      }
-    });
-
-    logoutBtn.addEventListener('click', () => {
-      currentAdmin = null;
-      reportContainer.style.display = 'none';
-      loginScreen.style.display = 'flex';
-      usernameInput.value = '';
-      passwordInput.value = '';
-      loginAlert.style.display = 'none';
-    });
-
-    // ============ ELIMINAR TODOS LOS REGISTROS ============
-    deleteAllBtn.addEventListener('click', () => {
-      confirmDialog.style.display = 'block';
-    });
-
-    cancelDeleteBtn.addEventListener('click', () => {
-      confirmDialog.style.display = 'none';
-    });
-
-    confirmDeleteBtn.addEventListener('click', async () => {
-      confirmDialog.style.display = 'none';
-      
-      if (!currentAdmin) return;
-      
-      showLoading('Eliminando todos los registros...');
-      
-      try {
-        const q = query(collection(db, 'facialAttendance'));
-        const snapshot = await getDocs(q);
-        
-        const batch = writeBatch(db);
-        snapshot.docs.forEach(doc => {
-          batch.delete(doc.ref);
-        });
-        
-        await batch.commit();
-        
-        todosLosRegistros = [];
-        todosLosPares = [];
-        
-        mostrarTabla([]);
-        actualizarEstadisticas([]);
-        
-        showToast('Todos los registros han sido eliminados', 'success');
-      } catch (error) {
-        console.error('Error al eliminar:', error);
-        showToast('Error al eliminar registros', 'error');
-      } finally {
-        hideLoading();
-      }
-    });
-
-    window.addEventListener('click', (e) => {
-      if (e.target === confirmDialog) {
-        confirmDialog.style.display = 'none';
-      }
-    });
-
-    // ============ CARGAR REGISTROS ============
-    async function cargarRegistros() {
-      if (!currentAdmin) return;
-
-      showLoading('Cargando registros...');
-
-      try {
-        const empQuery = query(collection(db, 'employees'));
-        const empSnapshot = await getDocs(empQuery);
-        empSnapshot.forEach(doc => {
-          const data = doc.data();
-          empleadosMap.set(data.username, {
-            nombre: `${data.firstName || ''} ${data.lastName || ''}`.trim() || data.username,
-            turno: parseFloat(data.turnoHoras) || 8
-          });
-        });
-
-        const q = query(
-          collection(db, 'facialAttendance'),
-          orderBy('timestamp', 'asc')
-        );
-
-        const snapshot = await getDocs(q);
-        todosLosRegistros = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          timestamp: doc.data().timestamp?.toDate() || new Date()
-        }));
-
-        procesarYMostrar();
-
-      } catch (error) {
-        console.error('Error:', error);
-        tablaBody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--danger);">Error al cargar datos</td></tr>';
-      } finally {
-        hideLoading();
-      }
-    }
-
-    // ============ PROCESAR REGISTROS - VERSIÓN ORIGINAL CON 5 MINUTOS ============
-    function procesarYMostrar() {
-      const colaboradores = new Map();
-
-      todosLosRegistros.forEach(reg => {
-        if (!reg.collaboratorCode) return;
-
-        if (!colaboradores.has(reg.collaboratorCode)) {
-          colaboradores.set(reg.collaboratorCode, []);
+      items.forEach(item => {
+        item.style.flex = `0 0 ${itemWidth}px`;
+        const img = item.querySelector('img');
+        if(img) {
+          if(userConfig.imgShape === 'circle') img.style.borderRadius = '50%';
+          else if(userConfig.imgShape === 'square') img.style.borderRadius = '0%';
+          else if(userConfig.imgShape === 'rounded') img.style.borderRadius = '20px';
+          img.style.width = `${itemWidth}px`;
+          img.style.height = `${itemWidth}px`;
         }
-        colaboradores.get(reg.collaboratorCode).push(reg);
+        const span = item.querySelector('span');
+        if(span) span.style.order = userConfig.namePosition === 'top' ? '-1' : '0';
       });
-
-      const resultados = [];
-
-      colaboradores.forEach((registros, codigo) => {
-        const ordenados = registros.sort((a, b) => a.timestamp - b.timestamp);
-
-        let ultimaEntrada = null;
-        let ultimaSalida = null;
-
-        ordenados.forEach(reg => {
-          // LÓGICA DE 5 MINUTOS - Si hay entrada sin salida y pasa +5min, se registra salida automática
-          if (ultimaEntrada && !ultimaSalida) {
-            const diffMinutos = (reg.timestamp - ultimaEntrada.timestamp) / (1000 * 60);
-            
-            if (diffMinutos >= UMBRAL_5_MINUTOS) {
-              resultados.push({
-                codigo,
-                nombre: empleadosMap.get(codigo)?.nombre || codigo,
-                turno: empleadosMap.get(codigo)?.turno || 8,
-                entrada: {
-                  fecha: ultimaEntrada.fecha,
-                  hora: ultimaEntrada.hora,
-                  timestamp: ultimaEntrada.timestamp
-                },
-                salida: {
-                  fecha: reg.fecha,
-                  hora: reg.hora,
-                  timestamp: reg.timestamp
-                },
-                completo: true
-              });
-              ultimaEntrada = null;
-              ultimaSalida = null;
-            }
-          }
-
-          // Procesar según tipo
-          if (reg.type === 'entry') {
-            if (!ultimaEntrada) {
-              ultimaEntrada = reg;
-              ultimaSalida = null;
-            }
-          } 
-          else if (reg.type === 'exit' && ultimaEntrada) {
-            // Hay una entrada pendiente y llega una salida
-            resultados.push({
-              codigo,
-              nombre: empleadosMap.get(codigo)?.nombre || codigo,
-              turno: empleadosMap.get(codigo)?.turno || 8,
-              entrada: {
-                fecha: ultimaEntrada.fecha,
-                hora: ultimaEntrada.hora,
-                timestamp: ultimaEntrada.timestamp
-              },
-              salida: {
-                fecha: reg.fecha,
-                hora: reg.hora,
-                timestamp: reg.timestamp
-              },
-              completo: true
-            });
-            ultimaEntrada = null;
-            ultimaSalida = reg;
-          }
-        });
-
-        // Entrada sin salida al final
-        if (ultimaEntrada) {
-          resultados.push({
-            codigo,
-            nombre: empleadosMap.get(codigo)?.nombre || codigo,
-            turno: empleadosMap.get(codigo)?.turno || 8,
-            entrada: {
-              fecha: ultimaEntrada.fecha,
-              hora: ultimaEntrada.hora,
-              timestamp: ultimaEntrada.timestamp
-            },
-            salida: null,
-            completo: false
-          });
-        }
-      });
-
-      // APLICAR REGLAS DE MEJORA SIN MODIFICAR LOS PARES ORIGINALES
-      const resultadosMejorados = aplicarReglasMejora(resultados);
-      todosLosPares = resultadosMejorados;
-
-      resultadosMejorados.sort((a, b) => {
-        if (!a.entrada || !b.entrada) return 0;
-        return b.entrada.fecha.localeCompare(a.entrada.fecha);
-      });
-
-      mostrarTabla(resultadosMejorados);
-      actualizarEstadisticas(resultadosMejorados);
+      
+      if(carruselInterval) { clearInterval(carruselInterval); carruselInterval = null; }
+      if(userConfig.navMode === 'auto' || userConfig.navMode === 'both') { carruselInterval = setInterval(() => moverCarrusel(1), userConfig.autoSpeed); }
+      crearBotonesCarrusel();
     }
-
-    // ============ FUNCIÓN PARA APLICAR REGLAS DE MEJORA ============
-    function aplicarReglasMejora(paresOriginales) {
-      const paresMejorados = [];
-      
-      // Ordenar por fecha ascendente para procesar secuencialmente
-      const paresOrdenados = [...paresOriginales].sort((a, b) => {
-        if (!a.entrada || !b.entrada) return 0;
-        return a.entrada.fecha.localeCompare(b.entrada.fecha);
-      });
-
-      for (let i = 0; i < paresOrdenados.length; i++) {
-        const parActual = { ...paresOrdenados[i] }; // Copia para no modificar el original
-        
-        // REGLA 1: Si falta salida del día anterior, el primer registro del día siguiente es su salida
-        if (i > 0) {
-          const parAnterior = paresMejorados[paresMejorados.length - 1];
-          
-          if (parAnterior && !parAnterior.salida && parActual.entrada) {
-            const fechaEntradaActual = new Date(parActual.entrada.fecha);
-            const fechaEntradaAnterior = new Date(parAnterior.entrada.fecha);
-            const diffDias = Math.floor((fechaEntradaActual - fechaEntradaAnterior) / (1000 * 60 * 60 * 24));
-            
-            if (diffDias >= 1) {
-              // La entrada actual se convierte en la salida del día anterior
-              parAnterior.salida = {
-                fecha: parActual.entrada.fecha,
-                hora: parActual.entrada.hora,
-                timestamp: parActual.entrada.timestamp
-              };
-              parAnterior.completo = true;
-              
-              // IMPORTANTE: Este parActual mantiene su entrada original
-              // No modificamos su entrada, solo se usó como salida del anterior
-              console.log(`Regla 1 aplicada: Entrada del ${parActual.entrada.fecha} usada como salida del día anterior`);
-            }
-          }
-        }
-        
-        // REGLA 2: Si pasaron más de 16 horas sin salida, marcar como incompleto
-        if (parActual.entrada && !parActual.salida) {
-          // Buscar si hay algún registro posterior que podría ser su salida
-          let salidaEncontrada = false;
-          for (let j = i + 1; j < paresOrdenados.length; j++) {
-            const parSiguiente = paresOrdenados[j];
-            if (parSiguiente.entrada) {
-              const horasDiff = calcularDiferenciaHoras(
-                parActual.entrada.fecha, parActual.entrada.hora,
-                parSiguiente.entrada.fecha, parSiguiente.entrada.hora
-              );
-              
-              if (horasDiff > UMBRAL_16_HORAS) {
-                // Han pasado más de 16 horas sin salida, marcar como incompleto
-                parActual.completo = false;
-                console.log(`Regla 2 aplicada: ${horasDiff.toFixed(2)}h sin salida - marcado incompleto`);
-                salidaEncontrada = true;
-                break;
-              }
-            }
-          }
-        }
-        
-        paresMejorados.push(parActual);
-      }
-      
-      return paresMejorados;
+    
+    function crearBotonesCarrusel() {
+      const controlsDiv = document.getElementById('carouselControls');
+      controlsDiv.innerHTML = '<button class="carousel-control-btn" id="carouselPrev"><i class="fas fa-chevron-left"></i></button><button class="carousel-control-btn" id="carouselNext"><i class="fas fa-chevron-right"></i></button>';
+      document.getElementById('carouselPrev')?.addEventListener('click', () => moverCarrusel(-1));
+      document.getElementById('carouselNext')?.addEventListener('click', () => moverCarrusel(1));
     }
-
-    // ============ MOSTRAR TABLA SIMPLIFICADA ============
-    function mostrarTabla(resultados) {
-      if (resultados.length === 0) {
-        tablaBody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 30px;">No hay registros</td></tr>';
-        return;
-      }
-
-      const colaboradoresMap = new Map();
-      
-      resultados.forEach(r => {
-        if (!colaboradoresMap.has(r.codigo)) {
-          colaboradoresMap.set(r.codigo, {
-            codigo: r.codigo,
-            nombre: r.nombre,
-            totalExtras: 0
-          });
-        }
-        
-        const horas = calcularHoras(r.entrada, r.salida);
-        const turno = r.turno || 8;
-        const extras = horas > turno ? Math.round((horas - turno) * 100) / 100 : 0;
-        
-        const colaborador = colaboradoresMap.get(r.codigo);
-        colaborador.totalExtras += extras;
-      });
-
-      let html = '';
-      
-      colaboradoresMap.forEach(col => {
-        html += `
-          <tr>
-            <td><strong>${col.nombre}</strong><br><small style="color: var(--text-muted);">${col.codigo}</small></td>
-            <td class="horas-extra">${col.totalExtras > 0 ? '+' + col.totalExtras.toFixed(2) + 'h' : '0h'}</td>
-            <td>
-              <button class="btn-ver" onclick='verDetalle("${col.codigo}")'>
-                <i class="fas fa-eye"></i> Ver detalles
-              </button>
-            </td>
-          </tr>
-        `;
-      });
-
-      tablaBody.innerHTML = html;
-    }
-
-    function actualizarEstadisticas(resultados) {
-      const totalRegistros = todosLosRegistros.length;
-      const entradas = resultados.length;
-      const salidas = resultados.filter(r => r.completo).length;
-
-      document.getElementById('totalRegistros').textContent = totalRegistros;
-      document.getElementById('totalEntradas').textContent = entradas;
-      document.getElementById('totalSalidas').textContent = salidas;
-      document.getElementById('totalPares').textContent = salidas;
-    }
-
-    // ============ FILTROS ============
-    window.aplicarFiltros = () => {
-      const fechaInicio = document.getElementById('fechaInicio').value;
-      const fechaFin = document.getElementById('fechaFin').value;
-      const estado = document.getElementById('filtroEstado').value;
-
-      let resultadosFiltrados = [...todosLosPares];
-
-      if (fechaInicio) {
-        resultadosFiltrados = resultadosFiltrados.filter(r => 
-          r.entrada && r.entrada.fecha >= fechaInicio
-        );
-      }
-      if (fechaFin) {
-        resultadosFiltrados = resultadosFiltrados.filter(r => 
-          r.entrada && r.entrada.fecha <= fechaFin
-        );
-      }
-
-      if (estado === 'completo') {
-        resultadosFiltrados = resultadosFiltrados.filter(r => r.completo);
-      } else if (estado === 'incompleto') {
-        resultadosFiltrados = resultadosFiltrados.filter(r => !r.completo);
-      }
-
-      resultadosFiltrados.sort((a, b) => {
-        if (!a.entrada || !b.entrada) return 0;
-        return b.entrada.fecha.localeCompare(a.entrada.fecha);
-      });
-
-      mostrarTabla(resultadosFiltrados);
-    };
-
-    window.limpiarFiltros = () => {
-      document.getElementById('fechaInicio').value = '';
-      document.getElementById('fechaFin').value = '';
-      document.getElementById('filtroEstado').value = 'todos';
-      
-      const resultadosOrdenados = [...todosLosPares].sort((a, b) => {
-        if (!a.entrada || !b.entrada) return 0;
-        return b.entrada.fecha.localeCompare(a.entrada.fecha);
-      });
-      
-      mostrarTabla(resultadosOrdenados);
-    };
-
-    function agruparRegistrosPorDia(registros) {
-      const diasMap = new Map();
-      
-      registros.forEach(reg => {
-        if (!reg.entrada) return;
-        const fecha = reg.entrada.fecha;
-        if (!diasMap.has(fecha)) {
-          diasMap.set(fecha, {
-            fecha: fecha,
-            entrada: reg.entrada,
-            salida: reg.salida,
-            turno: reg.turno,
-            completo: reg.completo
-          });
-        }
-      });
-      
-      return Array.from(diasMap.values());
-    }
-
-    async function guardarRegistroEnFirebase(datosRegistro) {
-      try {
-        const docRef = await addDoc(collection(db, 'reportesGuardados'), {
-          ...datosRegistro,
-          guardadoPor: currentAdmin?.uid || 'unknown',
-          guardadoPorNombre: currentAdmin?.name || 'unknown',
-          fechaGuardado: serverTimestamp()
-        });
-        return { success: true, id: docRef.id };
-      } catch (error) {
-        console.error('Error al guardar:', error);
-        return { success: false, error: error.message };
-      }
-    }
-
-    // ============ MODAL DE DETALLE ============
-    window.verDetalle = (codigo) => {
-      colaboradorActual = codigo;
-      const infoColaborador = empleadosMap.get(codigo) || { nombre: codigo, turno: 8 };
-      const paresColaborador = todosLosPares.filter(p => p.codigo === codigo);
-      
-      paresColaborador.sort((a, b) => {
-        if (!a.entrada || !b.entrada) return 0;
-        return b.entrada.fecha.localeCompare(a.entrada.fecha);
-      });
-
-      document.getElementById('modalTitulo').textContent = infoColaborador.nombre || codigo;
-      document.getElementById('modalCodigo').textContent = codigo;
-      document.getElementById('modalTurno').textContent = (infoColaborador.turno || 8) + ' horas';
-
-      // Calcular totales generales
-      let totalExtrasGeneral = 0;
-      let totalHorasGeneral = 0;
-      
-      paresColaborador.forEach(par => {
-        const horas = calcularHoras(par.entrada, par.salida);
-        const extras = horas > (par.turno || 8) ? horas - (par.turno || 8) : 0;
-        totalHorasGeneral += horas;
-        totalExtrasGeneral += extras;
-      });
-
-      document.getElementById('modalTotalExtras').textContent = totalExtrasGeneral.toFixed(2) + 'h';
-
-      // Último registro
-      const ultimoRegistro = paresColaborador.length > 0 ? paresColaborador[0] : null;
-      
-      if (ultimoRegistro && ultimoRegistro.entrada) {
-        const hTrabajadas = calcularHoras(ultimoRegistro.entrada, ultimoRegistro.salida);
-        const hTurno = infoColaborador.turno || 8;
-        const hExtras = hTrabajadas > hTurno ? hTrabajadas - hTurno : 0;
-
-        let registrosHtml = `
-          <div class="detalle-row">
-            <span>Entrada</span>
-            <span>${ultimoRegistro.entrada.fecha} ${convertirA12HConSegundos(ultimoRegistro.entrada.hora)}</span>
-          </div>
-        `;
-
-        if (ultimoRegistro.salida) {
-          registrosHtml += `
-            <div class="detalle-row">
-              <span>Salida</span>
-              <span>${ultimoRegistro.salida.fecha} ${convertirA12HConSegundos(ultimoRegistro.salida.hora)}</span>
-            </div>
-          `;
-        } else {
-          registrosHtml += `<div class="detalle-row" style="color: var(--warning);"><span>Sin salida registrada</span></div>`;
-        }
-
-        registrosHtml += `
-          <div class="detalle-row" style="color: var(--primary); margin-top: 10px;">
-            <span>Horas trabajadas</span>
-            <span>${hTrabajadas.toFixed(2)}h</span>
-          </div>
-          <div class="detalle-row" style="color: var(--warning);">
-            <span>Horas extras</span>
-            <span>${hExtras > 0 ? '+' : ''}${hExtras.toFixed(2)}h</span>
-          </div>
-        `;
-
-        document.getElementById('modalRegistros').innerHTML = registrosHtml;
-        document.getElementById('modalTotales').innerHTML = `
-          <span>Total día: ${hTrabajadas.toFixed(2)}h</span>
-          <span>Extras: ${hExtras > 0 ? '+' : ''}${hExtras.toFixed(2)}h</span>
-        `;
+    
+    function moverCarrusel(direccion) {
+      const track = document.getElementById('carouselTrack');
+      if(!track || !track.children.length) return;
+      const itemWidth = track.children[0].offsetWidth + (parseInt(getComputedStyle(track).gap) || 15);
+      let newScroll = track.scrollLeft + (direccion * itemWidth);
+      if(userConfig.loopMode === 'loop') {
+        if(newScroll < 0) newScroll = track.scrollWidth - track.clientWidth;
+        else if(newScroll > track.scrollWidth - track.clientWidth) newScroll = 0;
+      } else if(userConfig.loopMode === 'back') {
+        if(newScroll < 0) newScroll = 0;
+        else if(newScroll > track.scrollWidth - track.clientWidth) newScroll = track.scrollWidth - track.clientWidth;
       } else {
-        document.getElementById('modalRegistros').innerHTML = '<p style="text-align: center;">No hay registros</p>';
-        document.getElementById('modalTotales').innerHTML = '';
+        if(newScroll < 0) newScroll = 0;
+        if(newScroll > track.scrollWidth - track.clientWidth) newScroll = track.scrollWidth - track.clientWidth;
       }
-
-      // Historial completo
-      const diasUnicos = agruparRegistrosPorDia(paresColaborador);
-      diasUnicos.sort((a, b) => b.fecha.localeCompare(a.fecha));
-
-      let tablaHtml = '';
-      let totalDias = 0;
-      let totalHorasCol = 0;
-      let totalExtrasCol = 0;
-
-      diasUnicos.forEach(dia => {
-        const horas = calcularHoras(dia.entrada, dia.salida);
-        const turno = dia.turno || 8;
-        const extras = horas > turno ? (horas - turno) : 0;
-        
-        totalHorasCol += horas;
-        totalExtrasCol += extras;
-        totalDias++;
-
-        const estado = dia.completo ? 'Completo' : 'Incompleto';
-        const estadoClass = dia.completo ? 'badge-completo' : 'badge-exit';
-        
-        tablaHtml += `
-          <tr>
-            <td>${dia.fecha}</td>
-            <td>${convertirA12HConSegundos(dia.entrada.hora)}</td>
-            <td>${dia.salida ? convertirA12HConSegundos(dia.salida.hora) : '---'}</td>
-            <td>${horas.toFixed(2)}h</td>
-            <td class="extras-cell">${extras > 0 ? '+' + extras.toFixed(2) + 'h' : '0h'}</td>
-            <td><span class="badge ${estadoClass}">${estado}</span></td>
-          </tr>
-        `;
-      });
-
-      document.getElementById('modalTablaBody').innerHTML = tablaHtml || '<tr><td colspan="6" style="text-align: center;">Sin historial</td></tr>';
-      document.getElementById('modalHistorialTotales').innerHTML = `
-        <span>Total días: ${totalDias}</span>
-        <span>Horas totales: ${totalHorasCol.toFixed(2)}h</span>
-      `;
-      document.getElementById('modalExtrasTotales').innerHTML = `
-        <span>Total horas extras:</span>
-        <span>${totalExtrasCol.toFixed(2)}h</span>
-      `;
-
-      detalleModal.style.display = 'flex';
-    };
-
-    // ============ BOTÓN GUARDAR REGISTRO ============
-    btnGuardarRegistro.addEventListener('click', async () => {
-      if (!colaboradorActual) {
-        showToast('No hay colaborador seleccionado', 'error');
-        return;
-      }
-
-      showLoading('Guardando registro...');
-
+      track.scrollTo({ left: newScroll, behavior: 'smooth' });
+    }
+    
+    function actualizarCarrusel() { 
+      if(!empleados.length) { document.getElementById('carouselTrack').innerHTML = '<div style="text-align:center; padding:20px;">No hay colaboradores</div>'; return; } 
+      const shuffled = [...empleados].sort(() => 0.5 - Math.random()).slice(0, 20); 
+      document.getElementById('carouselTrack').innerHTML = shuffled.map(emp => `<div class="carousel-item" onclick="window.verDetalle('${emp.id}')"><img src="${emp.fotoBase64 || 'https://via.placeholder.com/80'}" onerror="this.src='https://via.placeholder.com/80'"><span>${emp.firstName || ''} ${emp.lastName || ''}</span></div>`).join(''); 
+      aplicarConfigCarruselCompleto(); 
+    }
+    
+    function actualizarStats() {
+      document.getElementById('statTotal').innerText = empleados.length;
+      const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const recent = empleados.filter(e => e.createdAt && e.createdAt.toDate && e.createdAt.toDate() > sevenDaysAgo).length;
+      document.getElementById('statRecent').innerText = recent;
+      const areas = new Set(empleados.map(e => e.areaTrabajo).filter(a => a));
+      document.getElementById('statAreas').innerText = areas.size;
+      const sorted = [...empleados].sort((a,b) => (b.createdAt?.toDate?.() || 0) - (a.createdAt?.toDate?.() || 0)).slice(0,5);
+      document.getElementById('recentEmployees').innerHTML = sorted.map(emp => `<div class="recent-item" onclick="window.verDetalle('${emp.id}')"><img src="${emp.fotoBase64 || 'https://via.placeholder.com/35'}"><span>${emp.firstName} ${emp.lastName}</span><span style="margin-left:auto; font-size:10px; color:var(--primary);">${emp.rtmId || ''}</span></div>`).join('');
+    }
+    
+    async function verificarRtmGlobal(rtm, idExcluir=null) { const q = query(collection(db, 'Ponche'), where('rtmId', '==', rtm)); const snap = await getDocs(q); if(snap.empty) return true; if(idExcluir && snap.docs[0].id === idExcluir) return true; return false; }
+    async function verificarCodigoNomina(codigo, idExcluir=null) { if(!currentUser) return false; const q = query(collection(db, 'Ponche'), where('username', '==', codigo), where('collaboratorId', '==', currentUser.uid)); const snap = await getDocs(q); if(snap.empty) return true; if(idExcluir && snap.docs[0].id === idExcluir) return true; return false; }
+    
+    function iniciarEscuchaEmpleados() { if(!currentUser) return; const q = query(collection(db, 'Ponche'), where('collaboratorId', '==', currentUser.uid)); onSnapshot(q, (snap) => { empleados = []; snap.forEach(doc => empleados.push({ id: doc.id, ...doc.data() })); mostrarListaEmpleados(); actualizarCarrusel(); actualizarBuscadorGlobal(); actualizarStats(); }); }
+    
+    function mostrarListaEmpleados(filtro='') { let f = empleados.filter(e => !filtro || `${e.firstName || ''} ${e.lastName || ''}`.toLowerCase().includes(filtro.toLowerCase()) || (e.username||'').includes(filtro) || (e.rtmId||'').includes(filtro)); document.getElementById('employeesGrid').innerHTML = f.map(emp => `<div class="employee-card" onclick="window.verDetalle('${emp.id}')"><img src="${emp.fotoBase64||'https://via.placeholder.com/70'}" onerror="this.src='https://via.placeholder.com/70'"><div class="employee-name">${emp.firstName || ''} ${emp.lastName || ''}</div><div class="employee-code">${emp.rtmId||''}</div><div class="employee-actions"><button class="btn btn-primary" onclick="event.stopPropagation(); window.editarEmpleado('${emp.id}')"><i class="fas fa-edit"></i> Editar</button><button class="btn btn-danger" onclick="event.stopPropagation(); window.confirmarEliminar('${emp.id}')"><i class="fas fa-trash"></i></button></div></div>`).join(''); }
+    function actualizarBuscadorGlobal() { const term = document.getElementById('globalSearchInput').value.toLowerCase(); if(!term) { document.getElementById('globalSearchResults').innerHTML = ''; return; } const res = empleados.filter(e => `${e.firstName || ''} ${e.lastName || ''}`.toLowerCase().includes(term) || (e.username||'').includes(term) || (e.rtmId||'').includes(term)); document.getElementById('globalSearchResults').innerHTML = res.map(emp => `<div class="search-result-item" onclick="window.verDetalle('${emp.id}')" style="background:rgba(255,255,255,0.05);border-radius:15px;padding:10px;text-align:center;cursor:pointer;"><img src="${emp.fotoBase64||'https://via.placeholder.com/60'}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;"><div>${emp.firstName || ''} ${emp.lastName || ''}</div><div style="font-size:10px; color:var(--primary);">${emp.rtmId||''}</div></div>`).join(''); }
+    
+    window.verDetalle = (id) => { const emp = empleados.find(e=>e.id===id); if(!emp) return; document.getElementById('detailImg').src = emp.fotoBase64 || 'https://via.placeholder.com/120'; document.getElementById('detailName').innerText = `${emp.firstName || ''} ${emp.lastName || ''}`; document.getElementById('detailInfoGrid').innerHTML = `<div class="detail-info-item"><div class="detail-info-label">RTM ID</div><div>${emp.rtmId || 'N/A'}</div></div><div class="detail-info-item"><div class="detail-info-label">Código Nómina</div><div>${emp.username || 'N/A'}</div></div><div class="detail-info-item"><div class="detail-info-label">Posición</div><div>${emp.posicionLaboral || 'N/A'}</div></div><div class="detail-info-item"><div class="detail-info-label">Área</div><div>${emp.areaTrabajo || 'N/A'}</div></div><div class="detail-info-item"><div class="detail-info-label">Turno</div><div>${emp.turnoHoras || 'N/A'} horas</div></div>`; document.getElementById('detailPage').style.display = 'block'; empleadoAEliminar = emp.id; };
+    
+    window.editarEmpleado = (id) => { const emp = empleados.find(e=>e.id===id); if(!emp) return; window.cambiarSession('pageRegistro'); document.getElementById('editId').value = emp.id; document.getElementById('username').value = emp.username || ''; document.getElementById('rtmId').value = emp.rtmId || ''; document.getElementById('rtmId').disabled = true; document.getElementById('firstName').value = emp.firstName || ''; document.getElementById('lastName').value = emp.lastName || ''; document.getElementById('posicionLaboral').value = emp.posicionLaboral || ''; document.getElementById('turnoHoras').value = emp.turnoHoras || '8'; document.getElementById('fechaIngreso').value = emp.fechaIngreso || ''; document.getElementById('departamento').value = emp.departamento || ''; document.getElementById('areaTrabajo').value = emp.areaTrabajo || ''; document.getElementById('jefeCargo').value = emp.jefeCargo || ''; document.getElementById('fotoBase64').value = emp.fotoBase64 || ''; document.getElementById('fotoPreview').innerHTML = emp.fotoBase64 ? `<img src="${emp.fotoBase64}" style="width:70px; height:70px; object-fit:cover; border-radius:50%; border:2px solid var(--primary);">` : ''; document.getElementById('btnSubmitText').innerText = 'ACTUALIZAR'; document.getElementById('btnCancelarEdit').style.display = 'block'; };
+    
+    window.confirmarEliminar = (id) => { empleadoAEliminar = id; document.getElementById('deleteModal').classList.add('active'); };
+    window.cambiarSession = (sessionId) => { const sections = ['homeSection', 'pageRegistro', 'pageLista', 'pageConfiguracion']; sections.forEach(s => { const el = document.getElementById(s); if(el) el.style.display = s === sessionId ? 'block' : 'none'; }); document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active')); if(sessionId === 'homeSection') document.getElementById('navHome').classList.add('active'); if(sessionId === 'pageRegistro') document.getElementById('navRegistro').classList.add('active'); if(sessionId === 'pageLista') document.getElementById('navLista').classList.add('active'); if(sessionId === 'pageConfiguracion') document.getElementById('navConfig').classList.add('active'); };
+    
+    // Funciones de cámara - AHORA CON CÁMARA TRASERA POR DEFECTO
+    async function iniciarCamara() {
+      detenerCamara();
       try {
-        const paresColaborador = todosLosPares.filter(p => p.codigo === colaboradorActual);
-        const infoColaborador = empleadosMap.get(colaboradorActual) || { nombre: colaboradorActual, turno: 8 };
-        
-        let totalHorasGeneral = 0;
-        let totalExtrasGeneral = 0;
-        
-        paresColaborador.forEach(par => {
-          const horas = calcularHoras(par.entrada, par.salida);
-          const extras = horas > par.turno ? horas - par.turno : 0;
-          totalHorasGeneral += horas;
-          totalExtrasGeneral += extras;
-        });
-
-        const datosAGuardar = {
-          colaborador: {
-            codigo: colaboradorActual,
-            nombre: infoColaborador.nombre,
-            turno: infoColaborador.turno
-          },
-          totales: {
-            horasTotales: totalHorasGeneral,
-            extrasTotales: totalExtrasGeneral,
-            diasTrabajados: paresColaborador.length
-          },
-          registrosPorDia: paresColaborador.map(par => ({
-            fecha: par.entrada?.fecha || par.salida?.fecha,
-            entrada: par.entrada ? {
-              fecha: par.entrada.fecha,
-              hora: par.entrada.hora,
-              hora12h: convertirA12HConSegundos(par.entrada.hora).replace(/<[^>]*>/g, '')
-            } : null,
-            salida: par.salida ? {
-              fecha: par.salida.fecha,
-              hora: par.salida.hora,
-              hora12h: convertirA12HConSegundos(par.salida.hora).replace(/<[^>]*>/g, '')
-            } : null,
-            horas: calcularHoras(par.entrada, par.salida),
-            extras: calcularHoras(par.entrada, par.salida) > (par.turno || 8) ? 
-              calcularHoras(par.entrada, par.salida) - (par.turno || 8) : 0,
-            completo: par.completo
-          })),
-          fechaReporte: new Date().toISOString()
-        };
-
-        const resultado = await guardarRegistroEnFirebase(datosAGuardar);
-        if (resultado.success) showToast('Registro guardado exitosamente', 'success');
-        else showToast('Error al guardar: ' + resultado.error, 'error');
-      } catch (error) {
-        showToast('Error al guardar el registro', 'error');
-      } finally {
-        hideLoading();
-      }
-    });
-
-    window.cerrarModal = () => {
-      detalleModal.style.display = 'none';
-      colaboradorActual = null;
-    };
-
-    window.addEventListener('click', (e) => {
-      if (e.target === detalleModal) cerrarModal();
-    });
-
-    usernameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') passwordInput.focus(); }); 
-    passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') loginBtn.click(); });
-
-    const savedUser = sessionStorage.getItem('facial_currentUser');
-    if (savedUser) {
-      try {
-        currentAdmin = JSON.parse(savedUser);
-        adminName.textContent = currentAdmin.name;
-        loginScreen.style.display = 'none';
-        reportContainer.style.display = 'block';
-        cargarRegistros();
-      } catch (e) {
-        sessionStorage.removeItem('facial_currentUser');
+        const constraints = { video: { facingMode: currentFacingMode, width: { ideal: 1280 }, height: { ideal: 720 } } };
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+        const video = document.getElementById('cameraVideo');
+        video.srcObject = stream;
+      } catch (error) { 
+        // Si falla la cámara trasera, intentar con la delantera
+        if (currentFacingMode === 'environment') {
+          currentFacingMode = 'user';
+          try {
+            const constraints = { video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } };
+            stream = await navigator.mediaDevices.getUserMedia(constraints);
+            const video = document.getElementById('cameraVideo');
+            video.srcObject = stream;
+          } catch (e) {
+            showAlert('Error al abrir cámara', 'error');
+          }
+        } else {
+          showAlert('Error al abrir cámara', 'error');
+        }
       }
     }
+    
+    function detenerCamara() {
+      if (stream) { stream.getTracks().forEach(track => track.stop()); stream = null; }
+      const video = document.getElementById('cameraVideo');
+      if (video) video.srcObject = null;
+    }
+    
+    async function capturarFoto() {
+      const video = document.getElementById('cameraVideo');
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      if (currentFacingMode === 'user') {
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+      }
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const base64 = canvas.toDataURL('image/jpeg', 0.9);
+      document.getElementById('previewImage').src = base64;
+      document.getElementById('cameraFullscreen').classList.remove('active');
+      document.getElementById('previewScreen').classList.add('active');
+    }
+    
+    function guardarFoto() {
+      const imgSrc = document.getElementById('previewImage').src;
+      document.getElementById('fotoBase64').value = imgSrc;
+      document.getElementById('fotoPreview').innerHTML = `<img src="${imgSrc}" style="width:70px; height:70px; object-fit:cover; border-radius:50%; border:2px solid var(--primary);">`;
+      document.getElementById('previewScreen').classList.remove('active');
+      showAlert('Foto guardada');
+    }
+    
+    document.getElementById('btnAbrirCamara').addEventListener('click', () => {
+      document.getElementById('cameraFullscreen').classList.add('active');
+      iniciarCamara();
+    });
+    document.getElementById('btnCerrarCamara').addEventListener('click', () => {
+      detenerCamara();
+      document.getElementById('cameraFullscreen').classList.remove('active');
+    });
+    document.getElementById('btnSwitchCamara').addEventListener('click', () => {
+      currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+      iniciarCamara();
+    });
+    document.getElementById('btnCapturarFoto').addEventListener('click', capturarFoto);
+    document.getElementById('btnCerrarPreview').addEventListener('click', () => {
+      document.getElementById('previewScreen').classList.remove('active');
+      document.getElementById('cameraFullscreen').classList.add('active');
+      iniciarCamara();
+    });
+    document.getElementById('btnRepetirFoto').addEventListener('click', () => {
+      document.getElementById('previewScreen').classList.remove('active');
+      document.getElementById('cameraFullscreen').classList.add('active');
+      iniciarCamara();
+    });
+    document.getElementById('btnGuardarFoto').addEventListener('click', guardarFoto);
+    
+    document.getElementById('navHome').onclick = () => window.cambiarSession('homeSection');
+    document.getElementById('navRegistro').onclick = () => { window.cambiarSession('pageRegistro'); document.getElementById('rtmId').disabled = false; document.getElementById('btnCancelarEdit').click(); };
+    document.getElementById('navLista').onclick = () => window.cambiarSession('pageLista');
+    document.getElementById('navConfig').onclick = () => { window.cambiarSession('pageConfiguracion'); cargarConfiguracion(); };
+    document.getElementById('saveConfigBtn').onclick = guardarConfiguracion;
+    document.getElementById('btnGenerarRtmId').onclick = async () => { showLoading(true); try { for(let i=0;i<100;i++){ const r=`RTM${Math.floor(100000+Math.random()*900000)}`; if(await verificarRtmGlobal(r)){ document.getElementById('rtmId').value = r; document.getElementById('rtmStatus').innerHTML = '<i class="fas fa-check-circle"></i> RTM disponible'; document.getElementById('rtmStatus').className = 'code-status available'; break; } } } catch(e){ } finally { showLoading(false); } };
+    document.getElementById('btnCancelarEdit').onclick = () => { document.getElementById('registroForm').reset(); document.getElementById('editId').value = ''; document.getElementById('fotoPreview').innerHTML = ''; document.getElementById('fotoBase64').value = ''; document.getElementById('btnSubmitText').innerText = 'GUARDAR'; document.getElementById('btnCancelarEdit').style.display = 'none'; document.getElementById('rtmId').disabled = false; };
+    document.getElementById('backFromDetail').onclick = () => document.getElementById('detailPage').style.display = 'none';
+    document.getElementById('sendToWhatsAppBtn').onclick = () => { const emp = empleados.find(e=>e.id===empleadoAEliminar); if(emp) window.open(`https://wa.me/?text=${encodeURIComponent(`${emp.firstName} ${emp.lastName} - RTM: ${emp.rtmId}`)}`, '_blank'); };
+    document.getElementById('editFromDetailBtn').onclick = () => { const emp = empleados.find(e=>e.id===empleadoAEliminar); if(emp) { document.getElementById('detailPage').style.display = 'none'; window.editarEmpleado(emp.id); } };
+    document.getElementById('confirmDeleteBtn').onclick = async () => { if(empleadoAEliminar){ showLoading(true); await deleteDoc(doc(db,'Ponche',empleadoAEliminar)); showSuccess('Colaborador eliminado'); empleadoAEliminar=null; document.getElementById('deleteModal').classList.remove('active'); showLoading(false); } };
+    document.getElementById('cancelDeleteBtn').onclick = () => document.getElementById('deleteModal').classList.remove('active');
+    
+    document.getElementById('registroForm').onsubmit = async (e) => { e.preventDefault(); if(!currentUser) return; const id = document.getElementById('editId').value; const data = { username: document.getElementById('username').value.trim(), rtmId: document.getElementById('rtmId').value.trim().toUpperCase(), firstName: document.getElementById('firstName').value.trim(), lastName: document.getElementById('lastName').value.trim(), posicionLaboral: document.getElementById('posicionLaboral').value, turnoHoras: parseInt(document.getElementById('turnoHoras').value), fechaIngreso: document.getElementById('fechaIngreso').value, departamento: document.getElementById('departamento').value, areaTrabajo: document.getElementById('areaTrabajo').value, jefeCargo: document.getElementById('jefeCargo').value, fotoBase64: document.getElementById('fotoBase64').value, collaboratorId: currentUser.uid, updatedAt: Timestamp.now() }; if(!data.username || !data.firstName || !data.lastName) return; if(!data.rtmId.startsWith('RTM') || data.rtmId.length!==9) return; if(!data.fotoBase64 && !id) return; if(!await verificarCodigoNomina(data.username, id)) return; if(!await verificarRtmGlobal(data.rtmId, id)) return; showLoading(true); try { if(id) await updateDoc(doc(db,'Ponche',id), data); else { data.createdAt = Timestamp.now(); await addDoc(collection(db,'Ponche'), data); } showSuccess(id ? 'Colaborador actualizado' : 'Colaborador registrado'); document.getElementById('btnCancelarEdit').click(); } catch(error) { } finally { showLoading(false); } };
+    
+    document.getElementById('loginBtn').onclick = async () => { const user = document.getElementById('loginUsername').value.trim(), pass = document.getElementById('loginPassword').value.trim(); if(!user||!pass) return; showLoading(true); try { const q = query(collection(db,"Collaborators"), where("username","==",user), where("pin","==",pass)); const snap = await getDocs(q); if(snap.empty) throw new Error(); const userDoc = snap.docs[0]; currentUser = { uid: userDoc.id, name: userDoc.data().companyName || user }; localStorage.setItem('currentUserRegistro', JSON.stringify(currentUser)); document.getElementById('companyDisplay').innerText = currentUser.name; document.getElementById('welcomeUserName').innerText = currentUser.name; document.getElementById('loginScreen').style.display = 'none'; document.getElementById('appScreen').style.display = 'block'; document.getElementById('bottomNav').classList.add('visible'); iniciarEscuchaEmpleados(); window.cambiarSession('homeSection'); cargarConfiguracion(); } catch(e) { document.getElementById('loginAlert').innerText = 'Credenciales incorrectas'; document.getElementById('loginAlert').style.display = 'block'; } finally { showLoading(false); } };
+    document.getElementById('logoutBtn').onclick = () => { localStorage.removeItem('currentUserRegistro'); currentUser = null; if(carruselInterval) clearInterval(carruselInterval); document.getElementById('appScreen').style.display = 'none'; document.getElementById('loginScreen').style.display = 'flex'; document.getElementById('bottomNav').classList.remove('visible'); };
+    document.getElementById('globalSearchInput').addEventListener('input', actualizarBuscadorGlobal);
+    document.getElementById('listaSearchInput').addEventListener('input', (e) => mostrarListaEmpleados(e.target.value));
+    const saved = localStorage.getItem('currentUserRegistro'); if(saved) { try { currentUser = JSON.parse(saved); if(currentUser?.uid) { document.getElementById('loginScreen').style.display = 'none'; document.getElementById('appScreen').style.display = 'block'; document.getElementById('bottomNav').classList.add('visible'); document.getElementById('companyDisplay').innerText = currentUser.name; document.getElementById('welcomeUserName').innerText = currentUser.name; iniciarEscuchaEmpleados(); window.cambiarSession('homeSection'); cargarConfiguracion(); } } catch(e){} }
   </script>
 </body>
 </html>
