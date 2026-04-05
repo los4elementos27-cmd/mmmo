@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linterna Pro + Flash Real</title>
+    <style>
+        :root {
+            --bg-off: #08080a;
+            --bg-on: #121215;
+            --flashlight-metal: #2c3e50;
+            --flashlight-dark: #1a252f;
+            --switch-base: #111;
+            --switch-btn: #e74c3c;
+            --light-beam: rgba(255, 255, 230, 0.5);
+            --light-glow: #fffde0;
+            --trans: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        body, html {
+            height: 100%; width: 100%; overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+            background-color: var(--bg-off); transition: background 0.5s;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        /* Haz de luz animado */
+        .light-effect {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -110%) scale(0.5);
+            width: 100vw; height: 150vh;
+            background: radial-gradient(ellipse at bottom, var(--light-beam) 0%, transparent 70%);
+            opacity: 0; filter: blur(30px);
+            transition: var(--trans); pointer-events: none; z-index: 1;
+        }
+
+        .flashlight-container {
+            position: relative; z-index: 10;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        .fl-head {
+            width: 90px; height: 45px;
+            background: linear-gradient(90deg, #3a536b, var(--flashlight-metal), #3a536b);
+            border-radius: 12px 12px 4px 4px; position: relative;
+            border-bottom: 4px solid #111;
+        }
+        
+        .fl-lens {
+            position: absolute; top: 8px; left: 15px; right: 15px; height: 12px;
+            background: #111; border-radius: 4px; transition: var(--trans);
+        }
+
+        .fl-body {
+            width: 65px; height: 200px;
+            background: linear-gradient(90deg, var(--flashlight-dark), var(--flashlight-metal), var(--flashlight-dark));
+            border-radius: 0 0 15px 15px; position: relative;
+            display: flex; justify-content: center; padding-top: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+        }
+
+        .switch-area {
+            width: 28px; height: 70px; background: var(--switch-base);
+            border-radius: 14px; position: relative; cursor: pointer;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
+        }
+
+        .switch-handle {
+            width: 22px; height: 35px;
+            background: linear-gradient(to bottom, #ff6b6b, var(--switch-btn));
+            border-radius: 11px; position: absolute;
+            top: 32px; left: 3px; transition: var(--trans);
+        }
+
+        /* Activación */
+        body.on { background-color: var(--bg-on); }
+        body.on .switch-handle { top: 3px; background: linear-gradient(to bottom, #8eff8e, #2ecc71); }
+        body.on .fl-lens { background: var(--light-glow); box-shadow: 0 0 20px 8px rgba(255, 253, 224, 0.8); }
+        body.on .light-effect { opacity: 1; transform: translate(-50%, -110%) scale(1); }
+
+        .info {
+            position: absolute; bottom: 40px; color: #555;
+            font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="light-effect"></div>
+
+    <div class="flashlight-container">
+        <div class="fl-head"><div class="fl-lens"></div></div>
+        <div class="fl-body">
+            <div class="switch-area" id="btnToggle">
+                <div class="switch-handle"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="info" id="status">Toca para activar flash</div>
+
+    <script>
+        const btn = document.getElementById('btnToggle');
+        const body = document.body;
+        const status = document.getElementById('status');
+        
+        let stream = null;
+        let track = null;
+
+        async function initFlash() {
+            try {
+                // Solicita acceso a la cámara trasera
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: { exact: "environment" } }
+                });
+                track = stream.getVideoTracks()[0];
+                status.innerText = "Flash Listo";
+            } catch (err) {
+                console.error("No se pudo acceder al flash:", err);
+                status.innerText = "Flash no disponible";
+            }
+        }
+
+        async function toggleFlash() {
+            const isOn = body.classList.toggle('on');
+            
+            // Intentar controlar el flash físico
+            if (track) {
+                try {
+                    await track.applyConstraints({
+                        advanced: [{ torch: isOn }]
+                    });
+                } catch (e) {
+                    console.warn("El navegador no soporta el control del flash.");
+                }
+            }
+
+            if (navigator.vibrate) navigator.vibrate(isOn ? 60 : 30);
+            status.innerText = isOn ? "Encendido" : "Apagado";
+        }
+
+        // Inicializar al primer toque (obligatorio por políticas de navegador)
+        btn.addEventListener('click', () => {
+            if (!track) {
+                initFlash().then(() => toggleFlash());
+            } else {
+                toggleFlash();
+            }
+        });
+    </script>
+</body>
+</html>
