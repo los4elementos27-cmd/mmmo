@@ -1,0 +1,2931 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0">
+  <title>PlusMoney Retom · Sistema Integral de Préstamos</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    :root {
+      --accent: #00f5a0;
+      --accent2: #00d9f5;
+      --accent3: #f500a0;
+      --gold: #ffd700;
+      --danger: #ff4757;
+      --warning: #ffa502;
+      --info: #2ed573;
+      --wa: #25D366;
+      --wa-dark: #128C7E;
+      --purple: #a29bfe;
+      --bg0: #060d16;
+      --bg1: #0a1628;
+      --bg2: #0f1f36;
+      --bg3: #162540;
+      --bg4: #1d2f4e;
+      --glass: rgba(255,255,255,0.04);
+      --glass2: rgba(255,255,255,0.08);
+      --glass3: rgba(0,245,160,0.07);
+      --border: rgba(255,255,255,0.08);
+      --border2: rgba(0,245,160,0.2);
+      --txt: #e8f4fd;
+      --txt2: rgba(232,244,253,0.6);
+      --txt3: rgba(232,244,253,0.35);
+      --radius: 14px;
+      --radius2: 20px;
+      --shadow: 0 8px 32px rgba(0,0,0,0.4);
+      --shadow2: 0 4px 16px rgba(0,245,160,0.15);
+      --transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+      --transition2: all 0.18s ease;
+      --font: 'Outfit', sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+    
+    body.theme-classic {
+      --accent: #0078d4;
+      --accent2: #3d9fdf;
+      --accent3: #ca5010;
+      --gold: #ffd700;
+      --danger: #d13438;
+      --warning: #ca5010;
+      --info: #038387;
+      --wa: #25D366;
+      --wa-dark: #128C7E;
+      --purple: #5c2d91;
+      --bg0: #f0f2f8;
+      --bg1: #ffffff;
+      --bg2: #ffffff;
+      --bg3: #f9f9f9;
+      --bg4: #e6e9ef;
+      --glass: rgba(0,0,0,0.02);
+      --glass2: rgba(0,0,0,0.04);
+      --glass3: rgba(0,120,212,0.07);
+      --border: rgba(0,0,0,0.08);
+      --border2: rgba(0,120,212,0.2);
+      --txt: #1e1e2e;
+      --txt2: #605e5c;
+      --txt3: #9ca3af;
+      --shadow: 0 4px 12px rgba(0,0,0,0.08);
+      --shadow2: 0 8px 24px rgba(0,0,0,0.12);
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg0);
+      color: var(--txt);
+      min-height: 100vh;
+      overflow-x: hidden;
+      font-size: 14px;
+      line-height: 1.5;
+      transition: var(--transition);
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 50% at 20% 10%, rgba(0,245,160,0.06) 0%, transparent 60%),
+                  radial-gradient(ellipse 60% 40% at 80% 80%, rgba(0,217,245,0.05) 0%, transparent 60%),
+                  radial-gradient(ellipse 40% 30% at 60% 30%, rgba(245,0,160,0.04) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    body.theme-classic::before { display: none; }
+
+    .app-container {
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 1;
+    }
+    @media (min-width: 768px) {
+      .app-container { max-width: 780px; margin: 0 auto; box-shadow: 0 0 80px rgba(0,0,0,0.6); }
+      body.theme-classic .app-container { box-shadow: var(--shadow); }
+    }
+    @media (min-width: 1024px) {
+      .app-container { max-width: 1000px; }
+    }
+
+    .app-header {
+      background: rgba(10,22,40,0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border2);
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 900;
+      min-height: 58px;
+      gap: 10px;
+    }
+    body.theme-classic .app-header {
+      background: linear-gradient(90deg, #005a9e, #0078d4);
+      border-bottom: none;
+    }
+
+    .header-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+    .logo-badge {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; color: var(--bg0);
+      flex-shrink: 0;
+      box-shadow: 0 0 16px rgba(0,245,160,0.35);
+    }
+    .app-title {
+      font-size: 15px; font-weight: 700;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .header-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .menu-btn {
+      width: 38px; height: 38px;
+      background: var(--glass2);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      color: var(--accent);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: var(--transition2);
+      flex-shrink: 0;
+    }
+    .menu-btn:hover { background: rgba(0,245,160,0.15); transform: scale(1.05); }
+    .avatar-btn {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      overflow: hidden;
+      cursor: pointer;
+      transition: var(--transition2);
+      background: var(--bg3);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent);
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .avatar-btn img { width: 100%; height: 100%; object-fit: cover; }
+    .avatar-btn:hover { box-shadow: 0 0 12px rgba(0,245,160,0.4); transform: scale(1.05); }
+
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 16px 16px 85px;
+      -webkit-overflow-scrolling: touch;
+      position: relative;
+      z-index: 1;
+    }
+
+    .section { display: none; animation: fadeInUp 0.32s cubic-bezier(0.4,0,0.2,1); }
+    .section.active { display: block; }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: rgba(9,19,36,0.96);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+      padding: 6px 4px 8px;
+      z-index: 800;
+      display: flex; justify-content: space-around;
+      height: 68px;
+    }
+    @media (min-width: 768px) {
+      .bottom-nav { max-width: 780px; left: 50%; transform: translateX(-50%); }
+    }
+
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 3px; padding: 6px 4px;
+      color: var(--txt3); text-decoration: none;
+      font-size: 10px; font-weight: 500;
+      border-radius: 10px; transition: var(--transition);
+      flex: 1; max-width: 72px; cursor: pointer;
+      position: relative;
+    }
+    .nav-item i { font-size: 17px; transition: var(--transition); }
+    .nav-item.active { color: var(--accent); }
+    .nav-item.active i {
+      filter: drop-shadow(0 0 6px rgba(0,245,160,0.6));
+      transform: translateY(-2px);
+    }
+    .nav-item.active::after {
+      content: '';
+      position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 20px; height: 3px;
+      background: var(--accent);
+      border-radius: 3px 3px 0 0;
+      box-shadow: 0 0 8px rgba(0,245,160,0.5);
+    }
+    .nav-item:hover { color: var(--accent); background: var(--glass3); }
+
+    .section-title {
+      font-size: 20px; font-weight: 800;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 20px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .section-title i { -webkit-text-fill-color: initial; color: var(--accent); font-size: 18px; }
+
+    .card {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: var(--radius2);
+      padding: 16px;
+      margin-bottom: 12px;
+      transition: var(--transition);
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0,245,160,0.3), transparent);
+    }
+    .card:hover { background: var(--glass2); border-color: var(--border2); transform: translateY(-2px); box-shadow: var(--shadow2); }
+
+    .card-title { font-size: 15px; font-weight: 700; color: var(--accent); margin-bottom: 10px; }
+    .card-row {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 7px; font-size: 13px;
+    }
+    .card-lbl { color: var(--txt2); }
+    .card-val { color: var(--txt); font-weight: 600; }
+
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+      margin-bottom: 20px;
+    }
+    @media (min-width: 600px) { .stats-grid { grid-template-columns: repeat(4, 1fr); } }
+
+    .stat-card {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: var(--radius2);
+      padding: 16px 12px;
+      text-align: center;
+      transition: var(--transition);
+      position: relative; overflow: hidden;
+    }
+    .stat-card::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      opacity: 0; transition: var(--transition);
+    }
+    .stat-card:hover::after { opacity: 1; }
+    .stat-card:hover { border-color: var(--border2); transform: translateY(-3px); box-shadow: var(--shadow2); }
+    .stat-val {
+      font-size: 18px; font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 4px; line-height: 1.2;
+    }
+    .stat-lbl { font-size: 11px; color: var(--txt2); font-weight: 500; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-label {
+      display: block; margin-bottom: 7px;
+      color: var(--txt); font-weight: 600; font-size: 13px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      background: var(--bg2);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: var(--txt); font-size: 14px; font-family: var(--font);
+      outline: none; transition: var(--transition2);
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0,245,160,0.1);
+      background: var(--bg3);
+    }
+    .form-select {
+      -webkit-appearance: none; appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300f5a0'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+      background-repeat: no-repeat; background-position: right 12px center; background-size: 18px;
+      padding-right: 40px;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 460px) { .form-row { grid-template-columns: 1fr; } }
+    .form-section-title {
+      font-size: 13px; font-weight: 700; color: var(--accent2);
+      text-transform: uppercase; letter-spacing: 1px;
+      margin: 20px 0 14px; padding-bottom: 8px;
+      border-bottom: 1px solid var(--border2);
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .btn {
+      width: 100%; border: none; border-radius: 10px;
+      padding: 13px 16px; color: white; font-size: 14px; font-weight: 700;
+      font-family: var(--font); cursor: pointer;
+      transition: var(--transition); display: flex; align-items: center;
+      justify-content: center; gap: 8px; min-height: 46px;
+    }
+    .btn-primary { background: linear-gradient(135deg, var(--accent), #00c97e); color: var(--bg0); }
+    .btn-primary:hover { box-shadow: 0 6px 20px rgba(0,245,160,0.35); transform: translateY(-1px); }
+    .btn-secondary { background: linear-gradient(135deg, var(--accent2), #0099cc); }
+    .btn-danger { background: linear-gradient(135deg, var(--danger), #cc2222); }
+    .btn-warning { background: linear-gradient(135deg, var(--warning), #e67e00); }
+    .btn-wa { background: linear-gradient(135deg, var(--wa), var(--wa-dark)); }
+    .btn-purple { background: linear-gradient(135deg, var(--purple), #7c6de8); }
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid var(--border2);
+      color: var(--accent);
+    }
+    .btn-sm { padding: 8px 14px; font-size: 12px; min-height: 36px; border-radius: 8px; }
+    .btn-xs { padding: 6px 10px; font-size: 11px; min-height: 30px; border-radius: 6px; width: auto; }
+    .btn-group { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+
+    /* Botón Detalles - Color corregido */
+    .btn-info-custom {
+      background: linear-gradient(135deg, #0a5c8e, #1a7fb3);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition2);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-info-custom:hover {
+      background: linear-gradient(135deg, #1a7fb3, #0a5c8e);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .search-wrap {
+      position: relative; margin-bottom: 16px;
+    }
+    .search-wrap i {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--txt3); font-size: 14px; pointer-events: none;
+    }
+    .search-input {
+      width: 100%; background: var(--bg2);
+      border: 1.5px solid var(--border); border-radius: 25px;
+      padding: 11px 14px 11px 40px;
+      color: var(--txt); font-size: 14px; font-family: var(--font);
+      outline: none; transition: var(--transition2);
+    }
+
+    .photo-selector-input { position: absolute; width: 0.1px; height: 0.1px; opacity: 0; overflow: hidden; z-index: -1; }
+    .photo-selector-label {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 10px; padding: 24px; min-height: 150px;
+      background: var(--glass3);
+      border: 2px dashed rgba(0,245,160,0.3);
+      border-radius: var(--radius2); color: var(--accent);
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: var(--transition); text-align: center;
+    }
+    .photo-selector-label i { font-size: 36px; transition: var(--transition); }
+    .photo-selector-label:hover { background: rgba(0,245,160,0.1); border-color: var(--accent); transform: translateY(-2px); }
+    .photo-preview { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 12px; }
+    .photo-preview img {
+      width: 110px; height: 110px; border-radius: 50%;
+      object-fit: cover; border: 3px solid var(--accent);
+      box-shadow: 0 0 20px rgba(0,245,160,0.25); transition: var(--transition);
+    }
+    .remove-photo-btn {
+      background: rgba(255,71,87,0.12); border: 1px solid rgba(255,71,87,0.3);
+      color: var(--danger); padding: 7px 14px; border-radius: 8px;
+      font-size: 12px; cursor: pointer; transition: var(--transition2);
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    .modal {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.85); z-index: 2000;
+      justify-content: center; align-items: flex-end;
+      padding: 0; backdrop-filter: blur(6px);
+    }
+    .modal.centered { align-items: center; padding: 16px; }
+    .modal-content {
+      background: var(--bg2); border-radius: var(--radius2) var(--radius2) 0 0;
+      width: 100%; max-width: 600px; max-height: 92vh;
+      overflow-y: auto; box-shadow: var(--shadow);
+      animation: slideUpModal 0.32s cubic-bezier(0.4,0,0.2,1);
+      border: 1px solid var(--border2); border-bottom: none;
+    }
+    .modal.centered .modal-content { border-radius: var(--radius2); border-bottom: 1px solid var(--border2); max-height: 88vh; }
+    @keyframes slideUpModal {
+      from { transform: translateY(60px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .modal-header {
+      padding: 16px 18px; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 10;
+      backdrop-filter: blur(10px);
+    }
+    .modal-header h2 { color: var(--accent); font-size: 17px; display: flex; align-items: center; gap: 9px; }
+    .modal-body { padding: 20px 18px; }
+    .close-modal {
+      background: var(--glass2); border: 1px solid var(--border);
+      color: var(--txt); width: 34px; height: 34px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: var(--transition2); font-size: 14px;
+    }
+    .close-modal:hover { background: rgba(255,71,87,0.2); color: var(--danger); transform: rotate(90deg); }
+
+    .menu-modal-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+      padding: 18px;
+    }
+    @media (min-width: 480px) { .menu-modal-grid { grid-template-columns: repeat(4, 1fr); } }
+    .menu-icon-btn {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 8px;
+      cursor: pointer; transition: var(--transition);
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      text-align: center; color: var(--txt2); font-size: 11px; font-weight: 600;
+    }
+    .menu-icon-btn i { font-size: 22px; }
+    .menu-icon-btn:hover { background: var(--bg4); border-color: var(--border2); color: var(--accent); transform: translateY(-3px); box-shadow: var(--shadow2); }
+    .menu-icon-btn.color-green i { color: var(--accent); }
+    .menu-icon-btn.color-blue i { color: var(--accent2); }
+    .menu-icon-btn.color-pink i { color: var(--accent3); }
+    .menu-icon-btn.color-gold i { color: var(--gold); }
+    .menu-icon-btn.color-warn i { color: var(--warning); }
+    .menu-icon-btn.color-danger i { color: var(--danger); }
+    .menu-icon-btn.color-purple i { color: var(--purple); }
+
+    .badge {
+      display: inline-flex; align-items: center;
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .badge-green { background: rgba(0,245,160,0.15); color: var(--accent); border: 1px solid rgba(0,245,160,0.3); }
+    .badge-red { background: rgba(255,71,87,0.15); color: var(--danger); border: 1px solid rgba(255,71,87,0.3); }
+    .badge-yellow { background: rgba(255,165,2,0.15); color: var(--warning); border: 1px solid rgba(255,165,2,0.3); }
+    .badge-blue { background: rgba(0,217,245,0.15); color: var(--accent2); border: 1px solid rgba(0,217,245,0.3); }
+
+    .progress-wrap { background: var(--bg3); border-radius: 6px; height: 8px; overflow: hidden; margin-top: 6px; }
+    .progress-fill { height: 100%; border-radius: 6px; transition: width 0.6s ease; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+    .progress-fill.danger { background: linear-gradient(90deg, var(--danger), #ff8c00); }
+
+    .alert { padding: 12px 14px; border-radius: 10px; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; font-size: 13px; border-left: 3px solid; }
+    .alert-error { background: rgba(255,71,87,0.1); border-left-color: var(--danger); }
+
+    .toast {
+      position: fixed; bottom: 82px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,245,160,0.95); color: var(--bg0);
+      padding: 11px 22px; border-radius: 25px; z-index: 3500;
+      animation: slideInToast 0.3s ease;
+      display: none; font-weight: 700; max-width: 90%; text-align: center;
+      font-size: 13px;
+    }
+    @keyframes slideInToast {
+      from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+      to { transform: translateX(-50%) translateY(0); opacity: 1; }
+    }
+
+    .loading {
+      display: none; position: fixed; inset: 0;
+      background: rgba(6,13,22,0.92); z-index: 9999;
+      justify-content: center; align-items: center;
+      flex-direction: column; gap: 18px;
+      backdrop-filter: blur(8px);
+    }
+    .spinner-ring {
+      width: 52px; height: 52px; position: relative;
+    }
+    .spinner-ring::before, .spinner-ring::after {
+      content: ''; position: absolute; inset: 0;
+      border-radius: 50%; border: 3px solid transparent;
+      animation: spinRing 1.2s ease infinite;
+    }
+    .spinner-ring::before { border-top-color: var(--accent); }
+    .spinner-ring::after { border-bottom-color: var(--accent2); animation-delay: -0.6s; }
+    @keyframes spinRing { to { transform: rotate(360deg); } }
+    .loading-text { color: var(--txt2); font-size: 14px; font-weight: 500; }
+
+    .cal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.82); z-index: 4500;
+      justify-content: center; align-items: center; padding: 20px;
+      backdrop-filter: blur(6px); animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .cal-box {
+      background: var(--bg2); border-radius: var(--radius2);
+      width: 100%; max-width: 380px; overflow: hidden;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+      animation: alertPop 0.3s cubic-bezier(0.4,0,0.2,1);
+      border: 1px solid var(--border);
+    }
+    @keyframes alertPop {
+      from { transform: scale(0.88) translateY(20px); opacity: 0; }
+      to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    .cal-head { padding: 28px 24px 20px; text-align: center; background: rgba(0,0,0,0.15); }
+    .cal-icon {
+      width: 64px; height: 64px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px; font-size: 28px;
+    }
+    .cal-icon.success { background: rgba(0,245,160,0.12); color: var(--accent); border: 2px solid rgba(0,245,160,0.3); }
+    .cal-icon.danger { background: rgba(255,71,87,0.12); color: var(--danger); border: 2px solid rgba(255,71,87,0.3); }
+    .cal-icon.warning { background: rgba(255,165,2,0.12); color: var(--warning); border: 2px solid rgba(255,165,2,0.3); }
+    .cal-title { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+    .cal-msg { color: var(--txt2); font-size: 14px; line-height: 1.5; }
+    .cal-body { padding: 18px 20px; }
+    .cal-btns { display: flex; gap: 10px; margin-top: 4px; }
+    .cal-btns .btn { flex: 1; }
+
+    .login-container {
+      display: flex; justify-content: center; align-items: center;
+      min-height: 100vh; padding: 24px;
+      background: var(--bg0); position: relative;
+    }
+    .login-container::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(0,245,160,0.08) 0%, transparent 70%);
+    }
+    .login-inner { width: 100%; max-width: 360px; position: relative; z-index: 1; }
+    .login-logo-wrap { text-align: center; margin-bottom: 36px; }
+    .login-logo {
+      width: 72px; height: 72px; margin: 0 auto 16px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 20px; display: flex; align-items: center; justify-content: center;
+      font-size: 32px; color: var(--bg0);
+      box-shadow: 0 0 30px rgba(0,245,160,0.3);
+      animation: logoFloat 3s ease-in-out infinite;
+    }
+    @keyframes logoFloat {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    .login-title {
+      font-size: 28px; font-weight: 900;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+    .login-subtitle { color: var(--txt2); font-size: 13px; }
+    .login-tabs {
+      display: flex; gap: 0; margin-bottom: 24px;
+      background: var(--bg2); border-radius: 10px; padding: 4px;
+    }
+    .login-tab {
+      flex: 1; padding: 9px; border-radius: 7px; font-size: 13px;
+      font-weight: 600; font-family: var(--font); cursor: pointer;
+      border: none; color: var(--txt2); background: transparent;
+      transition: var(--transition2);
+    }
+    .login-tab.active { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: var(--bg0); }
+    .login-form { display: none; }
+    .login-form.active { display: block; animation: fadeInUp 0.3s ease; }
+
+    .input-icon-wrap { position: relative; }
+    .input-icon-wrap i {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--txt3); font-size: 15px; pointer-events: none;
+    }
+    .input-icon-wrap .form-input { padding-left: 42px; }
+    .input-icon-wrap .eye-toggle {
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--txt3); cursor: pointer; font-size: 15px; z-index: 2;
+    }
+
+    .checkbox-remember {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 16px 0;
+      cursor: pointer;
+    }
+    .checkbox-remember input {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--accent);
+    }
+    .checkbox-remember span { color: var(--txt2); font-size: 13px; }
+
+    /* Estilos de factura - Logo pequeño */
+    .invoice-container-80mm {
+      width: 78mm;
+      background: white;
+      color: #111;
+      padding: 14px;
+      font-family: 'Arial', sans-serif;
+      font-size: 11px;
+      margin: 0 auto;
+      box-sizing: border-box;
+      border: 1px solid #eee;
+    }
+    .invoice-container-a4 {
+      max-width: 210mm;
+      background: white;
+      color: #111;
+      padding: 20px;
+      font-family: 'Arial', sans-serif;
+      font-size: 12px;
+      margin: 0 auto;
+      box-sizing: border-box;
+      border: 1px solid #ddd;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .invoice-header { text-align: center; margin-bottom: 12px; border-bottom: 2px solid #000; padding-bottom: 10px; }
+    .invoice-logo { max-width: 50px; max-height: 50px; margin: 0 auto 6px; display: block; object-fit: contain; }
+    .invoice-biz-name { font-size: 15px; font-weight: 900; margin: 4px 0; }
+    .invoice-sub { font-size: 9px; color: #666; margin: 1px 0; }
+    .invoice-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 10px; gap: 6px; }
+    .invoice-row .lbl { font-weight: 700; color: #444; }
+    .invoice-row .val { text-align: right; }
+    .invoice-divider { border: none; border-top: 1px dashed #999; margin: 10px 0; }
+    .invoice-total-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 11px; }
+    .invoice-total-row.grand { font-weight: 900; font-size: 13px; border-top: 2px solid #000; padding-top: 8px; margin-top: 8px; }
+    .invoice-footer { text-align: center; margin-top: 14px; padding-top: 10px; border-top: 1px dashed #999; font-size: 8px; color: #888; }
+    .barcode-container { margin: 8px auto; text-align: center; }
+    .barcode-svg { max-width: 100%; height: auto; }
+    .qr-code-container { margin: 8px auto; text-align: center; }
+
+    /* Estilos para carta de saldo */
+    .balance-letter {
+      max-width: 210mm;
+      background: white;
+      color: #111;
+      padding: 25px;
+      font-family: 'Arial', sans-serif;
+      font-size: 12px;
+      margin: 0 auto;
+      box-sizing: border-box;
+      border: 1px solid #ddd;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .balance-letter .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 15px; }
+    .balance-letter .logo { max-width: 60px; max-height: 60px; margin: 0 auto 10px; display: block; object-fit: contain; }
+    .balance-letter .title { font-size: 18px; font-weight: 900; margin: 10px 0; }
+    .balance-letter .subtitle { font-size: 11px; color: #666; }
+    .balance-letter .info-section { margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; }
+    .balance-letter .info-row { display: flex; justify-content: space-between; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid #eee; }
+    .balance-letter .total-row { font-size: 16px; font-weight: 900; color: #0078d4; margin-top: 15px; padding-top: 10px; border-top: 2px solid #000; }
+    .balance-letter .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ccc; font-size: 9px; color: #888; }
+
+    .payment-item {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 13px;
+      margin-bottom: 10px;
+      border-left: 3px solid var(--accent);
+      transition: var(--transition2);
+    }
+    .payment-item:hover { background: var(--glass2); }
+
+    .profile-avatar-wrap {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 32px 16px 24px;
+    }
+    .profile-avatar {
+      width: 100px; height: 100px; border-radius: 50%;
+      border: 3px solid var(--accent); overflow: hidden;
+      background: var(--bg3); display: flex; align-items: center; justify-content: center;
+      font-size: 40px; color: var(--accent);
+      box-shadow: 0 0 24px rgba(0,245,160,0.25);
+      position: relative; cursor: pointer;
+      transition: var(--transition);
+    }
+    .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .profile-avatar:hover { box-shadow: 0 0 36px rgba(0,245,160,0.4); transform: scale(1.04); }
+    .profile-avatar-overlay {
+      position: absolute; inset: 0; background: rgba(0,0,0,0.5);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: var(--transition2);
+      border-radius: 50%; font-size: 22px; color: white;
+    }
+    .profile-avatar:hover .profile-avatar-overlay { opacity: 1; }
+    .profile-name { font-size: 20px; font-weight: 800; margin-top: 14px; }
+    .profile-role { color: var(--accent); font-size: 13px; font-weight: 600; margin-top: 4px; }
+
+    .quick-actions {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+      margin-bottom: 20px;
+    }
+    .quick-btn {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 10px;
+      cursor: pointer; transition: var(--transition);
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      text-align: center; color: var(--txt2); font-size: 11px; font-weight: 600;
+    }
+    .quick-btn i { font-size: 22px; }
+    .quick-btn:hover { background: var(--bg4); border-color: var(--border2); color: var(--accent); transform: translateY(-3px); box-shadow: var(--shadow2); }
+    .quick-btn.q-green i { color: var(--accent); }
+    .quick-btn.q-blue i { color: var(--accent2); }
+    .quick-btn.q-gold i { color: var(--gold); }
+    .quick-btn.q-warn i { color: var(--warning); }
+    .quick-btn.q-purple i { color: var(--purple); }
+
+    .activity-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 0; border-bottom: 1px solid var(--border);
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-icon {
+      width: 38px; height: 38px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+    .activity-icon.green { background: rgba(0,245,160,0.12); color: var(--accent); }
+    .activity-txt { flex: 1; min-width: 0; }
+    .activity-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .activity-sub { font-size: 11px; color: var(--txt2); margin-top: 2px; }
+    .activity-amount { font-size: 13px; font-weight: 700; text-align: right; flex-shrink: 0; }
+
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th {
+      text-align: left; padding: 10px 12px; font-size: 11px;
+      font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+      color: var(--txt3); border-bottom: 1px solid var(--border);
+    }
+    .data-table td {
+      padding: 11px 12px; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .data-table tr:hover td { background: var(--glass); }
+
+    .interest-toggle {
+      display: flex; gap: 0; background: var(--bg3); border-radius: 10px; padding: 4px; margin-bottom: 16px;
+    }
+    .interest-opt {
+      flex: 1; padding: 10px; border-radius: 7px; font-size: 13px;
+      font-weight: 600; cursor: pointer;
+      border: none; color: var(--txt2); background: transparent;
+      transition: var(--transition2);
+    }
+    .interest-opt.active { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: var(--bg0); }
+
+    .chart-container {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: var(--radius2);
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    canvas#dashboardChart { max-height: 250px; width: 100%; }
+    canvas#monthlyChart { max-height: 200px; width: 100%; }
+
+    .loan-detail {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .loan-detail:last-child { border-bottom: none; }
+    .loan-detail span:first-child { color: var(--txt2); font-weight: 500; }
+    .loan-detail span:last-child { font-weight: 700; color: var(--accent); }
+    .loan-detail .text-danger { color: var(--danger); }
+
+    .format-selector {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+      background: var(--bg3);
+      padding: 4px;
+      border-radius: 12px;
+    }
+    .format-option {
+      flex: 1;
+      text-align: center;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: var(--transition);
+      color: var(--txt2);
+    }
+    .format-option.active {
+      background: var(--accent);
+      color: var(--bg0);
+    }
+
+    .frequency-selector {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .freq-opt {
+      flex: 1;
+      text-align: center;
+      padding: 10px 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: var(--transition);
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--txt2);
+      min-width: 70px;
+    }
+    .freq-opt.active {
+      background: var(--accent);
+      color: var(--bg0);
+      border-color: var(--accent);
+    }
+
+    .payment-type-selector {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .pay-type-opt {
+      flex: 1;
+      text-align: center;
+      padding: 10px 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: var(--transition);
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--txt2);
+    }
+    .pay-type-opt.active {
+      background: var(--accent);
+      color: var(--bg0);
+      border-color: var(--accent);
+    }
+
+    .payment-breakdown {
+      background: rgba(0,245,160,0.05);
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 12px;
+      border: 1px solid rgba(0,245,160,0.15);
+    }
+    .payment-breakdown .row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 12px;
+    }
+
+    .text-center { text-align: center; }
+    .text-accent { color: var(--accent); }
+    .text-danger { color: var(--danger); }
+    .text-warn { color: var(--warning); }
+    .text-muted { color: var(--txt2); }
+    .text-sm { font-size: 12px; }
+    .fw-bold { font-weight: 700; }
+    .mt-1 { margin-top: 8px; }
+    .mt-2 { margin-top: 16px; }
+    .mb-1 { margin-bottom: 8px; }
+    .mb-2 { margin-bottom: 16px; }
+    .empty-state {
+      text-align: center; padding: 40px 20px; color: var(--txt2);
+    }
+    .empty-state i { font-size: 52px; color: var(--txt3); margin-bottom: 14px; display: block; }
+    .divider { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
+    .spacer { height: 80px; }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="login-container">
+  <div class="login-inner">
+    <div class="login-logo-wrap">
+      <div class="login-logo"><i class="fas fa-coins"></i></div>
+      <div class="login-title">PlusMoney</div>
+      <div class="login-subtitle">Sistema Integral de Préstamos · Retom</div>
+    </div>
+
+    <div class="login-tabs">
+      <button class="login-tab active" id="tabLogin" onclick="switchLoginTab('login')">Iniciar Sesión</button>
+      <button class="login-tab" id="tabRegister" onclick="switchLoginTab('register')">Nueva Cuenta</button>
+    </div>
+
+    <div class="login-form active" id="loginForm">
+      <div class="form-group">
+        <div class="input-icon-wrap">
+          <i class="fas fa-user"></i>
+          <input type="text" id="loginUsername" class="form-input" placeholder="Usuario">
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="input-icon-wrap">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="loginPassword" class="form-input" placeholder="PIN (8 dígitos)">
+          <i class="fas fa-eye eye-toggle" onclick="togglePwd('loginPassword',this)"></i>
+        </div>
+      </div>
+      <div class="checkbox-remember" id="rememberCheckbox">
+        <input type="checkbox" id="rememberMe">
+        <span>Recordar sesión</span>
+      </div>
+      <button id="loginBtn" class="btn btn-primary mt-2">
+        <i class="fas fa-sign-in-alt"></i> Ingresar al Sistema
+      </button>
+      <div id="loginAlert" class="alert alert-error" style="display:none; margin-top:14px;"></div>
+    </div>
+
+    <div class="login-form" id="registerForm">
+      <div class="photo-selector-container mb-2">
+        <input type="file" id="regPhoto" class="photo-selector-input" accept="image/*">
+        <label for="regPhoto" class="photo-selector-label" style="min-height:110px;">
+          <i class="fas fa-user-circle"></i>
+          <span>Foto de Perfil (Opcional)</span>
+          <span class="sub-text">Toca para seleccionar imagen</span>
+        </label>
+      </div>
+      <div id="regPhotoPreview" class="photo-preview"></div>
+      <div class="form-row mt-2">
+        <div class="form-group">
+          <div class="input-icon-wrap">
+            <i class="fas fa-id-badge"></i>
+            <input type="text" id="regFirstName" class="form-input" placeholder="Nombre">
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="input-icon-wrap">
+            <i class="fas fa-id-badge"></i>
+            <input type="text" id="regLastName" class="form-input" placeholder="Apellido">
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="input-icon-wrap">
+          <i class="fas fa-user"></i>
+          <input type="text" id="regUsername" class="form-input" placeholder="Nombre de usuario">
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="input-icon-wrap">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="regPassword" class="form-input" placeholder="PIN (8 dígitos mínimo)">
+          <i class="fas fa-eye eye-toggle" onclick="togglePwd('regPassword',this)"></i>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="input-icon-wrap">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="regPassword2" class="form-input" placeholder="Confirmar PIN">
+        </div>
+      </div>
+      <button id="registerBtn" class="btn btn-secondary mt-2">
+        <i class="fas fa-user-plus"></i> Crear Cuenta
+      </button>
+      <div id="registerAlert" class="alert alert-error" style="display:none; margin-top:14px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="appScreen" class="app-container" style="display:none;">
+
+  <header class="app-header">
+    <div class="header-left">
+      <div class="logo-badge"><i class="fas fa-coins"></i></div>
+      <div class="app-title" id="appTitle">PlusMoney Retom</div>
+    </div>
+    <div class="header-right">
+      <button class="menu-btn" id="openMenuBtn" title="Menú de Préstamos">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="avatar-btn" id="headerAvatar" onclick="goToProfile()" title="Mi Perfil">
+        <i class="fas fa-user"></i>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+
+    <section id="homeSection" class="section active">
+      <div class="section-title"><i class="fas fa-chart-line"></i> Panel Principal</div>
+      <div class="stats-grid" id="homeStats">
+        <div class="stat-card"><div class="stat-val" id="st-clientes">0</div><div class="stat-lbl">Clientes</div></div>
+        <div class="stat-card"><div class="stat-val" id="st-prestado">$0</div><div class="stat-lbl">Prestado</div></div>
+        <div class="stat-card"><div class="stat-val" id="st-cobrado">$0</div><div class="stat-lbl">Cobrado</div></div>
+        <div class="stat-card"><div class="stat-val" id="st-pendiente">$0</div><div class="stat-lbl">Pendiente</div></div>
+      </div>
+      <div class="chart-container"><canvas id="dashboardChart"></canvas></div>
+      <div class="section-title" style="font-size:14px; margin-bottom:14px;"><i class="fas fa-bolt"></i> Acciones Rápidas</div>
+      <div class="quick-actions">
+        <div class="quick-btn q-green" onclick="openLoanSection('crearPrestamo')"><i class="fas fa-plus-circle"></i>Nuevo Préstamo</div>
+        <div class="quick-btn q-blue" onclick="openLoanSection('realizarPago')"><i class="fas fa-money-bill-wave"></i>Registrar Pago</div>
+        <div class="quick-btn q-gold" onclick="openLoanSection('pagosPendientes')"><i class="fas fa-clock"></i>Pendientes</div>
+        <div class="quick-btn q-warn" onclick="openLoanSection('pagosAtrasados')"><i class="fas fa-exclamation-triangle"></i>Atrasados</div>
+        <div class="quick-btn q-purple" onclick="openLoanSection('facturaManual')"><i class="fas fa-file-invoice"></i>Factura</div>
+        <div class="quick-btn q-purple" onclick="openLoanSection('prestamosCompletados')"><i class="fas fa-check-circle"></i>Completados</div>
+      </div>
+      <div class="chart-container"><canvas id="monthlyChart"></canvas></div>
+      <div class="card mb-2">
+        <div class="card-title"><i class="fas fa-wallet" style="margin-right:8px;"></i>Resumen Financiero</div>
+        <div class="card-row"><span class="card-lbl">Total Prestado</span><span class="card-val" id="h-totalPrestado">$0.00</span></div>
+        <div class="card-row"><span class="card-lbl">Total Cobrado</span><span class="card-val text-accent" id="h-totalPagado">$0.00</span></div>
+        <div class="card-row"><span class="card-lbl">Saldo Pendiente</span><span class="card-val text-danger fw-bold" id="h-totalPendiente">$0.00</span></div>
+        <div class="card-row"><span class="card-lbl">Ganancias (Intereses)</span><span class="card-val" style="color:var(--gold);" id="h-ganancias">$0.00</span></div>
+        <div class="card-row"><span class="card-lbl">Pérdidas por Mora</span><span class="card-val text-danger" id="h-perdidas">$0.00</span></div>
+      </div>
+      <div class="section-title" style="font-size:14px; margin-bottom:12px;"><i class="fas fa-history"></i> Actividad Reciente</div>
+      <div class="card" style="padding:8px 16px;"><div id="recentActivity"><div class="empty-state" style="padding:20px;"><i class="fas fa-stream"></i><p>Sin actividad reciente</p></div></div></div>
+      <div class="spacer"></div>
+    </section>
+
+    <section id="addClientSection" class="section">
+      <div class="section-title"><i class="fas fa-user-plus"></i> Agregar Cliente</div>
+      <form id="addClientForm">
+        <div class="form-section-title"><i class="fas fa-id-card"></i> Datos Personales</div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Nombre</label><input type="text" id="clientFirstName" class="form-input" placeholder="Nombre" required></div>
+          <div class="form-group"><label class="form-label">Apellido</label><input type="text" id="clientLastName" class="form-input" placeholder="Apellido" required></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Cédula / ID</label><input type="text" id="clientCedula" class="form-input" placeholder="000-0000000-0"></div>
+          <div class="form-group"><label class="form-label">Teléfono</label><input type="tel" id="clientPhone" class="form-input" placeholder="809-000-0000"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Dirección</label><input type="text" id="clientAddress" class="form-input" placeholder="Dirección del cliente"></div>
+        <div class="form-group"><label class="form-label">Tipo de Cliente (Opcional)</label>
+          <select id="clientType" class="form-select">
+            <option value="">Seleccione tipo (opcional)</option>
+            <option value="solo">Solo</option>
+            <option value="pareja">Con Pareja</option>
+            <option value="ninos">Con Niños</option>
+            <option value="personalizado">Personalizado</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Foto de Perfil</label>
+          <input type="file" id="clientPhoto" class="photo-selector-input" accept="image/*" capture="environment">
+          <label for="clientPhoto" class="photo-selector-label">
+            <i class="fas fa-camera"></i>
+            <span>Seleccionar Foto del Cliente</span>
+            <span class="sub-text">Toca para tomar foto o galería</span>
+          </label>
+          <div class="photo-preview" id="photoPreview"></div>
+        </div>
+        <div class="form-section-title"><i class="fas fa-hand-holding-usd"></i> Datos del Préstamo</div>
+        <div class="form-group">
+          <label class="form-label">Tipo de Préstamo</label>
+          <div class="interest-toggle">
+            <button type="button" class="interest-opt active" id="optSinInteres" onclick="setInterestMode(false)">Sin Interés</button>
+            <button type="button" class="interest-opt" id="optConInteres" onclick="setInterestMode(true)">Con Interés</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Frecuencia de Pago</label>
+          <div class="frequency-selector" id="frequencySelector">
+            <div class="freq-opt active" data-freq="mensual">Mensual</div>
+            <div class="freq-opt" data-freq="quincenal">Quincenal</div>
+            <div class="freq-opt" data-freq="semanal">Semanal</div>
+            <div class="freq-opt" data-freq="diario">Diario</div>
+          </div>
+          <input type="hidden" id="paymentFrequency" value="mensual">
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Monto Préstamo</label><input type="number" id="clientAmount" class="form-input" placeholder="0.00" step="0.01" required></div>
+          <div class="form-group"><label class="form-label">Plazo (Meses)</label><input type="number" id="clientPlazoMeses" class="form-input" placeholder="12" value="12" min="1"></div>
+        </div>
+        <div id="interestFields" style="display:none;">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Tasa de Interés Mensual (%)</label><input type="number" id="clientInteres" class="form-input" placeholder="5" step="0.1" value="5"></div>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">Fecha de Inicio</label><input type="date" id="clientFechaInicio" class="form-input" value=""></div>
+        <div class="form-group"><label class="form-label">Notas</label><textarea id="clientNotas" class="form-textarea" placeholder="Notas adicionales sobre el préstamo..."></textarea></div>
+        <div id="loanSummaryPreview" class="card" style="display:none;">
+          <div class="card-title"><i class="fas fa-calculator" style="margin-right:8px;"></i>Vista Previa del Préstamo</div>
+          <div class="card-row"><span class="card-lbl">Monto Principal</span><span class="card-val" id="prev-principal">$0.00</span></div>
+          <div class="card-row" id="prev-interes-row" style="display:none;"><span class="card-lbl">Total Intereses</span><span class="card-val text-warn" id="prev-interes">$0.00</span></div>
+          <div class="card-row" id="prev-total-row" style="display:none;"><span class="card-lbl">Total a Pagar</span><span class="card-val text-accent fw-bold" id="prev-total">$0.00</span></div>
+          <div class="card-row" id="prev-cuota-row" style="display:none;"><span class="card-lbl">Pago por Período</span><span class="card-val text-accent" id="prev-cuota">$0.00</span></div>
+          <div class="card-row" id="prev-interes-por-periodo-row" style="display:none;"><span class="card-lbl">Interés por Período</span><span class="card-val text-warn" id="prev-interes-por-periodo">$0.00</span></div>
+          <div class="card-row" id="prev-capital-por-periodo-row" style="display:none;"><span class="card-lbl">Capital por Período</span><span class="card-val" id="prev-capital-por-periodo">$0.00</span></div>
+        </div>
+        <button type="submit" class="btn btn-primary mt-2"><i class="fas fa-save"></i> Guardar Cliente y Préstamo</button>
+        <div class="spacer"></div>
+      </form>
+    </section>
+
+    <section id="clientsSection" class="section">
+      <div class="section-title"><i class="fas fa-users"></i> Clientes</div>
+      <div class="search-wrap">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchClient" class="search-input" placeholder="Buscar por nombre, cédula...">
+      </div>
+      <div style="display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;">
+        <button class="btn btn-xs btn-outline" style="width:auto;" onclick="filterClients('all')">Todos</button>
+        <button class="btn btn-xs" style="background:rgba(0,245,160,0.15); color:var(--accent); width:auto;" onclick="filterClients('activo')">Activos</button>
+        <button class="btn btn-xs" style="background:rgba(255,71,87,0.15); color:var(--danger); width:auto;" onclick="filterClients('atrasado')">Atrasados</button>
+        <button class="btn btn-xs" style="background:rgba(0,217,245,0.15); color:var(--accent2); width:auto;" onclick="filterClients('pagado')">Pagados</button>
+      </div>
+      <div id="clientsList"></div>
+      <div class="spacer"></div>
+    </section>
+
+    <section id="editClientSection" class="section">
+      <div class="section-title"><i class="fas fa-user-edit"></i> Editar Cliente</div>
+      <div id="editClientContent">
+        <div class="empty-state">
+          <i class="fas fa-users"></i>
+          <p>Selecciona un cliente desde la lista para editarlo</p>
+          <button class="btn btn-outline mt-2" style="max-width:220px; margin:12px auto 0;" onclick="switchSection('clientsSection')"><i class="fas fa-users"></i> Ver Clientes</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="paymentsSection" class="section">
+      <div class="section-title"><i class="fas fa-money-bill-wave"></i> Realizar Pagos</div>
+      <form id="paymentForm">
+        <div class="form-group">
+          <label class="form-label">Cliente</label>
+          <select id="paymentClient" class="form-select" required>
+            <option value="">Seleccione cliente</option>
+          </select>
+        </div>
+        <div id="paymentClientInfo" style="display:none;" class="card">
+          <div class="card-row"><span class="card-lbl">Préstamo Total</span><span class="card-val" id="pi-total">$0.00</span></div>
+          <div class="card-row"><span class="card-lbl">Intereses Totales</span><span class="card-val text-warn" id="pi-interes">$0.00</span></div>
+          <div class="card-row"><span class="card-lbl">Ya Pagado</span><span class="card-val text-accent" id="pi-pagado">$0.00</span></div>
+          <div class="card-row"><span class="card-lbl">Capital Pendiente</span><span class="card-val text-danger" id="pi-capitalPendiente">$0.00</span></div>
+          <div class="card-row"><span class="card-lbl">Próximo Pago</span><span class="card-val" id="pi-proximoPago">$0.00</span></div>
+          <div class="card-row"><span class="card-lbl">Interés del Próximo Pago</span><span class="card-val text-warn" id="pi-interesProximo">$0.00</span></div>
+          <div class="card-row"><span class="card-lbl">Capital del Próximo Pago</span><span class="card-val" id="pi-capitalProximo">$0.00</span></div>
+          <div class="card-row" id="pi-mora-row" style="display:none;"><span class="card-lbl">Mora Acumulada</span><span class="card-val text-danger" id="pi-mora">$0.00</span></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tipo de Pago</label>
+          <div class="payment-type-selector" id="paymentTypeSelector">
+            <div class="pay-type-opt active" data-type="cuota">Pago de Cuota (Capital + Interés)</div>
+            <div class="pay-type-opt" data-type="capital">Solo Capital</div>
+            <div class="pay-type-opt" data-type="interes">Solo Interés</div>
+            <div class="pay-type-opt" data-type="personalizado">Personalizado</div>
+          </div>
+          <input type="hidden" id="paymentTypeValue" value="cuota">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Monto a Pagar</label>
+          <input type="number" id="paymentAmount" class="form-input" placeholder="0.00" step="0.01" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Método de Pago</label>
+          <select id="paymentMethod" class="form-select">
+            <option value="efectivo">Efectivo</option>
+            <option value="transferencia">Transferencia</option>
+            <option value="tarjeta">Tarjeta</option>
+            <option value="cheque">Cheque</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Observación</label>
+          <input type="text" id="paymentNota" class="form-input" placeholder="Nota del pago (opcional)">
+        </div>
+        <div id="paymentBreakdown" class="payment-breakdown" style="display:none;">
+          <div class="row"><span>💰 Capital aplicado:</span><span id="breakdown-capital" class="fw-bold">$0.00</span></div>
+          <div class="row"><span>📈 Interés aplicado:</span><span id="breakdown-interes" class="fw-bold text-warn">$0.00</span></div>
+          <div class="row"><span>⚠️ Mora aplicada:</span><span id="breakdown-mora" class="fw-bold text-danger">$0.00</span></div>
+          <div class="row divider" style="border-top:1px solid rgba(0,245,160,0.2); margin-top:6px; padding-top:6px;"><span>💵 Total aplicado:</span><span id="breakdown-total" class="fw-bold text-accent">$0.00</span></div>
+        </div>
+        <button type="submit" class="btn btn-primary mt-2"><i class="fas fa-check-circle"></i> Registrar Pago</button>
+      </form>
+      <div class="divider"></div>
+      <div class="section-title" style="font-size:15px; margin-bottom:12px;"><i class="fas fa-history"></i> Pagos Recientes</div>
+      <div id="paymentsHistory"></div>
+      <div class="spacer"></div>
+    </section>
+
+    <section id="configSection" class="section">
+      <div class="section-title"><i class="fas fa-cog"></i> Configuración</div>
+      <form id="configForm">
+        <div class="form-section-title"><i class="fas fa-building"></i> Empresa</div>
+        <div class="form-group"><label class="form-label">Nombre de la Empresa</label><input type="text" id="companyName" class="form-input" placeholder="Mi Empresa"></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">RNC</label><input type="text" id="companyRNC" class="form-input" placeholder="RNC"></div>
+          <div class="form-group"><label class="form-label">Teléfono</label><input type="tel" id="companyPhone" class="form-input" placeholder="809-000-0000"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Dirección</label><input type="text" id="companyAddress" class="form-input" placeholder="Dirección"></div>
+        <div class="form-group">
+          <label class="form-label">Logo de la Empresa</label>
+          <input type="file" id="companyLogoFile" class="photo-selector-input" accept="image/*">
+          <label for="companyLogoFile" class="photo-selector-label" style="min-height: 100px;">
+            <i class="fas fa-image"></i>
+            <span>Seleccionar Logo para Facturas</span>
+            <span class="sub-text">Formatos: PNG, JPG, GIF</span>
+          </label>
+          <div id="logoPreview" style="margin-top: 8px; display: flex; justify-content: center;"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Email</label><input type="email" id="companyEmail" class="form-input" placeholder="empresa@email.com"></div>
+        <div class="form-section-title"><i class="fas fa-palette"></i> Apariencia</div>
+        <div class="form-group">
+          <label class="form-label">Tema</label>
+          <select id="themeSelect" class="form-select">
+            <option value="official">Retom Official (Original)</option>
+            <option value="classic">Retom Clásico (Azul/Blanco)</option>
+          </select>
+        </div>
+        <div class="form-section-title"><i class="fas fa-percentage"></i> Intereses Globales</div>
+        <div class="toggle-wrap" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;"><span class="toggle-label">Aplicar intereses a todos</span><label class="toggle"><input type="checkbox" id="globalInterestEnabled"><span class="toggle-slider"></span></label></div>
+        <div id="globalInterestFields">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Tasa de Interés Mensual (%)</label><input type="number" id="globalInterestRate" class="form-input" placeholder="5" step="0.1"></div>
+          </div>
+        </div>
+        <div class="form-section-title"><i class="fas fa-exclamation-triangle"></i> Mora / Penalidades</div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">% Mora Diaria</label><input type="number" id="moraRate" class="form-input" placeholder="2" step="0.1"></div>
+          <div class="form-group"><label class="form-label">Días Gracia</label><input type="number" id="diasGracia" class="form-input" placeholder="3"></div>
+        </div>
+        <button type="submit" class="btn btn-primary mt-2"><i class="fas fa-save"></i> Guardar Configuración</button>
+        <div class="spacer"></div>
+      </form>
+    </section>
+
+    <section id="loanSection" class="section"><div id="loanSubContent"></div></section>
+
+    <section id="profileSection" class="section">
+      <div class="section-title"><i class="fas fa-user-circle"></i> Mi Perfil</div>
+      <div class="card" style="padding:0; overflow:hidden;">
+        <div class="profile-avatar-wrap">
+          <div class="profile-avatar" id="profileAvatarBig" onclick="document.getElementById('profilePhotoInput').click()">
+            <i class="fas fa-user" id="profileAvatarIcon"></i>
+            <img id="profileAvatarImg" style="display:none;" alt="Foto de perfil">
+            <div class="profile-avatar-overlay"><i class="fas fa-camera"></i></div>
+          </div>
+          <input type="file" id="profilePhotoInput" style="display:none;" accept="image/*">
+          <div class="profile-name" id="profileName">Usuario</div>
+          <div class="profile-role"><i class="fas fa-shield-alt" style="margin-right:6px;"></i>Colaborador</div>
+        </div>
+      </div>
+      <div class="card mt-2">
+        <div class="card-title"><i class="fas fa-info-circle" style="margin-right:8px;"></i>Información de Cuenta</div>
+        <div class="card-row"><span class="card-lbl">Usuario</span><span class="card-val" id="profileUsername">—</span></div>
+        <div class="card-row"><span class="card-lbl">Nombre</span><span class="card-val" id="profileFullName">—</span></div>
+        <div class="card-row"><span class="card-lbl">Miembro desde</span><span class="card-val" id="profileSince">—</span></div>
+      </div>
+      <div class="card mt-2">
+        <div class="card-title"><i class="fas fa-edit" style="margin-right:8px;"></i>Editar Información</div>
+        <form id="profileForm">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Nombre</label><input type="text" id="editProfileFirstName" class="form-input" placeholder="Nombre"></div>
+            <div class="form-group"><label class="form-label">Apellido</label><input type="text" id="editProfileLastName" class="form-input" placeholder="Apellido"></div>
+          </div>
+          <div class="form-group"><label class="form-label">Usuario</label><input type="text" id="editProfileUsername" class="form-input" placeholder="Nombre de usuario"></div>
+          <button type="submit" class="btn btn-primary btn-sm mt-2"><i class="fas fa-save"></i> Guardar Cambios</button>
+        </form>
+      </div>
+      <div class="card mt-2">
+        <div class="card-title"><i class="fas fa-lock" style="margin-right:8px;"></i>Cambiar PIN / Contraseña</div>
+        <form id="changePasswordForm">
+          <div class="form-group"><label class="form-label">PIN Actual</label><div class="input-icon-wrap"><i class="fas fa-lock"></i><input type="password" id="oldPin" class="form-input" placeholder="PIN actual"></div></div>
+          <div class="form-group"><label class="form-label">Nuevo PIN</label><div class="input-icon-wrap"><i class="fas fa-key"></i><input type="password" id="newPin" class="form-input" placeholder="Nuevo PIN"><i class="fas fa-eye eye-toggle" onclick="togglePwd('newPin',this)"></i></div></div>
+          <div class="form-group"><label class="form-label">Confirmar Nuevo PIN</label><div class="input-icon-wrap"><i class="fas fa-key"></i><input type="password" id="newPin2" class="form-input" placeholder="Confirmar nuevo PIN"></div></div>
+          <button type="submit" class="btn btn-warning btn-sm mt-2"><i class="fas fa-key"></i> Actualizar PIN</button>
+        </form>
+      </div>
+      <div class="mt-2"><button class="btn btn-danger" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button></div>
+      <div class="spacer"></div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav" id="bottomNav">
+    <div class="nav-item active" data-section="homeSection"><i class="fas fa-home"></i><span>Inicio</span></div>
+    <div class="nav-item" data-section="addClientSection"><i class="fas fa-user-plus"></i><span>Agregar</span></div>
+    <div class="nav-item" data-section="clientsSection"><i class="fas fa-users"></i><span>Clientes</span></div>
+    <div class="nav-item" data-section="paymentsSection"><i class="fas fa-money-bill"></i><span>Pagos</span></div>
+    <div class="nav-item" data-section="configSection"><i class="fas fa-cog"></i><span>Config</span></div>
+  </nav>
+</div>
+
+<div id="menuModal" class="modal" style="align-items:flex-start;">
+  <div class="modal-content" style="border-radius:0 0 var(--radius2) var(--radius2); border-top:none;">
+    <div class="modal-header"><h2><i class="fas fa-th"></i> Sistema de Préstamos</h2><button class="close-modal" onclick="closeModal('menuModal')"><i class="fas fa-times"></i></button></div>
+    <div class="menu-modal-grid">
+      <button class="menu-icon-btn color-green" onclick="openLoanSection('crearPrestamo')"><i class="fas fa-plus-circle"></i>Crear Préstamo</button>
+      <button class="menu-icon-btn color-blue" onclick="openLoanSection('clientesPrestamos')"><i class="fas fa-users"></i>Clientes con Préstamos</button>
+      <button class="menu-icon-btn color-warn" onclick="openLoanSection('pagosPendientes')"><i class="fas fa-clock"></i>Pagos Pendientes</button>
+      <button class="menu-icon-btn color-danger" onclick="openLoanSection('pagosAtrasados')"><i class="fas fa-exclamation-triangle"></i>Pagos Atrasados</button>
+      <button class="menu-icon-btn color-blue" onclick="openLoanSection('realizarPago')"><i class="fas fa-hand-holding-usd"></i>Realizar Pagos</button>
+      <button class="menu-icon-btn color-gold" onclick="openLoanSection('ganancias')"><i class="fas fa-chart-line"></i>Ganancias</button>
+      <button class="menu-icon-btn color-pink" onclick="openLoanSection('perdidas')"><i class="fas fa-chart-line fa-flip-vertical"></i>Pérdidas / Mora</button>
+      <button class="menu-icon-btn color-purple" onclick="openLoanSection('reportes')"><i class="fas fa-file-alt"></i>Reportes</button>
+      <button class="menu-icon-btn color-green" onclick="openLoanSection('facturaManual')"><i class="fas fa-file-invoice-dollar"></i>Factura Electrónica</button>
+      <button class="menu-icon-btn color-blue" onclick="openLoanSection('estadoPrestamos')"><i class="fas fa-clipboard-list"></i>Estado Préstamos</button>
+      <button class="menu-icon-btn color-pink" onclick="openLoanSection('historialCompleto')"><i class="fas fa-history"></i>Historial Completo</button>
+      <button class="menu-icon-btn color-purple" onclick="openLoanSection('historialFacturas')"><i class="fas fa-file-invoice"></i>Historial Facturas</button>
+      <button class="menu-icon-btn color-purple" onclick="openLoanSection('prestamosCompletados')"><i class="fas fa-check-circle"></i>Préstamos Completados</button>
+      <button class="menu-icon-btn color-gold" onclick="openLoanSection('cartaSaldo')"><i class="fas fa-file-alt"></i>Carta de Saldo</button>
+    </div>
+  </div>
+</div>
+
+<div id="paymentHistoryModal" class="modal centered">
+  <div class="modal-content">
+    <div class="modal-header"><h2><i class="fas fa-history"></i> Historial de Pagos</h2><button class="close-modal" onclick="closeModal('paymentHistoryModal')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body" id="paymentHistoryContent"></div>
+  </div>
+</div>
+
+<div id="invoiceModal" class="modal centered">
+  <div class="modal-content">
+    <div class="modal-header"><h2><i class="fas fa-file-invoice"></i> Factura</h2><button class="close-modal" onclick="closeModal('invoiceModal')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="format-selector" id="formatSelector">
+        <div class="format-option active" data-format="80mm">Formato Térmico (80mm)</div>
+        <div class="format-option" data-format="a4">Formato Carta (A4)</div>
+      </div>
+      <div id="invoiceForImage" class="invoice-container-80mm"></div>
+      <div class="wa-box" style="background: rgba(37,211,102,0.07); border: 1px solid rgba(37,211,102,0.25); border-radius: 12px; padding: 16px; margin-top: 16px;">
+        <h4 style="color: var(--wa); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;"><i class="fab fa-whatsapp"></i> Enviar por WhatsApp</h4>
+        <p style="font-size: 12px; color: var(--txt2); margin-bottom: 6px;"><i class="fas fa-info-circle"></i> La factura se convertirá a imagen antes de enviar.</p>
+      </div>
+      <div class="btn-group mt-2">
+        <button class="btn btn-wa btn-sm" id="sendWABtn"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+        <button class="btn btn-purple btn-sm" id="copyClipBtn"><i class="fas fa-copy"></i> Copiar Imagen</button>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary btn-sm" id="printInvoiceBtn"><i class="fas fa-print"></i> Imprimir</button>
+        <button class="btn btn-secondary btn-sm" id="downloadInvoiceBtn"><i class="fas fa-download"></i> Descargar PNG</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="balanceLetterModal" class="modal centered">
+  <div class="modal-content">
+    <div class="modal-header"><h2><i class="fas fa-file-alt"></i> Carta de Saldo</h2><button class="close-modal" onclick="closeModal('balanceLetterModal')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div id="balanceLetterContent" class="balance-letter"></div>
+      <div class="wa-box" style="background: rgba(37,211,102,0.07); border: 1px solid rgba(37,211,102,0.25); border-radius: 12px; padding: 16px; margin-top: 16px;">
+        <h4 style="color: var(--wa); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;"><i class="fab fa-whatsapp"></i> Enviar por WhatsApp</h4>
+      </div>
+      <div class="btn-group mt-2">
+        <button class="btn btn-wa btn-sm" id="sendWABtnLetter"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+        <button class="btn btn-purple btn-sm" id="copyClipBtnLetter"><i class="fas fa-copy"></i> Copiar Imagen</button>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary btn-sm" id="printLetterBtn"><i class="fas fa-print"></i> Imprimir</button>
+        <button class="btn btn-secondary btn-sm" id="downloadLetterBtn"><i class="fas fa-download"></i> Descargar PNG</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="loanDetailsModal" class="modal centered">
+  <div class="modal-content">
+    <div class="modal-header"><h2><i class="fas fa-chart-line"></i> Detalles del Préstamo</h2><button class="close-modal" onclick="closeModal('loanDetailsModal')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body" id="loanDetailsContent"></div>
+  </div>
+</div>
+
+<div id="successAlert" class="cal-overlay">
+  <div class="cal-box"><div class="cal-head"><div class="cal-icon success"><i class="fas fa-check"></i></div><div class="cal-title" id="calSuccessTitle">¡Éxito!</div><div class="cal-msg" id="calSuccessMsg">Operación realizada correctamente.</div></div><div class="cal-body"><button class="btn btn-primary" onclick="closeAlert('successAlert')"><i class="fas fa-check"></i> Aceptar</button></div></div>
+</div>
+
+<div id="confirmAlert" class="cal-overlay">
+  <div class="cal-box"><div class="cal-head"><div class="cal-icon warning"><i class="fas fa-question-circle"></i></div><div class="cal-title" id="calConfirmTitle">¿Confirmar?</div><div class="cal-msg" id="calConfirmMsg">¿Está seguro de continuar?</div></div><div class="cal-body"><div class="cal-btns"><button class="btn btn-outline" onclick="closeAlert('confirmAlert'); if(window._confirmCb) window._confirmCb(false)">Cancelar</button><button class="btn btn-primary" onclick="closeAlert('confirmAlert'); if(window._confirmCb) window._confirmCb(true)">Confirmar</button></div></div></div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="loading" id="loading"><div class="spinner-ring"></div><div class="loading-text" id="loadingText">Cargando...</div></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+import { getFirestore, collection, query, where, getDocs, doc, getDoc, updateDoc, addDoc, Timestamp, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-storage.js";
+import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAMTWJr3mISmNiP-e_KjCO9BdBPi7Uuug4",
+  authDomain: "formulario-2-8929a.firebaseapp.com",
+  databaseURL: "https://formulario-2-8929a-default-rtdb.firebaseio.com",
+  projectId: "formulario-2-8929a",
+  storageBucket: "formulario-2-8929a.appspot.com",
+  messagingSenderId: "136908102526",
+  appId: "1:136908102526:web:d0a3bc1e3cb91a3fcab12f"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const storage = getStorage(app);
+const auth = getAuth(app);
+
+let currentUser = null;
+let clients = [];
+let payments = [];
+let invoices = [];
+let completedLoans = [];
+let companyConfig = {};
+let clientFilter = 'all';
+let currentFormat = '80mm';
+let currentInvoice = null;
+let currentBalanceLetter = null;
+let dashboardChart = null;
+let monthlyChart = null;
+let invoiceItems = [{ desc: '', qty: 1, price: 0 }];
+let selectedPaymentClient = null;
+
+const $ = id => document.getElementById(id);
+const showLoading = t => { $('loadingText').textContent = t || 'Cargando...'; $('loading').style.display = 'flex'; };
+const hideLoading = () => { $('loading').style.display = 'none'; };
+
+function showToast(msg, type = 'success') {
+  const t = $('toast');
+  t.textContent = msg;
+  t.style.background = type === 'error' ? 'rgba(255,71,87,0.96)' : type === 'warning' ? 'rgba(255,165,2,0.96)' : 'rgba(0,245,160,0.96)';
+  t.style.display = 'block';
+  clearTimeout(t._to);
+  t._to = setTimeout(() => { t.style.display = 'none'; }, 3200);
+}
+
+function showSuccess(title, msg) { $('calSuccessTitle').textContent = title; $('calSuccessMsg').textContent = msg; $('successAlert').style.display = 'flex'; setTimeout(() => { $('successAlert').style.display = 'none'; }, 3000); }
+function showConfirm(title, msg, cb) { $('calConfirmTitle').textContent = title; $('calConfirmMsg').textContent = msg; window._confirmCb = cb; $('confirmAlert').style.display = 'flex'; }
+window.closeAlert = id => { $(id).style.display = 'none'; };
+window.closeModal = id => { $(id).style.display = 'none'; };
+function formatCurrency(n) { return new Intl.NumberFormat('es-DO', { style: 'currency', currency: 'DOP', minimumFractionDigits: 2 }).format(n || 0); }
+function formatDate(d) { if (!d) return '—'; try { if (d.toDate) d = d.toDate(); if (typeof d === 'string') d = new Date(d); return d.toLocaleDateString('es-ES'); } catch { return '—'; } }
+function formatDateTime(d) { if (!d) return '—'; try { if (d.toDate) d = d.toDate(); if (typeof d === 'string') d = new Date(d); return d.toLocaleString('es-ES'); } catch { return '—'; } }
+function generateInvoiceId() { return 'RTM' + Math.floor(Math.random() * 1000000).toString().padStart(6, '0'); }
+function getTypeText(t) { return { solo: 'Solo', pareja: 'Con Pareja', ninos: 'Con Niños', personalizado: 'Personalizado' }[t] || ''; }
+
+// ============ FUNCIONES DE CÁLCULO ============
+function getPeriodosPorFrecuencia(frecuencia, meses) {
+  const map = { mensual: 1, quincenal: 2, semanal: 4, diario: 30 };
+  return meses * (map[frecuencia] || 1);
+}
+
+function getTasaPeriodica(tasaMensual, frecuencia) {
+  const divisores = { mensual: 1, quincenal: 2, semanal: 4, diario: 30 };
+  const divisor = divisores[frecuencia] || 1;
+  return (tasaMensual / 100) / divisor;
+}
+
+function calcularCuotaFija(principal, tasaPeriodica, periodos) {
+  if (tasaPeriodica <= 0) return principal / periodos;
+  return principal * tasaPeriodica * Math.pow(1 + tasaPeriodica, periodos) / (Math.pow(1 + tasaPeriodica, periodos) - 1);
+}
+
+function calcularDetallePrestamo(principal, tasaMensual, meses, frecuencia) {
+  if (!principal || principal <= 0) return { totalIntereses: 0, totalPagar: principal, cuota: 0, interesPeriodico: 0, capitalPeriodico: 0, periodos: 0, tasaPeriodica: 0 };
+  const periodos = getPeriodosPorFrecuencia(frecuencia, meses);
+  const tasaPeriodica = getTasaPeriodica(tasaMensual, frecuencia);
+  if (tasaMensual <= 0) {
+    const cuota = principal / periodos;
+    return { totalIntereses: 0, totalPagar: principal, cuota, interesPeriodico: 0, capitalPeriodico: cuota, periodos, tasaPeriodica: 0 };
+  }
+  const cuota = calcularCuotaFija(principal, tasaPeriodica, periodos);
+  const totalPagar = cuota * periodos;
+  const totalIntereses = totalPagar - principal;
+  const primerInteres = principal * tasaPeriodica;
+  const primerCapital = cuota - primerInteres;
+  return { totalIntereses, totalPagar, cuota, interesPeriodico: primerInteres, capitalPeriodico: primerCapital, periodos, tasaPeriodica };
+}
+
+// Capital restante = Monto préstamo - Total pagado
+function calcularCapitalRestante(client) {
+  const cp = payments.filter(p => p.clientId === client.id);
+  const totalPagado = cp.reduce((s, p) => s + (p.amount || 0), 0);
+  return Math.max(0, (client.amount || 0) - totalPagado);
+}
+
+// Capital restante excluyendo un pago específico (para la factura)
+function calcularCapitalRestanteExcluyendo(client, excludePaymentId) {
+  const cp = payments.filter(p => p.clientId === client.id && p.id !== excludePaymentId);
+  const totalPagado = cp.reduce((s, p) => s + (p.amount || 0), 0);
+  return Math.max(0, (client.amount || 0) - totalPagado);
+}
+
+function calcularInteresRestante(client) {
+  const cp = payments.filter(p => p.clientId === client.id);
+  const totalPagadoInteres = cp.reduce((s, p) => s + (p.interesAplicado || 0), 0);
+  const interesesTotales = getInterestAmount(client);
+  return Math.max(0, interesesTotales - totalPagadoInteres);
+}
+
+function getTotalWithInterest(client) {
+  const principal = client.amount || 0;
+  if (!client.hasInterest || !client.interestRate) return principal;
+  const detalle = calcularDetallePrestamo(principal, client.interestRate, client.plazoMeses || 12, client.paymentFrequency || 'mensual');
+  return detalle.totalPagar;
+}
+
+function getInterestAmount(client) {
+  return getTotalWithInterest(client) - (client.amount || 0);
+}
+
+function calcMora(client) {
+  if (!client.fechaVence) return 0;
+  const vence = client.fechaVence.toDate ? client.fechaVence.toDate() : new Date(client.fechaVence);
+  const today = new Date();
+  if (today <= vence) return 0;
+  const dias = Math.floor((today - vence) / 86400000);
+  const gracia = parseInt(companyConfig.diasGracia || 0);
+  const diasMora = Math.max(0, dias - gracia);
+  const moraRate = parseFloat(companyConfig.moraRate || 0);
+  const capitalRestante = calcularCapitalRestante(client);
+  return capitalRestante > 0 ? (capitalRestante * moraRate / 100 * diasMora) : 0;
+}
+
+function getProximoPagoInfo(client) {
+  const capitalRestante = calcularCapitalRestante(client);
+  const tasaMensual = client.interestRate || 0;
+  const meses = client.plazoMeses || 12;
+  const frecuencia = client.paymentFrequency || 'mensual';
+  const detalle = calcularDetallePrestamo(client.amount, tasaMensual, meses, frecuencia);
+  const tasaPeriodica = getTasaPeriodica(tasaMensual, frecuencia);
+  const interesPeriodico = capitalRestante * tasaPeriodica;
+  const capitalPeriodico = detalle.cuota - interesPeriodico;
+  return { cuota: detalle.cuota, interes: interesPeriodico, capital: capitalPeriodico };
+}
+
+function calcularPagoConDesglose(client, montoPago, tipoPago) {
+  const capitalRestante = calcularCapitalRestante(client);
+  const mora = calcMora(client);
+  let capitalAplicado = 0, interesAplicado = 0, moraAplicada = 0;
+  if (mora > 0 && montoPago >= mora) {
+    moraAplicada = mora;
+    montoPago -= mora;
+  } else if (mora > 0) {
+    moraAplicada = montoPago;
+    montoPago = 0;
+  }
+  if (montoPago > 0) {
+    capitalAplicado = Math.min(montoPago, capitalRestante);
+  }
+  return { capitalAplicado, interesAplicado, moraAplicada, totalAplicado: capitalAplicado + interesAplicado + moraAplicada };
+}
+
+function getStatusBadge(client) {
+  const capitalRestante = calcularCapitalRestante(client);
+  if (capitalRestante <= 0) return '<span class="badge badge-blue">Pagado</span>';
+  const vence = client.fechaVence ? (client.fechaVence.toDate ? client.fechaVence.toDate() : new Date(client.fechaVence)) : null;
+  if (vence && vence < new Date()) return '<span class="badge badge-red">Atrasado</span>';
+  return '<span class="badge badge-green">Activo</span>';
+}
+
+// CHARTS
+function initCharts() {
+  const ctx1 = document.getElementById('dashboardChart')?.getContext('2d');
+  const ctx2 = document.getElementById('monthlyChart')?.getContext('2d');
+  if (ctx1 && !dashboardChart) {
+    dashboardChart = new Chart(ctx1, {
+      type: 'bar',
+      data: { labels: ['Total Prestado', 'Capital Pendiente', 'Total Intereses', 'Total Mora'], datasets: [{ label: 'Resumen Financiero ($)', data: [0, 0, 0, 0], backgroundColor: ['rgba(0,245,160,0.6)', 'rgba(255,71,87,0.6)', 'rgba(0,217,245,0.6)', 'rgba(255,165,2,0.6)'], borderColor: ['rgba(0,245,160,1)', 'rgba(255,71,87,1)', 'rgba(0,217,245,1)', 'rgba(255,165,2,1)'], borderWidth: 1 }] },
+      options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'top', labels: { color: 'white' } }, tooltip: { callbacks: { label: (ctx) => formatCurrency(ctx.raw) } } }, scales: { y: { beginAtZero: true, ticks: { callback: (v) => formatCurrency(v), color: 'white' }, grid: { color: 'rgba(255,255,255,0.1)' } }, x: { ticks: { color: 'white' }, grid: { display: false } } } }
+    });
+  }
+  if (ctx2 && !monthlyChart) {
+    monthlyChart = new Chart(ctx2, {
+      type: 'line',
+      data: { labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'], datasets: [{ label: 'Prestado', data: Array(12).fill(0), borderColor: 'rgba(0,245,160,1)', backgroundColor: 'rgba(0,245,160,0.1)', tension: 0.4, fill: true }, { label: 'Cobrado', data: Array(12).fill(0), borderColor: 'rgba(0,217,245,1)', backgroundColor: 'rgba(0,217,245,0.1)', tension: 0.4, fill: true }] },
+      options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'top', labels: { color: 'white' } }, tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${formatCurrency(ctx.raw)}` } } }, scales: { y: { beginAtZero: true, ticks: { callback: (v) => formatCurrency(v), color: 'white' }, grid: { color: 'rgba(255,255,255,0.1)' } }, x: { ticks: { color: 'white' }, grid: { display: false } } } }
+    });
+  }
+}
+
+function updateCharts() {
+  let totalPrestado = 0, capitalPendiente = 0, totalIntereses = 0, totalMora = 0;
+  let monthlyData = { prestado: Array(12).fill(0), cobrado: Array(12).fill(0) };
+  clients.forEach(client => {
+    totalPrestado += client.amount || 0;
+    capitalPendiente += calcularCapitalRestante(client);
+    totalIntereses += getInterestAmount(client);
+    totalMora += calcMora(client);
+    const mesCreacion = client.createdAt?.toDate ? client.createdAt.toDate().getMonth() : new Date().getMonth();
+    monthlyData.prestado[mesCreacion] += client.amount || 0;
+    const cp = payments.filter(p => p.clientId === client.id);
+    cp.forEach(p => { const mesPago = p.date?.toDate ? p.date.toDate().getMonth() : new Date().getMonth(); monthlyData.cobrado[mesPago] += p.amount; });
+  });
+  if (dashboardChart) { dashboardChart.data.datasets[0].data = [totalPrestado, capitalPendiente, totalIntereses, totalMora]; dashboardChart.update(); }
+  if (monthlyChart) { monthlyChart.data.datasets[0].data = monthlyData.prestado; monthlyChart.data.datasets[1].data = monthlyData.cobrado; monthlyChart.update(); }
+}
+
+// Navigation
+window.switchSection = function(id, skipNav = false) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (!skipNav) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const ni = document.querySelector(`.nav-item[data-section="${id}"]`);
+    if (ni) ni.classList.add('active');
+  }
+};
+
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const sid = item.getAttribute('data-section');
+    switchSection(sid);
+    const map = { homeSection: () => { loadHomeData(); updateCharts(); }, clientsSection: loadClients, paymentsSection: () => { loadPaymentClients(); loadPaymentsHistory(); }, configSection: loadConfig, profileSection: loadProfile };
+    if (map[sid]) map[sid]();
+  });
+});
+
+$('openMenuBtn').addEventListener('click', () => { $('menuModal').style.display = 'flex'; });
+window.addEventListener('click', e => {
+  if (e.target === $('menuModal')) $('menuModal').style.display = 'none';
+  if (e.target === $('paymentHistoryModal')) $('paymentHistoryModal').style.display = 'none';
+  if (e.target === $('invoiceModal')) $('invoiceModal').style.display = 'none';
+  if (e.target === $('balanceLetterModal')) $('balanceLetterModal').style.display = 'none';
+  if (e.target === $('loanDetailsModal')) $('loanDetailsModal').style.display = 'none';
+});
+
+window.openLoanSection = function(sub) {
+  $('menuModal').style.display = 'none';
+  switchSection('loanSection', true);
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const c = $('loanSubContent');
+  const subs = {
+    crearPrestamo: () => { c.innerHTML = `<div class="section-title"><i class="fas fa-plus-circle"></i> Crear Préstamo</div><p class="text-muted text-sm mb-2">Use la sección "Agregar Cliente" para crear un préstamo completo.</p><button class="btn btn-primary" onclick="switchSection('addClientSection')"><i class="fas fa-user-plus"></i> Ir a Agregar Cliente</button><div class="spacer"></div>`; },
+    clientesPrestamos: () => renderClientesPrestamos(c),
+    pagosPendientes: () => renderPagosPendientes(c),
+    pagosAtrasados: () => renderPagosAtrasados(c),
+    realizarPago: () => switchSection('paymentsSection'),
+    ganancias: () => renderGanancias(c),
+    perdidas: () => renderPerdidas(c),
+    reportes: () => renderReportes(c),
+    facturaManual: () => renderFacturaManual(c),
+    estadoPrestamos: () => renderEstadoPrestamos(c),
+    historialCompleto: () => renderHistorialCompleto(c),
+    historialFacturas: () => renderHistorialFacturas(c),
+    prestamosCompletados: () => renderPrestamosCompletados(c),
+    cartaSaldo: () => renderCartaSaldo(c)
+  };
+  if (subs[sub]) subs[sub]();
+  else c.innerHTML = '<div class="empty-state"><i class="fas fa-tools"></i><p>Sección en construcción</p></div>';
+};
+
+// Frecuencia selector
+document.querySelectorAll('.freq-opt').forEach(opt => {
+  opt.addEventListener('click', () => {
+    document.querySelectorAll('.freq-opt').forEach(o => o.classList.remove('active'));
+    opt.classList.add('active');
+    $('paymentFrequency').value = opt.dataset.freq;
+    updateLoanPreview();
+  });
+});
+
+// Payment type selector
+document.querySelectorAll('.pay-type-opt').forEach(opt => {
+  opt.addEventListener('click', () => {
+    document.querySelectorAll('.pay-type-opt').forEach(o => o.classList.remove('active'));
+    opt.classList.add('active');
+    $('paymentTypeValue').value = opt.dataset.type;
+    if (selectedPaymentClient) updatePaymentAmountByType();
+  });
+});
+
+function updatePaymentAmountByType() {
+  if (!selectedPaymentClient) return;
+  const tipo = $('paymentTypeValue').value;
+  const capitalRestante = calcularCapitalRestante(selectedPaymentClient);
+  if (tipo === 'capital') $('paymentAmount').value = capitalRestante.toFixed(2);
+  else $('paymentAmount').value = '';
+  calcularDesglosePago();
+}
+
+function calcularDesglosePago() {
+  if (!selectedPaymentClient) return;
+  const monto = parseFloat($('paymentAmount').value) || 0;
+  const tipo = $('paymentTypeValue').value;
+  const desglose = calcularPagoConDesglose(selectedPaymentClient, monto, tipo);
+  $('paymentBreakdown').style.display = 'block';
+  $('breakdown-capital').textContent = formatCurrency(desglose.capitalAplicado);
+  $('breakdown-interes').textContent = formatCurrency(desglose.interesAplicado);
+  $('breakdown-mora').textContent = formatCurrency(desglose.moraAplicada);
+  $('breakdown-total').textContent = formatCurrency(desglose.totalAplicado);
+}
+
+// Login
+window.switchLoginTab = function(tab) {
+  $('tabLogin').classList.toggle('active', tab === 'login');
+  $('tabRegister').classList.toggle('active', tab === 'register');
+  $('loginForm').classList.toggle('active', tab === 'login');
+  $('registerForm').classList.toggle('active', tab === 'register');
+};
+
+window.togglePwd = function(id, el) {
+  const inp = $(id);
+  if (inp.type === 'password') { inp.type = 'text'; el.classList.replace('fa-eye', 'fa-eye-slash'); }
+  else { inp.type = 'password'; el.classList.replace('fa-eye-slash', 'fa-eye'); }
+};
+
+function saveSession(userData) { localStorage.setItem('plusmoney_session', JSON.stringify({ uid: userData.uid, username: userData.username, name: userData.name, photoUrl: userData.photoUrl || '', timestamp: Date.now() })); }
+function loadSavedSession() { const saved = localStorage.getItem('plusmoney_session'); if (saved) { try { const data = JSON.parse(saved); if (Date.now() - data.timestamp < 7 * 24 * 60 * 60 * 1000) return data; } catch (e) {} } return null; }
+function clearSession() { localStorage.removeItem('plusmoney_session'); }
+
+$('loginBtn').addEventListener('click', async () => {
+  const u = $('loginUsername').value.trim();
+  const p = $('loginPassword').value.trim();
+  const remember = $('rememberMe').checked;
+  if (!u || !p) { showLoginAlert('loginAlert', 'Complete todos los campos.'); return; }
+  try {
+    showLoading('Verificando credenciales...');
+    const q2 = query(collection(db, 'Collaborators'), where('username', '==', u), where('pin', '==', p));
+    const snap = await getDocs(q2);
+    if (snap.empty) throw new Error('Usuario o PIN incorrectos');
+    const d = snap.docs[0];
+    const data = d.data();
+    currentUser = { uid: d.id, username: data.username, name: `${data.firstName || ''} ${data.lastName || ''}`.trim() || u, firstName: data.firstName || '', lastName: data.lastName || '', photoUrl: data.photoUrl || '', role: 'collaborator', createdAt: data.createdAt, pin: p };
+    if (remember) saveSession(currentUser);
+    await initApp();
+  } catch (e) { showLoginAlert('loginAlert', e.message); }
+  finally { hideLoading(); }
+});
+
+$('registerBtn').addEventListener('click', async () => {
+  const fn = $('regFirstName').value.trim();
+  const ln = $('regLastName').value.trim();
+  const u = $('regUsername').value.trim();
+  const p = $('regPassword').value.trim();
+  const p2 = $('regPassword2').value.trim();
+  if (!fn || !ln || !u || !p) { showLoginAlert('registerAlert', 'Complete todos los campos.'); return; }
+  if (p !== p2) { showLoginAlert('registerAlert', 'Los PINs no coinciden.'); return; }
+  if (p.length < 6) { showLoginAlert('registerAlert', 'PIN mínimo 6 caracteres.'); return; }
+  try {
+    showLoading('Creando cuenta...');
+    const q2 = query(collection(db, 'Collaborators'), where('username', '==', u));
+    const snap = await getDocs(q2);
+    if (!snap.empty) throw new Error('Ese nombre de usuario ya existe.');
+    let photoUrl = '';
+    if ($('regPhoto').files[0]) {
+      const file = $('regPhoto').files[0];
+      const sr = ref(storage, `profiles/${Date.now()}_${file.name}`);
+      await uploadBytes(sr, file);
+      photoUrl = await getDownloadURL(sr);
+    }
+    const newRef = doc(collection(db, 'Collaborators'));
+    await setDoc(newRef, { firstName: fn, lastName: ln, username: u, pin: p, photoUrl, createdAt: Timestamp.now(), updatedAt: Timestamp.now() });
+    showToast('Cuenta creada. Iniciando sesión...');
+    currentUser = { uid: newRef.id, username: u, name: `${fn} ${ln}`, firstName: fn, lastName: ln, photoUrl, role: 'collaborator', createdAt: Timestamp.now(), pin: p };
+    await initApp();
+  } catch (e) { showLoginAlert('registerAlert', e.message); }
+  finally { hideLoading(); }
+});
+
+function showLoginAlert(elId, msg) { const el = $(elId); el.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${msg}`; el.style.display = 'flex'; }
+
+async function initApp() {
+  hideLoading();
+  $('loginScreen').style.display = 'none';
+  $('appScreen').style.display = 'flex';
+  initPhotoSelector();
+  initRegPhotoSelector();
+  initProfilePhotoSelector();
+  initCharts();
+  await Promise.all([loadCompanyConfig(), loadClients(), loadPayments(), loadInvoices(), loadCompletedLoans()]);
+  loadHomeData();
+  updateCharts();
+  loadPaymentClients();
+  loadPaymentsHistory();
+  updateHeaderAvatar();
+  applyTheme();
+}
+
+function updateHeaderAvatar() { const ab = $('headerAvatar'); if (currentUser.photoUrl) ab.innerHTML = `<img src="${currentUser.photoUrl}" alt="avatar">`; else ab.innerHTML = `<i class="fas fa-user"></i>`; }
+
+$('logoutBtn').addEventListener('click', () => {
+  showConfirm('Cerrar Sesión', '¿Seguro que desea salir?', confirmed => {
+    if (!confirmed) return;
+    clearSession();
+    signOut(auth).catch(e => console.warn(e));
+    currentUser = null; clients = []; payments = []; invoices = []; completedLoans = []; companyConfig = {};
+    $('appScreen').style.display = 'none';
+    $('loginScreen').style.display = 'flex';
+    $('loginUsername').value = ''; $('loginPassword').value = '';
+    $('loginAlert').style.display = 'none';
+    switchSection('homeSection');
+    document.querySelector('.nav-item[data-section="homeSection"]').classList.add('active');
+  });
+});
+
+async function loadCompanyConfig() {
+  if (!currentUser) return;
+  try {
+    const ref2 = doc(db, 'companyConfig', currentUser.uid);
+    const snap = await getDoc(ref2);
+    if (snap.exists()) companyConfig = snap.data();
+    else {
+      companyConfig = {
+        name: 'Mi Empresa', rnc: '000000000', address: 'Dirección', phone: '809-000-0000', logoUrl: '', email: '',
+        globalInterestEnabled: false, globalInterestRate: 5, moraRate: 2, diasGracia: 3, theme: 'official',
+        amountSolo: 1000, amountPareja: 2000, amountNinos: 1500, amountPersonalizado: 1200,
+        createdAt: Timestamp.now(), updatedAt: Timestamp.now()
+      };
+      await setDoc(ref2, companyConfig);
+    }
+    fillConfigForm();
+    applyTheme();
+  } catch (e) { console.error(e); }
+}
+
+function fillConfigForm() {
+  const c = companyConfig;
+  $('companyName').value = c.name || '';
+  $('companyRNC').value = c.rnc || '';
+  $('companyPhone').value = c.phone || '';
+  $('companyAddress').value = c.address || '';
+  $('companyEmail').value = c.email || '';
+  $('globalInterestEnabled').checked = c.globalInterestEnabled || false;
+  $('globalInterestRate').value = c.globalInterestRate || '';
+  $('moraRate').value = c.moraRate || '';
+  $('diasGracia').value = c.diasGracia || '';
+  $('themeSelect').value = c.theme || 'official';
+  $('amountSolo').value = c.amountSolo || '';
+  $('amountPareja').value = c.amountPareja || '';
+  $('amountNinos').value = c.amountNinos || '';
+  $('amountPersonalizado').value = c.amountPersonalizado || '';
+  if (c.logoUrl) $('logoPreview').innerHTML = `<img src="${c.logoUrl}" style="max-height: 60px; border-radius: 8px;">`;
+  else $('logoPreview').innerHTML = '';
+}
+
+$('configForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  try {
+    showLoading('Guardando configuración...');
+    let logoUrl = companyConfig.logoUrl || '';
+    if ($('companyLogoFile').files[0]) {
+      const file = $('companyLogoFile').files[0];
+      const storageRef = ref(storage, `company_logos/${currentUser.uid}/${Date.now()}_${file.name}`);
+      await uploadBytes(storageRef, file);
+      logoUrl = await getDownloadURL(storageRef);
+    }
+    const ref2 = doc(db, 'companyConfig', currentUser.uid);
+    const data = {
+      name: $('companyName').value, rnc: $('companyRNC').value, phone: $('companyPhone').value,
+      address: $('companyAddress').value, logoUrl, email: $('companyEmail').value,
+      globalInterestEnabled: $('globalInterestEnabled').checked,
+      globalInterestRate: parseFloat($('globalInterestRate').value) || 0,
+      moraRate: parseFloat($('moraRate').value) || 0,
+      diasGracia: parseInt($('diasGracia').value) || 0,
+      theme: $('themeSelect').value,
+      amountSolo: parseFloat($('amountSolo').value) || 0,
+      amountPareja: parseFloat($('amountPareja').value) || 0,
+      amountNinos: parseFloat($('amountNinos').value) || 0,
+      amountPersonalizado: parseFloat($('amountPersonalizado').value) || 0,
+      updatedAt: Timestamp.now()
+    };
+    await setDoc(ref2, data, { merge: true });
+    companyConfig = { ...companyConfig, ...data };
+    applyTheme();
+    showSuccess('Configuración Guardada', 'Los cambios han sido guardados.');
+  } catch (e) { showToast('Error al guardar: ' + e.message, 'error'); }
+  finally { hideLoading(); }
+});
+
+function applyTheme() { document.body.classList.toggle('theme-classic', (companyConfig.theme || 'official') === 'classic'); }
+async function loadConfig() { await loadCompanyConfig(); }
+
+async function loadInvoices() {
+  if (!currentUser) return;
+  try {
+    const q2 = query(collection(db, 'invoices'), where('userId', '==', currentUser.uid));
+    const snap = await getDocs(q2);
+    invoices = [];
+    snap.forEach(d => invoices.push({ id: d.id, ...d.data() }));
+  } catch (e) { console.error(e); }
+}
+
+async function saveInvoiceToHistory(invoiceData) {
+  if (!currentUser) return;
+  try { await addDoc(collection(db, 'invoices'), { ...invoiceData, userId: currentUser.uid, createdAt: Timestamp.now() }); await loadInvoices(); } catch (e) { console.error(e); }
+}
+
+async function loadCompletedLoans() {
+  if (!currentUser) return;
+  try {
+    const q2 = query(collection(db, 'completedLoans'), where('userId', '==', currentUser.uid));
+    const snap = await getDocs(q2);
+    completedLoans = [];
+    snap.forEach(d => completedLoans.push({ id: d.id, ...d.data() }));
+  } catch (e) { console.error(e); }
+}
+
+async function saveCompletedLoan(loanData) {
+  if (!currentUser) return;
+  try {
+    const existing = completedLoans.find(l => l.clientId === loanData.clientId && l.originalLoanId === loanData.originalLoanId);
+    if (!existing) {
+      await addDoc(collection(db, 'completedLoans'), { ...loanData, userId: currentUser.uid, completedAt: Timestamp.now() });
+      await loadCompletedLoans();
+    }
+  } catch (e) { console.error(e); }
+}
+
+async function loadClients() {
+  if (!currentUser) return;
+  try {
+    showLoading('Cargando clientes...');
+    const q2 = query(collection(db, 'clients'), where('collaboratorId', '==', currentUser.uid));
+    const snap = await getDocs(q2);
+    clients = [];
+    snap.forEach(d => clients.push({ id: d.id, ...d.data() }));
+  } catch (e) { showToast('Error cargando clientes', 'error'); }
+  finally { hideLoading(); updateClientsList(); }
+}
+
+window.filterClients = function(f) { clientFilter = f; updateClientsList(); };
+
+function updateClientsList(search = '') {
+  const list = $('clientsList');
+  if (!list) return;
+  let filtered = clients.filter(c => {
+    const name = `${c.firstName || ''} ${c.lastName || c.name || ''}`.toLowerCase();
+    const cedula = (c.cedula || '').toLowerCase();
+    const q = search.toLowerCase();
+    if (q && !name.includes(q) && !cedula.includes(q)) return false;
+    if (clientFilter === 'all') return true;
+    const capitalRestante = calcularCapitalRestante(c);
+    if (clientFilter === 'pagado') return capitalRestante <= 0;
+    const vence = c.fechaVence ? (c.fechaVence.toDate ? c.fechaVence.toDate() : new Date(c.fechaVence)) : null;
+    if (clientFilter === 'atrasado') return vence && vence < new Date() && capitalRestante > 0;
+    if (clientFilter === 'activo') return capitalRestante > 0 && (!vence || vence >= new Date());
+    return true;
+  });
+  if (!filtered.length) { list.innerHTML = '<div class="empty-state"><i class="fas fa-users"></i><p>Sin clientes en esta categoría</p></div>'; return; }
+  list.innerHTML = filtered.map(c => {
+    const cp = payments.filter(p => p.clientId === c.id);
+    const totalPagado = cp.reduce((s, p) => s + (p.amount || 0), 0);
+    const capitalRestante = (c.amount || 0) - totalPagado;
+    const total = getTotalWithInterest(c);
+    const pct = total > 0 ? Math.min(100, Math.round(totalPagado / total * 100)) : 0;
+    const mora = calcMora(c);
+    const name = `${c.firstName || c.name || ''} ${c.lastName || ''}`.trim();
+    const proximo = getProximoPagoInfo(c);
+    return `<div class="card">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+        <div style="width:46px;height:46px;border-radius:50%;overflow:hidden;background:var(--bg3);border:2px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:20px;">${c.photoUrl ? `<img src="${c.photoUrl}" style="width:100%;height:100%;object-fit:cover;">` : '<i class="fas fa-user"></i>'}</div>
+        <div style="flex:1;min-width:0;"><div class="card-title" style="margin-bottom:3px;">${name}</div><div style="font-size:11px;color:var(--txt2);">${c.cedula || ''} ${c.phone ? '· ' + c.phone : ''}</div></div>
+        <div>${getStatusBadge(c)}</div>
+      </div>
+      <div class="card-row"><span class="card-lbl">Tipo</span><span class="card-val">${getTypeText(c.type) || 'No especificado'}</span></div>
+      <div class="card-row"><span class="card-lbl">Préstamo</span><span class="card-val">${formatCurrency(c.amount)}</span></div>
+      ${c.hasInterest ? `<div class="card-row"><span class="card-lbl">Total c/Interés</span><span class="card-val text-warn">${formatCurrency(total)}</span></div>` : ''}
+      <div class="card-row"><span class="card-lbl">Pagado</span><span class="card-val text-accent">${formatCurrency(totalPagado)}</span></div>
+      <div class="card-row"><span class="card-lbl">Capital Pendiente</span><span class="card-val ${capitalRestante > 0 ? 'text-danger' : 'text-accent'}">${formatCurrency(capitalRestante)}</span></div>
+      <div class="card-row"><span class="card-lbl">Próximo Pago</span><span class="card-val">${formatCurrency(proximo.cuota)}</span></div>
+      ${mora > 0 ? `<div class="card-row"><span class="card-lbl">Mora</span><span class="card-val text-danger">+${formatCurrency(mora)}</span></div>` : ''}
+      <div style="margin:10px 0 4px;"><div class="progress-wrap"><div class="progress-fill ${pct >= 100 ? '' : 'danger'}" style="width:${pct}%"></div></div></div>
+      <div style="font-size:11px;color:var(--txt2);text-align:right;margin-bottom:10px;">${pct}% pagado</div>
+      <div class="btn-group" style="margin-top:8px;">
+        <button class="btn btn-outline btn-xs" onclick="viewPaymentHistory('${c.id}')"><i class="fas fa-history"></i> Historial</button>
+        <button class="btn btn-secondary btn-xs" onclick="editClient('${c.id}')"><i class="fas fa-edit"></i> Editar</button>
+        <button class="btn btn-primary btn-xs" onclick="quickPay('${c.id}')"><i class="fas fa-money-bill"></i> Pagar</button>
+        <button class="btn-info-custom btn-xs" onclick="viewLoanDetails('${c.id}')"><i class="fas fa-chart-line"></i> Detalles</button>
+        ${capitalRestante <= 0 ? `<button class="btn btn-purple btn-xs" onclick="generateBalanceLetter('${c.id}')"><i class="fas fa-file-alt"></i> Carta Saldo</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+$('searchClient').addEventListener('input', e => updateClientsList(e.target.value));
+
+function updateAmountByClientType() {
+  const type = $('clientType').value;
+  let amount = 0;
+  switch(type) {
+    case 'solo': amount = companyConfig.amountSolo || 0; break;
+    case 'pareja': amount = companyConfig.amountPareja || 0; break;
+    case 'ninos': amount = companyConfig.amountNinos || 0; break;
+    case 'personalizado': amount = companyConfig.amountPersonalizado || 0; break;
+    default: amount = 0;
+  }
+  $('clientAmount').value = amount;
+  updateLoanPreview();
+}
+
+let hasInterest = false;
+window.setInterestMode = function(v) {
+  hasInterest = v;
+  $('interestFields').style.display = v ? 'block' : 'none';
+  $('optConInteres').classList.toggle('active', v);
+  $('optSinInteres').classList.toggle('active', !v);
+  updateLoanPreview();
+};
+
+function updateLoanPreview() {
+  const preview = $('loanSummaryPreview');
+  const amt = parseFloat($('clientAmount').value) || 0;
+  const meses = parseInt($('clientPlazoMeses').value) || 12;
+  const frecuencia = $('paymentFrequency').value;
+  if (!amt || !meses) { preview.style.display = 'none'; return; }
+  preview.style.display = 'block';
+  $('prev-principal').textContent = formatCurrency(amt);
+  if (hasInterest) {
+    const tasa = parseFloat($('clientInteres').value) || 0;
+    const detalle = calcularDetallePrestamo(amt, tasa, meses, frecuencia);
+    $('prev-interes-row').style.display = 'flex';
+    $('prev-total-row').style.display = 'flex';
+    $('prev-cuota-row').style.display = 'flex';
+    $('prev-interes-por-periodo-row').style.display = 'flex';
+    $('prev-capital-por-periodo-row').style.display = 'flex';
+    $('prev-interes').textContent = formatCurrency(detalle.totalIntereses);
+    $('prev-total').textContent = formatCurrency(detalle.totalPagar);
+    $('prev-cuota').textContent = formatCurrency(detalle.cuota);
+    $('prev-interes-por-periodo').textContent = formatCurrency(detalle.interesPeriodico);
+    $('prev-capital-por-periodo').textContent = formatCurrency(detalle.capitalPeriodico);
+  } else {
+    $('prev-interes-row').style.display = 'none';
+    $('prev-total-row').style.display = 'none';
+    $('prev-cuota-row').style.display = 'flex';
+    $('prev-interes-por-periodo-row').style.display = 'none';
+    $('prev-capital-por-periodo-row').style.display = 'none';
+    const periodos = getPeriodosPorFrecuencia(frecuencia, meses);
+    $('prev-cuota').textContent = formatCurrency(amt / periodos);
+  }
+}
+
+function initPhotoSelector() {
+  $('clientPhoto').addEventListener('change', function(e) {
+    const f = e.target.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = ev => { $('photoPreview').innerHTML = `<img src="${ev.target.result}"><button type="button" class="remove-photo-btn" onclick="clearPhoto('clientPhoto','photoPreview')"><i class="fas fa-trash"></i> Remover</button>`; };
+    r.readAsDataURL(f);
+  });
+}
+function initRegPhotoSelector() {
+  $('regPhoto').addEventListener('change', function(e) {
+    const f = e.target.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = ev => { $('regPhotoPreview').innerHTML = `<img src="${ev.target.result}"><button type="button" class="remove-photo-btn" onclick="clearPhoto('regPhoto','regPhotoPreview')"><i class="fas fa-trash"></i> Remover</button>`; };
+    r.readAsDataURL(f);
+  });
+}
+function initProfilePhotoSelector() {
+  $('profilePhotoInput').addEventListener('change', async function(e) {
+    const f = e.target.files[0];
+    if (!f || !currentUser) return;
+    try {
+      showLoading('Subiendo foto...');
+      const sr = ref(storage, `profiles/${currentUser.uid}_${Date.now()}`);
+      await uploadBytes(sr, f);
+      const url = await getDownloadURL(sr);
+      currentUser.photoUrl = url;
+      await updateDoc(doc(db, 'Collaborators', currentUser.uid), { photoUrl: url, updatedAt: Timestamp.now() });
+      $('profileAvatarImg').src = url;
+      $('profileAvatarImg').style.display = 'block';
+      $('profileAvatarIcon').style.display = 'none';
+      updateHeaderAvatar();
+      showToast('Foto actualizada');
+    } catch (e) { showToast('Error subiendo foto', 'error'); }
+    finally { hideLoading(); }
+  });
+}
+window.clearPhoto = function(inputId, previewId) { $(inputId).value = ''; $(previewId).innerHTML = ''; };
+
+$('clientType').addEventListener('change', updateAmountByClientType);
+
+$('addClientForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  try {
+    showLoading('Guardando cliente...');
+    let photoUrl = '';
+    if ($('clientPhoto').files[0]) {
+      const f = $('clientPhoto').files[0];
+      const sr = ref(storage, `clients/${currentUser.uid}/${Date.now()}_${f.name}`);
+      await uploadBytes(sr, f);
+      photoUrl = await getDownloadURL(sr);
+    }
+    const useGlobalInterest = !hasInterest && companyConfig.globalInterestEnabled;
+    const frecuencia = $('paymentFrequency').value;
+    const meses = parseInt($('clientPlazoMeses').value) || 12;
+    const tasaInteres = hasInterest ? (parseFloat($('clientInteres').value) || 0) : (useGlobalInterest ? companyConfig.globalInterestRate : 0);
+    const fechaInicio = $('clientFechaInicio').value ? new Date($('clientFechaInicio').value) : new Date();
+    const fechaVence = new Date(fechaInicio);
+    if (frecuencia === 'mensual') fechaVence.setMonth(fechaVence.getMonth() + meses);
+    else fechaVence.setDate(fechaVence.getDate() + (meses * 30));
+    const data = {
+      firstName: $('clientFirstName').value.trim(), lastName: $('clientLastName').value.trim(),
+      name: `${$('clientFirstName').value.trim()} ${$('clientLastName').value.trim()}`,
+      cedula: $('clientCedula').value.trim(), phone: $('clientPhone').value.trim(),
+      address: $('clientAddress').value.trim(), type: $('clientType').value || '',
+      amount: parseFloat($('clientAmount').value) || 0, photoUrl,
+      hasInterest: hasInterest || useGlobalInterest,
+      interestRate: tasaInteres,
+      paymentFrequency: frecuencia,
+      plazoMeses: meses,
+      fechaInicio: Timestamp.fromDate(fechaInicio),
+      fechaVence: Timestamp.fromDate(fechaVence),
+      notas: $('clientNotas').value.trim(),
+      collaboratorId: currentUser.uid, collaboratorName: currentUser.name,
+      status: 'activo', createdAt: Timestamp.now(), updatedAt: Timestamp.now()
+    };
+    await addDoc(collection(db, 'clients'), data);
+    $('addClientForm').reset();
+    $('photoPreview').innerHTML = '';
+    hasInterest = false;
+    $('interestFields').style.display = 'none';
+    $('optSinInteres').classList.add('active');
+    $('optConInteres').classList.remove('active');
+    $('loanSummaryPreview').style.display = 'none';
+    await loadClients();
+    loadHomeData();
+    updateCharts();
+    showSuccess('Cliente Guardado', 'El cliente y préstamo han sido registrados.');
+  } catch (e) { showToast('Error: ' + e.message, 'error'); }
+  finally { hideLoading(); }
+});
+
+window.editClient = function(clientId) {
+  const c = clients.find(x => x.id === clientId);
+  if (!c) return;
+  $('editClientContent').innerHTML = `
+    <form id="editClientForm">
+      <div class="form-section-title"><i class="fas fa-id-card"></i> Datos Personales</div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Nombre</label><input type="text" id="ec-fn" class="form-input" value="${c.firstName || c.name || ''}"></div><div class="form-group"><label class="form-label">Apellido</label><input type="text" id="ec-ln" class="form-input" value="${c.lastName || ''}"></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Cédula</label><input type="text" id="ec-cedula" class="form-input" value="${c.cedula || ''}"></div><div class="form-group"><label class="form-label">Teléfono</label><input type="tel" id="ec-phone" class="form-input" value="${c.phone || ''}"></div></div>
+      <div class="form-group"><label class="form-label">Dirección</label><input type="text" id="ec-address" class="form-input" value="${c.address || ''}"></div>
+      <div class="form-group"><label class="form-label">Tipo</label><select id="ec-type" class="form-select"><option value="">Seleccione</option>${['solo', 'pareja', 'ninos', 'personalizado'].map(t => `<option value="${t}" ${c.type === t ? 'selected' : ''}>${getTypeText(t)}</option>`).join('')}</select></div>
+      <div class="form-group"><label class="form-label">Foto</label><input type="file" id="ec-photo" class="photo-selector-input" accept="image/*"><label for="ec-photo" class="photo-selector-label" style="min-height:80px;"><i class="fas fa-camera"></i><span>Cambiar Foto</span></label>${c.photoUrl ? `<div class="photo-preview mt-1"><img src="${c.photoUrl}" alt="Foto actual"></div>` : ''}</div>
+      <div class="form-section-title"><i class="fas fa-hand-holding-usd"></i> Datos del Préstamo</div>
+      <div class="form-group"><label class="form-label">Monto Préstamo</label><input type="number" id="ec-amount" class="form-input" value="${c.amount || 0}" step="0.01"></div>
+      <div class="form-group"><label class="form-label">Tipo de Préstamo</label><div class="interest-toggle"><button type="button" class="interest-opt ${!c.hasInterest ? 'active' : ''}" id="ec-optSin" onclick="ecSetInterest(false)">Sin Interés</button><button type="button" class="interest-opt ${c.hasInterest ? 'active' : ''}" id="ec-optCon" onclick="ecSetInterest(true)">Con Interés</button></div></div>
+      <div id="ec-interestFields" style="${c.hasInterest ? '' : 'display:none'}"><div class="form-row"><div class="form-group"><label class="form-label">Tasa Interés Mensual (%)</label><input type="number" id="ec-rate" class="form-input" value="${c.interestRate || 0}" step="0.1"></div></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Plazo (Meses)</label><input type="number" id="ec-plazo" class="form-input" value="${c.plazoMeses || 12}"></div><div class="form-group"><label class="form-label">Frecuencia</label><select id="ec-freq" class="form-select"><option value="mensual" ${c.paymentFrequency === 'mensual' ? 'selected' : ''}>Mensual</option><option value="quincenal" ${c.paymentFrequency === 'quincenal' ? 'selected' : ''}>Quincenal</option><option value="semanal" ${c.paymentFrequency === 'semanal' ? 'selected' : ''}>Semanal</option><option value="diario" ${c.paymentFrequency === 'diario' ? 'selected' : ''}>Diario</option></select></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Fecha Inicio</label><input type="date" id="ec-fechaInicio" class="form-input" value="${c.fechaInicio ? (c.fechaInicio.toDate ? c.fechaInicio.toDate() : new Date(c.fechaInicio)).toISOString().split('T')[0] : ''}"></div><div class="form-group"><label class="form-label">Vencimiento</label><input type="date" id="ec-vence" class="form-input" value="${c.fechaVence ? (c.fechaVence.toDate ? c.fechaVence.toDate() : new Date(c.fechaVence)).toISOString().split('T')[0] : ''}"></div></div>
+      <div class="form-group"><label class="form-label">Notas</label><textarea id="ec-notas" class="form-textarea">${c.notas || ''}</textarea></div>
+      <div class="btn-group mt-2"><button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar</button><button type="button" class="btn btn-danger" onclick="deleteClient('${c.id}')"><i class="fas fa-trash"></i> Eliminar</button></div>
+    </form>`;
+  switchSection('editClientSection', true);
+  document.getElementById('editClientForm').addEventListener('submit', async ev => { ev.preventDefault(); await saveEditedClient(c.id); });
+};
+
+window.ecSetInterest = function(v) {
+  $('ec-interestFields').style.display = v ? 'block' : 'none';
+  $('ec-optCon').classList.toggle('active', v);
+  $('ec-optSin').classList.toggle('active', !v);
+};
+
+async function saveEditedClient(id) {
+  try {
+    showLoading('Guardando cambios...');
+    const ref2 = doc(db, 'clients', id);
+    const isInterest = $('ec-optCon').classList.contains('active');
+    const frecuencia = $('ec-freq').value;
+    const meses = parseInt($('ec-plazo').value) || 12;
+    const fechaInicio = $('ec-fechaInicio').value ? new Date($('ec-fechaInicio').value) : new Date();
+    const fechaVence = $('ec-vence').value ? new Date($('ec-vence').value) : new Date(fechaInicio);
+    if (!fechaVence || isNaN(fechaVence)) fechaVence.setMonth(fechaInicio.getMonth() + meses);
+    const upd = {
+      firstName: $('ec-fn').value.trim(), lastName: $('ec-ln').value.trim(),
+      name: `${$('ec-fn').value.trim()} ${$('ec-ln').value.trim()}`,
+      cedula: $('ec-cedula').value.trim(), phone: $('ec-phone').value.trim(),
+      address: $('ec-address').value.trim(), type: $('ec-type').value,
+      amount: parseFloat($('ec-amount').value) || 0,
+      hasInterest: isInterest,
+      interestRate: isInterest ? parseFloat($('ec-rate').value) || 0 : 0,
+      paymentFrequency: frecuencia,
+      plazoMeses: meses,
+      fechaInicio: Timestamp.fromDate(fechaInicio),
+      fechaVence: Timestamp.fromDate(fechaVence),
+      notas: $('ec-notas').value.trim(),
+      updatedAt: Timestamp.now()
+    };
+    if ($('ec-photo').files[0]) {
+      const f = $('ec-photo').files[0];
+      const sr = ref(storage, `clients/${currentUser.uid}/${Date.now()}_${f.name}`);
+      await uploadBytes(sr, f);
+      upd.photoUrl = await getDownloadURL(sr);
+    }
+    await updateDoc(ref2, upd);
+    await loadClients();
+    loadHomeData();
+    updateCharts();
+    showSuccess('Cliente Actualizado', 'Los cambios fueron guardados.');
+    switchSection('clientsSection');
+  } catch (e) { showToast('Error: ' + e.message, 'error'); }
+  finally { hideLoading(); }
+}
+
+window.deleteClient = function(id) {
+  showConfirm('Eliminar Cliente', '¿Eliminar este cliente y todos sus pagos?', async confirmed => {
+    if (!confirmed) return;
+    try {
+      showLoading('Eliminando...');
+      await deleteDoc(doc(db, 'clients', id));
+      const pq = query(collection(db, 'payments'), where('clientId', '==', id));
+      const psnap = await getDocs(pq);
+      await Promise.all(psnap.docs.map(d => deleteDoc(doc(db, 'payments', d.id))));
+      await Promise.all([loadClients(), loadPayments()]);
+      loadHomeData();
+      updateCharts();
+      showSuccess('Eliminado', 'Cliente y pagos eliminados.');
+      switchSection('clientsSection');
+    } catch (e) { showToast('Error eliminando', 'error'); }
+    finally { hideLoading(); }
+  });
+};
+
+async function loadPayments() {
+  if (!currentUser) return;
+  try {
+    const q2 = query(collection(db, 'payments'), where('collaboratorId', '==', currentUser.uid));
+    const snap = await getDocs(q2);
+    payments = [];
+    snap.forEach(d => payments.push({ id: d.id, ...d.data() }));
+  } catch (e) { console.error(e); }
+}
+
+function loadPaymentClients() {
+  const sel = $('paymentClient');
+  sel.innerHTML = '<option value="">Seleccione cliente</option>';
+  clients.forEach(c => {
+    const capitalRestante = calcularCapitalRestante(c);
+    if (capitalRestante <= 0) return;
+    const op = document.createElement('option');
+    op.value = c.id;
+    op.textContent = `${c.firstName || c.name || ''} ${c.lastName || ''}`.trim();
+    sel.appendChild(op);
+  });
+}
+
+$('paymentClient').addEventListener('change', e => {
+  const id = e.target.value;
+  const info = $('paymentClientInfo');
+  if (!id) { info.style.display = 'none'; $('paymentBreakdown').style.display = 'none'; selectedPaymentClient = null; return; }
+  const c = clients.find(x => x.id === id);
+  if (!c) return;
+  selectedPaymentClient = c;
+  const cp = payments.filter(p => p.clientId === id);
+  const totalPagado = cp.reduce((s, p) => s + (p.amount || 0), 0);
+  const capitalRestante = (c.amount || 0) - totalPagado;
+  const interesesTotales = getInterestAmount(c);
+  const mora = calcMora(c);
+  const proximo = getProximoPagoInfo(c);
+  info.style.display = 'block';
+  $('pi-total').textContent = formatCurrency(getTotalWithInterest(c));
+  $('pi-interes').textContent = formatCurrency(interesesTotales);
+  $('pi-pagado').textContent = formatCurrency(totalPagado);
+  $('pi-capitalPendiente').textContent = formatCurrency(capitalRestante);
+  $('pi-proximoPago').textContent = formatCurrency(proximo.cuota);
+  $('pi-interesProximo').textContent = formatCurrency(proximo.interes);
+  $('pi-capitalProximo').textContent = formatCurrency(proximo.capital);
+  if (mora > 0) { $('pi-mora-row').style.display = 'flex'; $('pi-mora').textContent = formatCurrency(mora); }
+  else { $('pi-mora-row').style.display = 'none'; }
+  updatePaymentAmountByType();
+});
+
+$('paymentAmount').addEventListener('input', () => calcularDesglosePago());
+
+window.quickPay = function(clientId) {
+  switchSection('paymentsSection');
+  document.querySelector('.nav-item[data-section="paymentsSection"]').classList.add('active');
+  const sel = $('paymentClient');
+  loadPaymentClients();
+  setTimeout(() => { sel.value = clientId; sel.dispatchEvent(new Event('change')); }, 100);
+};
+
+$('paymentForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const clientId = $('paymentClient').value;
+  const monto = parseFloat($('paymentAmount').value);
+  const tipoPago = $('paymentTypeValue').value;
+  if (!clientId) { showToast('Seleccione cliente', 'error'); return; }
+  if (!monto || monto <= 0) { showToast('Ingrese un monto válido', 'error'); return; }
+  const c = clients.find(x => x.id === clientId);
+  if (!c) return;
+
+  // Guardar el capital ANTES del pago para la factura
+  const capitalAntes = calcularCapitalRestante(c);
+  const desglose = calcularPagoConDesglose(c, monto, tipoPago);
+
+  try {
+    showLoading('Registrando pago...');
+    const pd = {
+      clientId, clientName: `${c.firstName || c.name || ''} ${c.lastName || ''}`.trim(),
+      amount: monto,
+      capitalAplicado: desglose.capitalAplicado,
+      interesAplicado: desglose.interesAplicado,
+      moraAplicada: desglose.moraAplicada,
+      // Guardamos el capital antes del pago para la factura
+      capitalAntesDePago: capitalAntes,
+      tipoPago, method: $('paymentMethod').value, nota: $('paymentNota').value,
+      collaboratorId: currentUser.uid, collaboratorName: currentUser.name,
+      date: Timestamp.now(), createdAt: Timestamp.now()
+    };
+    const newDoc = await addDoc(collection(db, 'payments'), pd);
+    $('paymentForm').reset();
+    $('paymentClientInfo').style.display = 'none';
+    $('paymentBreakdown').style.display = 'none';
+    await Promise.all([loadPayments(), loadClients()]);
+    loadPaymentsHistory(); loadHomeData(); loadPaymentClients(); updateCharts();
+
+    const capitalDespues = calcularCapitalRestante(c);
+    if (capitalDespues <= 0 && capitalAntes > 0) {
+      const completedData = {
+        clientId: c.id, clientName: `${c.firstName || c.name || ''} ${c.lastName || ''}`.trim(),
+        originalLoanId: c.id, amount: c.amount, interestRate: c.interestRate,
+        paymentFrequency: c.paymentFrequency, plazoMeses: c.plazoMeses,
+        completedAt: Timestamp.now()
+      };
+      await saveCompletedLoan(completedData);
+    }
+
+    showSuccess('Pago Registrado', `Monto: ${formatCurrency(monto)} | Capital Aplicado: ${formatCurrency(desglose.capitalAplicado)} | Mora: ${formatCurrency(desglose.moraAplicada)}`);
+    // Pasar el capitalAntes al mostrar la factura
+    setTimeout(() => showInvoiceFromPayment({ id: newDoc.id, ...pd }, c, capitalAntes), 600);
+  } catch (e) { showToast('Error: ' + e.message, 'error'); }
+  finally { hideLoading(); }
+});
+
+async function loadPaymentsHistory() {
+  const el = $('paymentsHistory');
+  if (!el) return;
+  if (!payments.length) { el.innerHTML = '<div class="empty-state"><i class="fas fa-history"></i><p>Sin pagos registrados</p></div>'; return; }
+  const sorted = [...payments].sort((a, b) => { const at = a.date?.toDate ? a.date.toDate() : new Date(a.date || 0); const bt = b.date?.toDate ? b.date.toDate() : new Date(b.date || 0); return bt - at; }).slice(0, 15);
+  el.innerHTML = sorted.map(p => { const c = clients.find(x => x.id === p.clientId); const nm = p.clientName || (c ? `${c.firstName || c.name || ''} ${c.lastName || ''}`.trim() : 'Desconocido'); return `<div class="payment-item"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;"><strong>${nm}</strong><span class="text-accent fw-bold">${formatCurrency(p.amount)}</span></div><div style="font-size:11px;color:var(--txt2);margin-bottom:8px;">${formatDateTime(p.date)} · ${p.method || 'Efectivo'}</div><div style="font-size:10px;">💰 Capital: ${formatCurrency(p.capitalAplicado || 0)} | ⚠️ Mora: ${formatCurrency(p.moraAplicada || 0)}</div><button class="btn btn-outline btn-xs mt-1" onclick="showInvoiceByPaymentId('${p.id}')"><i class="fas fa-file-invoice"></i> Factura</button></div>`; }).join('');
+}
+
+window.viewPaymentHistory = function(clientId) {
+  const c = clients.find(x => x.id === clientId);
+  if (!c) return;
+  const cp = payments.filter(p => p.clientId === clientId);
+  const totalPagado = cp.reduce((s, p) => s + (p.amount || 0), 0);
+  const capitalRestante = calcularCapitalRestante(c);
+  const interesesTotales = getInterestAmount(c);
+  const name = `${c.firstName || c.name || ''} ${c.lastName || ''}`.trim();
+  const el = $('paymentHistoryContent');
+  el.innerHTML = `<h3 style="color:var(--accent);margin-bottom:14px;">${name}</h3><div class="card mb-2"><div class="card-row"><span class="card-lbl">Préstamo</span><span class="card-val">${formatCurrency(c.amount)}</span></div>${c.hasInterest ? `<div class="card-row"><span class="card-lbl">Total c/Interés</span><span class="card-val text-warn">${formatCurrency(getTotalWithInterest(c))}</span></div>` : ''}<div class="card-row"><span class="card-lbl">Total Pagado</span><span class="card-val text-accent">${formatCurrency(totalPagado)}</span></div><div class="card-row"><span class="card-lbl">Capital Pendiente</span><span class="card-val text-danger">${formatCurrency(capitalRestante)}</span></div></div><div style="font-weight:700;margin-bottom:10px;">Pagos Registrados (${cp.length})</div>${cp.length === 0 ? '<div class="empty-state"><p>Sin pagos</p></div>' : cp.sort((a, b) => { const at = a.date?.toDate ? a.date.toDate() : new Date(a.date || 0); const bt = b.date?.toDate ? b.date.toDate() : new Date(b.date || 0); return bt - at; }).map(p => `<div class="payment-item"><div style="display:flex;justify-content:space-between;margin-bottom:5px;"><strong>${formatDateTime(p.date)}</strong><span class="text-accent fw-bold">${formatCurrency(p.amount)}</span></div><div style="font-size:11px;">💰 Capital: ${formatCurrency(p.capitalAplicado || 0)} | ⚠️ Mora: ${formatCurrency(p.moraAplicada || 0)}</div><div style="font-size:10px;color:var(--txt2);">${p.method || 'Efectivo'} ${p.nota ? '· ' + p.nota : ''}</div><button class="btn btn-outline btn-xs mt-1" onclick="showInvoiceByPaymentId('${p.id}')"><i class="fas fa-file-invoice"></i> Factura</button></div>`).join('')}`;
+  $('paymentHistoryModal').style.display = 'flex';
+};
+
+function loadHomeData() {
+  let totalPrestado = 0;
+  let totalPagado = 0;
+  let capitalPendienteTotal = 0;
+  let totalGan = 0;
+  let totalMora = 0;
+
+  clients.forEach(c => {
+    totalPrestado += c.amount || 0;
+    const cp = payments.filter(p => p.clientId === c.id);
+    const totalPagadoCliente = cp.reduce((s, p) => s + (p.amount || 0), 0);
+    totalPagado += totalPagadoCliente;
+    const capitalRestante = Math.max(0, (c.amount || 0) - totalPagadoCliente);
+    capitalPendienteTotal += capitalRestante;
+    if (c.hasInterest) totalGan += getInterestAmount(c);
+    totalMora += calcMora(c);
+  });
+
+  $('st-clientes').textContent = clients.length;
+  $('st-prestado').textContent = formatCurrency(totalPrestado);
+  $('st-cobrado').textContent = formatCurrency(totalPagado);
+  $('st-pendiente').textContent = formatCurrency(capitalPendienteTotal);
+
+  $('h-totalPrestado').textContent = formatCurrency(totalPrestado);
+  $('h-totalPagado').textContent = formatCurrency(totalPagado);
+  $('h-totalPendiente').textContent = formatCurrency(capitalPendienteTotal);
+  $('h-ganancias').textContent = formatCurrency(totalGan);
+  $('h-perdidas').textContent = formatCurrency(totalMora);
+
+  const sorted = [...payments].sort((a, b) => { const at = a.date?.toDate ? a.date.toDate() : new Date(a.date || 0); const bt = b.date?.toDate ? b.date.toDate() : new Date(b.date || 0); return bt - at; }).slice(0, 6);
+  const ra = $('recentActivity');
+  if (!sorted.length) { ra.innerHTML = '<div class="empty-state" style="padding:20px;"><i class="fas fa-stream"></i><p>Sin actividad</p></div>'; return; }
+  ra.innerHTML = sorted.map(p => { const c = clients.find(x => x.id === p.clientId); const nm = p.clientName || (c ? `${c.firstName || c.name || ''} ${c.lastName || ''}`.trim() : 'Desconocido'); return `<div class="activity-item"><div class="activity-icon green"><i class="fas fa-money-bill"></i></div><div class="activity-txt"><div class="activity-name">${nm}</div><div class="activity-sub">${formatDateTime(p.date)} · ${p.method || 'Efectivo'}</div></div><div class="activity-amount text-accent">+${formatCurrency(p.amount)}</div></div>`; }).join('');
+}
+
+window.goToProfile = function() { switchSection('profileSection', true); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); loadProfile(); };
+function loadProfile() {
+  if (!currentUser) return;
+  $('profileName').textContent = currentUser.name;
+  $('profileUsername').textContent = currentUser.username;
+  $('profileFullName').textContent = currentUser.name;
+  $('profileSince').textContent = formatDate(currentUser.createdAt);
+  $('editProfileFirstName').value = currentUser.firstName || '';
+  $('editProfileLastName').value = currentUser.lastName || '';
+  $('editProfileUsername').value = currentUser.username || '';
+  if (currentUser.photoUrl) { $('profileAvatarImg').src = currentUser.photoUrl; $('profileAvatarImg').style.display = 'block'; $('profileAvatarIcon').style.display = 'none'; }
+}
+
+$('profileForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  try {
+    showLoading('Guardando...');
+    const fn = $('editProfileFirstName').value.trim();
+    const ln = $('editProfileLastName').value.trim();
+    const un = $('editProfileUsername').value.trim();
+    if (!fn || !ln || !un) { showToast('Complete todos los campos', 'error'); return; }
+    await updateDoc(doc(db, 'Collaborators', currentUser.uid), { firstName: fn, lastName: ln, username: un, updatedAt: Timestamp.now() });
+    currentUser.firstName = fn; currentUser.lastName = ln; currentUser.name = `${fn} ${ln}`; currentUser.username = un;
+    loadProfile();
+    showSuccess('Perfil Actualizado', 'Información guardada exitosamente.');
+  } catch (e) { showToast('Error: ' + e.message, 'error'); }
+  finally { hideLoading(); }
+});
+
+$('changePasswordForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const oldPin = $('oldPin').value;
+  const newPin = $('newPin').value;
+  const newPin2 = $('newPin2').value;
+  if (oldPin !== currentUser.pin) { showToast('PIN actual incorrecto', 'error'); return; }
+  if (newPin !== newPin2) { showToast('Los PINs no coinciden', 'error'); return; }
+  if (newPin.length < 6) { showToast('PIN mínimo 6 caracteres', 'error'); return; }
+  try {
+    showLoading('Actualizando PIN...');
+    await updateDoc(doc(db, 'Collaborators', currentUser.uid), { pin: newPin, updatedAt: Timestamp.now() });
+    currentUser.pin = newPin;
+    $('changePasswordForm').reset();
+    showSuccess('PIN Actualizado', 'Tu PIN ha sido cambiado exitosamente.');
+  } catch (e) { showToast('Error: ' + e.message, 'error'); }
+  finally { hideLoading(); }
+});
+
+// QR y Código de Barras
+function generateBarcodeSVG(text, width = 2, height = 30) {
+  const chars = text.toUpperCase().split('');
+  const code39Map = {
+    '0': '101001101101', '1': '110100101011', '2': '101100101011', '3': '110110010101',
+    '4': '101001101011', '5': '110100110101', '6': '101100110101', '7': '101001011011',
+    '8': '110100101101', '9': '101100101101', 'A': '110101001011', 'B': '101101001011',
+    'C': '110110100101', 'D': '101011001011', 'E': '110101100101', 'F': '101101100101',
+    'G': '101010011011', 'H': '110101001101', 'I': '101101001101', 'J': '101011001101',
+    'K': '110101010011', 'L': '101101010011', 'M': '110110101001', 'N': '101011010011',
+    'O': '110101101001', 'P': '101101101001', 'Q': '101010110011', 'R': '110101011001',
+    'S': '101101011001', 'T': '101011011001', 'U': '110010101011', 'V': '100110101011',
+    'W': '110011010101', 'X': '100101101011', 'Y': '110010110101', 'Z': '100110110101',
+    '-': '100101011011', '.': '110010101101', ' ': '100110101101', '$': '100100100101',
+    '/': '100100101001', '+': '100101001001', '%': '101001001001'
+  };
+  let binary = '100101101101';
+  for (let char of chars) { if (code39Map[char]) binary += '0' + code39Map[char]; else binary += '0' + code39Map[' ']; }
+  binary += '010010101101';
+  let svg = `<svg class="barcode-svg" width="${binary.length * width}" height="${height}" xmlns="http://www.w3.org/2000/svg">`;
+  let x = 0;
+  for (let i = 0; i < binary.length; i++) { if (binary[i] === '1') svg += `<rect x="${x}" y="0" width="${width}" height="${height}" fill="#000" />`; x += width; }
+  svg += `</svg>`;
+  return svg;
+}
+
+function generateQRCode(text, size = 80) {
+  const encodedText = encodeURIComponent(text);
+  return `<img src="https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodedText}" width="${size}" height="${size}" style="max-width:100%;height:auto;" alt="QR Code" crossorigin="anonymous">`;
+}
+
+// ============================================================
+// CORRECCIÓN PRINCIPAL: buildInvoiceHTML
+// Recibe capitalAntesDePago para mostrar saldos correctos
+// ============================================================
+function buildInvoiceHTML(client, payment, extraData = {}) {
+  const co = companyConfig;
+  const invoiceId = extraData.invoiceId || generateInvoiceId();
+  const name = `${client.firstName || client.name || ''} ${client.lastName || ''}`.trim();
+
+  // Capital ANTES de este pago: si viene guardado en el pago úsalo,
+  // si no, recalcularlo excluyendo este pago de la lista actual
+  const capitalAntesDePago = (payment.capitalAntesDePago !== undefined)
+    ? payment.capitalAntesDePago
+    : calcularCapitalRestanteExcluyendo(client, payment.id);
+
+  // Total pagado acumulado hasta ANTES de este pago
+  const pagosAnteriores = payments.filter(p => p.clientId === client.id && p.id !== payment.id);
+  const totalPagadoAntes = pagosAnteriores.reduce((s, p) => s + (p.amount || 0), 0);
+
+  // Capital después de este pago = Capital antes - capital aplicado en este pago
+  const capitalDespuesDePago = Math.max(0, capitalAntesDePago - (payment.capitalAplicado || 0));
+
+  // Total pagado incluyendo este pago
+  const totalPagadoConEste = totalPagadoAntes + (payment.amount || 0);
+
+  const qrData = `https://ministerio-2025.firebaseapp.com/pos/fc-dgii.html`;
+  const qrCodeHtml = generateQRCode(qrData, 80);
+  const barcodeHtml = generateBarcodeSVG(invoiceId, 2, 30);
+
+  const content = `
+    <div class="invoice-header">
+      ${co.logoUrl ? `<img src="${co.logoUrl}" class="invoice-logo" alt="Logo" style="max-width:50px;max-height:50px;object-fit:contain;">` : '<div style="width:50px;height:50px;background:#f0f0f0;margin:0 auto 8px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;">💰</div>'}
+      <div class="invoice-biz-name">${co.name || 'PlusMoney Retom'}</div>
+      <div class="invoice-sub">RNC: ${co.rnc || '—'}</div>
+      <div class="invoice-sub">${co.address || ''}</div>
+      <div class="invoice-sub">Tel: ${co.phone || ''}</div>
+    </div>
+    <div style="text-align:center;margin:10px 0;">
+      <div style="font-size:13px;font-weight:900;">RECIBO DE PAGO</div>
+      <div class="invoice-sub">N° ${invoiceId}</div>
+      <div class="invoice-sub">Fecha: ${formatDate(new Date())}</div>
+    </div>
+    <hr class="invoice-divider">
+    <div style="font-size:10px;font-weight:700;margin-bottom:6px;">DATOS DEL CLIENTE</div>
+    <div class="invoice-row"><span class="lbl">Cliente:</span><span class="val">${name}</span></div>
+    ${client.cedula ? `<div class="invoice-row"><span class="lbl">Cédula:</span><span class="val">${client.cedula}</span></div>` : ''}
+    ${client.phone ? `<div class="invoice-row"><span class="lbl">Teléfono:</span><span class="val">${client.phone}</span></div>` : ''}
+    <hr class="invoice-divider">
+    <div style="font-size:10px;font-weight:700;margin-bottom:6px;">DETALLE DEL PRÉSTAMO</div>
+    <div class="invoice-row"><span class="lbl">Monto Principal:</span><span class="val">${formatCurrency(client.amount)}</span></div>
+    <div class="invoice-row"><span class="lbl">Plazo:</span><span class="val">${client.plazoMeses || 0} meses (${client.paymentFrequency || 'mensual'})</span></div>
+    <div class="invoice-row"><span class="lbl">Fecha de Inicio:</span><span class="val">${formatDate(client.fechaInicio)}</span></div>
+    <hr class="invoice-divider">
+    <div style="font-size:10px;font-weight:700;margin-bottom:6px;">ESTADO ANTES DE ESTE PAGO</div>
+    <div class="invoice-row"><span class="lbl">Capital Pendiente:</span><span class="val">${formatCurrency(capitalAntesDePago)}</span></div>
+    <div class="invoice-row"><span class="lbl">Total Pagado Anterior:</span><span class="val">${formatCurrency(totalPagadoAntes)}</span></div>
+    <hr class="invoice-divider">
+    <div style="font-size:10px;font-weight:700;margin-bottom:6px;">PAGO REALIZADO</div>
+    <div class="invoice-row"><span class="lbl">Monto:</span><span class="val">${formatCurrency(payment.amount)}</span></div>
+    <div class="invoice-row"><span class="lbl">Capital Aplicado:</span><span class="val">${formatCurrency(payment.capitalAplicado || 0)}</span></div>
+    <div class="invoice-row"><span class="lbl">Mora Aplicada:</span><span class="val">${formatCurrency(payment.moraAplicada || 0)}</span></div>
+    <div class="invoice-row"><span class="lbl">Método:</span><span class="val">${payment.method || 'Efectivo'}</span></div>
+    <div class="invoice-row"><span class="lbl">Fecha:</span><span class="val">${formatDateTime(payment.date)}</span></div>
+    <hr class="invoice-divider">
+    <div class="invoice-total-row grand">
+      <span>NUEVO SALDO PENDIENTE:</span>
+      <span>${formatCurrency(capitalDespuesDePago)}</span>
+    </div>
+    <div class="invoice-footer">
+      <div class="barcode-container" style="margin:10px 0;">${barcodeHtml}</div>
+      <div class="qr-code-container" style="margin:10px 0;">${qrCodeHtml}</div>
+      <p>¡Gracias por su pago!</p>
+      <p>Este documento es comprobante válido.</p>
+      <p>${co.email || ''}</p>
+      <p style="font-size:7px;">Emitido electrónicamente · ${new Date().getFullYear()}</p>
+    </div>`;
+
+  saveInvoiceToHistory({ invoiceId, clientId: client.id, clientName: name, type: 'payment', total: payment.amount, htmlContent: content });
+  return { content, invoiceId };
+}
+
+// Mostrar factura al registrar un pago nuevo — recibe capitalAntes
+function showInvoiceFromPayment(payment, client, capitalAntes) {
+  const { content, invoiceId } = buildInvoiceHTML(client, payment, {});
+  currentInvoice = { payment, client, invoiceId, htmlContent: content };
+  $('invoiceForImage').innerHTML = content;
+  $('invoiceModal').style.display = 'flex';
+}
+
+// Mostrar factura desde historial — usa capitalAntesDePago guardado en el pago
+window.showInvoiceByPaymentId = function(paymentId) {
+  const p = payments.find(x => x.id === paymentId);
+  if (!p) return;
+  const c = clients.find(x => x.id === p.clientId);
+  if (!c) return;
+  showInvoiceFromPayment(p, c);
+};
+
+// Carta de Saldo
+function generateBalanceLetterContent(client) {
+  const name = `${client.firstName || client.name || ''} ${client.lastName || ''}`.trim();
+  const co = companyConfig;
+  const totalPagado = payments.filter(p => p.clientId === client.id).reduce((s, p) => s + (p.amount || 0), 0);
+  const fechaHoy = formatDate(new Date());
+
+  return `<div class="balance-letter">
+    <div class="header">
+      ${co.logoUrl ? `<img src="${co.logoUrl}" class="logo" alt="Logo" style="max-width:60px;max-height:60px;object-fit:contain;">` : '<div style="width:60px;height:60px;background:#f0f0f0;margin:0 auto;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;">💰</div>'}
+      <div class="title">CARTA DE SALDO</div>
+      <div class="subtitle">${co.name || 'PlusMoney Retom'}</div>
+      <div class="subtitle">RNC: ${co.rnc || '—'}</div>
+    </div>
+    <div class="info-section">
+      <div class="info-row"><strong>Fecha de Emisión:</strong> <span>${fechaHoy}</span></div>
+      <div class="info-row"><strong>Cliente:</strong> <span>${name}</span></div>
+      <div class="info-row"><strong>Cédula:</strong> <span>${client.cedula || '—'}</span></div>
+      <div class="info-row"><strong>Teléfono:</strong> <span>${client.phone || '—'}</span></div>
+      <div class="info-row"><strong>Dirección:</strong> <span>${client.address || '—'}</span></div>
+    </div>
+    <div class="info-section">
+      <div class="info-row"><strong>Monto Original del Préstamo:</strong> <span>${formatCurrency(client.amount)}</span></div>
+      <div class="info-row"><strong>Plazo:</strong> <span>${client.plazoMeses || 0} meses (${client.paymentFrequency || 'mensual'})</span></div>
+      <div class="info-row"><strong>Fecha de Inicio:</strong> <span>${formatDate(client.fechaInicio)}</span></div>
+      <div class="info-row"><strong>Fecha de Vencimiento:</strong> <span>${formatDate(client.fechaVence)}</span></div>
+      <div class="info-row"><strong>Total Pagado:</strong> <span>${formatCurrency(totalPagado)}</span></div>
+      <div class="info-row"><strong>Estado del Préstamo:</strong> <span class="text-accent">SALDADO</span></div>
+    </div>
+    <div class="total-row">
+      <div class="info-row"><strong>SALDO TOTAL PENDIENTE:</strong> <strong style="color:#00a000;">${formatCurrency(0)}</strong></div>
+      <div class="info-row"><strong>ESTADO:</strong> <strong style="color:#00a000;">COMPLETADO / SALDADO</strong></div>
+    </div>
+    <div class="footer">
+      <p>Este documento certifica que el préstamo ha sido pagado en su totalidad.</p>
+      <p>${co.name || 'PlusMoney Retom'} - ${co.address || ''}</p>
+      <p>Tel: ${co.phone || ''} | Email: ${co.email || ''}</p>
+      <p>Documento generado electrónicamente · ${new Date().getFullYear()}</p>
+      <div style="margin-top:20px; text-align:center;">
+        <div style="width:200px; height:2px; background:#000; margin:10px auto;"></div>
+        <p style="font-size:10px;">Firma Autorizada</p>
+      </div>
+    </div>
+  </div>`;
+}
+
+window.generateBalanceLetter = function(clientId) {
+  const client = clients.find(c => c.id === clientId);
+  if (!client) return;
+  const capitalRestante = calcularCapitalRestante(client);
+  if (capitalRestante > 0) { showToast('El préstamo no está completamente saldado', 'warning'); return; }
+  const content = generateBalanceLetterContent(client);
+  currentBalanceLetter = { client, content };
+  $('balanceLetterContent').innerHTML = content;
+  $('balanceLetterModal').style.display = 'flex';
+};
+
+function renderCartaSaldo(c) {
+  const pagados = clients.filter(cl => calcularCapitalRestante(cl) <= 0);
+  c.innerHTML = `<div class="section-title"><i class="fas fa-file-alt"></i> Carta de Saldo</div><p class="text-muted text-sm mb-2">Seleccione un cliente con préstamo completado para generar su carta de saldo</p>${pagados.length === 0 ? '<div class="empty-state"><i class="fas fa-info-circle"></i><p>No hay préstamos completados</p></div>' : pagados.map(cl => { const name = `${cl.firstName || cl.name || ''} ${cl.lastName || ''}`.trim(); return `<div class="card"><div class="card-title">${name}</div><div class="card-row"><span class="card-lbl">Préstamo</span><span class="card-val">${formatCurrency(cl.amount)}</span></div><div class="card-row"><span class="card-lbl">Estado</span><span class="card-val text-accent">Saldado</span></div><button class="btn btn-primary btn-sm mt-1" onclick="generateBalanceLetter('${cl.id}')"><i class="fas fa-file-alt"></i> Generar Carta de Saldo</button></div>`; }).join('')}<div class="spacer"></div>`;
+}
+
+window.viewLoanDetails = function(clientId) {
+  const client = clients.find(c => c.id === clientId);
+  if (!client) return;
+  const cp = payments.filter(p => p.clientId === clientId);
+  const totalPagado = cp.reduce((s, p) => s + (p.amount || 0), 0);
+  const capitalRestante = calcularCapitalRestante(client);
+  const interesesTotales = getInterestAmount(client);
+  const mora = calcMora(client);
+  const totalPagar = getTotalWithInterest(client);
+  const pctPagado = totalPagar > 0 ? Math.min(100, Math.round(totalPagado / totalPagar * 100)) : 0;
+  const name = `${client.firstName || client.name || ''} ${client.lastName || ''}`.trim();
+  const frecuencia = client.paymentFrequency || 'mensual';
+  const detalle = calcularDetallePrestamo(client.amount, client.interestRate || 0, client.plazoMeses || 12, frecuencia);
+  const proximo = getProximoPagoInfo(client);
+
+  $('loanDetailsContent').innerHTML = `<div class="loan-detail"><span>Cliente:</span><span class="text-accent">${name}</span></div><div class="loan-detail"><span>Cédula:</span><span>${client.cedula || '—'}</span></div><div class="loan-detail"><span>Teléfono:</span><span>${client.phone || '—'}</span></div><div class="loan-detail"><span>Dirección:</span><span>${client.address || '—'}</span></div><div class="loan-detail"><span>Tipo de Cliente:</span><span>${getTypeText(client.type) || 'No especificado'}</span></div><div class="loan-detail divider" style="border-bottom:1px solid var(--border); margin-bottom:8px;"></div><div class="loan-detail"><span>Monto del Préstamo:</span><span>${formatCurrency(client.amount)}</span></div>${client.hasInterest ? `<div class="loan-detail"><span>Tasa de Interés Mensual:</span><span>${client.interestRate}%</span></div>` : '<div class="loan-detail"><span>Tipo de Préstamo:</span><span>Sin Interés</span></div>'}<div class="loan-detail"><span>Plazo:</span><span>${client.plazoMeses || 0} meses</span></div><div class="loan-detail"><span>Frecuencia de Pago:</span><span>${frecuencia.charAt(0).toUpperCase() + frecuencia.slice(1)}</span></div><div class="loan-detail"><span>Pago por Período:</span><span>${formatCurrency(detalle.cuota)}</span></div><div class="loan-detail"><span>Total a Pagar:</span><span class="text-warn">${formatCurrency(totalPagar)}</span></div><div class="loan-detail"><span>Interés Total:</span><span class="text-warn">${formatCurrency(interesesTotales)}</span></div><div class="loan-detail divider" style="border-bottom:1px solid var(--border); margin-bottom:8px;"></div><div class="loan-detail"><span>Total Pagado:</span><span class="text-accent">${formatCurrency(totalPagado)}</span></div><div class="loan-detail"><span>Capital Pendiente:</span><span class="text-danger">${formatCurrency(capitalRestante)}</span></div><div class="loan-detail"><span>Mora Acumulada:</span><span class="text-danger">${formatCurrency(mora)}</span></div><div class="loan-detail"><span>Próximo Pago:</span><span>${formatCurrency(proximo.cuota)} (Capital: ${formatCurrency(proximo.capital)} + Interés: ${formatCurrency(proximo.interes)})</span></div><div class="loan-detail"><span>Porcentaje Pagado:</span><span>${pctPagado}%</span></div><div class="progress-wrap mt-1 mb-2"><div class="progress-fill" style="width:${pctPagado}%;"></div></div><div class="loan-detail divider" style="border-bottom:1px solid var(--border); margin-bottom:8px;"></div><div class="loan-detail"><span>Fecha de Inicio:</span><span>${formatDate(client.fechaInicio)}</span></div><div class="loan-detail"><span>Fecha de Vencimiento:</span><span>${formatDate(client.fechaVence)}</span></div><div class="loan-detail"><span>Estado:</span><span>${capitalRestante <= 0 ? '<span class="badge badge-blue">Completado</span>' : (client.fechaVence && client.fechaVence.toDate() < new Date() ? '<span class="badge badge-red">Atrasado</span>' : '<span class="badge badge-green">Activo</span>')}</span></div><div class="loan-detail"><span>Notas:</span><span>${client.notas || '—'}</span></div>`;
+  $('loanDetailsModal').style.display = 'flex';
+};
+
+// Format selector
+document.querySelectorAll('.format-option').forEach(opt => {
+  opt.addEventListener('click', () => {
+    document.querySelectorAll('.format-option').forEach(o => o.classList.remove('active'));
+    opt.classList.add('active');
+    currentFormat = opt.dataset.format;
+    const invoiceDiv = $('invoiceForImage');
+    invoiceDiv.className = currentFormat === '80mm' ? 'invoice-container-80mm' : 'invoice-container-a4';
+    if (currentInvoice && currentInvoice.htmlContent) invoiceDiv.innerHTML = currentInvoice.htmlContent;
+  });
+});
+
+$('sendWABtn').addEventListener('click', async () => {
+  if (!currentInvoice) { showToast('No hay factura para enviar', 'error'); return; }
+  try {
+    showLoading('Preparando imagen para WhatsApp...');
+    await new Promise(resolve => setTimeout(resolve, 300));
+    const invoiceElement = $('invoiceForImage');
+    if (!invoiceElement) throw new Error('No se encontró la factura');
+    const originalWidth = invoiceElement.style.width;
+    invoiceElement.style.width = '80mm';
+    const canvas = await html2canvas(invoiceElement, { scale: 2.5, backgroundColor: '#FFFFFF', useCORS: true, logging: false });
+    invoiceElement.style.width = originalWidth;
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png', 0.9));
+    if (!blob) throw new Error('No se pudo generar la imagen');
+    const file = new File([blob], `factura_${currentInvoice.invoiceId || Date.now()}.png`, { type: 'image/png' });
+    hideLoading();
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'Factura PlusMoney' });
+      showToast('Factura compartida exitosamente', 'success');
+    } else {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = file.name;
+      link.click();
+      setTimeout(() => { window.open('https://wa.me/', '_blank'); URL.revokeObjectURL(url); }, 500);
+      showToast('Imagen descargada. Abre WhatsApp y compártela', 'blue');
+    }
+  } catch (error) { console.error('Error:', error); hideLoading(); showToast('Error al enviar: ' + error.message, 'error'); }
+});
+
+$('copyClipBtn').addEventListener('click', async () => {
+  try {
+    showLoading('Copiando...');
+    const canvas = await html2canvas($('invoiceForImage'), { scale: 2, useCORS: true, backgroundColor: '#FFFFFF' });
+    canvas.toBlob(async blob => { try { await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]); hideLoading(); showToast('Factura copiada al portapapeles', 'purple'); } catch { hideLoading(); showToast('No se pudo copiar al portapapeles', 'error'); } }, 'image/png');
+  } catch { hideLoading(); showToast('Error al generar imagen', 'error'); }
+});
+
+$('printInvoiceBtn').addEventListener('click', () => {
+  const w = window.open('', '_blank');
+  w.document.write(`<html><head><title>Factura</title><style>body{font-family:Arial,sans-serif;margin:0;padding:10px;background:white;}.invoice-container-80mm{width:80mm;margin:0 auto;font-size:11px;color:#111;}.invoice-container-a4{max-width:210mm;margin:0 auto;font-size:12px;color:#111;box-shadow:0 4px 12px rgba(0,0,0,0.1);}.invoice-row{display:flex;justify-content:space-between;margin-bottom:4px;}.invoice-divider{border:none;border-top:1px dashed #999;margin:8px 0;}.invoice-total-row{display:flex;justify-content:space-between;margin-bottom:5px;}.invoice-total-row.grand{font-weight:900;font-size:13px;border-top:2px solid #000;padding-top:8px;}.invoice-footer{text-align:center;margin-top:12px;font-size:8px;color:#888;}.barcode-container{text-align:center;margin:8px auto;}.qr-code-container{text-align:center;margin:8px auto;}.invoice-logo{max-width:50px;max-height:50px;object-fit:contain;}@media print{@page{margin:0;}}</style></head><body><div class="${currentFormat === '80mm' ? 'invoice-container-80mm' : 'invoice-container-a4'}">${$('invoiceForImage').innerHTML}</div></body></html>`);
+  w.document.close();
+  w.focus();
+  setTimeout(() => { w.print(); w.close(); }, 300);
+});
+
+$('downloadInvoiceBtn').addEventListener('click', async () => {
+  try {
+    showLoading('Generando imagen...');
+    const canvas = await html2canvas($('invoiceForImage'), { scale: 3, useCORS: true, backgroundColor: '#FFFFFF' });
+    const link = document.createElement('a');
+    link.download = `factura_${currentInvoice?.invoiceId || Date.now()}.png`;
+    link.href = canvas.toDataURL('image/png', 0.95);
+    link.click();
+    hideLoading(); showToast('Factura descargada', 'success');
+  } catch { hideLoading(); showToast('Error al descargar', 'error'); }
+});
+
+$('sendWABtnLetter').addEventListener('click', async () => {
+  if (!currentBalanceLetter) return;
+  try {
+    showLoading('Preparando imagen...');
+    const canvas = await html2canvas($('balanceLetterContent'), { scale: 2, useCORS: true, backgroundColor: '#FFFFFF' });
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/png', 0.95));
+    const file = new File([blob], `carta_saldo_${currentBalanceLetter.client?.id || Date.now()}.png`, { type: 'image/png' });
+    hideLoading();
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file], title: 'Carta de Saldo PlusMoney' });
+    else { const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = file.name; link.click(); setTimeout(() => window.open('https://wa.me/?text=Adjunto%20mi%20carta%20de%20saldo%20de%20PlusMoney', '_blank'), 800); showToast('Imagen descargada. Abre WhatsApp y compártela.', 'blue'); }
+  } catch (e) { hideLoading(); showToast('Error al enviar', 'error'); }
+});
+
+$('copyClipBtnLetter').addEventListener('click', async () => {
+  try {
+    showLoading('Copiando...');
+    const canvas = await html2canvas($('balanceLetterContent'), { scale: 2, useCORS: true, backgroundColor: '#FFFFFF' });
+    canvas.toBlob(async blob => { try { await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]); hideLoading(); showToast('Carta copiada al portapapeles', 'purple'); } catch { hideLoading(); showToast('No se pudo copiar', 'error'); } }, 'image/png');
+  } catch { hideLoading(); showToast('Error al generar imagen', 'error'); }
+});
+
+$('printLetterBtn').addEventListener('click', () => {
+  const w = window.open('', '_blank');
+  w.document.write(`<html><head><title>Carta de Saldo</title><style>body{font-family:Arial,sans-serif;margin:0;padding:20px;background:white;}.balance-letter{max-width:210mm;margin:0 auto;font-size:12px;color:#111;border:1px solid #ddd;padding:25px;}.header{text-align:center;margin-bottom:20px;border-bottom:2px solid #000;padding-bottom:15px;}.logo{max-width:60px;max-height:60px;object-fit:contain;}.title{font-size:18px;font-weight:900;margin:10px 0;}.info-section{margin:20px 0;padding:15px;background:#f8f9fa;border-radius:8px;}.info-row{display:flex;justify-content:space-between;margin-bottom:10px;}.total-row{font-size:16px;font-weight:900;margin-top:15px;padding-top:10px;border-top:2px solid #000;}.footer{text-align:center;margin-top:30px;padding-top:15px;border-top:1px solid #ccc;font-size:9px;color:#888;}@media print{@page{margin:0;}}</style></head><body>${$('balanceLetterContent').innerHTML}</body></html>`);
+  w.document.close();
+  w.focus();
+  setTimeout(() => { w.print(); w.close(); }, 300);
+});
+
+$('downloadLetterBtn').addEventListener('click', async () => {
+  try {
+    showLoading('Generando imagen...');
+    const canvas = await html2canvas($('balanceLetterContent'), { scale: 3, useCORS: true, backgroundColor: '#FFFFFF' });
+    const link = document.createElement('a');
+    link.download = `carta_saldo_${currentBalanceLetter?.client?.id || Date.now()}.png`;
+    link.href = canvas.toDataURL('image/png', 0.95);
+    link.click();
+    hideLoading(); showToast('Carta descargada', 'success');
+  } catch { hideLoading(); showToast('Error al descargar', 'error'); }
+});
+
+// Loan subsections
+function renderClientesPrestamos(c) {
+  const withLoans = clients.filter(cl => calcularCapitalRestante(cl) > 0);
+  c.innerHTML = `<div class="section-title"><i class="fas fa-users"></i> Clientes con Préstamos Activos</div><p class="text-muted text-sm mb-2">${withLoans.length} cliente(s) con saldo pendiente</p>${withLoans.length === 0 ? '<div class="empty-state"><i class="fas fa-check-circle"></i><p>¡Todos los préstamos están saldados!</p></div>' : withLoans.map(cl => { const totalPagado = payments.filter(p => p.clientId === cl.id).reduce((s, p) => s + (p.amount || 0), 0); const capitalRestante = (cl.amount || 0) - totalPagado; const total = getTotalWithInterest(cl); const pct = total > 0 ? Math.min(100, Math.round(totalPagado / total * 100)) : 0; const name = `${cl.firstName || cl.name || ''} ${cl.lastName || ''}`.trim(); const proximo = getProximoPagoInfo(cl); return `<div class="card"><div class="card-title">${name} ${getStatusBadge(cl)}</div><div class="card-row"><span class="card-lbl">Prestado</span><span class="card-val">${formatCurrency(cl.amount)}</span></div>${cl.hasInterest ? `<div class="card-row"><span class="card-lbl">Total c/Interés</span><span class="card-val text-warn">${formatCurrency(total)}</span></div>` : ''}<div class="card-row"><span class="card-lbl">Capital Pendiente</span><span class="card-val text-danger">${formatCurrency(capitalRestante)}</span></div><div class="card-row"><span class="card-lbl">Próximo Pago</span><span class="card-val">${formatCurrency(proximo.cuota)}</span></div><div class="progress-wrap mt-1"><div class="progress-fill" style="width:${pct}%"></div></div><div style="font-size:11px;color:var(--txt2);text-align:right;margin:4px 0 10px;">${pct}%</div><div class="btn-group"><button class="btn btn-outline btn-xs" onclick="viewPaymentHistory('${cl.id}')"><i class="fas fa-history"></i> Historial</button><button class="btn btn-primary btn-xs" onclick="quickPay('${cl.id}')"><i class="fas fa-money-bill"></i> Pagar</button><button class="btn-info-custom btn-xs" onclick="viewLoanDetails('${cl.id}')"><i class="fas fa-chart-line"></i> Detalles</button></div></div>`; }).join('')}<div class="spacer"></div>`;
+}
+
+function renderPagosPendientes(c) {
+  const pending = clients.filter(cl => calcularCapitalRestante(cl) > 0);
+  const total = pending.reduce((s, cl) => s + calcularCapitalRestante(cl), 0);
+  c.innerHTML = `<div class="section-title"><i class="fas fa-clock"></i> Pagos Pendientes</div><div class="card mb-2" style="background:rgba(255,165,2,0.07);border-color:rgba(255,165,2,0.3);"><div class="card-row"><span class="card-lbl">Clientes con pendientes</span><span class="card-val text-warn fw-bold">${pending.length}</span></div><div class="card-row"><span class="card-lbl">Total Capital Pendiente</span><span class="card-val text-danger fw-bold">${formatCurrency(total)}</span></div></div>${pending.length === 0 ? '<div class="empty-state"><i class="fas fa-check-double"></i><p>Sin pagos pendientes</p></div>' : pending.sort((a, b) => calcularCapitalRestante(b) - calcularCapitalRestante(a)).map(cl => { const pend = calcularCapitalRestante(cl); const name = `${cl.firstName || cl.name || ''} ${cl.lastName || ''}`.trim(); const proximo = getProximoPagoInfo(cl); return `<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span class="card-title" style="margin-bottom:0;">${name}</span><span class="badge badge-yellow">Pendiente</span></div><div class="card-row"><span class="card-lbl">Capital Pendiente</span><span class="card-val text-danger fw-bold">${formatCurrency(pend)}</span></div><div class="card-row"><span class="card-lbl">Próximo Pago</span><span class="card-val">${formatCurrency(proximo.cuota)}</span></div>${cl.fechaVence ? `<div class="card-row"><span class="card-lbl">Vence</span><span class="card-val">${formatDate(cl.fechaVence)}</span></div>` : ''}<button class="btn btn-primary btn-sm mt-1" onclick="quickPay('${cl.id}')"><i class="fas fa-money-bill"></i> Pagar Ahora</button></div>`; }).join('')}<div class="spacer"></div>`;
+}
+
+function renderPagosAtrasados(c) {
+  const today = new Date();
+  const late = clients.filter(cl => { const capitalRestante = calcularCapitalRestante(cl); if (capitalRestante <= 0) return false; if (!cl.fechaVence) return false; const v = cl.fechaVence.toDate ? cl.fechaVence.toDate() : new Date(cl.fechaVence); return v < today; });
+  const totalMora = late.reduce((s, cl) => s + calcMora(cl), 0);
+  c.innerHTML = `<div class="section-title"><i class="fas fa-exclamation-triangle"></i> Pagos Atrasados</div><div class="card mb-2" style="background:rgba(255,71,87,0.07);border-color:rgba(255,71,87,0.3);"><div class="card-row"><span class="card-lbl">Clientes atrasados</span><span class="card-val text-danger fw-bold">${late.length}</span></div><div class="card-row"><span class="card-lbl">Total Mora Acumulada</span><span class="card-val text-danger fw-bold">${formatCurrency(totalMora)}</span></div></div>${late.length === 0 ? '<div class="empty-state"><i class="fas fa-check-circle"></i><p>Sin pagos atrasados 🎉</p></div>' : late.map(cl => { const mora = calcMora(cl); const v = cl.fechaVence.toDate ? cl.fechaVence.toDate() : new Date(cl.fechaVence); const diasMora = Math.floor((today - v) / 86400000); const name = `${cl.firstName || cl.name || ''} ${cl.lastName || ''}`.trim(); const pendiente = calcularCapitalRestante(cl); return `<div class="card" style="border-left:3px solid var(--danger);"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span class="card-title" style="margin-bottom:0;">${name}</span><span class="badge badge-red">${diasMora}d atrasado</span></div><div class="card-row"><span class="card-lbl">Capital Pendiente</span><span class="card-val text-danger">${formatCurrency(pendiente)}</span></div><div class="card-row"><span class="card-lbl">Mora Acumulada</span><span class="card-val text-danger fw-bold">+${formatCurrency(mora)}</span></div><button class="btn btn-danger btn-sm mt-1" onclick="quickPay('${cl.id}')"><i class="fas fa-money-bill"></i> Registrar Pago</button></div>`; }).join('')}<div class="spacer"></div>`;
+}
+
+function renderGanancias(c) {
+  let totalGan = 0, ganCobrada = 0, ganPorCobrar = 0;
+  const clientsWithInterest = clients.filter(cl => cl.hasInterest);
+  clientsWithInterest.forEach(cl => {
+    const inter = getInterestAmount(cl);
+    totalGan += inter;
+    const cp = payments.filter(p => p.clientId === cl.id);
+    const totalPagadoInteres = cp.reduce((s, p) => s + (p.interesAplicado || 0), 0);
+    ganCobrada += totalPagadoInteres;
+    ganPorCobrar += inter - totalPagadoInteres;
+  });
+  c.innerHTML = `<div class="section-title"><i class="fas fa-chart-line"></i> Ganancias por Intereses</div><div class="stats-grid"><div class="stat-card"><div class="stat-val">${formatCurrency(totalGan)}</div><div class="stat-lbl">Total Esperado</div></div><div class="stat-card"><div class="stat-val" style="background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">${formatCurrency(ganCobrada)}</div><div class="stat-lbl">Ya Cobrado</div></div><div class="stat-card"><div class="stat-val" style="background:linear-gradient(135deg,var(--warning),#e67e00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">${formatCurrency(ganPorCobrar)}</div><div class="stat-lbl">Por Cobrar</div></div><div class="stat-card"><div class="stat-val">${clientsWithInterest.length}</div><div class="stat-lbl">Con Interés</div></div></div><div class="spacer"></div>`;
+}
+
+function renderPerdidas(c) {
+  const today = new Date();
+  const late = clients.filter(cl => { const capitalRestante = calcularCapitalRestante(cl); if (capitalRestante <= 0) return false; if (!cl.fechaVence) return false; const v = cl.fechaVence.toDate ? cl.fechaVence.toDate() : new Date(cl.fechaVence); return v < today; });
+  const totalMora = late.reduce((s, cl) => s + calcMora(cl), 0);
+  c.innerHTML = `<div class="section-title"><i class="fas fa-chart-line fa-flip-vertical"></i> Pérdidas y Mora</div><div class="stats-grid"><div class="stat-card"><div class="stat-val text-danger">${late.length}</div><div class="stat-lbl">En Mora</div></div><div class="stat-card"><div class="stat-val text-danger">${formatCurrency(totalMora)}</div><div class="stat-lbl">Total Mora</div></div><div class="stat-card"><div class="stat-val">${companyConfig.moraRate || 0}%</div><div class="stat-lbl">Tasa Mora</div></div><div class="stat-card"><div class="stat-val">${companyConfig.diasGracia || 0}</div><div class="stat-lbl">Días Gracia</div></div></div>${late.length === 0 ? '<div class="empty-state" style="margin-top:20px;"><i class="fas fa-smile"></i><p>Sin mora registrada</p></div>' : ''}<div class="spacer"></div>`;
+}
+
+function renderReportes(c) {
+  let totalP = 0, totalCob = 0, capitalPendienteTotal = 0, totalGan = 0, totalMora = 0;
+  clients.forEach(cl => {
+    totalP += cl.amount || 0;
+    const cp = payments.filter(p => p.clientId === cl.id);
+    const totalPagado = cp.reduce((s, p) => s + (p.amount || 0), 0);
+    totalCob += totalPagado;
+    capitalPendienteTotal += calcularCapitalRestante(cl);
+    if (cl.hasInterest) totalGan += getInterestAmount(cl);
+    totalMora += calcMora(cl);
+  });
+  const pagados = clients.filter(cl => calcularCapitalRestante(cl) <= 0);
+  c.innerHTML = `<div class="section-title"><i class="fas fa-chart-bar"></i> Reportes</div><div class="report-card"><div class="report-header"><span class="report-title"><i class="fas fa-wallet" style="margin-right:8px;"></i>Resumen Financiero</span></div><div class="card-row"><span class="card-lbl">Total Prestado</span><span class="card-val fw-bold">${formatCurrency(totalP)}</span></div><div class="card-row"><span class="card-lbl">Total Cobrado</span><span class="card-val text-accent">${formatCurrency(totalCob)}</span></div><div class="card-row"><span class="card-lbl">Capital Pendiente</span><span class="card-val text-danger">${formatCurrency(capitalPendienteTotal)}</span></div><div class="card-row"><span class="card-lbl">Ganancias Esperadas</span><span class="card-val" style="color:var(--gold);">${formatCurrency(totalGan)}</span></div><div class="card-row"><span class="card-lbl">Mora Total</span><span class="card-val text-danger">${formatCurrency(totalMora)}</span></div><div class="card-row"><span class="card-lbl">Tasa de Recuperación</span><span class="card-val">${totalP > 0 ? ((totalP - capitalPendienteTotal) / totalP * 100).toFixed(2) : 0}%</span></div></div><div class="report-card"><div class="report-header"><span class="report-title"><i class="fas fa-users" style="margin-right:8px;"></i>Estadísticas de Clientes</span></div><div class="card-row"><span class="card-lbl">Total Clientes</span><span class="card-val">${clients.length}</span></div><div class="card-row"><span class="card-lbl">Pagados Completamente</span><span class="card-val text-accent">${pagados.length}</span></div><div class="card-row"><span class="card-lbl">Con Interés</span><span class="card-val text-warn">${clients.filter(cl => cl.hasInterest).length}</span></div><div class="card-row"><span class="card-lbl">Total Pagos Registrados</span><span class="card-val">${payments.length}</span></div></div><div class="spacer"></div>`;
+}
+
+function renderEstadoPrestamos(c) {
+  const items = clients.map(cl => { const capitalRestante = calcularCapitalRestante(cl); let status = 'activo'; if (capitalRestante <= 0) status = 'pagado'; else if (cl.fechaVence && cl.fechaVence.toDate() < new Date()) status = 'atrasado'; return { ...cl, _capitalRestante: capitalRestante, _status: status }; });
+  c.innerHTML = `<div class="section-title"><i class="fas fa-clipboard-list"></i> Estado de Préstamos</div><div style="overflow-x:auto;"><table class="data-table"><thead><tr><th>Cliente</th><th>Préstamo</th><th>Capital Pendiente</th><th>Estado</th></tr></thead><tbody>${items.map(cl => { const name = `${cl.firstName || cl.name || ''} ${cl.lastName || ''}`.trim(); const badge = cl._status === 'pagado' ? '<span class="badge badge-blue">Pagado</span>' : cl._status === 'atrasado' ? '<span class="badge badge-red">Atrasado</span>' : '<span class="badge badge-green">Activo</span>'; return `<tr onclick="viewLoanDetails('${cl.id}')" style="cursor:pointer;"><td><strong>${name}</strong></td><td>${formatCurrency(cl.amount)}</td><td class="${cl._capitalRestante > 0 ? 'text-danger' : ''}">${formatCurrency(cl._capitalRestante)}</td><td>${badge}</td></tr>`; }).join('')}</tbody></table></div><div class="spacer"></div>`;
+}
+
+function renderHistorialCompleto(c) {
+  const sorted = [...payments].sort((a, b) => { const at = a.date?.toDate ? a.date.toDate() : new Date(a.date || 0); const bt = b.date?.toDate ? b.date.toDate() : new Date(b.date || 0); return bt - at; });
+  c.innerHTML = `<div class="section-title"><i class="fas fa-history"></i> Historial Completo de Pagos</div><p class="text-muted text-sm mb-2">${sorted.length} pago(s) registrado(s)</p>${sorted.length === 0 ? '<div class="empty-state"><i class="fas fa-receipt"></i><p>Sin pagos</p></div>' : sorted.map(p => { const cl = clients.find(x => x.id === p.clientId); const nm = p.clientName || (cl ? `${cl.firstName || cl.name || ''} ${cl.lastName || ''}`.trim() : 'Desconocido'); return `<div class="payment-item"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;"><strong>${nm}</strong><span class="text-accent fw-bold">${formatCurrency(p.amount)}</span></div><div style="font-size:11px;color:var(--txt2);margin-bottom:7px;">${formatDateTime(p.date)} · ${p.method || 'Efectivo'}</div><div style="font-size:10px;">💰 Capital: ${formatCurrency(p.capitalAplicado || 0)} | ⚠️ Mora: ${formatCurrency(p.moraAplicada || 0)}</div><button class="btn btn-outline btn-xs mt-1" onclick="showInvoiceByPaymentId('${p.id}')"><i class="fas fa-file-invoice"></i> Factura</button></div>`; }).join('')}<div class="spacer"></div>`;
+}
+
+function renderHistorialFacturas(c) {
+  const sorted = [...invoices].sort((a, b) => { const at = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0); const bt = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0); return bt - at; });
+  c.innerHTML = `<div class="section-title"><i class="fas fa-file-invoice"></i> Historial de Facturas</div><p class="text-muted text-sm mb-2">${sorted.length} factura(s) emitida(s)</p>${sorted.length === 0 ? '<div class="empty-state"><i class="fas fa-receipt"></i><p>Sin facturas generadas</p></div>' : sorted.map(inv => `<div class="payment-item"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><strong>${inv.invoiceId || '—'}</strong><span class="text-accent fw-bold">${formatCurrency(inv.total || 0)}</span></div><div style="font-size:11px;color:var(--txt2);margin-bottom:8px;">${formatDateTime(inv.createdAt)} · ${inv.clientName || '—'}</div><button class="btn btn-outline btn-xs" onclick="viewInvoiceFromHistory('${inv.id}')"><i class="fas fa-eye"></i> Ver Factura</button></div>`).join('')}<div class="spacer"></div>`;
+}
+
+function renderPrestamosCompletados(c) {
+  const completados = clients.filter(cl => calcularCapitalRestante(cl) <= 0);
+  c.innerHTML = `<div class="section-title"><i class="fas fa-check-circle"></i> Préstamos Completados</div><p class="text-muted text-sm mb-2">${completados.length} préstamo(s) completado(s)</p>${completados.length === 0 ? '<div class="empty-state"><i class="fas fa-info-circle"></i><p>Sin préstamos completados</p></div>' : completados.map(cl => { const name = `${cl.firstName || cl.name || ''} ${cl.lastName || ''}`.trim(); return `<div class="card"><div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;"><div style="width:46px;height:46px;border-radius:50%;overflow:hidden;background:var(--bg3);border:2px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:20px;">${cl.photoUrl ? `<img src="${cl.photoUrl}" style="width:100%;height:100%;object-fit:cover;">` : '<i class="fas fa-user"></i>'}</div><div><div class="card-title" style="margin-bottom:3px;">${name}</div><div style="font-size:11px;color:var(--txt2);">${cl.cedula || ''} ${cl.phone ? '· ' + cl.phone : ''}</div></div><div><span class="badge badge-blue">Completado</span></div></div><div class="card-row"><span class="card-lbl">Monto Original</span><span class="card-val">${formatCurrency(cl.amount)}</span></div><div class="card-row"><span class="card-lbl">Plazo</span><span class="card-val">${cl.plazoMeses || 0} meses (${cl.paymentFrequency || 'mensual'})</span></div><div class="card-row"><span class="card-lbl">Fecha Finalización</span><span class="card-val">${formatDate(cl.fechaVence)}</span></div><div class="btn-group mt-1"><button class="btn-info-custom btn-xs" onclick="viewLoanDetails('${cl.id}')"><i class="fas fa-chart-line"></i> Detalles</button><button class="btn btn-purple btn-xs" onclick="generateBalanceLetter('${cl.id}')"><i class="fas fa-file-alt"></i> Carta Saldo</button></div></div>`; }).join('')}<div class="spacer"></div>`;
+}
+
+window.viewInvoiceFromHistory = async function(invoiceId) {
+  const inv = invoices.find(i => i.id === invoiceId);
+  if (!inv) return;
+  $('invoiceForImage').innerHTML = inv.htmlContent;
+  currentInvoice = inv;
+  $('invoiceModal').style.display = 'flex';
+};
+
+function renderFacturaManual(c) {
+  invoiceItems = [{ desc: '', qty: 1, price: 0 }];
+  c.innerHTML = `<div class="section-title"><i class="fas fa-file-invoice-dollar"></i> Factura Electrónica Manual</div><form id="manualInvoiceForm"><div class="form-section-title"><i class="fas fa-store"></i> Emisor</div><div class="form-group"><label class="form-label">Empresa / Nombre</label><input type="text" id="inv-empresa" class="form-input" value="${companyConfig.name || ''}" placeholder="Nombre empresa"></div><div class="form-row"><div class="form-group"><label class="form-label">RNC/Cédula</label><input type="text" id="inv-rnc" class="form-input" value="${companyConfig.rnc || ''}"></div><div class="form-group"><label class="form-label">Teléfono</label><input type="text" id="inv-tel" class="form-input" value="${companyConfig.phone || ''}"></div></div><div class="form-group"><label class="form-label">Dirección</label><input type="text" id="inv-dir" class="form-input" value="${companyConfig.address || ''}"></div><div class="form-section-title"><i class="fas fa-user"></i> Receptor</div><div class="form-group"><label class="form-label">Nombre / Empresa</label><input type="text" id="inv-cliente" class="form-input" placeholder="Nombre del cliente"></div><div class="form-row"><div class="form-group"><label class="form-label">Cédula / RNC</label><input type="text" id="inv-cliente-rnc" class="form-input" placeholder="Cédula"></div><div class="form-group"><label class="form-label">Teléfono</label><input type="text" id="inv-cliente-tel" class="form-input" placeholder="Teléfono"></div></div><div class="form-section-title"><i class="fas fa-list"></i> Artículos / Servicios</div><div style="display:grid;grid-template-columns:1fr 80px 90px 36px;gap:6px;margin-bottom:6px;"><span class="form-label" style="margin:0;">Descripción</span><span class="form-label" style="margin:0;">Cant.</span><span class="form-label" style="margin:0;">Precio</span><span></span></div><div id="invItemsContainer"></div><button type="button" class="btn btn-outline btn-sm mt-1" onclick="addInvItem()"><i class="fas fa-plus"></i> Agregar Ítem</button><div class="form-section-title"><i class="fas fa-receipt"></i> Totales</div><div class="form-row"><div class="form-group"><label class="form-label">ITBIS (%)</label><input type="number" id="inv-itbis" class="form-input" value="18" step="0.1" oninput="calcInvTotal()"></div><div class="form-group"><label class="form-label">Descuento (RD$)</label><input type="number" id="inv-descuento" class="form-input" value="0" step="0.01" oninput="calcInvTotal()"></div></div><div class="card" style="background:rgba(0,245,160,0.06);border-color:rgba(0,245,160,0.2);"><div class="card-row"><span class="card-lbl">Subtotal</span><span class="card-val" id="inv-subtotal">$0.00</span></div><div class="card-row"><span class="card-lbl">ITBIS</span><span class="card-val" id="inv-itbis-val">$0.00</span></div><div class="card-row"><span class="card-lbl">Descuento</span><span class="card-val" id="inv-desc-val">$0.00</span></div><div class="card-row"><span class="card-lbl fw-bold" style="font-size:15px;">TOTAL</span><span class="card-val fw-bold text-accent" style="font-size:16px;" id="inv-total">$0.00</span></div></div><div class="form-section-title"><i class="fas fa-sticky-note"></i> Notas y Firma</div><div class="form-group"><textarea id="inv-notas" class="form-textarea" placeholder="Términos, condiciones, notas de la factura..."></textarea></div><div class="btn-group mt-2"><button type="button" class="btn btn-primary" onclick="generateManualInvoice()"><i class="fas fa-file-invoice"></i> Generar Factura</button><button type="button" class="btn btn-outline" onclick="clearManualInvoice()"><i class="fas fa-redo"></i> Limpiar</button></div></form><div class="spacer"></div>`;
+  renderInvItems();
+}
+
+window.addInvItem = function() { invoiceItems.push({ desc: '', qty: 1, price: 0 }); renderInvItems(); };
+window.removeInvItem = function(i) { if (invoiceItems.length > 1) { invoiceItems.splice(i, 1); renderInvItems(); } };
+window.updateInvItem = function(i, field, val) { invoiceItems[i][field] = field === 'qty' || field === 'price' ? parseFloat(val) || 0 : val; calcInvTotal(); };
+function renderInvItems() { const c = $('invItemsContainer'); if (!c) return; c.innerHTML = invoiceItems.map((item, i) => `<div class="invoice-item-row"><input type="text" class="form-input" value="${item.desc}" placeholder="Descripción" oninput="updateInvItem(${i},'desc',this.value)"><input type="number" class="form-input" value="${item.qty}" min="1" oninput="updateInvItem(${i},'qty',this.value)"><input type="number" class="form-input" value="${item.price}" step="0.01" oninput="updateInvItem(${i},'price',this.value)"><button type="button" class="inv-remove-btn" onclick="removeInvItem(${i})"><i class="fas fa-times"></i></button></div>`).join(''); calcInvTotal(); }
+window.calcInvTotal = function() { const subtotal = invoiceItems.reduce((s, it) => s + (it.qty || 0) * (it.price || 0), 0); const pctItbis = parseFloat($('inv-itbis')?.value || 0); const desc = parseFloat($('inv-descuento')?.value || 0); const itbisAmt = subtotal * pctItbis / 100; const total = subtotal + itbisAmt - desc; if ($('inv-subtotal')) $('inv-subtotal').textContent = formatCurrency(subtotal); if ($('inv-itbis-val')) $('inv-itbis-val').textContent = formatCurrency(itbisAmt); if ($('inv-desc-val')) $('inv-desc-val').textContent = formatCurrency(desc); if ($('inv-total')) $('inv-total').textContent = formatCurrency(total); };
+window.clearManualInvoice = function() { invoiceItems = [{ desc: '', qty: 1, price: 0 }]; renderInvItems(); };
+window.generateManualInvoice = async function() {
+  const empresa = $('inv-empresa')?.value || companyConfig.name || 'PlusMoney';
+  const rnc = $('inv-rnc')?.value || companyConfig.rnc || '—';
+  const tel = $('inv-tel')?.value || companyConfig.phone || '—';
+  const dir = $('inv-dir')?.value || companyConfig.address || '—';
+  const cliente = $('inv-cliente')?.value || 'Cliente General';
+  const cliRnc = $('inv-cliente-rnc')?.value || '—';
+  const cliTel = $('inv-cliente-tel')?.value || '—';
+  const notas = $('inv-notas')?.value || '';
+  const pctItbis = parseFloat($('inv-itbis')?.value || 0);
+  const desc = parseFloat($('inv-descuento')?.value || 0);
+  const subtotal = invoiceItems.reduce((s, it) => s + (it.qty || 0) * (it.price || 0), 0);
+  const itbisAmt = subtotal * pctItbis / 100;
+  const total = subtotal + itbisAmt - desc;
+  const invoiceId = generateInvoiceId();
+  const qrData = `https://plusmoney.app/factura/${invoiceId}|${cliente}|${total}|${formatDate(new Date())}`;
+  const qrCodeHtml = generateQRCode(qrData, 80);
+  const barcodeHtml = generateBarcodeSVG(invoiceId, 2, 30);
+  const logo = companyConfig.logoUrl;
+  const content = `<div class="invoice-header">${logo ? `<img src="${logo}" class="invoice-logo" alt="Logo" style="max-width:50px;max-height:50px;object-fit:contain;">` : '<div style="width:50px;height:50px;background:#f0f0f0;margin:0 auto 8px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;">💰</div>'}<div class="invoice-biz-name">${empresa}</div><div class="invoice-sub">RNC: ${rnc}</div><div class="invoice-sub">${dir}</div><div class="invoice-sub">Tel: ${tel}</div></div><div style="text-align:center;margin:10px 0;padding:8px;background:#f8f8f8;border-radius:6px;"><div style="font-size:14px;font-weight:900;">FACTURA ELECTRÓNICA</div><div class="invoice-sub">N° ${invoiceId}</div><div class="invoice-sub">Fecha: ${new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}</div><div class="barcode-container">${barcodeHtml}</div><div class="qr-code-container">${qrCodeHtml}</div></div><hr class="invoice-divider"><div style="font-size:10px;font-weight:700;margin-bottom:5px;">DATOS DEL CLIENTE</div><div class="invoice-row"><span class="lbl">Nombre:</span><span class="val">${cliente}</span></div><div class="invoice-row"><span class="lbl">Cédula/RNC:</span><span class="val">${cliRnc}</span></div><div class="invoice-row"><span class="lbl">Teléfono:</span><span class="val">${cliTel}</span></div><hr class="invoice-divider"><div style="font-size:10px;font-weight:700;margin-bottom:5px;">ARTÍCULOS</div><div style="display:grid;grid-template-columns:1fr 30px 55px 55px;gap:2px;margin-bottom:4px;font-size:9px;font-weight:700;color:#666;"><span>Descripción</span><span>Qty</span><span>Precio</span><span>Total</span></div>${invoiceItems.filter(it => it.desc || it.price).map(it => `<div style="display:grid;grid-template-columns:1fr 30px 55px 55px;gap:2px;margin-bottom:3px;font-size:10px;"><span>${it.desc || '—'}</span><span>${it.qty}</span><span>${formatCurrency(it.price)}</span><span>${formatCurrency((it.qty || 0) * (it.price || 0))}</span></div>`).join('')}<hr class="invoice-divider"><div class="invoice-total-row"><span>Subtotal:</span><span>${formatCurrency(subtotal)}</span></div>${pctItbis > 0 ? `<div class="invoice-total-row"><span>ITBIS (${pctItbis}%):</span><span>${formatCurrency(itbisAmt)}</span></div>` : ''}${desc > 0 ? `<div class="invoice-total-row"><span>Descuento:</span><span>-${formatCurrency(desc)}</span></div>` : ''}<div class="invoice-total-row grand"><span>TOTAL:</span><span>${formatCurrency(total)}</span></div>${notas ? `<hr class="invoice-divider"><div style="font-size:9px;color:#666;">${notas}</div>` : ''}<div class="invoice-footer"><p>Documento emitido electrónicamente</p><p>${empresa} · ${rnc}</p><p style="font-size:7px;">© ${new Date().getFullYear()} · Powered by PlusMoney Retom</p></div>`;
+  $('invoiceForImage').innerHTML = content;
+  currentInvoice = { isManual: true, invNum: invoiceId, empresa, cliente, htmlContent: content };
+  saveInvoiceToHistory({ invoiceId, clientName: cliente, type: 'manual', total, htmlContent: content });
+  $('invoiceModal').style.display = 'flex';
+};
+
+window.viewPaymentHistory = window.viewPaymentHistory;
+window.showInvoiceByPaymentId = window.showInvoiceByPaymentId;
+window.viewLoanDetails = window.viewLoanDetails;
+window.generateBalanceLetter = window.generateBalanceLetter;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const savedSession = loadSavedSession();
+  if (savedSession) {
+    try {
+      showLoading('Restaurando sesión...');
+      const userDoc = await getDoc(doc(db, 'Collaborators', savedSession.uid));
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+        currentUser = { uid: savedSession.uid, username: data.username, name: `${data.firstName || ''} ${data.lastName || ''}`.trim() || data.username, firstName: data.firstName || '', lastName: data.lastName || '', photoUrl: data.photoUrl || '', role: 'collaborator', createdAt: data.createdAt, pin: data.pin };
+        await initApp();
+      } else { $('loginUsername').focus(); }
+    } catch (e) { $('loginUsername').focus(); }
+    finally { hideLoading(); }
+  } else { $('loginUsername').focus(); }
+});
+</script>
