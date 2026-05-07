@@ -147,7 +147,7 @@ header{position:fixed;top:0;left:0;right:0;background:rgba(15,10,26,.95);backdro
 .confetti-piece{position:absolute;width:10px;height:10px;opacity:0;animation:confettiFall linear forwards}
 @keyframes confettiFall{0%{opacity:1;transform:translateY(-20px) rotate(0deg)}100%{opacity:0;transform:translateY(100vh) rotate(720deg)}}
 
-/* Ventana flotante de cámara mejorada */
+/* Ventana flotante de cámara */
 .floating-camera {
   position: fixed;
   bottom: 80px;
@@ -164,20 +164,21 @@ header{position:fixed;top:0;left:0;right:0;background:rgba(15,10,26,.95);backdro
   backdrop-filter: blur(4px);
 }
 .floating-camera.minimized {
-  width: 60px;
-  height: 60px;
-  border-radius: 30px;
+  width: 80px;
+  height: 80px;
+  border-radius: 40px;
 }
-.floating-camera.minimized .floating-video,
+.floating-camera.minimized .floating-video video {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+}
 .floating-camera.minimized .floating-controls,
 .floating-camera.minimized .floating-timer {
   display: none;
 }
 .floating-camera.minimized .floating-minimize-btn {
   display: flex;
-}
-.floating-camera.minimized .floating-restore-btn {
-  display: none;
 }
 .floating-video {
   width: 100%;
@@ -242,7 +243,7 @@ header{position:fixed;top:0;left:0;right:0;background:rgba(15,10,26,.95);backdro
   transition: all 0.2s;
 }
 .floating-minimize-btn:hover {
-  background: var(--danger);
+  background: var(--success);
 }
 .floating-restore-btn {
   position: absolute;
@@ -255,7 +256,7 @@ header{position:fixed;top:0;left:0;right:0;background:rgba(15,10,26,.95);backdro
   height: 28px;
   border-radius: 50%;
   cursor: pointer;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
@@ -327,9 +328,6 @@ header{position:fixed;top:0;left:0;right:0;background:rgba(15,10,26,.95);backdro
 .tv-fullscreen-controls button:hover {
   background: var(--danger);
   transform: scale(1.1);
-}
-.tv-fullscreen-controls button.close-fullscreen:hover {
-  background: var(--danger);
 }
 #tvFullscreenVideo {
   width: 100%;
@@ -513,11 +511,11 @@ header{position:fixed;top:0;left:0;right:0;background:rgba(15,10,26,.95);backdro
     <div id="sectionTV" class="section"><div id="tvContent"></div></div>
   </div>
   <nav class="bottom-nav">
-    <button class="nav-item active" id="navHome" onclick="goSection('Home')"><i class="fas fa-home"></i><span>Inicio</span></button>
-    <button class="nav-item" id="navStream" onclick="goSection('Stream')"><i class="fas fa-video"></i><span>Cámara</span></button>
-    <button class="nav-item" id="navDraw" onclick="goSection('Draw')"><i class="fas fa-dice"></i><span>Sortear</span></button>
-    <button class="nav-item" id="navTV" onclick="goSection('TV')"><i class="fas fa-tv"></i><span>TV</span></button>
-    <button class="nav-item" id="navHistory" onclick="goSection('History')"><i class="fas fa-trophy"></i><span>Historial</span></button>
+    <button class="nav-item active" id="navHome" onclick="changeSection('Home')"><i class="fas fa-home"></i><span>Inicio</span></button>
+    <button class="nav-item" id="navStream" onclick="changeSection('Stream')"><i class="fas fa-video"></i><span>Cámara</span></button>
+    <button class="nav-item" id="navDraw" onclick="changeSection('Draw')"><i class="fas fa-dice"></i><span>Sortear</span></button>
+    <button class="nav-item" id="navTV" onclick="changeSection('TV')"><i class="fas fa-tv"></i><span>TV</span></button>
+    <button class="nav-item" id="navHistory" onclick="changeSection('History')"><i class="fas fa-trophy"></i><span>Historial</span></button>
   </nav>
 </div>
 
@@ -566,7 +564,6 @@ header{position:fixed;top:0;left:0;right:0;background:rgba(15,10,26,.95);backdro
 <div class="confetti-container" id="confettiContainer"></div>
 <div id="toastContainer"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/jitsi-meet-sdk@latest/js/external_api.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, getDoc, updateDoc, deleteDoc, doc, setDoc, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
@@ -583,9 +580,10 @@ let currentStream = null, localVideoEl = null, camDevices = [], isCamRunning = f
 let floatingStream = null, isFloatingMinimized = false, floatingVideoEl = null;
 let liveStartTime = null, liveTimerInterval = null;
 let drawState = { active: false, raffleId: null, mode: 'online', prizeCount: 0, currentPrize: 0, remainingTickets: [], winnersSoFar: [], animInterval: null, timeout: null, countdownInterval: null };
-let currentDraggable = null, dragOffsetX = 0, dragOffsetY = 0, isDragging = false;
+let dragOffsetX = 0, dragOffsetY = 0;
 let currentSection = 'Home';
 let tvFullscreenActive = false;
+let activeAdminIdForSession = null;
 
 function $(id){ return document.getElementById(id); }
 function padNum(n,d){ return String(n).padStart(d||3,'0'); }
@@ -648,7 +646,7 @@ function showScreen(s){
 }
 function showMain(){ $('loadingScreen').style.display='none'; $('loginScreen').style.display='none'; $('mainApp').style.display='block'; }
 
-window.goSection = function(name){
+window.changeSection = function(name){
   currentSection = name;
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
@@ -658,8 +656,12 @@ window.goSection = function(name){
   // Mostrar u ocultar ventana flotante según la sección
   const floating = $('floatingCamera');
   if(floating){
-    if(name !== 'Stream' && isCamRunning){
+    if(name !== 'Stream' && isCamRunning && activeLiveSession && activeLiveSession.status === 'live'){
       floating.style.display = 'block';
+      // Si estaba minimizada, mantener minimizada
+      if(isFloatingMinimized){
+        floating.classList.add('minimized');
+      }
     } else if(name === 'Stream'){
       floating.style.display = 'none';
     } else if(!isCamRunning){
@@ -687,6 +689,7 @@ window.doLogin = async function(){
     if(snap.empty){ $('loginScreen').style.display='flex'; $('loadingScreen').style.display='none'; $('loginError').textContent='Usuario o contraseña incorrectos'; $('loginError').style.display='block'; return; }
     currentUser = { uid: snap.docs[0].id, ...snap.docs[0].data() };
     if(currentUser.role!=='admin'){ $('loginScreen').style.display='flex'; $('loadingScreen').style.display='none'; $('loginError').textContent='No tienes permisos de administrador'; $('loginError').style.display='block'; return; }
+    activeAdminIdForSession = currentUser.uid;
     try{ localStorage.setItem('rifapool_live_admin', JSON.stringify({uid:currentUser.uid,name:currentUser.name,role:currentUser.role})); }catch(e){}
     await afterLogin();
   }catch(e){ $('loginScreen').style.display='flex'; $('loadingScreen').style.display='none'; showToast(e.message||'Error de conexión','error'); }
@@ -696,8 +699,40 @@ async function afterLogin(){
   $('userNameDisplay').textContent = currentUser.name || currentUser.username || 'Admin';
   startRealtime();
   showMain();
-  goSection('Home');
+  
+  // Intentar restaurar sesión activa anterior
+  await restoreActiveSession();
+  
+  changeSection('Home');
   showToast(`¡Bienvenido, ${currentUser.name||currentUser.username}!`);
+}
+
+async function restoreActiveSession(){
+  try{
+    const q = query(collection(db,'liveSessions'), where('adminId','==',currentUser.uid), where('status','==','live'));
+    const snap = await getDocs(q);
+    if(!snap.empty){
+      const sessionDoc = snap.docs[0];
+      activeLiveSession = { id: sessionDoc.id, ...sessionDoc.data() };
+      activeAdminIdForSession = currentUser.uid;
+      liveStartTime = activeLiveSession.startedAt ? new Date(activeLiveSession.startedAt) : new Date();
+      startLiveTimer();
+      watchLiveSession(sessionDoc.id);
+      showToast('Sesión en vivo restaurada automáticamente','success');
+      
+      // Cargar tickets restantes para el sorteo
+      if(activeLiveSession.raffleId){
+        const raffle = allRaffles.find(r=>r.id===activeLiveSession.raffleId);
+        const tickets = allTickets.filter(t=>t.raffleId===activeLiveSession.raffleId);
+        drawState.active = true;
+        drawState.raffleId = activeLiveSession.raffleId;
+        drawState.mode = activeLiveSession.mode;
+        drawState.prizeCount = activeLiveSession.prizeCount || 1;
+        drawState.remainingTickets = tickets.filter(t => !activeLiveSession.winners?.some(w=>w.number===t.number));
+        drawState.winnersSoFar = activeLiveSession.winners || [];
+      }
+    }
+  }catch(e){ console.warn('Error restoring session:', e); }
 }
 
 window.doLogout = function(){
@@ -707,6 +742,7 @@ window.doLogout = function(){
     stopCameraAndFloating();
     if(liveTimerInterval) clearInterval(liveTimerInterval);
     currentUser=null; allRaffles=[]; allTickets=[]; allPayments=[]; activeLiveSession=null;
+    activeAdminIdForSession = null;
     $('loadingScreen').style.display='none';
     $('loginScreen').style.display='flex';
     $('mainApp').style.display='none';
@@ -725,6 +761,10 @@ function startRealtime(){
   ticketUnsub = onSnapshot(collection(db,'tickets'), snap=>{
     allTickets=[];
     snap.forEach(d=>{ const t={id:d.id,...d.data()}; if(t.adminId===currentUser?.uid) allTickets.push(t); });
+    // Actualizar remainingTickets en drawState
+    if(activeLiveSession && drawState.active){
+      drawState.remainingTickets = allTickets.filter(t => t.raffleId === activeLiveSession.raffleId && !activeLiveSession.winners?.some(w=>w.number===t.number));
+    }
   });
   if(paymentUnsub) paymentUnsub();
   paymentUnsub = onSnapshot(collection(db,'payments'), snap=>{
@@ -736,7 +776,14 @@ function startRealtime(){
 function watchLiveSession(sessionId){
   if(activeSessionUnsub) activeSessionUnsub();
   activeSessionUnsub = onSnapshot(doc(db,'liveSessions',sessionId), snap=>{
-    if(!snap.exists()){ activeLiveSession=null; renderDraw(); const badge=$('liveHeaderBadge'); if(badge) badge.style.display='none'; return; }
+    if(!snap.exists()){ 
+      activeLiveSession=null; 
+      renderDraw(); 
+      const badge=$('liveHeaderBadge'); if(badge) badge.style.display='none';
+      const timerHeader=$('liveTimerHeader'); if(timerHeader) timerHeader.style.display='none';
+      if(liveTimerInterval) clearInterval(liveTimerInterval);
+      return; 
+    }
     activeLiveSession = { id:snap.id, ...snap.data() };
     const isLive = activeLiveSession.status==='live';
     const badge = $('liveHeaderBadge');
@@ -748,6 +795,12 @@ function watchLiveSession(sessionId){
     if(currentSection === 'Draw') renderDraw();
     if(currentSection === 'Stream') renderStream();
     if(currentSection === 'TV') renderTVSection();
+    
+    // Actualizar remainingTickets en drawState
+    if(drawState.active && activeLiveSession.raffleId){
+      drawState.remainingTickets = allTickets.filter(t => t.raffleId === activeLiveSession.raffleId && !activeLiveSession.winners?.some(w=>w.number===t.number));
+      drawState.winnersSoFar = activeLiveSession.winners || [];
+    }
   });
 }
 
@@ -765,7 +818,8 @@ function startLiveTimer(){
     const floatingTimer = $('floatingTimer');
     if(floatingTimer && $('floatingCamera').style.display !== 'none') floatingTimer.textContent = timeStr;
     const headerTimer = $('liveTimerHeader');
-    if(headerTimer) headerTimer.style.display = 'inline-flex';
+    if(headerTimer && activeLiveSession && activeLiveSession.status==='live') headerTimer.style.display = 'inline-flex';
+    else if(headerTimer) headerTimer.style.display = 'none';
     
     // Actualizar timer en TV fullscreen si está activo
     const tvTimer = document.getElementById('tvFullscreenTimer');
@@ -840,15 +894,18 @@ async function initiateDraw(raffleId, mode, raffle, tickets){
     drawState.active=true; drawState.raffleId=raffleId; drawState.mode=mode;
     drawState.prizeCount=raffle.prizeCount||1; drawState.currentPrize=0;
     drawState.remainingTickets=[...tickets]; drawState.winnersSoFar=[];
+    
+    // Guardar en localStorage la sesión activa
+    localStorage.setItem('rifapool_active_session', JSON.stringify({ sessionId: sessionRef.id, adminId: currentUser.uid }));
 
-    goSection('Draw');
-    if(mode==='manual'){ goSection('Stream'); renderStream(); showToast('Activa tu cámara para transmitir','info'); }
+    changeSection('Draw');
+    if(mode==='manual'){ changeSection('Stream'); renderStream(); showToast('Activa tu cámara para transmitir','info'); }
     else { renderDraw(); showToast('🎰 ¡Tómbola Digital iniciada!','success'); }
     const badge = $('liveHeaderBadge'); if(badge) badge.style.display='inline-flex';
   }catch(e){ hideLoader(); showToast('Error: '+e.message,'error'); }
 }
 
-// Cámara con soporte para cámara trasera CORREGIDO
+// CÁMARA TRASERA CORREGIDA - FUNCIONAL
 window.openCamOptions = async function(){
   await enumerateCameras();
   const sel = $('camDeviceSelect');
@@ -861,6 +918,7 @@ async function enumerateCameras(){
     await navigator.mediaDevices.getUserMedia({video:true});
     const devices = await navigator.mediaDevices.enumerateDevices();
     camDevices = devices.filter(d=>d.kind==='videoinput');
+    if(camDevices.length === 0) showToast('No se encontraron cámaras','error');
   }catch(e){ showToast('No se pudo acceder a la cámara: '+e.message,'error'); }
 }
 
@@ -876,22 +934,25 @@ async function startCamera(deviceId, height=720){
   stopCameraAndFloating();
   showLoader('Activando cámara...');
   
-  // CORRECCIÓN: Mejor manejo para cámara trasera
-  let constraints = { 
-    video: { 
-      height: { ideal: height }, 
-      width: { ideal: 1280 },
-      facingMode: { exact: "environment" }  // Priorizar cámara trasera
-    }, 
-    audio: false 
-  };
+  // ESTRATEGIA CORREGIDA PARA CÁMARA TRASERA
+  let constraints = null;
   
-  // Si se seleccionó un deviceId específico, usarlo y no usar facingMode
   if(deviceId && deviceId !== ''){
+    // Usar deviceId específico
     constraints = { 
       video: { deviceId: { exact: deviceId }, height: { ideal: height }, width: { ideal: 1280 } }, 
       audio: false 
     };
+  } else {
+    // Intentar obtener cámara trasera primero (environment)
+    try{
+      constraints = { 
+        video: { facingMode: { exact: "environment" }, height: { ideal: height }, width: { ideal: 1280 } }, 
+        audio: false 
+      };
+    }catch(e){
+      constraints = { video: { height: { ideal: height }, width: { ideal: 1280 } }, audio: false };
+    }
   }
   
   try{
@@ -913,25 +974,25 @@ async function startCamera(deviceId, height=720){
     renderDraw();
     renderTVSection();
   }catch(e){
-    // Si falla con facingMode exact, intentar sin él (modo automático)
-    if(e.message.includes('facingMode') || e.message.includes('Could not start')){
-      try{
-        constraints = { video: { height: { ideal: height }, width: { ideal: 1280 } }, audio: false };
-        currentStream = await navigator.mediaDevices.getUserMedia(constraints);
-        isCamRunning = true;
-        hideLoader();
-        localVideoEl = $('localVideo');
-        if(localVideoEl){ localVideoEl.srcObject = currentStream; localVideoEl.style.display='block'; }
-        const ph = $('videoPlaceholder'); if(ph) ph.style.display='none';
-        createFloatingCamera();
-        showToast('📸 Cámara activada (modo automático)','success');
-        if(activeLiveSession?.id) updateDoc(doc(db,'liveSessions',activeLiveSession.id),{cameraActive:true}).catch(()=>{});
-        renderStream();
-        renderDraw();
-        renderTVSection();
-      }catch(e2){ hideLoader(); showToast('Error de cámara: '+e2.message,'error'); }
-    } else {
-      hideLoader(); showToast('Error de cámara: '+e.message,'error');
+    console.error('Error cámara:', e);
+    // Último intento: sin restricciones específicas
+    try{
+      constraints = { video: { height: { ideal: height }, width: { ideal: 1280 } }, audio: false };
+      currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+      isCamRunning = true;
+      hideLoader();
+      localVideoEl = $('localVideo');
+      if(localVideoEl){ localVideoEl.srcObject = currentStream; localVideoEl.style.display='block'; }
+      const ph = $('videoPlaceholder'); if(ph) ph.style.display='none';
+      createFloatingCamera();
+      showToast('📸 Cámara activada (modo automático)','success');
+      if(activeLiveSession?.id) updateDoc(doc(db,'liveSessions',activeLiveSession.id),{cameraActive:true}).catch(()=>{});
+      renderStream();
+      renderDraw();
+      renderTVSection();
+    }catch(e2){ 
+      hideLoader(); 
+      showToast('Error de cámara: No se pudo acceder a ninguna cámara. Verifica permisos.','error');
     }
   }
 }
@@ -948,8 +1009,8 @@ function createFloatingCamera(){
   floatingStream = currentStream;
   floatingVideo.srcObject = currentStream;
   
-  // Solo mostrar si NO estamos en la sección Stream
-  if(currentSection !== 'Stream' && isCamRunning){
+  // Solo mostrar si NO estamos en la sección Stream y hay sesión activa
+  if(currentSection !== 'Stream' && isCamRunning && activeLiveSession && activeLiveSession.status === 'live'){
     floatingDiv.style.display = 'block';
   } else {
     floatingDiv.style.display = 'none';
@@ -959,8 +1020,13 @@ function createFloatingCamera(){
   floatingDiv.classList.remove('minimized');
   const restoreBtn = $('floatingRestoreBtn');
   const minimizeBtn = $('floatingMinimizeBtn');
+  const minimizeControl = $('floatingMinimizeControl');
+  const closeControl = $('floatingCloseControl');
+  
   if(restoreBtn) restoreBtn.style.display = 'none';
   if(minimizeBtn) minimizeBtn.style.display = 'none';
+  if(minimizeControl) minimizeControl.style.display = 'flex';
+  if(closeControl) closeControl.style.display = 'flex';
   
   // Hacer draggable
   makeDraggable(floatingDiv);
@@ -1123,9 +1189,10 @@ window.endLiveSession = async function(){
     if(activeSessionUnsub){ activeSessionUnsub(); activeSessionUnsub=null; }
     const badge=$('liveHeaderBadge'); if(badge) badge.style.display='none';
     const timerHeader=$('liveTimerHeader'); if(timerHeader) timerHeader.style.display='none';
+    localStorage.removeItem('rifapool_active_session');
     hideLoader();
     showToast('Transmisión finalizada','info');
-    goSection('Home');
+    changeSection('Home');
   });
 };
 
@@ -1168,7 +1235,7 @@ function renderTVSection(){
       </div>
       <div style="display:flex;gap:12px;padding:12px;background:rgba(0,0,0,.8);justify-content:center">
         <button class="tv-icon-btn" onclick="openTVFullscreen()"><i class="fas fa-expand"></i> Pantalla Completa</button>
-        <button class="btn-secondary" onclick="goSection('Draw')"><i class="fas fa-dice"></i> Ir al Sorteo</button>
+        <button class="btn-secondary" onclick="changeSection('Draw')"><i class="fas fa-dice"></i> Ir al Sorteo</button>
       </div>
     </div>
   `;
@@ -1240,7 +1307,6 @@ window.openTVFullscreen = function(){
   tvFullscreenActive = true;
   
   const mode = activeLiveSession?.mode;
-  const isLive = activeLiveSession?.status === 'live';
   
   const overlay = document.createElement('div');
   overlay.className = 'tv-fullscreen-overlay';
@@ -1263,6 +1329,38 @@ window.openTVFullscreen = function(){
     if(fullVideo){
       fullVideo.srcObject = currentStream;
     }
+  } else if(mode === 'online'){
+    // Mostrar animación del sorteo en modo online
+    const fullVideo = document.getElementById('tvFullscreenVideo');
+    if(fullVideo){
+      fullVideo.style.display = 'none';
+      const drawDisplay = document.createElement('div');
+      drawDisplay.style.position = 'absolute';
+      drawDisplay.style.inset = '0';
+      drawDisplay.style.display = 'flex';
+      drawDisplay.style.alignItems = 'center';
+      drawDisplay.style.justifyContent = 'center';
+      drawDisplay.style.background = 'radial-gradient(ellipse at center,#0d1a2e 0%,#060c14 100%)';
+      drawDisplay.innerHTML = `
+        <div style="text-align:center">
+          <div style="font-family:'Orbitron',monospace;font-size:80px;font-weight:900;color:var(--warning);margin-bottom:20px" id="fullscreenBall">?</div>
+          <div style="font-size:14px;color:rgba(255,255,255,.5)">Sorteo en progreso...</div>
+        </div>
+      `;
+      overlay.insertBefore(drawDisplay, overlay.firstChild);
+      
+      // Simular animación de la bola
+      if(drawState.remainingTickets && drawState.remainingTickets.length > 0){
+        let ballInterval = setInterval(() => {
+          const ball = document.getElementById('fullscreenBall');
+          if(ball && drawState.remainingTickets.length > 0){
+            const randomTicket = drawState.remainingTickets[Math.floor(Math.random() * drawState.remainingTickets.length)];
+            ball.textContent = '#' + padNum(randomTicket.number, activeLiveSession?.digits || 3);
+          }
+        }, 100);
+        overlay.dataset.ballInterval = ballInterval;
+      }
+    }
   }
   
   // Actualizar timer en fullscreen
@@ -1278,14 +1376,15 @@ window.openTVFullscreen = function(){
     };
     updateTimer();
     const interval = setInterval(updateTimer, 1000);
-    overlay.dataset.interval = interval;
+    overlay.dataset.timerInterval = interval;
   }
 };
 
 window.closeTVFullscreen = function(){
   const overlay = document.querySelector('.tv-fullscreen-overlay');
   if(overlay){
-    if(overlay.dataset.interval) clearInterval(parseInt(overlay.dataset.interval));
+    if(overlay.dataset.timerInterval) clearInterval(parseInt(overlay.dataset.timerInterval));
+    if(overlay.dataset.ballInterval) clearInterval(parseInt(overlay.dataset.ballInterval));
     overlay.remove();
   }
   document.body.style.overflow = '';
@@ -1307,7 +1406,7 @@ function renderDraw(){
   let html = `<div class="card"><div class="card-header"><div><div class="card-title">${raffle?.name||activeLiveSession.raffleName}</div><div style="font-size:10px">${mode==='manual'?'📷 Sorteo Manual':'🎰 Sorteo Digital'} · ${prizeCount} premio(s)</div></div><span class="badge" style="background:rgba(231,111,81,.15);color:var(--danger)">🔴 EN VIVO</span></div><div class="stats-grid"><div class="stat-box"><div class="stat-label">Premios</div><div class="stat-value">${prizeCount}</div></div><div class="stat-box"><div class="stat-label">Entregados</div><div class="stat-value" style="color:var(--success)">${winners.length}</div></div><div class="stat-box"><div class="stat-label">Restantes</div><div class="stat-value" style="color:var(--warning)">${prizeCount-winners.length}</div></div></div>`;
   
   // Botón TV en la sección sorteo
-  html += `<div style="margin-top:10px"><button class="tv-icon-btn" onclick="goSection('TV')"><i class="fas fa-tv"></i> Ver en Modo TV</button></div></div>`;
+  html += `<div style="margin-top:10px"><button class="tv-icon-btn" onclick="changeSection('TV')"><i class="fas fa-tv"></i> Ver en Modo TV</button></div></div>`;
 
   if(mode==='online'){
     html += `<div class="draw-arena"><div id="drawPrizeLabel" class="draw-prize-label">${done?'SORTEO COMPLETADO':`SORTEANDO ${getPrizeLbl(currentPrize+1)}`}</div><div class="ball-container"><div class="main-ball ${done&&winners.length>0?getBallClass(winners.length-1):''}" id="mainBall">${done&&winners.length>0?'#'+padNum(winners[winners.length-1].number,raffle?.digits||3):'?'}</div></div><div class="draw-subtitle" id="drawSubtitle">${done?'¡Sorteo finalizado!':drawState.animInterval?'Sorteando...':'Presiona para sortear'}</div><div class="countdown-bar" id="countdownBar">Siguiente en...</div>${!done&&activeLiveSession.status==='live'?`<button class="btn-primary live-btn" id="drawActionBtn" onclick="performDraw()"><i class="fas fa-random"></i> ${currentPrize===0?'Iniciar Sorteo':'Sortear Siguiente'}</button>`:''}</div>`;
@@ -1345,6 +1444,12 @@ window.performDraw = async function(){
   drawState.timeout = setTimeout(async()=>{
     clearInterval(drawState.animInterval);
     drawState.animInterval=null;
+    if(drawState.remainingTickets.length === 0){
+      showToast('No hay más boletos disponibles para sortear','warning');
+      if(btn) btn.style.display='flex';
+      if(ball) ball.className='main-ball';
+      return;
+    }
     const winner = drawState.remainingTickets[Math.floor(Math.random()*drawState.remainingTickets.length)];
     if(!winner){ showToast('Error al seleccionar ganador','error'); return; }
     if(ball){ ball.className=`main-ball winner ${getBallClass(prizeIndex)}`; ball.textContent='#'+padNum(winner.number,raffle.digits||3); }
@@ -1384,6 +1489,7 @@ window.performDraw = async function(){
       if(subtitle) subtitle.textContent='🎉 ¡Sorteo completado!';
       if(lbl) lbl.textContent='SORTEO COMPLETADO';
       try{ await updateDoc(doc(db,'liveSessions',activeLiveSession.id),{status:'ended'}); }catch(e){}
+      localStorage.removeItem('rifapool_active_session');
       showToast('🎊 ¡Sorteo completado!','success');
       setTimeout(()=>renderDraw(),2000);
     }
@@ -1515,6 +1621,7 @@ function launchConfetti(){
       const snap=await getDoc(doc(db,'Collaborators',saved.uid));
       if(snap.exists()&&snap.data().role==='admin'){
         currentUser={uid:snap.id,...snap.data()};
+        activeAdminIdForSession = currentUser.uid;
         await afterLogin();
         return;
       }
