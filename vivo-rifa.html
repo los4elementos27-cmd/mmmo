@@ -47,8 +47,6 @@ body{font-family:'Quicksand',sans-serif;background:radial-gradient(ellipse at to
 .btn-success:hover{transform:translateY(-2px);filter:brightness(1.1)}
 .btn-danger{background:linear-gradient(135deg,var(--danger),#c0392b);border:none;padding:10px 16px;border-radius:var(--radius-sm);color:#fff;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-family:'Quicksand',sans-serif;transition:var(--transition)}
 .btn-danger:hover{transform:translateY(-2px);filter:brightness(1.1)}
-.btn-warning{background:linear-gradient(135deg,var(--warning),#d4a017);border:none;padding:8px 16px;border-radius:var(--radius-sm);color:#1a0a2e;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-family:'Quicksand',sans-serif;transition:var(--transition)}
-.btn-warning:hover{transform:translateY(-2px);filter:brightness(1.05)}
 
 #mainApp{display:none;min-height:100vh}
 header{position:fixed;top:0;left:0;right:0;background:rgba(15,10,26,.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(64,145,108,.15);padding:8px 16px;display:flex;justify-content:space-between;align-items:center;z-index:100;gap:10px}
@@ -95,8 +93,7 @@ header{position:fixed;top:0;left:0;right:0;background:rgba(15,10,26,.95);backdro
 
 .video-wrapper{position:relative;width:100%;background:#000;border-radius:var(--radius);overflow:hidden;border:2px solid rgba(64,145,108,.3);box-shadow:var(--shadow-xl)}
 .video-wrapper::before{content:'';padding-top:56.25%;display:block}
-#videoContainer,.video-placeholder{position:absolute;inset:0;width:100%;height:100%}
-.video-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(10,6,20,.9)}
+.video-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(10,6,20,.9)}
 .video-placeholder i{font-size:48px;color:rgba(255,255,255,.2)}
 .video-placeholder p{color:rgba(255,255,255,.4);font-size:12px;text-align:center}
 
@@ -147,341 +144,53 @@ header{position:fixed;top:0;left:0;right:0;background:rgba(15,10,26,.95);backdro
 .confetti-piece{position:absolute;width:10px;height:10px;opacity:0;animation:confettiFall linear forwards}
 @keyframes confettiFall{0%{opacity:1;transform:translateY(-20px) rotate(0deg)}100%{opacity:0;transform:translateY(100vh) rotate(720deg)}}
 
-/* Ventana flotante de cámara mejorada CON VIDEO EN CIRCULO */
-.floating-camera {
-  position: fixed;
-  bottom: 80px;
-  right: 16px;
-  width: 280px;
-  background: #000;
-  border-radius: 16px;
-  overflow: hidden;
-  border: 2px solid rgba(64,145,108,.5);
-  box-shadow: 0 8px 32px rgba(0,0,0,.5);
-  z-index: 1000;
-  transition: all 0.3s ease;
-  cursor: move;
-  backdrop-filter: blur(4px);
-}
-.floating-camera.minimized {
-  width: 70px;
-  height: 70px;
-  border-radius: 35px;
-  overflow: hidden;
-}
-.floating-camera.minimized .floating-video {
-  width: 100%;
-  height: 100%;
-}
-.floating-camera.minimized .floating-video video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.floating-camera.minimized .floating-controls,
-.floating-camera.minimized .floating-timer {
-  display: none;
-}
-.floating-camera.minimized .floating-minimize-btn {
-  display: flex !important;
-}
-.floating-camera.minimized .floating-restore-btn {
-  display: none !important;
-}
-.floating-video {
-  width: 100%;
-  background: #000;
-  position: relative;
-}
-.floating-video video {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-.floating-controls {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  display: flex;
-  gap: 8px;
-  background: rgba(0,0,0,.6);
-  padding: 4px 8px;
-  border-radius: 20px;
-  backdrop-filter: blur(4px);
-}
-.floating-controls button {
-  background: none;
-  border: none;
-  color: #fff;
-  cursor: pointer;
-  font-size: 14px;
-  padding: 4px;
-  transition: all 0.2s;
-}
-.floating-controls button:hover {
-  color: var(--danger);
-  transform: scale(1.1);
-}
-.floating-timer {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  background: rgba(0,0,0,.7);
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-family: 'Orbitron', monospace;
-  color: var(--warning);
-  backdrop-filter: blur(4px);
-}
-.floating-minimize-btn {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(0,0,0,.7);
-  border: none;
-  color: #fff;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  cursor: pointer;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  z-index: 11;
-}
-.floating-minimize-btn:hover {
-  background: var(--success);
-  transform: translate(-50%, -50%) scale(1.1);
-}
-.floating-restore-btn {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: rgba(0,0,0,.7);
-  border: none;
-  color: #fff;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  cursor: pointer;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  z-index: 11;
-}
-.floating-restore-btn:hover {
-  background: var(--success);
-}
+.floating-camera{position:fixed;bottom:80px;right:16px;width:280px;background:#000;border-radius:16px;overflow:hidden;border:2px solid rgba(64,145,108,.5);box-shadow:0 8px 32px rgba(0,0,0,.5);z-index:1000;transition:all 0.3s ease;cursor:move;backdrop-filter:blur(4px)}
+.floating-camera.minimized{width:70px;height:70px;border-radius:35px;overflow:hidden}
+.floating-camera.minimized .floating-video{width:100%;height:100%}
+.floating-camera.minimized .floating-video video{width:100%;height:100%;object-fit:cover}
+.floating-camera.minimized .floating-controls,.floating-camera.minimized .floating-timer{display:none}
+.floating-camera.minimized .floating-minimize-btn{display:flex !important}
+.floating-video{width:100%;background:#000;position:relative}
+.floating-video video{width:100%;height:auto;display:block}
+.floating-controls{position:absolute;bottom:8px;right:8px;display:flex;gap:8px;background:rgba(0,0,0,.6);padding:4px 8px;border-radius:20px;backdrop-filter:blur(4px)}
+.floating-controls button{background:none;border:none;color:#fff;cursor:pointer;font-size:14px;padding:4px;transition:all 0.2s}
+.floating-controls button:hover{color:var(--danger);transform:scale(1.1)}
+.floating-timer{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.7);padding:4px 10px;border-radius:20px;font-size:11px;font-family:'Orbitron',monospace;color:var(--warning);backdrop-filter:blur(4px)}
+.floating-minimize-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.7);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;display:none;align-items:center;justify-content:center;transition:all 0.2s;z-index:11}
+.floating-minimize-btn:hover{background:var(--success);transform:translate(-50%,-50%) scale(1.1)}
+.floating-restore-btn{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.7);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;display:none;align-items:center;justify-content:center;transition:all 0.2s;z-index:11}
+.floating-restore-btn:hover{background:var(--success)}
 
-/* Pantalla completa TV */
-.tv-fullscreen-overlay {
-  position: fixed;
-  inset: 0;
-  background: #000;
-  z-index: 11000;
-  display: flex;
-  flex-direction: column;
-  animation: fadeIn 0.3s ease;
-}
-.tv-fullscreen-header {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(to bottom, rgba(0,0,0,.8), transparent);
-  padding: 16px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 10;
-}
-.tv-fullscreen-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 18px;
-  font-weight: 800;
-  color: var(--success);
-}
-.tv-fullscreen-timer {
-  font-family: 'Orbitron', monospace;
-  font-size: 14px;
-  color: var(--warning);
-  background: rgba(0,0,0,.5);
-  padding: 4px 12px;
-  border-radius: 20px;
-}
-.tv-fullscreen-controls {
-  position: absolute;
-  bottom: 20px;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-  z-index: 10;
-  background: linear-gradient(to top, rgba(0,0,0,.8), transparent);
-  padding: 20px;
-}
-.tv-fullscreen-controls button {
-  background: rgba(255,255,255,.2);
-  border: none;
-  color: #fff;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 20px;
-  transition: all 0.2s;
-  backdrop-filter: blur(4px);
-}
-.tv-fullscreen-controls button:hover {
-  background: var(--danger);
-  transform: scale(1.1);
-}
-#tvFullscreenVideo {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
+.tv-fullscreen-overlay{position:fixed;inset:0;background:#000;z-index:11000;display:flex;flex-direction:column;animation:fadeIn 0.3s ease}
+.tv-fullscreen-header{position:absolute;top:0;left:0;right:0;background:linear-gradient(to bottom,rgba(0,0,0,.8),transparent);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;z-index:10}
+.tv-fullscreen-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:800;color:var(--success)}
+.tv-fullscreen-timer{font-family:'Orbitron',monospace;font-size:14px;color:var(--warning);background:rgba(0,0,0,.5);padding:4px 12px;border-radius:20px}
+.tv-fullscreen-controls{position:absolute;bottom:20px;left:0;right:0;display:flex;justify-content:center;gap:16px;z-index:10;background:linear-gradient(to top,rgba(0,0,0,.8),transparent);padding:20px}
+.tv-fullscreen-controls button{background:rgba(255,255,255,.2);border:none;color:#fff;width:48px;height:48px;border-radius:50%;cursor:pointer;font-size:20px;transition:all 0.2s;backdrop-filter:blur(4px)}
+.tv-fullscreen-controls button:hover{background:var(--danger);transform:scale(1.1)}
+#tvFullscreenVideo{width:100%;height:100%;object-fit:contain}
 
-/* Cuenta regresiva elegante */
-.countdown-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.95);
-  backdrop-filter: blur(20px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10000;
-  animation: fadeInScale 0.5s ease;
-}
-@keyframes fadeInScale {
-  from { opacity: 0; transform: scale(0.9); }
-  to { opacity: 1; transform: scale(1); }
-}
-.countdown-card {
-  text-align: center;
-  background: linear-gradient(135deg, rgba(42,26,78,.8), rgba(26,15,46,.9));
-  padding: 40px 60px;
-  border-radius: 40px;
-  border: 1px solid rgba(64,145,108,.3);
-  box-shadow: 0 0 60px rgba(64,145,108,.2);
-}
-.countdown-number {
-  font-family: 'Orbitron', monospace;
-  font-size: 120px;
-  font-weight: 900;
-  background: linear-gradient(135deg, var(--warning), #f4a261);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: pulseGlow 1s infinite;
-}
-@keyframes pulseGlow {
-  0%,100% { text-shadow: 0 0 20px rgba(233,196,106,.3); }
-  50% { text-shadow: 0 0 40px rgba(233,196,106,.6); }
-}
+.countdown-overlay{position:fixed;inset:0;background:rgba(0,0,0,.95);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center;z-index:10000;animation:fadeInScale 0.5s ease}
+@keyframes fadeInScale{from{opacity:0;transform:scale(0.9)}to{opacity:1;transform:scale(1)}}
+.countdown-card{text-align:center;background:linear-gradient(135deg,rgba(42,26,78,.8),rgba(26,15,46,.9));padding:40px 60px;border-radius:40px;border:1px solid rgba(64,145,108,.3);box-shadow:0 0 60px rgba(64,145,108,.2)}
+.countdown-number{font-family:'Orbitron',monospace;font-size:120px;font-weight:900;background:linear-gradient(135deg,var(--warning),#f4a261);-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:pulseGlow 1s infinite}
+@keyframes pulseGlow{0%,100%{text-shadow:0 0 20px rgba(233,196,106,.3)}50%{text-shadow:0 0 40px rgba(233,196,106,.6)}}
 
-/* Confirmación elegante */
-.confirm-modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.8);
-  backdrop-filter: blur(12px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 11000;
-  animation: fadeIn 0.2s ease;
-}
-.confirm-card {
-  background: linear-gradient(135deg, var(--purple-medium), var(--purple-dark));
-  border-radius: 24px;
-  padding: 28px 32px;
-  max-width: 340px;
-  width: 90%;
-  text-align: center;
-  border: 1px solid rgba(64,145,108,.3);
-  animation: scaleIn 0.3s ease;
-}
-.confirm-card i {
-  font-size: 48px;
-  color: var(--warning);
-  margin-bottom: 16px;
-}
-.confirm-card h3 {
-  font-family: 'Playfair Display', serif;
-  font-size: 22px;
-  margin-bottom: 12px;
-}
-.confirm-card p {
-  font-size: 13px;
-  color: rgba(255,255,255,.6);
-  margin-bottom: 24px;
-}
-.confirm-buttons {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-}
-.confirm-buttons button {
-  padding: 10px 24px;
-  border-radius: 40px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s;
-  border: none;
-}
-.confirm-cancel {
-  background: rgba(255,255,255,.1);
-  color: #fff;
-}
-.confirm-cancel:hover {
-  background: rgba(255,255,255,.2);
-  transform: translateY(-2px);
-}
-.confirm-confirm {
-  background: linear-gradient(135deg, var(--danger), #c0392b);
-  color: #fff;
-}
-.confirm-confirm:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.1);
-}
+.confirm-modal{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;z-index:11000;animation:fadeIn 0.2s ease}
+.confirm-card{background:linear-gradient(135deg,var(--purple-medium),var(--purple-dark));border-radius:24px;padding:28px 32px;max-width:340px;width:90%;text-align:center;border:1px solid rgba(64,145,108,.3);animation:scaleIn 0.3s ease}
+.confirm-card i{font-size:48px;color:var(--warning);margin-bottom:16px}
+.confirm-card h3{font-family:'Playfair Display',serif;font-size:22px;margin-bottom:12px}
+.confirm-card p{font-size:13px;color:rgba(255,255,255,.6);margin-bottom:24px}
+.confirm-buttons{display:flex;gap:12px;justify-content:center}
+.confirm-buttons button{padding:10px 24px;border-radius:40px;font-weight:700;cursor:pointer;transition:all 0.2s;border:none}
+.confirm-cancel{background:rgba(255,255,255,.1);color:#fff}
+.confirm-cancel:hover{background:rgba(255,255,255,.2);transform:translateY(-2px)}
+.confirm-confirm{background:linear-gradient(135deg,var(--danger),#c0392b);color:#fff}
+.confirm-confirm:hover{transform:translateY(-2px);filter:brightness(1.1)}
 
-.live-timer-bar {
-  background: linear-gradient(90deg, var(--danger), var(--warning));
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-family: 'Orbitron', monospace;
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.tv-icon-btn {
-  background: linear-gradient(135deg, var(--info), #2980b9);
-  border: none;
-  padding: 8px 16px;
-  border-radius: var(--radius-sm);
-  color: #fff;
-  font-weight: 600;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  transition: all 0.2s;
-}
-.tv-icon-btn:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.1);
-}
+.live-timer-bar{background:linear-gradient(90deg,var(--danger),var(--warning));padding:6px 12px;border-radius:20px;font-size:11px;font-family:'Orbitron',monospace;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+.tv-icon-btn{background:linear-gradient(135deg,var(--info),#2980b9);border:none;padding:8px 16px;border-radius:var(--radius-sm);color:#fff;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:12px;transition:all 0.2s}
+.tv-icon-btn:hover{transform:translateY(-2px);filter:brightness(1.1)}
 </style>
 </head>
 <body>
@@ -520,18 +229,15 @@ header{position:fixed;top:0;left:0;right:0;background:rgba(15,10,26,.95);backdro
     <div id="sectionStream" class="section"><div id="streamContent"></div></div>
     <div id="sectionDraw" class="section"><div id="drawContent"></div></div>
     <div id="sectionHistory" class="section"><div id="historyContent"></div></div>
-    <div id="sectionTV" class="section"><div id="tvContent"></div></div>
   </div>
   <nav class="bottom-nav">
     <button class="nav-item active" id="navHome" onclick="goSection('Home')"><i class="fas fa-home"></i><span>Inicio</span></button>
     <button class="nav-item" id="navStream" onclick="goSection('Stream')"><i class="fas fa-video"></i><span>Cámara</span></button>
     <button class="nav-item" id="navDraw" onclick="goSection('Draw')"><i class="fas fa-dice"></i><span>Sortear</span></button>
-    <button class="nav-item" id="navTV" onclick="goSection('TV')"><i class="fas fa-tv"></i><span>TV</span></button>
     <button class="nav-item" id="navHistory" onclick="goSection('History')"><i class="fas fa-trophy"></i><span>Historial</span></button>
   </nav>
 </div>
 
-<!-- Ventana flotante de cámara -->
 <div id="floatingCamera" class="floating-camera" style="display:none">
   <div class="floating-video">
     <video id="floatingVideo" autoplay muted playsinline style="width:100%;height:auto"></video>
@@ -589,10 +295,9 @@ const storage = getStorage(app);
 let currentUser = null, allRaffles = [], allTickets = [], allPayments = [];
 let activeLiveSession = null, activeSessionUnsub = null, raffleUnsub = null, ticketUnsub = null, paymentUnsub = null, configUnsub = null;
 let currentStream = null, localVideoEl = null, camDevices = [], isCamRunning = false;
-let floatingStream = null, isFloatingMinimized = false, floatingVideoEl = null;
+let floatingStream = null, isFloatingMinimized = false;
 let liveStartTime = null, liveTimerInterval = null;
 let drawState = { active: false, raffleId: null, mode: 'online', prizeCount: 0, currentPrize: 0, remainingTickets: [], winnersSoFar: [], animInterval: null, timeout: null, countdownInterval: null };
-let currentDraggable = null, dragOffsetX = 0, dragOffsetY = 0, isDragging = false;
 let currentSection = 'Home';
 let tvFullscreenActive = false;
 
@@ -630,32 +335,13 @@ function closeModal(id){ const m=$(id); if(m) m.classList.remove('active'); }
 function showConfirm(title, message, onConfirm) {
   const existing = document.querySelector('.confirm-modal');
   if(existing) existing.remove();
-  
   const modal = document.createElement('div');
   modal.className = 'confirm-modal';
-  modal.innerHTML = `
-    <div class="confirm-card">
-      <i class="fas fa-exclamation-triangle"></i>
-      <h3>${title}</h3>
-      <p>${message}</p>
-      <div class="confirm-buttons">
-        <button class="confirm-cancel" id="confirmCancelBtn">Cancelar</button>
-        <button class="confirm-confirm" id="confirmConfirmBtn">Confirmar</button>
-      </div>
-    </div>
-  `;
+  modal.innerHTML = `<div class="confirm-card"><i class="fas fa-exclamation-triangle"></i><h3>${title}</h3><p>${message}</p><div class="confirm-buttons"><button class="confirm-cancel" id="confirmCancelBtn">Cancelar</button><button class="confirm-confirm" id="confirmConfirmBtn">Confirmar</button></div></div>`;
   document.body.appendChild(modal);
-  
   document.getElementById('confirmCancelBtn').onclick = () => modal.remove();
   document.getElementById('confirmConfirmBtn').onclick = () => { modal.remove(); onConfirm(); };
 }
-
-function showScreen(s){
-  ['loadingScreen','loginScreen','mainApp'].forEach(id=>{ const el=$(id); if(el) el.style.display='none'; });
-  const el=$(s+'Screen')||$(s);
-  if(el) el.style.display='flex';
-}
-function showMain(){ $('loadingScreen').style.display='none'; $('loginScreen').style.display='none'; $('mainApp').style.display='block'; }
 
 window.goSection = function(name){
   currentSection = name;
@@ -663,27 +349,18 @@ window.goSection = function(name){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   const sec = $(`section${name}`); if(sec) sec.classList.add('active');
   const nav = $(`nav${name}`); if(nav) nav.classList.add('active');
-  
-  // Mostrar u ocultar ventana flotante según la sección
   const floating = $('floatingCamera');
   if(floating){
-    if(name !== 'Stream' && isCamRunning){
-      floating.style.display = 'block';
-    } else if(name === 'Stream'){
-      floating.style.display = 'none';
-    } else if(!isCamRunning){
-      floating.style.display = 'none';
-    }
+    if(name !== 'Stream' && isCamRunning) floating.style.display = 'block';
+    else if(name === 'Stream') floating.style.display = 'none';
+    else if(!isCamRunning) floating.style.display = 'none';
   }
-  
   if(name==='Home') renderHome();
   if(name==='Stream') renderStream();
   if(name==='Draw') renderDraw();
   if(name==='History') renderHistory();
-  if(name==='TV') renderTVSection();
 };
 
-// Login
 window.doLogin = async function(){
   const u = $('adminUser')?.value.trim();
   const p = $('adminPass')?.value.trim();
@@ -756,7 +433,6 @@ function watchLiveSession(sessionId){
     }
     if(currentSection === 'Draw') renderDraw();
     if(currentSection === 'Stream') renderStream();
-    if(currentSection === 'TV') renderTVSection();
   });
 }
 
@@ -775,9 +451,6 @@ function startLiveTimer(){
     if(floatingTimer && $('floatingCamera').style.display !== 'none') floatingTimer.textContent = timeStr;
     const headerTimer = $('liveTimerHeader');
     if(headerTimer) headerTimer.style.display = 'inline-flex';
-    
-    const tvTimer = document.getElementById('tvFullscreenTimer');
-    if(tvTimer) tvTimer.textContent = timeStr;
   }, 1000);
 }
 
@@ -790,13 +463,8 @@ window.startCountdownAndDraw = async function(){
   if(!raffle){ showToast('Rifa no encontrada','error'); return; }
   const tickets = allTickets.filter(t=>t.raffleId===raffleId);
   if(tickets.length===0){ showToast('Esta rifa no tiene boletos vendidos','warning'); return; }
-  
   closeModal('modalSelectRaffle');
-  
-  if(countdownSecs > 0){
-    await showCountdown(countdownSecs);
-  }
-  
+  if(countdownSecs > 0) await showCountdown(countdownSecs);
   await initiateDraw(raffleId, mode, raffle, tickets);
 };
 
@@ -805,23 +473,14 @@ async function showCountdown(seconds){
     let remaining = seconds;
     const overlay = document.createElement('div');
     overlay.className = 'countdown-overlay';
-    overlay.innerHTML = `
-      <div class="countdown-card">
-        <div class="countdown-title">🎰 LA TÓMBOLA COMIENZA EN</div>
-        <div class="countdown-number" id="countdownNumber">${remaining}</div>
-        <div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:16px;">PREPARA TUS BOLETOS</div>
-      </div>
-    `;
+    overlay.innerHTML = `<div class="countdown-card"><div class="countdown-title">🎰 LA TÓMBOLA COMIENZA EN</div><div class="countdown-number" id="countdownNumber">${remaining}</div><div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:16px;">PREPARA TUS BOLETOS</div></div>`;
     document.body.appendChild(overlay);
-    
     const interval = setInterval(() => {
       remaining--;
       const numDisplay = document.getElementById('countdownNumber');
       if(numDisplay) numDisplay.textContent = remaining;
-      
       if(remaining <= 0){
         clearInterval(interval);
-        overlay.style.animation = 'fadeOutScale 0.3s ease';
         setTimeout(() => { overlay.remove(); resolve(); }, 300);
       }
     }, 1000);
@@ -843,11 +502,9 @@ async function initiateDraw(raffleId, mode, raffle, tickets){
     watchLiveSession(sessionRef.id);
     startLiveTimer();
     hideLoader();
-
     drawState.active=true; drawState.raffleId=raffleId; drawState.mode=mode;
     drawState.prizeCount=raffle.prizeCount||1; drawState.currentPrize=0;
     drawState.remainingTickets=[...tickets]; drawState.winnersSoFar=[];
-
     goSection('Draw');
     if(mode==='manual'){ goSection('Stream'); renderStream(); showToast('Activa tu cámara para transmitir','info'); }
     else { renderDraw(); showToast('🎰 ¡Tómbola Digital iniciada!','success'); }
@@ -855,7 +512,6 @@ async function initiateDraw(raffleId, mode, raffle, tickets){
   }catch(e){ hideLoader(); showToast('Error: '+e.message,'error'); }
 }
 
-// ========== CÁMARA CORREGIDA - TRASERA FUNCIONANDO ==========
 window.openCamOptions = async function(){
   await enumerateCameras();
   const sel = $('camDeviceSelect');
@@ -865,19 +521,11 @@ window.openCamOptions = async function(){
 
 async function enumerateCameras(){
   try{
-    // Primero solicitar permiso con un stream temporal
     const tempStream = await navigator.mediaDevices.getUserMedia({video: true});
     tempStream.getTracks().forEach(track => track.stop());
-    
     const devices = await navigator.mediaDevices.enumerateDevices();
     camDevices = devices.filter(d=>d.kind==='videoinput');
-    
-    // Mostrar información de dispositivos
-    console.log('Cámaras disponibles:', camDevices.map(d => d.label));
-  }catch(e){ 
-    console.warn('Error enumerando cámaras:', e);
-    showToast('No se pudo acceder a la cámara: '+e.message,'error'); 
-  }
+  }catch(e){ showToast('No se pudo acceder a la cámara: '+e.message,'error'); }
 }
 
 window.applyAndStartCamera = async function(){
@@ -891,108 +539,55 @@ window.applyAndStartCamera = async function(){
 async function startCamera(deviceId, height=720){
   stopCameraAndFloating();
   showLoader('Activando cámara...');
-  
-  // Estrategia: Intentar primero cámara trasera (environment) si no hay deviceId seleccionado
   let constraints = null;
   let selectedDeviceId = deviceId;
-  
-  // Si no hay deviceId seleccionado, buscar una cámara trasera automáticamente
   if(!selectedDeviceId || selectedDeviceId === ''){
-    // Enumerar dispositivos para encontrar trasera
     try{
       const tempStream = await navigator.mediaDevices.getUserMedia({video: true});
       tempStream.getTracks().forEach(track => track.stop());
       const devices = await navigator.mediaDevices.enumerateDevices();
       const videoDevices = devices.filter(d => d.kind === 'videoinput');
-      
-      // Buscar cámara con "back", "rear", "environment" en el label
       const rearCamera = videoDevices.find(d => 
         d.label.toLowerCase().includes('back') || 
         d.label.toLowerCase().includes('rear') ||
         d.label.toLowerCase().includes('environment')
       );
-      
-      if(rearCamera){
-        selectedDeviceId = rearCamera.deviceId;
-        console.log('Cámara trasera encontrada:', rearCamera.label);
-      } else if(videoDevices.length > 0){
-        selectedDeviceId = videoDevices[0].deviceId;
-        console.log('Usando primera cámara disponible');
-      }
-    } catch(e){
-      console.warn('Error buscando cámara trasera:', e);
-    }
+      if(rearCamera) selectedDeviceId = rearCamera.deviceId;
+      else if(videoDevices.length > 0) selectedDeviceId = videoDevices[0].deviceId;
+    } catch(e){ console.warn('Error buscando cámara trasera:', e); }
   }
-  
-  // Construir constraints
   if(selectedDeviceId){
-    constraints = { 
-      video: { 
-        deviceId: { exact: selectedDeviceId },
-        width: { ideal: 1280 },
-        height: { ideal: height }
-      }, 
-      audio: false 
-    };
+    constraints = { video: { deviceId: { exact: selectedDeviceId }, width: { ideal: 1280 }, height: { ideal: height } }, audio: false };
   } else {
-    // Intentar con facingMode environment (cámara trasera)
-    constraints = { 
-      video: { 
-        facingMode: { exact: "environment" },
-        width: { ideal: 1280 },
-        height: { ideal: height }
-      }, 
-      audio: false 
-    };
+    constraints = { video: { facingMode: { exact: "environment" }, width: { ideal: 1280 }, height: { ideal: height } }, audio: false };
   }
-  
   try{
     currentStream = await navigator.mediaDevices.getUserMedia(constraints);
     isCamRunning = true;
     hideLoader();
-    
-    // Usar en la vista normal
     localVideoEl = $('localVideo');
-    if(localVideoEl){ 
-      localVideoEl.srcObject = currentStream; 
-      localVideoEl.style.display='block';
-      localVideoEl.style.transform = 'scaleX(-1)'; // Espejo para vista previa natural
-    }
+    if(localVideoEl){ localVideoEl.srcObject = currentStream; localVideoEl.style.display='block'; localVideoEl.style.transform = 'scaleX(-1)'; }
     const ph = $('videoPlaceholder'); if(ph) ph.style.display='none';
-    
-    // Crear ventana flotante
     createFloatingCamera();
-    
     showToast('📸 Cámara activada correctamente','success');
     if(activeLiveSession?.id) updateDoc(doc(db,'liveSessions',activeLiveSession.id),{cameraActive:true}).catch(()=>{});
     renderStream();
     renderDraw();
-    renderTVSection();
   }catch(e){
-    console.error('Error al iniciar cámara:', e);
-    // Último intento: sin restricciones específicas
     try{
       constraints = { video: true, audio: false };
       currentStream = await navigator.mediaDevices.getUserMedia(constraints);
       isCamRunning = true;
       hideLoader();
       localVideoEl = $('localVideo');
-      if(localVideoEl){ 
-        localVideoEl.srcObject = currentStream; 
-        localVideoEl.style.display='block';
-      }
+      if(localVideoEl){ localVideoEl.srcObject = currentStream; localVideoEl.style.display='block'; }
       const ph = $('videoPlaceholder'); if(ph) ph.style.display='none';
       createFloatingCamera();
       showToast('📸 Cámara activada (modo automático)','success');
       if(activeLiveSession?.id) updateDoc(doc(db,'liveSessions',activeLiveSession.id),{cameraActive:true}).catch(()=>{});
       renderStream();
       renderDraw();
-      renderTVSection();
-    }catch(e2){ 
-      hideLoader(); 
-      showToast('Error de cámara: No se pudo acceder a la cámara. Verifica los permisos.','error');
-      console.error('Error final:', e2);
-    }
+    }catch(e2){ hideLoader(); showToast('Error de cámara: No se pudo acceder a la cámara.','error'); }
   }
 }
 
@@ -1000,37 +595,23 @@ function createFloatingCamera(){
   const floatingDiv = $('floatingCamera');
   const floatingVideo = $('floatingVideo');
   if(!floatingDiv || !floatingVideo) return;
-  
-  if(floatingStream){
-    try{ floatingStream.getTracks().forEach(t=>t.stop()); }catch(e){}
-  }
-  
+  if(floatingStream){ try{ floatingStream.getTracks().forEach(t=>t.stop()); }catch(e){} }
   floatingStream = currentStream;
   floatingVideo.srcObject = currentStream;
-  floatingVideo.style.transform = 'scaleX(-1)'; // Espejo para vista natural
-  
-  // Solo mostrar si NO estamos en la sección Stream
-  if(currentSection !== 'Stream' && isCamRunning){
-    floatingDiv.style.display = 'block';
-  } else {
-    floatingDiv.style.display = 'none';
-  }
-  
+  floatingVideo.style.transform = 'scaleX(-1)';
+  if(currentSection !== 'Stream' && isCamRunning) floatingDiv.style.display = 'block';
+  else floatingDiv.style.display = 'none';
   isFloatingMinimized = false;
   floatingDiv.classList.remove('minimized');
   const restoreBtn = $('floatingRestoreBtn');
   const minimizeBtn = $('floatingMinimizeBtn');
   if(restoreBtn) restoreBtn.style.display = 'none';
   if(minimizeBtn) minimizeBtn.style.display = 'none';
-  
-  // Hacer draggable
   makeDraggable(floatingDiv);
 }
 
 function makeDraggable(element){
-  let startX, startY, startLeft, startTop;
-  let isDraggingLocal = false;
-  
+  let startX, startY, startLeft, startTop, isDraggingLocal = false;
   const onMouseMove = (moveEvent) => {
     if(!isDraggingLocal) return;
     let newLeft = startLeft + (moveEvent.clientX - startX);
@@ -1042,25 +623,15 @@ function makeDraggable(element){
     element.style.right = 'auto';
     element.style.bottom = 'auto';
   };
-  
-  const onMouseUp = () => {
-    isDraggingLocal = false;
-    document.removeEventListener('mousemove', onMouseMove);
-    document.removeEventListener('mouseup', onMouseUp);
-  };
-  
+  const onMouseUp = () => { isDraggingLocal = false; document.removeEventListener('mousemove', onMouseMove); document.removeEventListener('mouseup', onMouseUp); };
   element.addEventListener('mousedown', (e) => {
     if(e.target.closest('.floating-controls')) return;
     if(e.target.closest('.floating-minimize-btn')) return;
     if(e.target.closest('.floating-restore-btn')) return;
     e.preventDefault();
     const rect = element.getBoundingClientRect();
-    startX = e.clientX;
-    startY = e.clientY;
-    startLeft = rect.left;
-    startTop = rect.top;
+    startX = e.clientX; startY = e.clientY; startLeft = rect.left; startTop = rect.top;
     isDraggingLocal = true;
-    
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
   });
@@ -1073,7 +644,6 @@ function stopCameraAndFloating(){
   const floatingDiv = $('floatingCamera');
   if(floatingDiv) floatingDiv.style.display = 'none';
   if(activeLiveSession?.id) updateDoc(doc(db,'liveSessions',activeLiveSession.id),{cameraActive:false}).catch(()=>{});
-  
   const localVideo = $('localVideo');
   if(localVideo) localVideo.style.display = 'none';
   const videoPlaceholder = $('videoPlaceholder');
@@ -1082,29 +652,19 @@ function stopCameraAndFloating(){
 
 window.switchCamera = async function(){
   await enumerateCameras();
-  if(camDevices.length<2){ 
-    showToast('Solo hay una cámara disponible','info'); 
-    return; 
-  }
+  if(camDevices.length<2){ showToast('Solo hay una cámara disponible','info'); return; }
   const currentId = currentStream?.getVideoTracks()[0]?.getSettings()?.deviceId;
-  // Encontrar la siguiente cámara
   let nextDevice = camDevices.find(d => d.deviceId !== currentId);
   if(!nextDevice && camDevices.length > 0) nextDevice = camDevices[0];
-  if(nextDevice){
-    await startCamera(nextDevice.deviceId, 720);
-    showToast('Cámara cambiada correctamente','success');
-  } else {
-    showToast('No se pudo cambiar la cámara','error');
-  }
+  if(nextDevice){ await startCamera(nextDevice.deviceId, 720); showToast('Cámara cambiada correctamente','success'); }
+  else showToast('No se pudo cambiar la cámara','error');
 };
 
-// Eventos de ventana flotante
 document.addEventListener('DOMContentLoaded', () => {
   const minimizeControl = document.getElementById('floatingMinimizeControl');
   const closeControl = document.getElementById('floatingCloseControl');
   const minimizeBtn = document.getElementById('floatingMinimizeBtn');
   const restoreBtn = document.getElementById('floatingRestoreBtn');
-  
   if(minimizeControl){
     minimizeControl.onclick = () => {
       const floating = $('floatingCamera');
@@ -1118,7 +678,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     };
   }
-  
   if(minimizeBtn){
     minimizeBtn.onclick = () => {
       const floating = $('floatingCamera');
@@ -1132,7 +691,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     };
   }
-  
   if(restoreBtn){
     restoreBtn.onclick = () => {
       const floating = $('floatingCamera');
@@ -1146,7 +704,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     };
   }
-  
   if(closeControl){
     closeControl.onclick = () => {
       showConfirm('Cerrar Cámara', '¿Deseas detener la transmisión de la cámara?', () => {
@@ -1154,7 +711,6 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast('Cámara detenida','info');
         renderStream();
         renderDraw();
-        renderTVSection();
       });
     };
   }
@@ -1166,7 +722,6 @@ function renderStream(){
   let html = `<div style="margin-bottom:14px"><div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:800;color:var(--success)"><i class="fas fa-video"></i> Transmisión en Vivo</div><div style="font-size:11px;color:rgba(255,255,255,.4)">${isLive?`🔴 Sesión activa · ${activeLiveSession?.raffleName||''}`:'Sin sesión activa'}</div></div>
   <div class="video-wrapper"><div class="live-indicator ${hasStream&&isLive?'active':''}"><div class="live-dot"></div>EN VIVO</div><div id="localVideoWrap" style="position:absolute;inset:0;background:#000"><video id="localVideo" autoplay muted playsinline style="width:100%;height:100%;object-fit:cover;${hasStream?'':'display:none'}"></video><div class="video-placeholder" id="videoPlaceholder" style="${hasStream?'display:none':''}"><i class="fas fa-camera-slash"></i><p>Cámara no activada<br><span style="font-size:10px">Presiona "Activar Cámara" para transmitir</span></p></div></div></div>
   <div class="card"><div class="card-title"><i class="fas fa-sliders-h"></i> Controles de Cámara</div><div class="cam-controls">${!hasStream?`<button class="cam-btn cam-btn-start" onclick="openCamOptions()" style="grid-column:1/-1"><i class="fas fa-camera"></i> Activar Cámara</button>`:`<button class="cam-btn cam-btn-switch" onclick="switchCamera()"><i class="fas fa-sync-alt"></i> Cambiar</button><button class="cam-btn cam-btn-stop" onclick="stopCameraAndFloating()"><i class="fas fa-video-slash"></i> Detener</button>`}</div></div>`;
-  
   if(isLive){
     html += `<div class="card"><div class="card-title"><i class="fas fa-share-alt"></i> Compartir</div><div style="display:flex;gap:8px"><input type="text" id="streamLinkInput" readonly value="${getViewerUrl()}" style="flex:1;padding:8px;background:rgba(0,0,0,.3);border:1px solid rgba(64,145,108,.25);border-radius:10px;color:var(--success);font-size:10px"><button class="btn-secondary" onclick="copyStreamLink()"><i class="fas fa-copy"></i></button></div><button class="btn-success" style="width:100%;margin-top:10px" onclick="shareStreamWhatsApp()"><i class="fab fa-whatsapp"></i> Enviar por WhatsApp</button></div>
     <div style="margin-top:14px"><button class="btn-danger" style="width:100%" onclick="endLiveSession()"><i class="fas fa-stop-circle"></i> Finalizar Transmisión</button></div>`;
@@ -1176,13 +731,11 @@ function renderStream(){
 }
 
 window.endLiveSession = async function(){
-  showConfirm('Finalizar Transmisión', '¿Estás seguro de que deseas finalizar la transmisión en vivo? Los clientes ya no podrán ver el sorteo.', async () => {
+  showConfirm('Finalizar Transmisión', '¿Estás seguro de que deseas finalizar la transmisión en vivo?', async () => {
     showLoader('Finalizando...');
     stopCameraAndFloating();
     if(liveTimerInterval) clearInterval(liveTimerInterval);
-    if(activeLiveSession?.id){
-      try{ await updateDoc(doc(db,'liveSessions',activeLiveSession.id),{ status:'ended', endedAt:new Date().toISOString() }); }catch(e){}
-    }
+    if(activeLiveSession?.id) try{ await updateDoc(doc(db,'liveSessions',activeLiveSession.id),{ status:'ended', endedAt:new Date().toISOString() }); }catch(e){}
     activeLiveSession=null; drawState.active=false;
     if(activeSessionUnsub){ activeSessionUnsub(); activeSessionUnsub=null; }
     const badge=$('liveHeaderBadge'); if(badge) badge.style.display='none';
@@ -1193,138 +746,42 @@ window.endLiveSession = async function(){
   });
 };
 
-function renderTVSection(){
-  if(!activeLiveSession || activeLiveSession.status !== 'live'){
-    $('tvContent').innerHTML = `
-      <div class="card" style="text-align:center;padding:60px 20px">
-        <div style="font-size:60px;margin-bottom:16px">📺</div>
-        <div style="font-size:20px;font-weight:800;color:var(--success);margin-bottom:8px">Modo TV</div>
-        <p style="color:rgba(255,255,255,.45);font-size:12px">Inicia una transmisión para verla en pantalla completa</p>
-        <button class="btn-primary live-btn" style="margin-top:20px" onclick="openSelectRaffle()"><i class="fas fa-play-circle"></i> Iniciar Tómbola</button>
-      </div>
-    `;
+function renderDraw(){
+  if(!activeLiveSession || activeLiveSession.status==='ended'){
+    $('drawContent').innerHTML=`<div class="card" style="text-align:center;padding:40px 20px"><div style="font-size:50px;margin-bottom:14px">🎰</div><div style="font-size:20px;font-weight:800;color:var(--success);margin-bottom:8px">Tómbola en Vivo</div><p style="color:rgba(255,255,255,.45);font-size:12px;margin-bottom:20px">Inicia una tómbola para comenzar el sorteo</p><button class="btn-primary live-btn" onclick="openSelectRaffle()"><i class="fas fa-play-circle"></i> Iniciar Tómbola</button></div>`;
     return;
   }
-  
   const raffle = allRaffles.find(r=>r.id===activeLiveSession.raffleId);
   const mode = activeLiveSession.mode;
   const winners = activeLiveSession.winners||[];
   const prizeCount = activeLiveSession.prizeCount||1;
-  const isLive = true;
-  
-  let html = `
-    <div style="position:relative;background:#000;border-radius:20px;overflow:hidden;margin-bottom:16px">
-      <div style="position:relative;width:100%;padding-top:56.25%;background:#000">
-        <div id="tvVideoContainer" style="position:absolute;inset:0;background:#000">
-          ${mode === 'manual' && isCamRunning ? 
-            `<video id="tvVideo" autoplay muted playsinline style="width:100%;height:100%;object-fit:contain"></video>` :
-            `<div style="display:flex;align-items:center;justify-content:center;height:100%;flex-direction:column;gap:16px">
-               <i class="fas fa-tv" style="font-size:64px;color:rgba(255,255,255,.2)"></i>
-               <p style="color:rgba(255,255,255,.4);font-size:12px">${mode === 'manual' ? 'Activa la cámara para transmitir' : 'Modo Online - El sorteo digital se muestra en la sección Sorteo'}</p>
-               ${mode === 'manual' && !isCamRunning ? `<button class="cam-btn cam-btn-start" onclick="openCamOptions()" style="margin-top:10px"><i class="fas fa-camera"></i> Activar Cámara</button>` : ''}
-             </div>`
-          }
-        </div>
-        <div class="live-indicator active" style="position:absolute;top:12px;left:12px"><div class="live-dot"></div>EN VIVO</div>
-        <div style="position:absolute;top:12px;right:12px;background:rgba(0,0,0,.7);padding:4px 12px;border-radius:20px;font-family:'Orbitron',monospace;font-size:12px;color:var(--warning)">
-          <i class="fas fa-clock"></i> <span id="tvTimer">00:00:00</span>
-        </div>
-      </div>
-      <div style="display:flex;gap:12px;padding:12px;background:rgba(0,0,0,.8);justify-content:center">
-        <button class="tv-icon-btn" onclick="openTVFullscreen()"><i class="fas fa-expand"></i> Pantalla Completa</button>
-        <button class="btn-secondary" onclick="goSection('Draw')"><i class="fas fa-dice"></i> Ir al Sorteo</button>
-      </div>
-    </div>
-  `;
-  
-  html += `
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title"><i class="fas fa-info-circle"></i> Información del Sorteo</div>
-        <span class="badge badge-live">EN VIVO</span>
-      </div>
-      <div class="info-row"><span class="info-key">Rifa:</span><span class="info-val">${activeLiveSession.raffleName}</span></div>
-      <div class="info-row"><span class="info-key">Premios:</span><span class="info-val">${prizeCount}</span></div>
-      <div class="info-row"><span class="info-key">Ganadores:</span><span class="info-val" style="color:var(--warning)">${winners.length}</span></div>
-      <div class="info-row"><span class="info-key">Tiempo en vivo:</span><span class="info-val" id="tvLiveTimer">00:00:00</span></div>
-    </div>
-  `;
-  
-  if(winners.length > 0){
-    html += `
-      <div style="font-weight:700;font-size:13px;margin:16px 0 10px;color:var(--warning)"><i class="fas fa-trophy"></i> Últimos Ganadores</div>
-      <div class="winners-list">
-        ${winners.slice(-3).reverse().map((w,i)=>`
-          <div class="winner-card">
-            <div class="winner-medal">${getMedal(winners.length - i - 1)}</div>
-            <div>
-              <div class="winner-number">#${padNum(w.number,raffle?.digits||3)}</div>
-              <div class="winner-name">${w.clientName||'N/A'}</div>
-              <div class="winner-sub">${getPrizeLbl(winners.length - i)}</div>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    `;
+  const currentPrize = winners.length;
+  const done = currentPrize>=prizeCount;
+  let html = `<div class="card"><div class="card-header"><div><div class="card-title">${raffle?.name||activeLiveSession.raffleName}</div><div style="font-size:10px">${mode==='manual'?'📷 Sorteo Manual':'🎰 Sorteo Digital'} · ${prizeCount} premio(s)</div></div><span class="badge" style="background:rgba(231,111,81,.15);color:var(--danger)">🔴 EN VIVO</span></div><div class="stats-grid"><div class="stat-box"><div class="stat-label">Premios</div><div class="stat-value">${prizeCount}</div></div><div class="stat-box"><div class="stat-label">Entregados</div><div class="stat-value" style="color:var(--success)">${winners.length}</div></div><div class="stat-box"><div class="stat-label">Restantes</div><div class="stat-value" style="color:var(--warning)">${prizeCount-winners.length}</div></div></div>`;
+  html += `<div style="margin-top:10px"><button class="tv-icon-btn" onclick="openTVFullscreen()"><i class="fas fa-tv"></i> Ver en Pantalla Completa</button></div></div>`;
+  if(mode==='online'){
+    html += `<div class="draw-arena"><div id="drawPrizeLabel" class="draw-prize-label">${done?'SORTEO COMPLETADO':`SORTEANDO ${getPrizeLbl(currentPrize+1)}`}</div><div class="ball-container"><div class="main-ball ${done&&winners.length>0?getBallClass(winners.length-1):''}" id="mainBall">${done&&winners.length>0?'#'+padNum(winners[winners.length-1].number,raffle?.digits||3):'?'}</div></div><div class="draw-subtitle" id="drawSubtitle">${done?'¡Sorteo finalizado!':drawState.animInterval?'Sorteando...':'Presiona para sortear'}</div><div class="countdown-bar" id="countdownBar">Siguiente en...</div>${!done&&activeLiveSession.status==='live'?`<button class="btn-primary live-btn" id="drawActionBtn" onclick="performDraw()"><i class="fas fa-random"></i> ${currentPrize===0?'Iniciar Sorteo':'Sortear Siguiente'}</button>`:''}</div>`;
+  } else {
+    html += `<div class="draw-arena"><div style="font-weight:700;margin-bottom:10px"><i class="fas fa-dice"></i> Registrar Ganador Manual</div><div class="inp-group"><select id="manualPrizePos" style="width:100%;padding:10px;background:rgba(45,27,78,.5);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:#fff">${Array.from({length:prizeCount-winners.length},(_, i)=>`<option value="${winners.length+i+1}">${getPrizeLbl(winners.length+i+1)}</option>`).join('')}</select></div><div class="inp-group"><input type="number" id="manualWinnerNum" placeholder="Número ganador..." style="width:100%;padding:10px;background:rgba(45,27,78,.5);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:#fff;font-size:16px;text-align:center"></div>${!done&&activeLiveSession.status==='live'?`<button class="btn-primary" style="width:100%" onclick="registerManualDrawWinner()"><i class="fas fa-trophy"></i> Registrar Ganador</button>`:''}</div>`;
   }
-  
-  $('tvContent').innerHTML = html;
-  
-  if(mode === 'manual' && isCamRunning && currentStream){
-    const tvVideo = document.getElementById('tvVideo');
-    if(tvVideo){
-      tvVideo.srcObject = currentStream;
-      tvVideo.style.display = 'block';
-    }
+  if(winners.length>0){
+    html += `<div style="font-weight:700;font-size:13px;margin:16px 0 10px;color:var(--warning)"><i class="fas fa-trophy"></i> Ganadores</div><div class="winners-list">${winners.map((w,i)=>`<div class="winner-card"><div class="winner-medal">${getMedal(i)}</div><div><div class="winner-number">#${padNum(w.number,raffle?.digits||3)}</div><div class="winner-name">${w.clientName||'N/A'}</div><div class="winner-sub">${w.clientPhone||''}</div><div class="winner-prize">${getPrizeLbl(i+1)}</div></div></div>`).join('')}</div>`;
   }
-  
-  if(liveStartTime){
-    const updateTVTimer = () => {
-      const elapsed = Math.floor((Date.now() - liveStartTime) / 1000);
-      const hours = Math.floor(elapsed / 3600);
-      const minutes = Math.floor((elapsed % 3600) / 60);
-      const seconds = elapsed % 60;
-      const timeStr = `${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
-      const tvTimerSpan = document.getElementById('tvLiveTimer');
-      if(tvTimerSpan) tvTimerSpan.textContent = timeStr;
-      const tvTimerTop = document.getElementById('tvTimer');
-      if(tvTimerTop) tvTimerTop.textContent = timeStr;
-    };
-    updateTVTimer();
-    const tvInterval = setInterval(updateTVTimer, 1000);
-    setTimeout(() => clearInterval(tvInterval), 5000);
-  }
+  $('drawContent').innerHTML = html;
 }
 
 window.openTVFullscreen = function(){
   if(tvFullscreenActive) return;
   tvFullscreenActive = true;
-  
-  const mode = activeLiveSession?.mode;
-  
   const overlay = document.createElement('div');
   overlay.className = 'tv-fullscreen-overlay';
-  overlay.innerHTML = `
-    <div class="tv-fullscreen-header">
-      <div class="tv-fullscreen-title">${activeLiveSession?.raffleName || 'RIFA POOL'} - EN VIVO</div>
-      <div class="tv-fullscreen-timer" id="tvFullscreenTimer">00:00:00</div>
-    </div>
-    <video id="tvFullscreenVideo" autoplay muted playsinline style="width:100%;height:100%;object-fit:contain"></video>
-    <div class="tv-fullscreen-controls">
-      <button class="close-fullscreen" onclick="closeTVFullscreen()"><i class="fas fa-times"></i></button>
-      <button onclick="closeTVFullscreen()"><i class="fas fa-compress"></i></button>
-    </div>
-  `;
+  overlay.innerHTML = `<div class="tv-fullscreen-header"><div class="tv-fullscreen-title">${activeLiveSession?.raffleName || 'RIFA POOL'} - EN VIVO</div><div class="tv-fullscreen-timer" id="tvFullscreenTimer">00:00:00</div></div><video id="tvFullscreenVideo" autoplay muted playsinline style="width:100%;height:100%;object-fit:contain"></video><div class="tv-fullscreen-controls"><button class="close-fullscreen" onclick="closeTVFullscreen()"><i class="fas fa-times"></i></button><button onclick="closeTVFullscreen()"><i class="fas fa-compress"></i></button></div>`;
   document.body.appendChild(overlay);
   document.body.style.overflow = 'hidden';
-  
-  if(mode === 'manual' && currentStream){
+  if(currentStream){
     const fullVideo = document.getElementById('tvFullscreenVideo');
-    if(fullVideo){
-      fullVideo.srcObject = currentStream;
-    }
+    if(fullVideo) fullVideo.srcObject = currentStream;
   }
-  
   if(liveStartTime){
     const updateTimer = () => {
       const elapsed = Math.floor((Date.now() - liveStartTime) / 1000);
@@ -1351,35 +808,6 @@ window.closeTVFullscreen = function(){
   tvFullscreenActive = false;
 };
 
-function renderDraw(){
-  if(!activeLiveSession || activeLiveSession.status==='ended'){
-    $('drawContent').innerHTML=`<div class="card" style="text-align:center;padding:40px 20px"><div style="font-size:50px;margin-bottom:14px">🎰</div><div style="font-size:20px;font-weight:800;color:var(--success);margin-bottom:8px">Tómbola en Vivo</div><p style="color:rgba(255,255,255,.45);font-size:12px;margin-bottom:20px">Inicia una tómbola para comenzar el sorteo</p><button class="btn-primary live-btn" onclick="openSelectRaffle()"><i class="fas fa-play-circle"></i> Iniciar Tómbola</button></div>`;
-    return;
-  }
-  const raffle = allRaffles.find(r=>r.id===activeLiveSession.raffleId);
-  const mode = activeLiveSession.mode;
-  const winners = activeLiveSession.winners||[];
-  const prizeCount = activeLiveSession.prizeCount||1;
-  const currentPrize = winners.length;
-  const done = currentPrize>=prizeCount;
-
-  let html = `<div class="card"><div class="card-header"><div><div class="card-title">${raffle?.name||activeLiveSession.raffleName}</div><div style="font-size:10px">${mode==='manual'?'📷 Sorteo Manual':'🎰 Sorteo Digital'} · ${prizeCount} premio(s)</div></div><span class="badge" style="background:rgba(231,111,81,.15);color:var(--danger)">🔴 EN VIVO</span></div><div class="stats-grid"><div class="stat-box"><div class="stat-label">Premios</div><div class="stat-value">${prizeCount}</div></div><div class="stat-box"><div class="stat-label">Entregados</div><div class="stat-value" style="color:var(--success)">${winners.length}</div></div><div class="stat-box"><div class="stat-label">Restantes</div><div class="stat-value" style="color:var(--warning)">${prizeCount-winners.length}</div></div></div>`;
-  
-  html += `<div style="margin-top:10px"><button class="tv-icon-btn" onclick="goSection('TV')"><i class="fas fa-tv"></i> Ver en Modo TV</button></div></div>`;
-
-  if(mode==='online'){
-    html += `<div class="draw-arena"><div id="drawPrizeLabel" class="draw-prize-label">${done?'SORTEO COMPLETADO':`SORTEANDO ${getPrizeLbl(currentPrize+1)}`}</div><div class="ball-container"><div class="main-ball ${done&&winners.length>0?getBallClass(winners.length-1):''}" id="mainBall">${done&&winners.length>0?'#'+padNum(winners[winners.length-1].number,raffle?.digits||3):'?'}</div></div><div class="draw-subtitle" id="drawSubtitle">${done?'¡Sorteo finalizado!':drawState.animInterval?'Sorteando...':'Presiona para sortear'}</div><div class="countdown-bar" id="countdownBar">Siguiente en...</div>${!done&&activeLiveSession.status==='live'?`<button class="btn-primary live-btn" id="drawActionBtn" onclick="performDraw()"><i class="fas fa-random"></i> ${currentPrize===0?'Iniciar Sorteo':'Sortear Siguiente'}</button>`:''}</div>`;
-  } else {
-    html += `<div class="draw-arena"><div style="font-weight:700;margin-bottom:10px"><i class="fas fa-dice"></i> Registrar Ganador Manual</div><div class="inp-group"><select id="manualPrizePos" style="width:100%;padding:10px;background:rgba(45,27,78,.5);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:#fff">${Array.from({length:prizeCount-winners.length},(_, i)=>`<option value="${winners.length+i+1}">${getPrizeLbl(winners.length+i+1)}</option>`).join('')}</select></div><div class="inp-group"><input type="number" id="manualWinnerNum" placeholder="Número ganador..." style="width:100%;padding:10px;background:rgba(45,27,78,.5);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:#fff;font-size:16px;text-align:center"></div>${!done&&activeLiveSession.status==='live'?`<button class="btn-primary" style="width:100%" onclick="registerManualDrawWinner()"><i class="fas fa-trophy"></i> Registrar Ganador</button>`:''}</div>`;
-  }
-
-  if(winners.length>0){
-    html += `<div style="font-weight:700;font-size:13px;margin:16px 0 10px;color:var(--warning)"><i class="fas fa-trophy"></i> Ganadores</div><div class="winners-list">${winners.map((w,i)=>`<div class="winner-card"><div class="winner-medal">${getMedal(i)}</div><div><div class="winner-number">#${padNum(w.number,raffle?.digits||3)}</div><div class="winner-name">${w.clientName||'N/A'}</div><div class="winner-sub">${w.clientPhone||''}</div><div class="winner-prize">${getPrizeLbl(i+1)}</div></div></div>`).join('')}</div>`;
-  }
-
-  $('drawContent').innerHTML = html;
-}
-
 window.performDraw = async function(){
   if(!activeLiveSession||!drawState.active) return;
   const raffle = allRaffles.find(r=>r.id===drawState.raffleId);
@@ -1387,19 +815,16 @@ window.performDraw = async function(){
   if(drawState.animInterval) return;
   const prizeIndex = (activeLiveSession.winners||[]).length;
   if(prizeIndex>=drawState.prizeCount){ showToast('¡Todos los premios ya fueron sorteados!','info'); return; }
-  
   const lbl = $('drawPrizeLabel'); if(lbl) lbl.textContent=`SORTEANDO ${getPrizeLbl(prizeIndex+1)}`;
   const subtitle = $('drawSubtitle'); if(subtitle) subtitle.textContent='Sorteando...';
   const btn = $('drawActionBtn'); if(btn) btn.style.display='none';
   const ball = $('mainBall');
   if(ball){ ball.className='main-ball spinning'; }
-
   drawState.animInterval = setInterval(()=>{
     if(!drawState.remainingTickets.length) return;
     const t = drawState.remainingTickets[Math.floor(Math.random()*drawState.remainingTickets.length)];
     if(ball) ball.textContent='#'+padNum(t.number,raffle.digits||3);
   },80);
-
   drawState.timeout = setTimeout(async()=>{
     clearInterval(drawState.animInterval);
     drawState.animInterval=null;
@@ -1407,20 +832,16 @@ window.performDraw = async function(){
     if(!winner){ showToast('Error al seleccionar ganador','error'); return; }
     if(ball){ ball.className=`main-ball winner ${getBallClass(prizeIndex)}`; ball.textContent='#'+padNum(winner.number,raffle.digits||3); }
     if(subtitle) subtitle.textContent=`🏆 ${winner.clientName} — ${getPrizeLbl(prizeIndex+1)}`;
-
     drawState.remainingTickets=drawState.remainingTickets.filter(t=>t.id!==winner.id);
     const newWinner = { number:winner.number, clientName:winner.clientName, clientPhone:winner.clientPhone, clientId:winner.clientId };
     const newWinners = [...(activeLiveSession.winners||[]), newWinner];
-
     try{
       await updateDoc(doc(db,'liveSessions',activeLiveSession.id),{ winners:newWinners, currentPrize:newWinners.length });
       const isAllDone = newWinners.length>=drawState.prizeCount;
       await updateDoc(doc(db,'rifas',raffle.id),{ winners:newWinners.map(w=>w.number), drawCompleted:isAllDone });
     }catch(e){ showToast('Error guardando: '+e.message,'error'); }
-
     showToast(`🏆 ${getPrizeLbl(prizeIndex+1)}: #${padNum(winner.number,raffle.digits||3)} — ${winner.clientName}`,'success');
     launchConfetti();
-
     const done = newWinners.length>=drawState.prizeCount;
     if(!done){
       let secs = 10;
@@ -1477,7 +898,6 @@ function renderHome(){
   const totalSold = allTickets.length;
   const totalRevenue = allTickets.reduce((s,t)=>{ const r=allRaffles.find(ra=>ra.id===t.raffleId); return s+(r?parseFloat(r.ticketPrice||0):0); },0);
   const totalPaid = allPayments.reduce((s,p)=>s+(p.paid||0),0);
-
   let html = `<div class="card"><div class="card-title"><i class="fas fa-chart-line"></i> Dashboard</div><div class="stats-grid"><div class="stat-box"><div class="stat-label">Rifas</div><div class="stat-value">${allRaffles.length}</div></div><div class="stat-box"><div class="stat-label">Boletos</div><div class="stat-value">${totalSold}</div></div><div class="stat-box"><div class="stat-label">Cobrado</div><div class="stat-value" style="font-size:14px">${money(totalPaid)}</div></div></div><div style="display:flex;gap:8px;margin-top:14px"><button class="btn-primary live-btn" style="flex:2" onclick="openSelectRaffle()"><i class="fas fa-play-circle"></i> Iniciar Tómbola</button><button class="btn-secondary" style="flex:1" onclick="openSharePanel()"><i class="fas fa-share-alt"></i> Compartir</button></div></div>`;
   html += `<div style="font-weight:700;font-size:13px;margin-bottom:10px;color:var(--success)"><i class="fas fa-list"></i> Mis Rifas (${allRaffles.length})</div>`;
   if(allRaffles.length===0){
@@ -1526,30 +946,25 @@ window.openSelectRaffleFor = function(raffleId){
   if(sel) sel.innerHTML = opts;
   $('modalSelectRaffle').classList.add('active');
 };
-
 window.openSharePanel = function(){
   if(!activeLiveSession){ showToast('Primero inicia una tómbola','warning'); return; }
   const url = getViewerUrl();
   const inp = $('shareLinkInput'); if(inp) inp.value=url;
   $('modalShareLink').classList.add('active');
 };
-
 window.copyShareLink = function(){
   const inp = $('shareLinkInput'); if(!inp) return;
   navigator.clipboard.writeText(inp.value).then(()=>showToast('✅ Link copiado','success')).catch(()=>{ inp.select(); document.execCommand('copy'); showToast('Link copiado','success'); });
 };
-
 window.copyStreamLink = function(){
   const inp = $('streamLinkInput'); if(!inp) return;
   navigator.clipboard.writeText(inp.value).then(()=>showToast('✅ Link copiado','success')).catch(()=>{ inp.select(); document.execCommand('copy'); showToast('Link copiado','success'); });
 };
-
 window.shareStreamWhatsApp = function(){
   const url = getViewerUrl();
   const msg = `🎰 ¡Tómbola EN VIVO!\n\nVe el sorteo aquí:\n${url}`;
   window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
 };
-
 window.shareViaWhatsApp = function(){ shareStreamWhatsApp(); closeModal('modalShareLink'); };
 
 function launchConfetti(){
@@ -1565,9 +980,9 @@ function launchConfetti(){
   }
 }
 
-// Persistencia de sesión - Verificar al cargar
+function showMain(){ $('loadingScreen').style.display='none'; $('loginScreen').style.display='none'; $('mainApp').style.display='block'; }
+
 (async function init(){
-  // Verificar si hay una sesión activa guardada
   let saved=null;
   try{ saved=JSON.parse(localStorage.getItem('rifapool_live_admin')||'null'); }catch(e){}
   if(saved?.uid){
@@ -1576,8 +991,6 @@ function launchConfetti(){
       if(snap.exists()&&snap.data().role==='admin'){
         currentUser={uid:snap.id,...snap.data()};
         await afterLogin();
-        
-        // Verificar si hay una sesión de vivo activa
         const q = query(collection(db,'liveSessions'), where('adminId','==',currentUser.uid), where('status','==','live'));
         const sessionSnap = await getDocs(q);
         if(!sessionSnap.empty){
