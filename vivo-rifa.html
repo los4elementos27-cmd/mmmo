@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-<title>RIFA POOL · Tómbola EN VIVO</title>
+<title>RIFA POOL · ADMIN · Tómbola EN VIVO</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Playfair+Display:wght@400;600;700;800&family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -24,15 +24,11 @@
 html,body{height:100%;overflow-x:hidden}
 body{font-family:'Quicksand',sans-serif;background:radial-gradient(ellipse at top,#1a0f2e 0%,#0f0a1a 100%);color:#fff;min-height:100vh;font-size:14px}
 
-/* ─── LOADING ─── */
 #loadingScreen{position:fixed;inset:0;background:radial-gradient(ellipse at center,#1a0f2e,#0f0a1a);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:16px;transition:opacity .5s}
 .loading-ball{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--purple-light),var(--success));display:flex;align-items:center;justify-content:center;font-size:36px;animation:floatBall 2s ease-in-out infinite,glow 2s ease-in-out infinite}
 @keyframes floatBall{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
 @keyframes glow{0%,100%{box-shadow:0 0 10px rgba(64,145,108,.3)}50%{box-shadow:0 0 30px rgba(64,145,108,.7)}}
-.loading-text{font-family:'Orbitron',monospace;font-size:18px;font-weight:700;letter-spacing:3px;color:var(--success)}
-.loading-sub{font-size:11px;color:rgba(255,255,255,.4);letter-spacing:1.5px}
 
-/* ─── LOGIN ─── */
 #loginScreen{position:fixed;inset:0;background:radial-gradient(ellipse at center,#1a0f2e,#0f0a1a);display:none;align-items:center;justify-content:center;z-index:9000;padding:16px}
 .login-card{background:rgba(26,15,46,.8);backdrop-filter:blur(12px);border:1px solid rgba(64,145,108,.2);border-radius:24px;padding:32px 28px;width:100%;max-width:340px;animation:slideUp .4s ease}
 @keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
@@ -41,9 +37,8 @@ body{font-family:'Quicksand',sans-serif;background:radial-gradient(ellipse at to
 .login-sub{text-align:center;font-size:11px;color:rgba(255,255,255,.45);margin-bottom:24px;letter-spacing:.5px}
 .inp-group{margin-bottom:14px}
 .inp-group label{display:block;font-size:10px;font-weight:700;margin-bottom:5px;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.8px}
-.inp-group input,.inp-group select,.inp-group textarea{width:100%;padding:11px 14px;border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-sm);font-size:13px;background:rgba(45,27,78,.5);color:#fff;transition:var(--transition);font-family:'Quicksand',sans-serif}
+.inp-group input,.inp-group select{width:100%;padding:11px 14px;border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-sm);font-size:13px;background:rgba(45,27,78,.5);color:#fff;transition:var(--transition);font-family:'Quicksand',sans-serif}
 .inp-group input:focus,.inp-group select:focus{outline:none;border-color:var(--success);box-shadow:0 0 0 2px rgba(64,145,108,.15)}
-.inp-group select option{background:#1a0f2e}
 .btn-primary{background:linear-gradient(135deg,var(--purple-light),var(--success));border:none;padding:12px 18px;border-radius:var(--radius-sm);color:#fff;font-weight:700;cursor:pointer;width:100%;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:'Quicksand',sans-serif;transition:var(--transition)}
 .btn-primary:hover{transform:translateY(-2px);filter:brightness(1.1)}
 .btn-secondary{background:rgba(45,27,78,.8);border:1px solid rgba(64,145,108,.25);padding:9px 16px;border-radius:var(--radius-sm);color:#fff;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-family:'Quicksand',sans-serif;transition:var(--transition)}
@@ -52,17 +47,11 @@ body{font-family:'Quicksand',sans-serif;background:radial-gradient(ellipse at to
 .btn-success:hover{transform:translateY(-2px);filter:brightness(1.1)}
 .btn-danger{background:linear-gradient(135deg,var(--danger),#c0392b);border:none;padding:10px 16px;border-radius:var(--radius-sm);color:#fff;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-family:'Quicksand',sans-serif;transition:var(--transition)}
 .btn-danger:hover{transform:translateY(-2px);filter:brightness(1.1)}
-.btn-warning{background:#e9c46a;border:none;padding:10px 16px;border-radius:var(--radius-sm);color:#1a0a2e;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-family:'Quicksand',sans-serif;transition:var(--transition)}
-.btn-warning:hover{transform:translateY(-2px);filter:brightness(1.05)}
 
-/* ─── MAIN APP ─── */
 #mainApp{display:none;min-height:100vh}
-
-/* ─── HEADER ─── */
 header{position:fixed;top:0;left:0;right:0;background:rgba(15,10,26,.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(64,145,108,.15);padding:8px 16px;display:flex;justify-content:space-between;align-items:center;z-index:100;gap:10px}
 .hdr-logo{display:flex;align-items:center;gap:10px}
 .hdr-logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--purple-light),var(--success));border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
-.hdr-logo-icon img{width:100%;height:100%;object-fit:cover}
 .hdr-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:800;background:linear-gradient(135deg,var(--success),#a8dadc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .hdr-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .badge{padding:3px 10px;border-radius:20px;font-size:8px;font-weight:700;letter-spacing:.5px}
@@ -70,42 +59,28 @@ header{position:fixed;top:0;left:0;right:0;background:rgba(15,10,26,.95);backdro
 .badge-admin{background:rgba(64,145,108,.15);color:var(--success);border:1px solid rgba(64,145,108,.2)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 
-/* ─── CONTENT ─── */
 .main-content{padding:70px 12px 20px}
 .section{display:none}
 .section.active{display:block;animation:fadeIn .3s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 
-/* ─── BOTTOM NAV ─── */
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(15,10,26,.97);backdrop-filter:blur(10px);border-top:1px solid rgba(64,145,108,.15);display:flex;justify-content:space-around;padding:6px 0 env(safe-area-inset-bottom,14px);z-index:99}
 .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:rgba(255,255,255,.45);font-size:9px;cursor:pointer;padding:7px 14px;border-radius:var(--radius-sm);transition:var(--transition);font-family:'Quicksand',sans-serif;font-weight:600}
 .nav-item i{font-size:19px;transition:var(--transition)}
 .nav-item.active{color:var(--success);background:rgba(64,145,108,.12);transform:translateY(-2px)}
-.nav-item:hover{color:var(--success);transform:translateY(-2px)}
 
-/* ─── CARDS ─── */
 .card{background:rgba(45,27,78,.45);backdrop-filter:blur(6px);border-radius:var(--radius);padding:16px;margin-bottom:14px;border:1px solid rgba(255,255,255,.06);transition:var(--transition)}
-.card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:rgba(64,145,108,.15)}
 .card-title{font-size:14px;font-weight:700;color:var(--success);font-family:'Playfair Display',serif;margin-bottom:12px;display:flex;align-items:center;gap:8px}
-.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:6px}
 
-.stat-box{background:rgba(0,0,0,.25);border-radius:var(--radius-sm);padding:10px;text-align:center;border:1px solid rgba(255,255,255,.04);transition:var(--transition)}
-.stat-box:hover{transform:translateY(-2px);background:rgba(0,0,0,.35)}
+.stat-box{background:rgba(0,0,0,.25);border-radius:var(--radius-sm);padding:10px;text-align:center;border:1px solid rgba(255,255,255,.04)}
 .stat-label{font-size:9px;color:rgba(255,255,255,.5);margin-bottom:4px;font-weight:600;letter-spacing:.3px;text-transform:uppercase}
 .stat-value{font-size:18px;font-weight:800;font-family:'Orbitron',monospace}
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px;margin-bottom:12px}
 
-.info-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04)}
-.info-row:last-child{border-bottom:none}
-.info-key{color:rgba(255,255,255,.5);font-size:11px}
-.info-val{font-weight:600;font-size:11px}
-
-/* ─── TOAST ─── */
 #toastContainer{position:fixed;bottom:24px;right:14px;z-index:9999;display:flex;flex-direction:column;gap:8px}
 .toast{background:linear-gradient(135deg,var(--purple-medium),var(--purple-dark));border-radius:var(--radius-sm);padding:10px 16px;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:10px;animation:slideInRight .25s ease;border-left:3px solid var(--success);font-size:12px;color:#fff;font-weight:600;backdrop-filter:blur(8px);max-width:280px}
 @keyframes slideInRight{from{opacity:0;transform:translateX(60px)}to{opacity:1;transform:translateX(0)}}
 
-/* ─── MODAL ─── */
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:2000;padding:14px}
 .modal.active{display:flex}
 .modal-content{background:linear-gradient(135deg,var(--purple-medium),var(--purple-dark));border-radius:var(--radius);max-width:540px;width:100%;max-height:88vh;overflow-y:auto;padding:22px;box-shadow:var(--shadow-xl);border:1px solid rgba(64,145,108,.2);animation:scaleIn .25s ease}
@@ -115,209 +90,272 @@ header{position:fixed;top:0;left:0;right:0;background:rgba(15,10,26,.95);backdro
 .modal-close{background:rgba(255,255,255,.1);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:13px;color:rgba(255,255,255,.7);transition:var(--transition);display:flex;align-items:center;justify-content:center}
 .modal-close:hover{background:var(--danger);color:#fff;transform:rotate(90deg)}
 
-/* ─── TOMBOLA HERO (Admin) ─── */
-.tombola-hero{background:linear-gradient(135deg,rgba(42,26,78,.4),rgba(26,15,46,.6));border-radius:var(--radius);padding:20px;margin-bottom:16px;border:1px solid rgba(64,145,108,.15);backdrop-filter:blur(8px);position:relative;overflow:hidden}
-.tombola-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 80% 20%,rgba(64,145,108,.08) 0%,transparent 60%);pointer-events:none}
+/* Ventana flotante de cámara */
+.floating-camera {
+  position: fixed;
+  bottom: 80px;
+  right: 16px;
+  width: 280px;
+  background: #000;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 2px solid rgba(64,145,108,.5);
+  box-shadow: 0 8px 32px rgba(0,0,0,.5);
+  z-index: 1000;
+  transition: all 0.3s ease;
+  cursor: move;
+}
+.floating-camera.minimized {
+  width: 60px;
+  height: 60px;
+  border-radius: 30px;
+}
+.floating-camera.minimized .floating-video,
+.floating-camera.minimized .floating-controls {
+  display: none;
+}
+.floating-camera.minimized .floating-minimize-btn i {
+  transform: rotate(180deg);
+}
+.floating-video {
+  width: 100%;
+  background: #000;
+  position: relative;
+}
+.floating-video video {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.floating-controls {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  display: flex;
+  gap: 8px;
+  background: rgba(0,0,0,.6);
+  padding: 4px 8px;
+  border-radius: 20px;
+  backdrop-filter: blur(4px);
+}
+.floating-controls button {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px;
+  transition: all 0.2s;
+}
+.floating-controls button:hover {
+  color: var(--danger);
+  transform: scale(1.1);
+}
+.floating-timer {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(0,0,0,.7);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-family: 'Orbitron', monospace;
+  color: var(--warning);
+  backdrop-filter: blur(4px);
+}
+.floating-minimize-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0,0,0,.7);
+  border: none;
+  color: #fff;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.floating-minimize-btn:hover {
+  background: var(--danger);
+}
 
-/* ─── LIVE BUTTON ─── */
-.live-btn{position:relative;overflow:hidden}
-.live-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);transform:translateX(-100%);animation:shimmer 2s infinite}
-@keyframes shimmer{100%{transform:translateX(100%)}}
+/* Cuenta regresiva elegante */
+.countdown-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.95);
+  backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeInScale 0.5s ease;
+}
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+.countdown-card {
+  text-align: center;
+  background: linear-gradient(135deg, rgba(42,26,78,.8), rgba(26,15,46,.9));
+  padding: 40px 60px;
+  border-radius: 40px;
+  border: 1px solid rgba(64,145,108,.3);
+  box-shadow: 0 0 60px rgba(64,145,108,.2);
+}
+.countdown-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--success);
+  margin-bottom: 20px;
+}
+.countdown-number {
+  font-family: 'Orbitron', monospace;
+  font-size: 120px;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--warning), #f4a261);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: pulseGlow 1s infinite;
+}
+@keyframes pulseGlow {
+  0%,100% { text-shadow: 0 0 20px rgba(233,196,106,.3); }
+  50% { text-shadow: 0 0 40px rgba(233,196,106,.6); }
+}
+.countdown-label {
+  font-size: 14px;
+  color: rgba(255,255,255,.5);
+  margin-top: 16px;
+  letter-spacing: 2px;
+}
 
-/* ─── VIDEO CONTAINER ─── */
-.video-wrapper{position:relative;width:100%;background:#000;border-radius:var(--radius);overflow:hidden;border:2px solid rgba(64,145,108,.3);box-shadow:var(--shadow-xl)}
-.video-wrapper::before{content:'';padding-top:56.25%;display:block}
-#videoContainer,.video-placeholder{position:absolute;inset:0;width:100%;height:100%}
-.video-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(10,6,20,.9)}
-.video-placeholder i{font-size:48px;color:rgba(255,255,255,.2)}
-.video-placeholder p{color:rgba(255,255,255,.4);font-size:12px;text-align:center}
+/* Confirmación elegante */
+.confirm-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.8);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 11000;
+  animation: fadeIn 0.2s ease;
+}
+.confirm-card {
+  background: linear-gradient(135deg, var(--purple-medium), var(--purple-dark));
+  border-radius: 24px;
+  padding: 28px 32px;
+  max-width: 340px;
+  width: 90%;
+  text-align: center;
+  border: 1px solid rgba(64,145,108,.3);
+  animation: scaleIn 0.3s ease;
+}
+.confirm-card i {
+  font-size: 48px;
+  color: var(--warning);
+  margin-bottom: 16px;
+}
+.confirm-card h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  margin-bottom: 12px;
+}
+.confirm-card p {
+  font-size: 13px;
+  color: rgba(255,255,255,.6);
+  margin-bottom: 24px;
+}
+.confirm-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+.confirm-buttons button {
+  padding: 10px 24px;
+  border-radius: 40px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+.confirm-cancel {
+  background: rgba(255,255,255,.1);
+  color: #fff;
+}
+.confirm-cancel:hover {
+  background: rgba(255,255,255,.2);
+  transform: translateY(-2px);
+}
+.confirm-confirm {
+  background: linear-gradient(135deg, var(--danger), #c0392b);
+  color: #fff;
+}
+.confirm-confirm:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
 
-/* ─── LIVE INDICATOR ─── */
-.live-indicator{position:absolute;top:12px;left:12px;z-index:10;background:rgba(231,111,81,.9);color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;display:none;align-items:center;gap:5px;letter-spacing:1px;backdrop-filter:blur(4px)}
-.live-indicator.active{display:flex}
-.live-dot{width:6px;height:6px;border-radius:50%;background:#fff;animation:blink .8s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-.viewers-badge{position:absolute;top:12px;right:12px;z-index:10;background:rgba(0,0,0,.7);color:#fff;font-size:10px;padding:4px 10px;border-radius:20px;display:none;align-items:center;gap:5px;backdrop-filter:blur(4px)}
-.viewers-badge.active{display:flex}
-
-/* ─── BALL ANIMATION ─── */
-.draw-arena{background:rgba(0,0,0,.4);border-radius:var(--radius);padding:24px;text-align:center;margin:14px 0;border:1px solid rgba(64,145,108,.12);position:relative;overflow:hidden}
-.draw-arena::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at center,rgba(64,145,108,.06) 0%,transparent 70%);pointer-events:none}
-.ball-container{display:flex;justify-content:center;align-items:center;margin:16px 0;height:140px;position:relative}
-.main-ball{width:var(--ball-size);height:var(--ball-size);border-radius:50%;background:linear-gradient(135deg,#2a1a4e,#40916c);display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:28px;font-weight:900;color:#fff;box-shadow:0 8px 32px rgba(64,145,108,.4),inset 0 -4px 12px rgba(0,0,0,.3),inset 0 4px 8px rgba(255,255,255,.1);position:relative;transition:all .4s cubic-bezier(.34,1.56,.64,1);cursor:default;user-select:none}
-.main-ball.spinning{animation:spinBall .08s linear infinite}
-@keyframes spinBall{0%{transform:scale(1.02) rotate(-3deg)}50%{transform:scale(.98) rotate(3deg)}100%{transform:scale(1.02) rotate(-3deg)}}
-.main-ball.winner{animation:winnerPop .6s cubic-bezier(.34,1.56,.64,1) forwards}
-@keyframes winnerPop{0%{transform:scale(.8);box-shadow:0 0 0 rgba(233,196,106,.5)}40%{transform:scale(1.15)}70%{transform:scale(.95)}100%{transform:scale(1);box-shadow:0 0 40px rgba(233,196,106,.6),0 0 80px rgba(233,196,106,.3)}}
-.main-ball.gold{background:linear-gradient(135deg,#b8860b,#e9c46a,#f4a261)}
-.main-ball.silver{background:linear-gradient(135deg,#7f8c8d,#adb5bd,#ced4da)}
-.main-ball.bronze{background:linear-gradient(135deg,#8b4513,#cd7f32,#daa520)}
-
-.orbiting-balls{position:absolute;inset:0;pointer-events:none}
-.orbit-ball{position:absolute;width:18px;height:18px;border-radius:50%;background:rgba(64,145,108,.3);border:1px solid rgba(64,145,108,.5);display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:rgba(255,255,255,.6);font-family:'Orbitron',monospace;top:50%;left:50%;transform-origin:0 0;animation:orbit 3s linear infinite}
-@keyframes orbit{from{transform:rotate(0deg) translate(55px) rotate(0deg)}to{transform:rotate(360deg) translate(55px) rotate(-360deg)}}
-
-.draw-subtitle{font-size:12px;color:rgba(255,255,255,.5);margin-top:6px;min-height:20px;font-weight:600}
-.draw-prize-label{font-size:10px;color:var(--warning);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
-
-/* ─── WINNERS LIST ─── */
-.winners-list{display:flex;flex-direction:column;gap:8px;margin-top:14px}
-.winner-card{background:linear-gradient(135deg,rgba(233,196,106,.1),rgba(64,145,108,.1));border:1px solid rgba(233,196,106,.25);border-radius:var(--radius-sm);padding:12px 16px;display:flex;align-items:center;gap:12px;animation:winnerCardIn .4s ease forwards;opacity:0}
-@keyframes winnerCardIn{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
-.winner-medal{font-size:28px;flex-shrink:0}
-.winner-number{font-family:'Orbitron',monospace;font-size:22px;font-weight:900;color:var(--warning)}
-.winner-name{font-weight:700;font-size:13px}
-.winner-sub{font-size:10px;color:rgba(255,255,255,.5);margin-top:2px}
-.winner-prize{font-size:10px;color:var(--success);font-weight:700;margin-top:3px}
-
-/* ─── COUNTDOWN ─── */
-.countdown-bar{background:rgba(233,196,106,.08);border-radius:var(--radius-sm);padding:8px 14px;text-align:center;font-family:'Orbitron',monospace;font-size:13px;font-weight:700;color:var(--warning);border:1px solid rgba(233,196,106,.2);margin:8px 0;display:none}
-.countdown-bar.active{display:block;animation:glowPulse 1.5s infinite}
-@keyframes glowPulse{0%,100%{box-shadow:0 0 3px rgba(233,196,106,.2)}50%{box-shadow:0 0 12px rgba(233,196,106,.5)}}
-
-/* ─── CAMERA CONTROLS ─── */
-.cam-controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.cam-btn{padding:12px;border-radius:var(--radius-sm);font-size:12px;font-weight:700;cursor:pointer;transition:var(--transition);display:flex;align-items:center;justify-content:center;gap:6px;border:none;font-family:'Quicksand',sans-serif}
-.cam-btn:active{transform:scale(.97)}
-.cam-btn-start{background:linear-gradient(135deg,var(--danger),#c0392b);color:#fff}
-.cam-btn-stop{background:rgba(231,111,81,.2);border:1px solid rgba(231,111,81,.4);color:var(--danger)}
-.cam-btn-switch{background:rgba(52,152,219,.2);border:1px solid rgba(52,152,219,.4);color:var(--info)}
-
-/* ─── PROGRESS BAR ─── */
-.progress-bar{background:rgba(255,255,255,.08);border-radius:8px;height:5px;overflow:hidden;margin:10px 0}
-.progress-fill{background:linear-gradient(90deg,var(--success),#a8dadc);height:100%;border-radius:8px;transition:width .4s ease}
-
-/* ─── VIEWER MODE ─── */
-.viewer-header{text-align:center;padding:20px 0 14px}
-.viewer-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:800;background:linear-gradient(135deg,var(--success),var(--warning));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
-.viewer-sub{font-size:11px;color:rgba(255,255,255,.45);letter-spacing:.5px}
-.viewer-event-card{background:linear-gradient(135deg,rgba(42,26,78,.5),rgba(26,15,46,.7));border:1px solid rgba(64,145,108,.2);border-radius:var(--radius);padding:16px;margin-bottom:14px;text-align:center}
-.viewer-raffle-name{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--success);margin-bottom:8px}
-.viewer-status{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:1px}
-.viewer-status.live{background:rgba(231,111,81,.2);color:var(--danger);border:1px solid rgba(231,111,81,.4)}
-.viewer-status.waiting{background:rgba(233,196,106,.15);color:var(--warning);border:1px solid rgba(233,196,106,.3)}
-.viewer-status.ended{background:rgba(64,145,108,.15);color:var(--success);border:1px solid rgba(64,145,108,.3)}
-
-/* ─── ONLINE DRAW (video-like) ─── */
-.online-draw-display{background:#000;border-radius:var(--radius);overflow:hidden;border:2px solid rgba(64,145,108,.3);position:relative}
-.draw-screen{width:100%;padding-top:56.25%;position:relative;background:radial-gradient(ellipse at center,#0d1a2e 0%,#060c14 100%)}
-.draw-screen-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
-.online-live-badge{position:absolute;top:10px;left:10px;background:rgba(231,111,81,.9);color:#fff;font-size:9px;font-weight:700;padding:3px 10px;border-radius:20px;display:flex;align-items:center;gap:4px;letter-spacing:1px}
-.draw-balls-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-.mini-ball{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--purple-light),var(--success));display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:11px;font-weight:700;color:#fff;box-shadow:0 3px 10px rgba(64,145,108,.4);transition:all .3s}
-.mini-ball.highlighted{background:linear-gradient(135deg,#b8860b,var(--warning));box-shadow:0 0 20px rgba(233,196,106,.6);transform:scale(1.2);animation:miniPop .4s ease}
-@keyframes miniPop{0%{transform:scale(.8)}60%{transform:scale(1.3)}100%{transform:scale(1.2)}}
-
-/* ─── TICKER ─── */
-.live-ticker{background:rgba(0,0,0,.4);border-top:1px solid rgba(64,145,108,.2);padding:8px 14px;display:flex;align-items:center;gap:10px;overflow:hidden}
-.ticker-label{font-size:9px;font-weight:700;color:var(--warning);letter-spacing:1px;text-transform:uppercase;flex-shrink:0;padding:2px 8px;background:rgba(233,196,106,.15);border-radius:20px}
-.ticker-text{font-size:11px;color:rgba(255,255,255,.7);white-space:nowrap;animation:tickerScroll 15s linear infinite}
-@keyframes tickerScroll{from{transform:translateX(100%)}to{transform:translateX(-100%)}}
-
-/* ─── CONFETTI ─── */
-.confetti-container{position:fixed;inset:0;pointer-events:none;z-index:9990;overflow:hidden}
-.confetti-piece{position:absolute;width:10px;height:10px;opacity:0;animation:confettiFall linear forwards}
-@keyframes confettiFall{0%{opacity:1;transform:translateY(-20px) rotate(0deg)}100%{opacity:0;transform:translateY(100vh) rotate(720deg)}}
-
-/* ─── LOADING OVERLAY ─── */
 .loading-overlay{position:fixed;inset:0;background:rgba(15,10,26,.95);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:10000}
 .loading-ticket{background:linear-gradient(135deg,var(--purple-medium),var(--purple-dark));border-radius:var(--radius);padding:24px 32px;text-align:center;border:1px solid rgba(64,145,108,.3);box-shadow:var(--shadow-lg)}
 .loading-ticket i{font-size:36px;color:var(--success);animation:spin 1s linear infinite;display:inline-block}
-.loading-ticket p{font-family:'Orbitron',monospace;font-size:11px;letter-spacing:2px;color:var(--success);margin-top:10px}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ─── JITSI INFO BOX ─── */
-.jitsi-info-box{padding:14px;background:rgba(52,152,219,.08);border:1px solid rgba(52,152,219,.25);border-radius:var(--radius-sm);font-size:11px;color:rgba(255,255,255,.7);margin-top:10px;line-height:1.6}
-.jitsi-info-box a{color:var(--info);font-weight:700;text-decoration:none}
-.jitsi-info-box a:hover{text-decoration:underline}
-
-/* ─── CAMERA PERMISSION BOX ─── */
-.cam-permission-info{padding:12px;background:rgba(233,196,106,.08);border:1px solid rgba(233,196,106,.25);border-radius:var(--radius-sm);font-size:11px;color:rgba(255,255,255,.65);margin-bottom:12px;line-height:1.6}
-
-/* ─── MOBILE ─── */
-@media(max-width:600px){
-  :root{--ball-size:80px}
-  .cam-controls{grid-template-columns:1fr}
-  .stats-grid{grid-template-columns:repeat(2,1fr)}
-  .main-ball{font-size:22px}
-  .winner-number{font-size:18px}
-  header{padding:7px 12px}
-  .hdr-title{font-size:14px}
-  .nav-item{padding:6px 10px}
-  .nav-item span{display:none}
-}
-@media(max-width:380px){
-  .cam-controls{grid-template-columns:1fr}
-  .main-ball{font-size:18px}
-  :root{--ball-size:70px}
+.live-timer-bar {
+  background: linear-gradient(90deg, var(--danger), var(--warning));
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-family: 'Orbitron', monospace;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 </style>
 </head>
 <body>
 
-<!-- LOADING -->
 <div id="loadingScreen">
   <div class="loading-ball">🎰</div>
   <div class="loading-text">RIFA POOL</div>
   <div class="loading-sub">TÓMBOLA EN VIVO</div>
 </div>
 
-<!-- LOGIN -->
 <div id="loginScreen">
   <div class="login-card">
-    <div id="loginLogoWrap">
-      <img id="loginLogoImg" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:2px solid rgba(64,145,108,.4);display:none;margin:0 auto 14px">
-      <div id="loginLogoIcon" class="login-logo">🎰</div>
-    </div>
+    <div class="login-logo">🎰</div>
     <h1 class="login-title">RIFA POOL</h1>
     <p class="login-sub">TÓMBOLA EN VIVO · PANEL ADMIN</p>
     <div class="inp-group"><label><i class="fas fa-user"></i> Usuario</label><input type="text" id="adminUser" placeholder="admin"></div>
     <div class="inp-group"><label><i class="fas fa-lock"></i> Contraseña</label><input type="password" id="adminPass" placeholder="••••••"></div>
     <button class="btn-primary" onclick="doLogin()"><i class="fas fa-sign-in-alt"></i> Ingresar al Panel</button>
-    <div id="loginError" style="display:none;margin-top:12px;padding:10px;background:rgba(231,111,81,.15);border-radius:10px;color:#e76f51;font-size:11px;text-align:center;border:1px solid rgba(231,111,81,.25)"></div>
-    <div style="text-align:center;margin-top:16px">
-      <p style="font-size:11px;color:rgba(255,255,255,.35)">¿Cliente? Pide el enlace de visualización a tu administrador</p>
-    </div>
+    <div id="loginError" style="display:none;margin-top:12px;padding:10px;background:rgba(231,111,81,.15);border-radius:10px;color:#e76f51;font-size:11px;text-align:center"></div>
   </div>
 </div>
 
-<!-- MAIN APP -->
 <div id="mainApp">
   <header>
-    <div class="hdr-logo">
-      <div class="hdr-logo-icon">
-        <img id="headerLogoImg" style="display:none">
-        <i id="headerLogoIcon" class="fas fa-ticket-alt" style="color:#fff;font-size:16px"></i>
-      </div>
-      <span class="hdr-title">TÓMBOLA EN VIVO</span>
-    </div>
+    <div class="hdr-logo"><div class="hdr-logo-icon"><i class="fas fa-ticket-alt" style="color:#fff;font-size:16px"></i></div><span class="hdr-title">TÓMBOLA EN VIVO</span></div>
     <div class="hdr-right">
       <span id="liveHeaderBadge" class="badge badge-live" style="display:none"><i class="fas fa-circle"></i> EN VIVO</span>
+      <span id="liveTimerHeader" class="live-timer-bar" style="display:none"><i class="fas fa-clock"></i> <span id="liveTimeDisplay">00:00:00</span></span>
       <span class="badge badge-admin">ADMIN</span>
-      <span id="userNameDisplay" style="font-size:11px;font-weight:600;color:rgba(255,255,255,.7)"></span>
+      <span id="userNameDisplay" style="font-size:11px;font-weight:600"></span>
       <button class="btn-secondary" style="padding:6px 10px;font-size:10px" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i></button>
     </div>
   </header>
-
   <div class="main-content" style="padding-bottom:80px">
-    <!-- HOME -->
-    <div id="sectionHome" class="section active">
-      <div id="homeContent"></div>
-    </div>
-    <!-- TRANSMITIR -->
-    <div id="sectionStream" class="section">
-      <div id="streamContent"></div>
-    </div>
-    <!-- SORTEO -->
-    <div id="sectionDraw" class="section">
-      <div id="drawContent"></div>
-    </div>
-    <!-- HISTORIAL -->
-    <div id="sectionHistory" class="section">
-      <div id="historyContent"></div>
-    </div>
+    <div id="sectionHome" class="section active"><div id="homeContent"></div></div>
+    <div id="sectionStream" class="section"><div id="streamContent"></div></div>
+    <div id="sectionDraw" class="section"><div id="drawContent"></div></div>
+    <div id="sectionHistory" class="section"><div id="historyContent"></div></div>
   </div>
-
   <nav class="bottom-nav">
     <button class="nav-item active" id="navHome" onclick="goSection('Home')"><i class="fas fa-home"></i><span>Inicio</span></button>
     <button class="nav-item" id="navStream" onclick="goSection('Stream')"><i class="fas fa-video"></i><span>Cámara</span></button>
@@ -326,149 +364,73 @@ header{position:fixed;top:0;left:0;right:0;background:rgba(15,10,26,.95);backdro
   </nav>
 </div>
 
-<!-- VIEWER MODE (acceso público) -->
-<div id="viewerMode" style="display:none;min-height:100vh;padding:0 0 20px">
-  <header style="position:fixed;top:0;left:0;right:0;background:rgba(15,10,26,.97);backdrop-filter:blur(10px);border-bottom:1px solid rgba(64,145,108,.15);padding:8px 14px;display:flex;justify-content:space-between;align-items:center;z-index:100">
-    <div class="hdr-logo">
-      <div class="hdr-logo-icon"><img id="viewerLogoImg" style="display:none;width:100%;height:100%;object-fit:cover"><i id="viewerLogoIcon" class="fas fa-ticket-alt" style="color:#fff;font-size:16px"></i></div>
-      <span class="hdr-title">RIFA POOL</span>
+<!-- Ventana flotante de cámara -->
+<div id="floatingCamera" class="floating-camera" style="display:none">
+  <div id="floatingVideoWrap" class="floating-video">
+    <video id="floatingVideo" autoplay muted playsinline style="width:100%;height:auto"></video>
+    <div class="floating-timer" id="floatingTimer">00:00:00</div>
+    <div class="floating-controls">
+      <button id="floatingMinimizeBtn" title="Minimizar"><i class="fas fa-window-minimize"></i></button>
+      <button id="floatingCloseBtn" title="Cerrar cámara"><i class="fas fa-times"></i></button>
     </div>
-    <div style="display:flex;align-items:center;gap:8px">
-      <span id="viewerLiveBadge" class="badge badge-live" style="display:none"><i class="fas fa-circle"></i> EN VIVO</span>
-      <span class="badge" style="background:rgba(52,152,219,.15);color:#3498db;border:1px solid rgba(52,152,219,.3)">ESPECTADOR</span>
-    </div>
-  </header>
-  <div id="viewerContent" style="padding:70px 12px 20px"></div>
+    <button class="floating-minimize-btn" id="floatingRestoreBtn" style="display:none"><i class="fas fa-expand"></i></button>
+  </div>
 </div>
 
-<!-- CONFETTI -->
-<div class="confetti-container" id="confettiContainer"></div>
+<div class="modal" id="modalSelectRaffle">
+  <div class="modal-content">
+    <div class="modal-header"><span class="modal-title"><i class="fas fa-dice"></i> Iniciar Tómbola</span><button class="modal-close" onclick="closeModal('modalSelectRaffle')"><i class="fas fa-times"></i></button></div>
+    <div class="inp-group"><label>Selecciona una Rifa</label><select id="selectRaffleForDraw"></select></div>
+    <div class="inp-group"><label>Modo de Sorteo</label><select id="drawMode"><option value="online">Online (Animación Digital)</option><option value="manual">Manual (Cámara en Vivo)</option></select></div>
+    <div class="inp-group"><label>Tiempo de cuenta regresiva</label><select id="countdownTime"><option value="0">Sin cuenta regresiva</option><option value="5">5 segundos</option><option value="10">10 segundos</option><option value="15">15 segundos</option><option value="30">30 segundos</option><option value="60">1 minuto</option><option value="300">5 minutos</option></select></div>
+    <button class="btn-primary" onclick="startCountdownAndDraw()"><i class="fas fa-play-circle"></i> Iniciar Tómbola EN VIVO</button>
+  </div>
+</div>
 
-<!-- TOAST -->
+<div class="modal" id="modalCamOptions">
+  <div class="modal-content">
+    <div class="modal-header"><span class="modal-title"><i class="fas fa-video"></i> Configurar Cámara</span><button class="modal-close" onclick="closeModal('modalCamOptions')"><i class="fas fa-times"></i></button></div>
+    <div class="inp-group"><label>Cámara</label><select id="camDeviceSelect"></select></div>
+    <div class="inp-group"><label>Calidad</label><select id="camQuality"><option value="720">HD 720p</option><option value="480">SD 480p</option><option value="360">Baja 360p</option></select></div>
+    <button class="btn-primary" onclick="applyAndStartCamera()"><i class="fas fa-camera"></i> Activar Cámara</button>
+  </div>
+</div>
+
+<div class="modal" id="modalShareLink">
+  <div class="modal-content">
+    <div class="modal-header"><span class="modal-title"><i class="fas fa-share-alt"></i> Compartir con Clientes</span><button class="modal-close" onclick="closeModal('modalShareLink')"><i class="fas fa-times"></i></button></div>
+    <p style="font-size:12px;color:rgba(255,255,255,.6);margin-bottom:12px">Comparte este enlace para que tus clientes vean el sorteo:</p>
+    <div style="display:flex;gap:8px;margin-bottom:16px"><input type="text" id="shareLinkInput" readonly style="flex:1;padding:10px;background:rgba(0,0,0,.3);border:1px solid rgba(64,145,108,.25);border-radius:10px;color:var(--success);font-size:11px;font-weight:600"><button class="btn-secondary" onclick="copyShareLink()"><i class="fas fa-copy"></i></button></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn-success" style="flex:1" onclick="shareViaWhatsApp()"><i class="fab fa-whatsapp"></i> WhatsApp</button><button class="btn-secondary" style="flex:1" onclick="copyShareLink()"><i class="fas fa-link"></i> Copiar Link</button></div>
+  </div>
+</div>
+
+<div class="confetti-container" id="confettiContainer"></div>
 <div id="toastContainer"></div>
 
-<!-- MODALES -->
-<!-- FIX: Los modales ahora usan onclick con stopPropagation en modal-content para cerrar al hacer clic en el fondo -->
-<div class="modal" id="modalSelectRaffle" onclick="handleModalBackdropClick(event,'modalSelectRaffle')">
-  <div class="modal-content" onclick="event.stopPropagation()">
-    <div class="modal-header">
-      <span class="modal-title"><i class="fas fa-dice"></i> Iniciar Tómbola</span>
-      <button class="modal-close" type="button" onclick="closeModal('modalSelectRaffle')"><i class="fas fa-times"></i></button>
-    </div>
-    <div class="inp-group"><label>Selecciona una Rifa</label><select id="selectRaffleForDraw"></select></div>
-    <div class="inp-group"><label>Modo de Sorteo</label>
-      <select id="drawMode" onchange="updateDrawModeInfo()">
-        <option value="online">Online (Animación Digital en Vivo)</option>
-        <option value="manual">Manual (Cámara en Vivo)</option>
-      </select>
-    </div>
-    <div id="drawModeInfo" style="padding:10px;background:rgba(64,145,108,.08);border-radius:10px;font-size:11px;color:rgba(255,255,255,.6);margin-bottom:14px"></div>
-    <button class="btn-primary" type="button" onclick="initiateDraw()"><i class="fas fa-play-circle"></i> Iniciar Tómbola EN VIVO</button>
-  </div>
-</div>
-
-<div class="modal" id="modalCamOptions" onclick="handleModalBackdropClick(event,'modalCamOptions')">
-  <div class="modal-content" onclick="event.stopPropagation()">
-    <div class="modal-header">
-      <span class="modal-title"><i class="fas fa-video"></i> Configurar Cámara</span>
-      <button class="modal-close" type="button" onclick="closeModal('modalCamOptions')"><i class="fas fa-times"></i></button>
-    </div>
-    <div class="cam-permission-info">
-      <i class="fas fa-info-circle" style="color:var(--warning)"></i> Se solicitará permiso de cámara. Si ves un error, verifica que el navegador tenga acceso habilitado.
-    </div>
-    <div class="inp-group"><label>Cámara</label><select id="camDeviceSelect"><option value="">-- Detectando cámaras --</option></select></div>
-    <div class="inp-group"><label>Calidad</label>
-      <select id="camQuality">
-        <option value="720">HD 720p</option>
-        <option value="480">SD 480p</option>
-        <option value="360">Baja 360p</option>
-      </select>
-    </div>
-    <button class="btn-primary" type="button" onclick="applyAndStartCamera()"><i class="fas fa-camera"></i> Activar Cámara</button>
-  </div>
-</div>
-
-<div class="modal" id="modalShareLink" onclick="handleModalBackdropClick(event,'modalShareLink')">
-  <div class="modal-content" onclick="event.stopPropagation()">
-    <div class="modal-header">
-      <span class="modal-title"><i class="fas fa-share-alt"></i> Compartir con Clientes</span>
-      <button class="modal-close" type="button" onclick="closeModal('modalShareLink')"><i class="fas fa-times"></i></button>
-    </div>
-    <p style="font-size:12px;color:rgba(255,255,255,.6);margin-bottom:12px">Comparte este enlace para que tus clientes vean el sorteo en vivo:</p>
-    <div style="display:flex;gap:8px;margin-bottom:16px">
-      <input type="text" id="shareLinkInput" readonly style="flex:1;padding:10px;background:rgba(0,0,0,.3);border:1px solid rgba(64,145,108,.25);border-radius:10px;color:var(--success);font-size:11px;font-weight:600;font-family:'Orbitron',monospace">
-      <button class="btn-secondary" type="button" onclick="copyShareLink()"><i class="fas fa-copy"></i></button>
-    </div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn-success" style="flex:1" type="button" onclick="shareViaWhatsApp()"><i class="fab fa-whatsapp"></i> WhatsApp</button>
-      <button class="btn-secondary" style="flex:1" type="button" onclick="copyShareLink()"><i class="fas fa-link"></i> Copiar Link</button>
-    </div>
-    <p style="font-size:10px;color:rgba(255,255,255,.35);text-align:center;margin-top:12px">Los clientes pueden ver sin registrarse</p>
-  </div>
-</div>
-
-<!-- Firebase SDK (NO Jitsi - se carga dinámicamente) -->
+<script src="https://cdn.jsdelivr.net/npm/jitsi-meet-sdk@latest/js/external_api.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-import {
-  getFirestore, collection, addDoc, getDocs, getDoc, updateDoc, deleteDoc,
-  doc, setDoc, onSnapshot, query, where, serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
-import {
-  getStorage, ref, uploadString, getDownloadURL
-} from "https://www.gstatic.com/firebasejs/10.12.3/firebase-storage.js";
+import { getFirestore, collection, addDoc, getDocs, getDoc, updateDoc, deleteDoc, doc, setDoc, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-storage.js";
 
-// ─── FIREBASE CONFIG ───────────────────────────────────────────
-const fbCfg = {
-  apiKey: "AIzaSyAMTWJr3mISmNiP-e_KjCO9BdBPi7Uuug4",
-  authDomain: "formulario-2-8929a.firebaseapp.com",
-  projectId: "formulario-2-8929a",
-  storageBucket: "formulario-2-8929a.appspot.com",
-  messagingSenderId: "136908102526",
-  appId: "1:136908102526:web:d0a3bc1e3cb91a3fcab12f"
-};
+const fbCfg = { apiKey: "AIzaSyAMTWJr3mISmNiP-e_KjCO9BdBPi7Uuug4", authDomain: "formulario-2-8929a.firebaseapp.com", projectId: "formulario-2-8929a", storageBucket: "formulario-2-8929a.appspot.com", messagingSenderId: "136908102526", appId: "1:136908102526:web:d0a3bc1e3cb91a3fcab12f" };
 const app = initializeApp(fbCfg);
-const db  = getFirestore(app);
+const db = getFirestore(app);
 const storage = getStorage(app);
 
-// ─── STATE ─────────────────────────────────────────────────────
-let currentUser  = null;
-let allRaffles   = [];
-let allTickets   = [];
-let allPayments  = [];
-let appLogo      = null;
-let appLogoDataURI = null;
-let adminBizInfo = { businessName:'RIFA POOL', contactPhone:'', address:'', email:'' };
+let currentUser = null, allRaffles = [], allTickets = [], allPayments = [];
+let activeLiveSession = null, activeSessionUnsub = null, raffleUnsub = null, ticketUnsub = null, paymentUnsub = null, configUnsub = null;
+let currentStream = null, localVideoEl = null, camDevices = [], isCamRunning = false;
+let floatingStream = null, isFloatingMinimized = false, floatingVideoEl = null;
+let liveStartTime = null, liveTimerInterval = null;
+let drawState = { active: false, raffleId: null, mode: 'online', prizeCount: 0, currentPrize: 0, remainingTickets: [], winnersSoFar: [], animInterval: null, timeout: null, countdownInterval: null };
+let currentDraggable = null, dragOffsetX = 0, dragOffsetY = 0;
 
-let activeLiveSession = null;
-let activeSessionUnsub = null;
-let raffleUnsub  = null;
-let ticketUnsub  = null;
-let paymentUnsub = null;
-let configUnsub  = null;
-
-let currentStream    = null;
-let localVideoEl     = null;
-let camDevices       = [];
-let selectedCamId    = null;
-let isCamRunning     = false;
-let jitsiLoaded      = false;
-
-let drawState = {
-  active: false, raffleId: null, mode: 'online',
-  prizeCount: 0, currentPrize: 0,
-  remainingTickets: [], winnersSoFar: [],
-  animInterval: null, timeout: null, countdownInterval: null
-};
-
-const IS_VIEWER_MODE = location.search.includes('view=') || location.hash.includes('viewer');
-
-// ─── HELPERS ────────────────────────────────────────────────────
 function $(id){ return document.getElementById(id); }
 function padNum(n,d){ return String(n).padStart(d||3,'0'); }
 function money(n){ return `RD$${parseFloat(n||0).toLocaleString('es-DO',{minimumFractionDigits:2})}`; }
 function fmtDate(d){ try{ return new Date(d).toLocaleDateString('es-DO',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }catch(e){ return 'N/A'; } }
-function daysLeft(end){ return Math.max(0,Math.ceil((new Date(end)-new Date())/(864e5))); }
 function getPrizeLbl(i){ return i===1?'🥇 1er LUGAR':i===2?'🥈 2do LUGAR':i===3?'🥉 3er LUGAR':`🏅 ${i}° LUGAR`; }
 function getMedal(i){ return i===0?'🥇':i===1?'🥈':i===2?'🥉':'🏅'; }
 function getBallClass(i){ return i===0?'gold':i===1?'silver':i===2?'bronze':''; }
@@ -479,7 +441,7 @@ function showToast(msg, type='success'){
   const t = document.createElement('div');
   t.className = 'toast';
   const colors = {success:'#40916c',error:'#e76f51',warning:'#e9c46a',info:'#3498db'};
-  const icons  = {success:'fa-check-circle',error:'fa-exclamation-circle',warning:'fa-exclamation-triangle',info:'fa-info-circle'};
+  const icons = {success:'fa-check-circle',error:'fa-exclamation-circle',warning:'fa-exclamation-triangle',info:'fa-info-circle'};
   t.style.borderLeftColor = colors[type]||colors.success;
   t.innerHTML = `<i class="fas ${icons[type]||icons.success}" style="color:${colors[type]||colors.success}"></i><span>${msg}</span>`;
   c.appendChild(t);
@@ -494,67 +456,50 @@ function showLoader(msg='Procesando...'){
   document.body.appendChild(el);
 }
 function hideLoader(){ const el = $('globalLoader'); if(el) el.remove(); }
+function closeModal(id){ const m=$(id); if(m) m.classList.remove('active'); }
 
-// ─── FIX: Cerrar modales correctamente ─────────────────────────
-window.closeModal = function(id){
-  const m = $(id);
-  if(m){ m.classList.remove('active'); }
-};
-
-window.handleModalBackdropClick = function(event, modalId){
-  // Solo cierra si el clic fue directamente en el backdrop (el elemento .modal)
-  if(event.target === $(modalId)){
-    closeModal(modalId);
-  }
-};
-
-// ─── FIX: Exponer updateDrawModeInfo globalmente ───────────────
-window.updateDrawModeInfo = function(){
-  const mode = $('drawMode')?.value;
-  const info = $('drawModeInfo');
-  if(!info) return;
-  if(mode==='online') info.innerHTML='<i class="fas fa-desktop"></i> <strong>Modo Online:</strong> Animación digital en pantalla completa. Los clientes ven los números girar en tiempo real como un video animado.';
-  else info.innerHTML='<i class="fas fa-camera"></i> <strong>Modo Manual:</strong> Activa tu cámara para transmitir el evento físico. Tus clientes ven tu cámara en vivo mientras sacas los números.';
-};
-
-async function urlToDataURI(url){
-  if(!url) return null;
-  if(url.startsWith('data:')) return url;
-  return new Promise(res=>{
-    const img = new Image(); img.crossOrigin='anonymous';
-    img.onload=()=>{ try{ const c=document.createElement('canvas'); c.width=img.naturalWidth||img.width; c.height=img.naturalHeight||img.height; c.getContext('2d').drawImage(img,0,0); res(c.toDataURL('image/png')); }catch(e){ res(url); } };
-    img.onerror=()=>res(url); img.src=url;
-  });
+function showConfirm(title, message, onConfirm) {
+  const existing = document.querySelector('.confirm-modal');
+  if(existing) existing.remove();
+  
+  const modal = document.createElement('div');
+  modal.className = 'confirm-modal';
+  modal.innerHTML = `
+    <div class="confirm-card">
+      <i class="fas fa-exclamation-triangle"></i>
+      <h3>${title}</h3>
+      <p>${message}</p>
+      <div class="confirm-buttons">
+        <button class="confirm-cancel" id="confirmCancelBtn">Cancelar</button>
+        <button class="confirm-confirm" id="confirmConfirmBtn">Confirmar</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  
+  document.getElementById('confirmCancelBtn').onclick = () => modal.remove();
+  document.getElementById('confirmConfirmBtn').onclick = () => { modal.remove(); onConfirm(); };
 }
 
-function updateLogoEverywhere(){
-  const src = appLogoDataURI || appLogo;
-  if(!src) return;
-  ['headerLogoImg','loginLogoImg','viewerLogoImg'].forEach(id=>{
-    const el=$(id); if(el){ el.src=src; el.style.display='block'; }
-  });
-  ['headerLogoIcon','loginLogoIcon','viewerLogoIcon'].forEach(id=>{
-    const el=$(id); if(el) el.style.display='none';
-  });
+function showScreen(s){
+  ['loadingScreen','loginScreen','mainApp'].forEach(id=>{ const el=$(id); if(el) el.style.display='none'; });
+  const el=$(s+'Screen')||$(s);
+  if(el) el.style.display='flex';
 }
+function showMain(){ $('loadingScreen').style.display='none'; $('loginScreen').style.display='none'; $('mainApp').style.display='block'; }
 
-// ─── SCREEN MANAGEMENT ─────────────────────────────────────────
-function showMain(){ $('loadingScreen').style.display='none'; $('loginScreen').style.display='none'; $('mainApp').style.display='block'; $('viewerMode').style.display='none'; }
-function showViewer(){ $('loadingScreen').style.display='none'; $('loginScreen').style.display='none'; $('mainApp').style.display='none'; $('viewerMode').style.display='block'; }
-
-// ─── SECTION NAV ───────────────────────────────────────────────
 window.goSection = function(name){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   const sec = $(`section${name}`); if(sec) sec.classList.add('active');
-  const nav = $(`nav${name}`);    if(nav) nav.classList.add('active');
-  if(name==='Home')    renderHome();
-  if(name==='Stream')  renderStream();
-  if(name==='Draw')    renderDraw();
+  const nav = $(`nav${name}`); if(nav) nav.classList.add('active');
+  if(name==='Home') renderHome();
+  if(name==='Stream') renderStream();
+  if(name==='Draw') renderDraw();
   if(name==='History') renderHistory();
 };
 
-// ─── LOGIN ──────────────────────────────────────────────────────
+// Login
 window.doLogin = async function(){
   const u = $('adminUser')?.value.trim();
   const p = $('adminPass')?.value.trim();
@@ -574,7 +519,6 @@ window.doLogin = async function(){
 
 async function afterLogin(){
   $('userNameDisplay').textContent = currentUser.name || currentUser.username || 'Admin';
-  await loadConfig();
   startRealtime();
   showMain();
   goSection('Home');
@@ -582,503 +526,384 @@ async function afterLogin(){
 }
 
 window.doLogout = function(){
-  try{ localStorage.removeItem('rifapool_live_admin'); }catch(e){}
-  [raffleUnsub,ticketUnsub,paymentUnsub,configUnsub,activeSessionUnsub].forEach(u=>{ if(u) u(); });
-  stopCamera();
-  currentUser=null; allRaffles=[]; allTickets=[]; allPayments=[]; activeLiveSession=null;
-  $('loadingScreen').style.display='none';
-  $('loginScreen').style.display='flex';
-  $('mainApp').style.display='none';
+  showConfirm('Cerrar Sesión', '¿Estás seguro de que deseas cerrar sesión?', () => {
+    try{ localStorage.removeItem('rifapool_live_admin'); }catch(e){}
+    [raffleUnsub,ticketUnsub,paymentUnsub,configUnsub,activeSessionUnsub].forEach(u=>{ if(u) u(); });
+    stopCameraAndFloating();
+    if(liveTimerInterval) clearInterval(liveTimerInterval);
+    currentUser=null; allRaffles=[]; allTickets=[]; allPayments=[]; activeLiveSession=null;
+    $('loadingScreen').style.display='none';
+    $('loginScreen').style.display='flex';
+    $('mainApp').style.display='none';
+  });
 };
 
-// ─── CONFIG / LOGO ─────────────────────────────────────────────
-async function loadConfig(){
-  if(!currentUser?.uid) return;
-  try{
-    const snap = await getDoc(doc(db,'adminConfig',currentUser.uid));
-    if(snap.exists()){
-      const d = snap.data();
-      adminBizInfo = { businessName:d.businessName||'RIFA POOL', contactPhone:d.contactPhone||'', address:d.address||'', email:d.email||'' };
-      if(d.logoUrl){ appLogo=d.logoUrl; appLogoDataURI = d.logoUrl.startsWith('data:') ? d.logoUrl : await urlToDataURI(d.logoUrl); }
-    }
-  }catch(e){ console.warn(e); }
-  updateLogoEverywhere();
-}
-
-// ─── REALTIME LISTENERS ─────────────────────────────────────────
 function startRealtime(){
   if(raffleUnsub) raffleUnsub();
   raffleUnsub = onSnapshot(collection(db,'rifas'), snap=>{
     allRaffles=[];
-    snap.forEach(d=>{ const r={id:d.id,...d.data()}; if(r.createdBy===currentUser.uid) allRaffles.push(r); });
+    snap.forEach(d=>{ const r={id:d.id,...d.data()}; if(r.createdBy===currentUser?.uid) allRaffles.push(r); });
+    if(document.querySelector('.section.active')?.id === 'sectionHome') renderHome();
+    if(document.querySelector('.section.active')?.id === 'sectionDraw') renderDraw();
   });
   if(ticketUnsub) ticketUnsub();
   ticketUnsub = onSnapshot(collection(db,'tickets'), snap=>{
     allTickets=[];
-    snap.forEach(d=>{ const t={id:d.id,...d.data()}; if(t.adminId===currentUser.uid) allTickets.push(t); });
+    snap.forEach(d=>{ const t={id:d.id,...d.data()}; if(t.adminId===currentUser?.uid) allTickets.push(t); });
   });
   if(paymentUnsub) paymentUnsub();
   paymentUnsub = onSnapshot(collection(db,'payments'), snap=>{
     allPayments=[];
     snap.forEach(d=>allPayments.push({id:d.id,...d.data()}));
   });
-  if(configUnsub) configUnsub();
-  configUnsub = onSnapshot(doc(db,'adminConfig',currentUser.uid), async snap=>{
-    if(!snap.exists()) return;
-    const d = snap.data();
-    adminBizInfo = { businessName:d.businessName||'RIFA POOL', contactPhone:d.contactPhone||'', address:d.address||'', email:d.email||'' };
-    if(d.logoUrl){ appLogo=d.logoUrl; appLogoDataURI=d.logoUrl.startsWith('data:')?d.logoUrl:await urlToDataURI(d.logoUrl); updateLogoEverywhere(); }
-  });
 }
 
-// ─── LIVE SESSION LISTENER ──────────────────────────────────────
 function watchLiveSession(sessionId){
   if(activeSessionUnsub) activeSessionUnsub();
   activeSessionUnsub = onSnapshot(doc(db,'liveSessions',sessionId), snap=>{
-    if(!snap.exists()) return;
+    if(!snap.exists()){ activeLiveSession=null; renderDraw(); const badge=$('liveHeaderBadge'); if(badge) badge.style.display='none'; return; }
     activeLiveSession = { id:snap.id, ...snap.data() };
-    syncLiveUI();
+    const isLive = activeLiveSession.status==='live';
+    const badge = $('liveHeaderBadge');
+    if(badge) badge.style.display = isLive ? 'inline-flex' : 'none';
+    if(isLive && activeLiveSession.startedAt){
+      liveStartTime = new Date(activeLiveSession.startedAt);
+      if(!liveTimerInterval) startLiveTimer();
+    }
+    if(document.querySelector('.section.active')?.id === 'sectionDraw') renderDraw();
+    if(document.querySelector('.section.active')?.id === 'sectionStream') renderStream();
   });
 }
 
-function syncLiveUI(){
-  if(!activeLiveSession) return;
-  const isLive = activeLiveSession.status==='live';
-  const badge = $('liveHeaderBadge');
-  if(badge) badge.style.display = isLive ? 'inline-flex' : 'none';
+function startLiveTimer(){
+  if(liveTimerInterval) clearInterval(liveTimerInterval);
+  liveTimerInterval = setInterval(() => {
+    if(!liveStartTime) return;
+    const elapsed = Math.floor((Date.now() - liveStartTime) / 1000);
+    const hours = Math.floor(elapsed / 3600);
+    const minutes = Math.floor((elapsed % 3600) / 60);
+    const seconds = elapsed % 60;
+    const timeStr = `${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    const timerDisplay = $('liveTimeDisplay');
+    if(timerDisplay) timerDisplay.textContent = timeStr;
+    const floatingTimer = $('floatingTimer');
+    if(floatingTimer && $('floatingCamera').style.display !== 'none') floatingTimer.textContent = timeStr;
+    const headerTimer = $('liveTimerHeader');
+    if(headerTimer) headerTimer.style.display = 'inline-flex';
+  }, 1000);
 }
 
-// ─── HOME ─────────────────────────────────────────────────────
-function renderHome(){
-  const active = allRaffles.filter(r=>r.status==='active');
-  const totalSold = allTickets.length;
-  const totalPaid = allPayments.reduce((s,p)=>s+(p.paid||0),0);
-
-  let html = `
-  <div class="tombola-hero">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-      <div style="width:48px;height:48px;background:linear-gradient(135deg,var(--purple-light),var(--success));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🎰</div>
-      <div>
-        <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:800;color:var(--success)">${adminBizInfo.businessName}</div>
-        <div style="font-size:10px;color:rgba(255,255,255,.45)">Panel Tómbola En Vivo · Admin</div>
-      </div>
-    </div>
-    <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
-      <div class="stat-box"><div class="stat-label">Rifas</div><div class="stat-value" style="font-size:20px;color:var(--success)">${allRaffles.length}</div></div>
-      <div class="stat-box"><div class="stat-label">Boletos</div><div class="stat-value" style="font-size:20px">${totalSold}</div></div>
-      <div class="stat-box"><div class="stat-label">Cobrado</div><div class="stat-value" style="font-size:14px;color:var(--success)">${money(totalPaid)}</div></div>
-      <div class="stat-box"><div class="stat-label">Activas</div><div class="stat-value" style="font-size:20px;color:var(--warning)">${active.length}</div></div>
-    </div>
-    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
-      <button class="btn-primary live-btn" style="flex:2;min-width:160px" onclick="openSelectRaffle()"><i class="fas fa-play-circle"></i> Iniciar Tómbola En Vivo</button>
-      <button class="btn-secondary" style="flex:1" onclick="openSharePanel()"><i class="fas fa-share-alt"></i> Compartir</button>
-    </div>
-  </div>`;
-
-  html += `<div style="font-weight:700;font-size:13px;margin-bottom:10px;color:var(--success)"><i class="fas fa-list"></i> Mis Rifas (${allRaffles.length})</div>`;
-  if(allRaffles.length===0){
-    html += `<div class="card" style="text-align:center;padding:40px 20px"><div style="font-size:40px;margin-bottom:10px">🎰</div><p style="color:rgba(255,255,255,.4);font-size:12px">Sin rifas creadas. Ve al panel principal.</p></div>`;
-  } else {
-    html += allRaffles.map(r=>{
-      const sold=r.soldTickets||0, total=r.totalTickets||0;
-      const pct=total>0?Math.round(sold/total*100):0;
-      const isActive=r.status==='active';
-      return `<div class="card">
-        <div class="card-header">
-          <div>
-            <div class="card-title"><i class="fas fa-dice"></i> ${r.name}</div>
-            <div style="font-size:9px;color:rgba(255,255,255,.4)">${r.isOnline?'🌐 Online':'📍 Presencial'} · ${fmtDate(r.endDate)}</div>
-          </div>
-          <span class="badge" style="${isActive?'background:rgba(64,145,108,.15);color:var(--success);border:1px solid rgba(64,145,108,.2)':'background:rgba(231,111,81,.15);color:var(--danger);border:1px solid rgba(231,111,81,.2)'}">${isActive?'ACTIVA':'CERRADA'}</span>
-        </div>
-        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-        <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
-          <div class="stat-box"><div class="stat-label">Vendidos</div><div class="stat-value" style="font-size:16px">${sold}</div></div>
-          <div class="stat-box"><div class="stat-label">Total</div><div class="stat-value" style="font-size:16px">${total}</div></div>
-          <div class="stat-box"><div class="stat-label">%</div><div class="stat-value" style="font-size:16px;color:var(--warning)">${pct}%</div></div>
-        </div>
-        ${isActive?`<button class="btn-primary live-btn" onclick="openSelectRaffleFor('${r.id}')"><i class="fas fa-play-circle"></i> Sortear Esta Rifa</button>`:`<div style="text-align:center;font-size:11px;color:rgba(255,255,255,.3);padding:4px">${r.drawCompleted?'✅ Sorteo Completado':'Rifa Cerrada'}</div>`}
-      </div>`;
-    }).join('');
-  }
-  $('homeContent').innerHTML = html;
-}
-
-// ─── SELECT RAFFLE MODAL ────────────────────────────────────────
-window.openSelectRaffle = function(){ openSelectRaffleFor(null); };
-window.openSelectRaffleFor = function(raffleId){
-  const sel = $('selectRaffleForDraw');
-  const opts = allRaffles.filter(r=>r.status==='active'||r.status==='closed').map(r=>`<option value="${r.id}" ${r.id===raffleId?'selected':''}>${r.name} (${r.soldTickets||0} boletos)</option>`).join('');
-  if(sel) sel.innerHTML = opts||'<option value="">Sin rifas disponibles</option>';
-  updateDrawModeInfo();
-  $('modalSelectRaffle').classList.add('active');
-};
-
-window.initiateDraw = async function(){
+// Cuenta regresiva
+window.startCountdownAndDraw = async function(){
   const raffleId = $('selectRaffleForDraw')?.value;
   const mode = $('drawMode')?.value || 'online';
+  const countdownSecs = parseInt($('countdownTime')?.value || '0');
   if(!raffleId){ showToast('Selecciona una rifa','error'); return; }
   const raffle = allRaffles.find(r=>r.id===raffleId);
   if(!raffle){ showToast('Rifa no encontrada','error'); return; }
   const tickets = allTickets.filter(t=>t.raffleId===raffleId);
   if(tickets.length===0){ showToast('Esta rifa no tiene boletos vendidos','warning'); return; }
-
+  
   closeModal('modalSelectRaffle');
-  showLoader('Iniciando transmisión...');
+  
+  if(countdownSecs > 0){
+    await showCountdown(countdownSecs);
+  }
+  
+  await initiateDraw(raffleId, mode, raffle, tickets);
+};
 
+async function showCountdown(seconds){
+  return new Promise((resolve) => {
+    let remaining = seconds;
+    const overlay = document.createElement('div');
+    overlay.className = 'countdown-overlay';
+    overlay.innerHTML = `
+      <div class="countdown-card">
+        <div class="countdown-title">🎰 LA TÓMBOLA COMIENZA EN</div>
+        <div class="countdown-number" id="countdownNumber">${remaining}</div>
+        <div class="countdown-label">PREPARA TUS BOLETOS</div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    
+    const interval = setInterval(() => {
+      remaining--;
+      const numDisplay = document.getElementById('countdownNumber');
+      if(numDisplay) numDisplay.textContent = remaining;
+      
+      if(remaining <= 0){
+        clearInterval(interval);
+        overlay.style.animation = 'fadeOutScale 0.3s ease';
+        setTimeout(() => { overlay.remove(); resolve(); }, 300);
+      }
+    }, 1000);
+  });
+}
+
+async function initiateDraw(raffleId, mode, raffle, tickets){
+  showLoader('Iniciando transmisión...');
   const roomName = generateRoomName(currentUser.uid);
   try{
     const sessionRef = await addDoc(collection(db,'liveSessions'),{
-      adminId: currentUser.uid,
-      adminName: currentUser.name||currentUser.username,
-      businessName: adminBizInfo.businessName,
-      raffleId, raffleName: raffle.name,
-      mode, roomName,
-      status: 'live',
+      adminId: currentUser.uid, adminName: currentUser.name||currentUser.username,
+      raffleId, raffleName: raffle.name, mode, roomName, status: 'live',
       winners: [], currentPrize: 0, prizeCount: raffle.prizeCount||1,
-      startedAt: new Date().toISOString(),
-      viewerCount: 0,
-      logoUrl: appLogo||null
+      startedAt: new Date().toISOString(), viewerCount: 0
     });
     activeLiveSession = { id:sessionRef.id, raffleId, mode, roomName, status:'live', winners:[], currentPrize:0, prizeCount:raffle.prizeCount||1 };
+    liveStartTime = new Date();
     watchLiveSession(sessionRef.id);
+    startLiveTimer();
     hideLoader();
 
     drawState.active=true; drawState.raffleId=raffleId; drawState.mode=mode;
     drawState.prizeCount=raffle.prizeCount||1; drawState.currentPrize=0;
     drawState.remainingTickets=[...tickets]; drawState.winnersSoFar=[];
 
+    goSection('Draw');
+    if(mode==='manual'){ goSection('Stream'); renderStream(); showToast('Activa tu cámara para transmitir','info'); }
+    else { renderDraw(); showToast('🎰 ¡Tómbola Digital iniciada!','success'); }
     const badge = $('liveHeaderBadge'); if(badge) badge.style.display='inline-flex';
-
-    if(mode==='manual'){
-      goSection('Stream');
-      showToast('Activa tu cámara para transmitir','info');
-    } else {
-      goSection('Draw');
-      showToast('🎰 ¡Tómbola Digital iniciada!','success');
-    }
   }catch(e){ hideLoader(); showToast('Error: '+e.message,'error'); }
-};
-
-// ─── STREAM (CAMERA) SECTION ──────────────────────────────────
-function renderStream(){
-  const isLive = activeLiveSession?.status==='live';
-  const hasStream = isCamRunning;
-  let html = `
-  <div style="margin-bottom:14px">
-    <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:800;color:var(--success)"><i class="fas fa-video"></i> Transmisión en Vivo</div>
-    <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:4px">${isLive?`🔴 Sesión activa · ${activeLiveSession?.raffleName||''}`:activeLiveSession?'Sesión creada':'Sin sesión activa'}</div>
-  </div>
-  <div class="video-wrapper" style="margin-bottom:14px">
-    <div class="live-indicator ${hasStream&&isLive?'active':''}"><div class="live-dot"></div>EN VIVO</div>
-    <div class="viewers-badge ${isLive?'active':''}"><i class="fas fa-eye"></i> <span id="viewerCountBadge">${activeLiveSession?.viewerCount||0}</span></div>
-    <div id="localVideoWrap" style="position:absolute;inset:0;background:#000">
-      <video id="localVideo" autoplay muted playsinline style="width:100%;height:100%;object-fit:cover;${hasStream?'':'display:none'}"></video>
-      <div class="video-placeholder" id="videoPlaceholder" style="${hasStream?'display:none':''}">
-        <i class="fas fa-camera-slash"></i>
-        <p>Cámara no activada<br><span style="font-size:10px">Presiona "Activar Cámara" para transmitir</span></p>
-      </div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-title"><i class="fas fa-sliders-h"></i> Controles de Cámara</div>
-    <div class="cam-controls">
-      ${!hasStream
-        ?`<button class="cam-btn cam-btn-start" onclick="openCamOptions()" style="grid-column:1/-1"><i class="fas fa-camera"></i> Activar Cámara</button>`
-        :`<button class="cam-btn cam-btn-switch" onclick="switchCamera()"><i class="fas fa-sync-alt"></i> Cambiar</button>
-          <button class="cam-btn cam-btn-stop" onclick="stopCameraAndRefresh()"><i class="fas fa-video-slash"></i> Detener</button>`
-      }
-    </div>
-    ${hasStream?`
-    <div style="margin-top:8px;padding:8px;background:rgba(64,145,108,.08);border-radius:10px;font-size:11px;color:var(--success)">
-      <i class="fas fa-circle" style="animation:pulse 1s infinite"></i> Cámara activa · Tus clientes pueden verte
-    </div>
-    `:''}
-  </div>
-  <!-- Link Jitsi para transmisión manual -->
-  ${isLive&&activeLiveSession?.roomName?`
-  <div class="card">
-    <div class="card-title"><i class="fas fa-broadcast-tower"></i> Canal de Transmisión Jitsi</div>
-    <div class="jitsi-info-box">
-      <p style="margin-bottom:8px"><i class="fas fa-info-circle" style="color:var(--info)"></i> Jitsi Meet permite que tus clientes vean tu cámara en tiempo real.</p>
-      <p style="margin-bottom:10px">Sala: <strong style="color:var(--success);font-family:'Orbitron',monospace;font-size:10px">${activeLiveSession.roomName}</strong></p>
-      <a href="https://meet.jit.si/${activeLiveSession.roomName}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;background:rgba(52,152,219,.2);border:1px solid rgba(52,152,219,.4);padding:8px 14px;border-radius:10px;color:var(--info);font-weight:700;font-size:12px;text-decoration:none">
-        <i class="fas fa-external-link-alt"></i> Abrir Jitsi en nueva ventana
-      </a>
-      <p style="margin-top:10px;font-size:10px;color:rgba(255,255,255,.4)">💡 Abre el enlace en otra pestaña para iniciar la transmisión de video. Comparte el link de espectador con tus clientes.</p>
-    </div>
-  </div>`:''}
-  ${isLive?`
-  <div class="card">
-    <div class="card-title"><i class="fas fa-share-alt"></i> Compartir con Clientes</div>
-    <p style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:10px">Comparte este enlace con tus clientes:</p>
-    <div style="display:flex;gap:8px;margin-bottom:10px">
-      <input type="text" id="streamLinkInput" readonly value="${getViewerUrl()}" style="flex:1;padding:8px;background:rgba(0,0,0,.3);border:1px solid rgba(64,145,108,.25);border-radius:10px;color:var(--success);font-size:10px;font-family:'Orbitron',monospace">
-      <button class="btn-secondary" onclick="copyStreamLink()"><i class="fas fa-copy"></i></button>
-    </div>
-    <button class="btn-success" style="width:100%" onclick="shareStreamWhatsApp()"><i class="fab fa-whatsapp"></i> Enviar por WhatsApp</button>
-  </div>
-  <div style="margin-top:14px">
-    <button class="btn-danger" style="width:100%" onclick="endLiveSession()"><i class="fas fa-stop-circle"></i> Finalizar Transmisión</button>
-  </div>`:''}`;
-
-  $('streamContent').innerHTML = html;
-
-  // Attach video stream after render
-  if(hasStream){
-    setTimeout(()=>{
-      const v = $('localVideo');
-      if(v && currentStream){
-        v.srcObject = currentStream;
-        v.style.display = 'block';
-        const ph = $('videoPlaceholder'); if(ph) ph.style.display='none';
-      }
-    },100);
-  }
 }
 
-// ─── CAMERA FUNCTIONS (FIXED) ─────────────────────────────────
-
+// Cámara con soporte para cámara trasera
 window.openCamOptions = async function(){
-  // First try to enumerate cameras (may need permission first)
+  await enumerateCameras();
   const sel = $('camDeviceSelect');
-  if(sel) sel.innerHTML = '<option value="">-- Detectando cámaras... --</option>';
+  if(sel) sel.innerHTML = camDevices.map((d,i)=>`<option value="${d.deviceId}">${d.label||`Cámara ${i+1}`}</option>`).join('');
   $('modalCamOptions').classList.add('active');
+};
 
-  // Try to enumerate cameras without forcing permission request
+async function enumerateCameras(){
   try{
+    await navigator.mediaDevices.getUserMedia({video:true});
     const devices = await navigator.mediaDevices.enumerateDevices();
     camDevices = devices.filter(d=>d.kind==='videoinput');
-
-    // If no labels (no permission yet), request permission then re-enumerate
-    if(camDevices.length===0 || !camDevices[0].label){
-      // Request minimal permission to get labels
-      const tempStream = await navigator.mediaDevices.getUserMedia({video:true,audio:false});
-      tempStream.getTracks().forEach(t=>t.stop());
-      const devs2 = await navigator.mediaDevices.enumerateDevices();
-      camDevices = devs2.filter(d=>d.kind==='videoinput');
-    }
-
-    if(sel){
-      if(camDevices.length===0){
-        sel.innerHTML='<option value="">No se detectaron cámaras</option>';
-      } else {
-        sel.innerHTML = camDevices.map((d,i)=>
-          `<option value="${d.deviceId}">${d.label||`Cámara ${i+1}`}</option>`
-        ).join('');
-      }
-    }
-  }catch(err){
-    console.warn('Enum cameras error:', err);
-    if(sel) sel.innerHTML='<option value="">Cámara por defecto</option>';
-    camDevices = [{deviceId:'', label:'Cámara por defecto'}];
-  }
-};
+  }catch(e){ showToast('No se pudo acceder a la cámara: '+e.message,'error'); }
+}
 
 window.applyAndStartCamera = async function(){
   closeModal('modalCamOptions');
-  const deviceId = $('camDeviceSelect')?.value || '';
-  const q = $('camQuality')?.value || '720';
+  const deviceId = $('camDeviceSelect')?.value;
+  const q = $('camQuality')?.value||'720';
   const h = parseInt(q);
   await startCamera(deviceId, h);
 };
 
 async function startCamera(deviceId, height=720){
-  // Stop any existing stream first
-  stopCamera();
+  stopCameraAndFloating();
   showLoader('Activando cámara...');
-
-  // Build constraints progressively (more compatible)
-  let constraints;
-
-  if(deviceId && deviceId.length > 0){
-    constraints = {
-      video: {
-        deviceId: { exact: deviceId },
-        width: { ideal: Math.round(height * 16/9) },
-        height: { ideal: height }
-      },
-      audio: false
-    };
+  // CORRECCIÓN: Usar facingMode 'environment' para cámara trasera si no hay deviceId específico
+  let constraints = { video: { height: { ideal: height }, width: { ideal: 1280 } }, audio: false };
+  
+  if(deviceId){
+    constraints.video.deviceId = { exact: deviceId };
   } else {
-    constraints = {
-      video: {
-        width: { ideal: Math.round(height * 16/9) },
-        height: { ideal: height },
-        facingMode: 'user'
-      },
-      audio: false
-    };
+    // Intentar cámara trasera por defecto
+    constraints.video.facingMode = { exact: "environment" };
   }
-
+  
   try{
     currentStream = await navigator.mediaDevices.getUserMedia(constraints);
     isCamRunning = true;
     hideLoader();
-    renderStream();
-    setTimeout(()=>{
-      const v = $('localVideo');
-      if(v && currentStream){ v.srcObject=currentStream; v.style.display='block'; }
-      const ph = $('videoPlaceholder'); if(ph) ph.style.display='none';
-    },150);
+    
+    // Usar en la vista normal
+    localVideoEl = $('localVideo');
+    if(localVideoEl){ localVideoEl.srcObject = currentStream; localVideoEl.style.display='block'; }
+    const ph = $('videoPlaceholder'); if(ph) ph.style.display='none';
+    
+    // Crear ventana flotante
+    createFloatingCamera();
+    
     showToast('📸 Cámara activada','success');
     if(activeLiveSession?.id) updateDoc(doc(db,'liveSessions',activeLiveSession.id),{cameraActive:true}).catch(()=>{});
-  }catch(err){
-    hideLoader();
-    console.error('Camera error:', err.name, err.message);
-    let errMsg = 'No se pudo activar la cámara.';
-    if(err.name==='NotAllowedError'||err.name==='PermissionDeniedError'){
-      errMsg = 'Permiso de cámara denegado. Ve a configuración del navegador y permite el acceso.';
-    } else if(err.name==='NotFoundError'||err.name==='DevicesNotFoundError'){
-      errMsg = 'No se encontró ninguna cámara en el dispositivo.';
-    } else if(err.name==='NotReadableError'||err.name==='TrackStartError'||err.name==='SourceUnavailableError'){
-      // FIX: Could not start video source → try with simpler constraints
-      errMsg = 'La cámara está en uso por otra aplicación. Intentando con ajustes alternativos...';
-      showToast(errMsg,'warning');
-      await tryFallbackCamera(height);
-      return;
-    } else if(err.name==='OverconstrainedError'){
-      errMsg = 'Los ajustes de cámara no son compatibles. Intentando con ajustes básicos...';
-      showToast(errMsg,'warning');
-      await tryFallbackCamera(height);
-      return;
+    renderStream();
+    renderDraw();
+  }catch(e){
+    // Si falla con facingMode exact, intentar sin él
+    if(e.message.includes('facingMode') || e.message.includes('Could not start')){
+      try{
+        constraints = { video: { height: { ideal: height }, width: { ideal: 1280 } }, audio: false };
+        currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+        isCamRunning = true;
+        hideLoader();
+        localVideoEl = $('localVideo');
+        if(localVideoEl){ localVideoEl.srcObject = currentStream; localVideoEl.style.display='block'; }
+        const ph = $('videoPlaceholder'); if(ph) ph.style.display='none';
+        createFloatingCamera();
+        showToast('📸 Cámara activada (modo automático)','success');
+        if(activeLiveSession?.id) updateDoc(doc(db,'liveSessions',activeLiveSession.id),{cameraActive:true}).catch(()=>{});
+        renderStream();
+        renderDraw();
+      }catch(e2){ hideLoader(); showToast('Error de cámara: '+e2.message,'error'); }
     } else {
-      errMsg = `Error de cámara: ${err.message}`;
+      hideLoader(); showToast('Error de cámara: '+e.message,'error');
     }
-    showToast(errMsg,'error');
   }
 }
 
-// FIX: Fallback cuando la cámara específica falla (Could not start video source)
-async function tryFallbackCamera(height=480){
-  showLoader('Reintentando con cámara por defecto...');
-  // Try with minimal constraints
-  const fallbackConstraints = [
-    { video: { height: { ideal: height }, facingMode: 'environment' }, audio: false },
-    { video: { height: { ideal: height }, facingMode: 'user' }, audio: false },
-    { video: { height: { ideal: Math.min(height,480) } }, audio: false },
-    { video: true, audio: false }
-  ];
-
-  for(const c of fallbackConstraints){
-    try{
-      currentStream = await navigator.mediaDevices.getUserMedia(c);
-      isCamRunning = true;
-      hideLoader();
-      renderStream();
-      setTimeout(()=>{
-        const v=$('localVideo');
-        if(v&&currentStream){ v.srcObject=currentStream; v.style.display='block'; }
-        const ph=$('videoPlaceholder'); if(ph) ph.style.display='none';
-      },150);
-      showToast('📸 Cámara activada (modo alternativo)','success');
-      if(activeLiveSession?.id) updateDoc(doc(db,'liveSessions',activeLiveSession.id),{cameraActive:true}).catch(()=>{});
-      return;
-    }catch(e2){
-      console.warn('Fallback attempt failed:', c, e2.message);
-      continue;
-    }
+function createFloatingCamera(){
+  const floatingDiv = $('floatingCamera');
+  const floatingVideo = $('floatingVideo');
+  if(!floatingDiv || !floatingVideo) return;
+  
+  if(floatingStream){
+    try{ floatingStream.getTracks().forEach(t=>t.stop()); }catch(e){}
   }
-  hideLoader();
-  showToast('No se pudo acceder a ninguna cámara. Verifica que no esté siendo usada por otra aplicación.','error');
+  
+  floatingStream = currentStream;
+  floatingVideo.srcObject = currentStream;
+  floatingDiv.style.display = 'block';
+  isFloatingMinimized = false;
+  floatingDiv.classList.remove('minimized');
+  
+  // Hacer draggable
+  makeDraggable(floatingDiv);
 }
 
-function stopCamera(){
-  if(currentStream){
-    currentStream.getTracks().forEach(t=>{ try{ t.stop(); }catch(e){} });
-    currentStream = null;
-  }
-  isCamRunning = false;
+function makeDraggable(element){
+  element.style.position = 'fixed';
+  element.style.cursor = 'move';
+  
+  element.addEventListener('mousedown', (e) => {
+    if(e.target.closest('.floating-controls')) return;
+    if(e.target.closest('.floating-minimize-btn')) return;
+    e.preventDefault();
+    const rect = element.getBoundingClientRect();
+    dragOffsetX = e.clientX - rect.left;
+    dragOffsetY = e.clientY - rect.top;
+    
+    const onMouseMove = (moveEvent) => {
+      let newLeft = moveEvent.clientX - dragOffsetX;
+      let newTop = moveEvent.clientY - dragOffsetY;
+      newLeft = Math.max(0, Math.min(window.innerWidth - element.offsetWidth, newLeft));
+      newTop = Math.max(0, Math.min(window.innerHeight - element.offsetHeight, newTop));
+      element.style.left = newLeft + 'px';
+      element.style.top = newTop + 'px';
+      element.style.right = 'auto';
+      element.style.bottom = 'auto';
+    };
+    
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+    
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  });
+}
+
+function stopCameraAndFloating(){
+  if(currentStream){ currentStream.getTracks().forEach(t=>t.stop()); currentStream=null; }
+  if(floatingStream){ floatingStream=null; }
+  isCamRunning=false;
+  const floatingDiv = $('floatingCamera');
+  if(floatingDiv) floatingDiv.style.display = 'none';
   if(activeLiveSession?.id) updateDoc(doc(db,'liveSessions',activeLiveSession.id),{cameraActive:false}).catch(()=>{});
+  
+  const localVideo = $('localVideo');
+  if(localVideo) localVideo.style.display = 'none';
+  const videoPlaceholder = $('videoPlaceholder');
+  if(videoPlaceholder) videoPlaceholder.style.display = 'flex';
 }
 
-// Wrapper para detener y re-renderizar
-window.stopCameraAndRefresh = function(){
-  stopCamera();
-  renderStream();
-  showToast('Cámara detenida','info');
-};
-
-// FIX: switchCamera mejorado con manejo de errores
 window.switchCamera = async function(){
-  if(!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices){
-    showToast('Tu navegador no soporta cambio de cámara','error'); return;
-  }
-
-  showLoader('Cambiando cámara...');
-
-  try{
-    // Get fresh device list
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    camDevices = devices.filter(d=>d.kind==='videoinput');
-
-    if(camDevices.length < 2){
-      hideLoader();
-      showToast('Solo hay una cámara disponible en este dispositivo','info');
-      return;
-    }
-
-    // Find current camera index
-    const currentTrack = currentStream?.getVideoTracks()?.[0];
-    const currentSettings = currentTrack?.getSettings?.() || {};
-    const currentDeviceId = currentSettings.deviceId || '';
-
-    let nextIdx = 0;
-    if(currentDeviceId){
-      const currentIdx = camDevices.findIndex(d=>d.deviceId===currentDeviceId);
-      nextIdx = currentIdx >= 0 ? (currentIdx+1) % camDevices.length : 0;
-    } else {
-      // Alternate facingMode
-      const currentFacingMode = currentSettings.facingMode || 'user';
-      nextIdx = camDevices.findIndex(d=>d.deviceId!==currentDeviceId);
-      if(nextIdx < 0) nextIdx = 0;
-    }
-
-    const nextDevice = camDevices[nextIdx];
-    hideLoader();
-
-    // Stop current stream before switching
-    if(currentStream){ currentStream.getTracks().forEach(t=>{ try{t.stop();}catch(e){} }); currentStream=null; isCamRunning=false; }
-
+  await enumerateCameras();
+  if(camDevices.length<2){ showToast('Solo hay una cámara disponible','info'); return; }
+  const currentId = currentStream?.getVideoTracks()[0]?.getSettings()?.deviceId;
+  // Encontrar la siguiente cámara (preferir trasera si está disponible)
+  let nextDevice = camDevices.find(d => d.deviceId !== currentId);
+  if(!nextDevice && camDevices.length > 0) nextDevice = camDevices[0];
+  if(nextDevice){
     await startCamera(nextDevice.deviceId, 720);
-
-  }catch(err){
-    hideLoader();
-    console.error('Switch camera error:', err);
-    showToast('Error al cambiar cámara: '+err.message,'error');
+    showToast('Cámara cambiada correctamente','success');
+  } else {
+    showToast('No se pudo cambiar la cámara','error');
   }
 };
+
+// Eventos de ventana flotante
+document.addEventListener('DOMContentLoaded', () => {
+  const minimizeBtn = document.getElementById('floatingMinimizeBtn');
+  const closeBtn = document.getElementById('floatingCloseBtn');
+  const restoreBtn = document.getElementById('floatingRestoreBtn');
+  
+  if(minimizeBtn){
+    minimizeBtn.onclick = () => {
+      const floating = $('floatingCamera');
+      if(floating){
+        floating.classList.add('minimized');
+        isFloatingMinimized = true;
+        $('floatingMinimizeBtn').style.display = 'none';
+        $('floatingRestoreBtn').style.display = 'flex';
+      }
+    };
+  }
+  
+  if(restoreBtn){
+    restoreBtn.onclick = () => {
+      const floating = $('floatingCamera');
+      if(floating){
+        floating.classList.remove('minimized');
+        isFloatingMinimized = false;
+        $('floatingMinimizeBtn').style.display = 'flex';
+        $('floatingRestoreBtn').style.display = 'none';
+      }
+    };
+  }
+  
+  if(closeBtn){
+    closeBtn.onclick = () => {
+      showConfirm('Cerrar Cámara', '¿Deseas detener la transmisión de la cámara?', () => {
+        stopCameraAndFloating();
+        showToast('Cámara detenida','info');
+        renderStream();
+        renderDraw();
+      });
+    };
+  }
+});
+
+function renderStream(){
+  const isLive = activeLiveSession?.status==='live';
+  const hasStream = isCamRunning;
+  let html = `<div style="margin-bottom:14px"><div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:800;color:var(--success)"><i class="fas fa-video"></i> Transmisión en Vivo</div><div style="font-size:11px;color:rgba(255,255,255,.4)">${isLive?`🔴 Sesión activa · ${activeLiveSession?.raffleName||''}`:'Sin sesión activa'}</div></div>
+  <div class="video-wrapper"><div class="live-indicator ${hasStream&&isLive?'active':''}"><div class="live-dot"></div>EN VIVO</div><div id="localVideoWrap" style="position:absolute;inset:0;background:#000"><video id="localVideo" autoplay muted playsinline style="width:100%;height:100%;object-fit:cover;${hasStream?'':'display:none'}"></video><div class="video-placeholder" id="videoPlaceholder" style="${hasStream?'display:none':''}"><i class="fas fa-camera-slash"></i><p>Cámara no activada<br><span style="font-size:10px">Presiona "Activar Cámara" para transmitir</span></p></div></div></div>
+  <div class="card"><div class="card-title"><i class="fas fa-sliders-h"></i> Controles de Cámara</div><div class="cam-controls">${!hasStream?`<button class="cam-btn cam-btn-start" onclick="openCamOptions()" style="grid-column:1/-1"><i class="fas fa-camera"></i> Activar Cámara</button>`:`<button class="cam-btn cam-btn-switch" onclick="switchCamera()"><i class="fas fa-sync-alt"></i> Cambiar</button><button class="cam-btn cam-btn-stop" onclick="stopCameraAndFloating()"><i class="fas fa-video-slash"></i> Detener</button>`}</div></div>`;
+  
+  if(isLive){
+    html += `<div class="card"><div class="card-title"><i class="fas fa-share-alt"></i> Compartir</div><div style="display:flex;gap:8px"><input type="text" id="streamLinkInput" readonly value="${getViewerUrl()}" style="flex:1;padding:8px;background:rgba(0,0,0,.3);border:1px solid rgba(64,145,108,.25);border-radius:10px;color:var(--success);font-size:10px"><button class="btn-secondary" onclick="copyStreamLink()"><i class="fas fa-copy"></i></button></div><button class="btn-success" style="width:100%;margin-top:10px" onclick="shareStreamWhatsApp()"><i class="fab fa-whatsapp"></i> Enviar por WhatsApp</button></div>
+    <div style="margin-top:14px"><button class="btn-danger" style="width:100%" onclick="endLiveSession()"><i class="fas fa-stop-circle"></i> Finalizar Transmisión</button></div>`;
+  }
+  $('streamContent').innerHTML = html;
+  if(hasStream){ localVideoEl = $('localVideo'); if(localVideoEl && currentStream) localVideoEl.srcObject = currentStream; }
+}
 
 window.endLiveSession = async function(){
-  if(!confirm('¿Finalizar la transmisión?')) return;
-  showLoader('Finalizando...');
-  stopCamera();
-  if(activeLiveSession?.id){
-    try{
-      await updateDoc(doc(db,'liveSessions',activeLiveSession.id),{ status:'ended', endedAt:new Date().toISOString() });
-    }catch(e){ console.warn(e); }
-  }
-  activeLiveSession=null; drawState.active=false;
-  if(activeSessionUnsub){ activeSessionUnsub(); activeSessionUnsub=null; }
-  const badge=$('liveHeaderBadge'); if(badge) badge.style.display='none';
-  if(drawState.animInterval){ clearInterval(drawState.animInterval); drawState.animInterval=null; }
-  if(drawState.timeout){ clearTimeout(drawState.timeout); drawState.timeout=null; }
-  if(drawState.countdownInterval){ clearInterval(drawState.countdownInterval); drawState.countdownInterval=null; }
-  hideLoader();
-  showToast('Transmisión finalizada','info');
-  goSection('Home');
+  showConfirm('Finalizar Transmisión', '¿Estás seguro de que deseas finalizar la transmisión en vivo? Los clientes ya no podrán ver el sorteo.', async () => {
+    showLoader('Finalizando...');
+    stopCameraAndFloating();
+    if(liveTimerInterval) clearInterval(liveTimerInterval);
+    if(activeLiveSession?.id){
+      try{ await updateDoc(doc(db,'liveSessions',activeLiveSession.id),{ status:'ended', endedAt:new Date().toISOString() }); }catch(e){}
+    }
+    activeLiveSession=null; drawState.active=false;
+    if(activeSessionUnsub){ activeSessionUnsub(); activeSessionUnsub=null; }
+    const badge=$('liveHeaderBadge'); if(badge) badge.style.display='none';
+    const timerHeader=$('liveTimerHeader'); if(timerHeader) timerHeader.style.display='none';
+    hideLoader();
+    showToast('Transmisión finalizada','info');
+    goSection('Home');
+  });
 };
 
-// ─── DRAW SECTION ─────────────────────────────────────────────
 function renderDraw(){
   if(!activeLiveSession || activeLiveSession.status==='ended'){
-    $('drawContent').innerHTML=`
-    <div class="tombola-hero" style="text-align:center;padding:40px 20px">
-      <div style="font-size:50px;margin-bottom:14px">🎰</div>
-      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:800;color:var(--success);margin-bottom:8px">Tómbola en Vivo</div>
-      <p style="color:rgba(255,255,255,.45);font-size:12px;margin-bottom:20px">Inicia una tómbola para comenzar el sorteo en tiempo real</p>
-      <button class="btn-primary live-btn" onclick="openSelectRaffle()"><i class="fas fa-play-circle"></i> Iniciar Tómbola</button>
-    </div>`;
+    $('drawContent').innerHTML=`<div class="card" style="text-align:center;padding:40px 20px"><div style="font-size:50px;margin-bottom:14px">🎰</div><div style="font-size:20px;font-weight:800;color:var(--success);margin-bottom:8px">Tómbola en Vivo</div><p style="color:rgba(255,255,255,.45);font-size:12px;margin-bottom:20px">Inicia una tómbola para comenzar el sorteo</p><button class="btn-primary live-btn" onclick="openSelectRaffle()"><i class="fas fa-play-circle"></i> Iniciar Tómbola</button></div>`;
     return;
   }
   const raffle = allRaffles.find(r=>r.id===activeLiveSession.raffleId);
@@ -1086,124 +911,36 @@ function renderDraw(){
   const winners = activeLiveSession.winners||[];
   const prizeCount = activeLiveSession.prizeCount||1;
   const currentPrize = winners.length;
-  const done = currentPrize>=prizeCount || activeLiveSession.drawCompleted;
+  const done = currentPrize>=prizeCount;
 
-  let html = `
-  <div class="tombola-hero">
-    <div class="card-header">
-      <div>
-        <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:800;color:var(--success)">${raffle?.name||activeLiveSession.raffleName}</div>
-        <div style="font-size:10px;color:rgba(255,255,255,.45);margin-top:2px">${mode==='manual'?'📷 Sorteo Manual':'🎰 Sorteo Digital'} · ${prizeCount} premio${prizeCount!==1?'s':''}</div>
-      </div>
-      <span class="badge" style="${activeLiveSession.status==='live'?'background:rgba(231,111,81,.15);color:var(--danger);border:1px solid rgba(231,111,81,.3)':'background:rgba(64,145,108,.15);color:var(--success);border:1px solid rgba(64,145,108,.2)'}">${activeLiveSession.status==='live'?'🔴 EN VIVO':'FINALIZADO'}</span>
-    </div>
-    <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
-      <div class="stat-box"><div class="stat-label">Premios</div><div class="stat-value" style="font-size:18px">${prizeCount}</div></div>
-      <div class="stat-box"><div class="stat-label">Entregados</div><div class="stat-value" style="font-size:18px;color:var(--success)">${winners.length}</div></div>
-      <div class="stat-box"><div class="stat-label">Restantes</div><div class="stat-value" style="font-size:18px;color:var(--warning)">${prizeCount-winners.length}</div></div>
-    </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
-      <button class="btn-secondary" style="flex:1" onclick="openSharePanel()"><i class="fas fa-share-alt"></i> Compartir</button>
-      <button class="btn-secondary" style="flex:1" onclick="goSection('Stream')"><i class="fas fa-video"></i> Cámara</button>
-    </div>
-  </div>`;
+  let html = `<div class="card"><div class="card-header"><div><div class="card-title">${raffle?.name||activeLiveSession.raffleName}</div><div style="font-size:10px">${mode==='manual'?'📷 Sorteo Manual':'🎰 Sorteo Digital'} · ${prizeCount} premio(s)</div></div><span class="badge" style="background:rgba(231,111,81,.15);color:var(--danger)">🔴 EN VIVO</span></div><div class="stats-grid"><div class="stat-box"><div class="stat-label">Premios</div><div class="stat-value">${prizeCount}</div></div><div class="stat-box"><div class="stat-label">Entregados</div><div class="stat-value" style="color:var(--success)">${winners.length}</div></div><div class="stat-box"><div class="stat-label">Restantes</div><div class="stat-value" style="color:var(--warning)">${prizeCount-winners.length}</div></div></div></div>`;
 
   if(mode==='online'){
-    html += `
-    <div class="draw-arena">
-      <div id="drawPrizeLabel" class="draw-prize-label">${done?'SORTEO COMPLETADO':currentPrize<prizeCount?`SORTEANDO ${getPrizeLbl(currentPrize+1)}`:''}</div>
-      <div class="ball-container">
-        <div class="main-ball ${done&&winners.length>0?getBallClass(winners.length-1):''}" id="mainBall">${done&&winners.length>0?'#'+padNum(winners[winners.length-1].number,raffle?.digits||3):'?'}</div>
-        <div class="orbiting-balls" id="orbitingBalls"></div>
-      </div>
-      <div class="draw-subtitle" id="drawSubtitle">${done?'¡Sorteo finalizado!':drawState.animInterval?'Sorteando...':'Presiona para sortear'}</div>
-      <div class="countdown-bar" id="countdownBar">Siguiente en...</div>
-      ${!done&&activeLiveSession.status==='live'?`<button class="btn-primary live-btn" id="drawActionBtn" style="max-width:300px;margin:12px auto 0;display:${drawState.animInterval?'none':'flex'}" onclick="performDraw()"><i class="fas fa-random"></i> ${currentPrize===0?'Iniciar Sorteo':'Sortear Siguiente'}</button>`:''}
-    </div>`;
-    setTimeout(()=>buildOrbitingBalls(raffle),100);
+    html += `<div class="draw-arena"><div id="drawPrizeLabel" class="draw-prize-label">${done?'SORTEO COMPLETADO':`SORTEANDO ${getPrizeLbl(currentPrize+1)}`}</div><div class="ball-container"><div class="main-ball ${done&&winners.length>0?getBallClass(winners.length-1):''}" id="mainBall">${done&&winners.length>0?'#'+padNum(winners[winners.length-1].number,raffle?.digits||3):'?'}</div></div><div class="draw-subtitle" id="drawSubtitle">${done?'¡Sorteo finalizado!':drawState.animInterval?'Sorteando...':'Presiona para sortear'}</div><div class="countdown-bar" id="countdownBar">Siguiente en...</div>${!done&&activeLiveSession.status==='live'?`<button class="btn-primary live-btn" id="drawActionBtn" onclick="performDraw()"><i class="fas fa-random"></i> ${currentPrize===0?'Iniciar Sorteo':'Sortear Siguiente'}</button>`:''}</div>`;
   } else {
-    html += `
-    <div class="video-wrapper" style="margin-bottom:14px">
-      <div class="live-indicator ${isCamRunning?'active':''}"><div class="live-dot"></div>EN VIVO</div>
-      <div id="localVideoWrapDraw" style="position:absolute;inset:0;background:#000">
-        <video id="localVideoDraw" autoplay muted playsinline style="width:100%;height:100%;object-fit:cover;${isCamRunning?'':'display:none'}"></video>
-        <div class="video-placeholder" id="videoPlaceholderDraw" style="${isCamRunning?'display:none':''}">
-          <i class="fas fa-camera-slash"></i>
-          <p>Ve a <strong>Cámara</strong> para activar tu transmisión</p>
-        </div>
-      </div>
-    </div>
-    <div class="draw-arena" style="text-align:left">
-      <div style="font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:var(--success);margin-bottom:10px"><i class="fas fa-dice"></i> Registrar Ganador Manual</div>
-      <div class="inp-group"><label>Premio a Sortear</label>
-        <select id="manualPrizePos" style="background:rgba(45,27,78,.5);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px;color:#fff;width:100%;font-family:'Quicksand',sans-serif">
-          ${Array.from({length:Math.max(0,prizeCount-winners.length)},(_,i)=>`<option value="${winners.length+i+1}">${getPrizeLbl(winners.length+i+1)}</option>`).join('')}
-        </select>
-      </div>
-      <div class="inp-group"><label>Número Ganador</label>
-        <input type="number" id="manualWinnerNum" min="1" max="${raffle?.totalTickets||999}" placeholder="Ingresa el número..." style="background:rgba(45,27,78,.5);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px;color:#fff;width:100%;font-family:'Orbitron',monospace;font-size:16px;text-align:center">
-      </div>
-      ${!done&&activeLiveSession.status==='live'?`<button class="btn-primary" style="width:100%" onclick="registerManualDrawWinner()"><i class="fas fa-trophy"></i> Registrar Ganador</button>`:''}
-    </div>`;
-    setTimeout(()=>{
-      const v=$('localVideoDraw');
-      if(v&&currentStream){ v.srcObject=currentStream; v.style.display='block'; const ph=$('videoPlaceholderDraw'); if(ph) ph.style.display='none'; }
-    },150);
+    html += `<div class="draw-arena"><div style="font-weight:700;margin-bottom:10px"><i class="fas fa-dice"></i> Registrar Ganador Manual</div><div class="inp-group"><select id="manualPrizePos" style="width:100%;padding:10px;background:rgba(45,27,78,.5);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:#fff">${Array.from({length:prizeCount-winners.length},(_, i)=>`<option value="${winners.length+i+1}">${getPrizeLbl(winners.length+i+1)}</option>`).join('')}</select></div><div class="inp-group"><input type="number" id="manualWinnerNum" placeholder="Número ganador..." style="width:100%;padding:10px;background:rgba(45,27,78,.5);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:#fff;font-size:16px;text-align:center"></div>${!done&&activeLiveSession.status==='live'?`<button class="btn-primary" style="width:100%" onclick="registerManualDrawWinner()"><i class="fas fa-trophy"></i> Registrar Ganador</button>`:''}</div>`;
   }
 
   if(winners.length>0){
-    html += `
-    <div style="font-weight:700;font-size:13px;margin:16px 0 10px;color:var(--warning)"><i class="fas fa-trophy"></i> Ganadores del Sorteo</div>
-    <div class="winners-list">
-      ${winners.map((w,i)=>`
-      <div class="winner-card" style="animation-delay:${i*0.1}s">
-        <div class="winner-medal">${getMedal(i)}</div>
-        <div>
-          <div class="winner-number">#${padNum(w.number,raffle?.digits||3)}</div>
-          <div class="winner-name">${w.clientName||'N/A'}</div>
-          <div class="winner-sub">${w.clientPhone||''}</div>
-          <div class="winner-prize">${getPrizeLbl(i+1)} · ${raffle?.prizes?.[i]?.name||'Premio'}</div>
-        </div>
-      </div>`).join('')}
-    </div>`;
-  }
-
-  if(activeLiveSession.status==='live'){
-    html += `
-    <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
-      <button class="btn-danger" style="flex:1" onclick="endLiveSession()"><i class="fas fa-stop-circle"></i> Finalizar</button>
-    </div>`;
+    html += `<div style="font-weight:700;font-size:13px;margin:16px 0 10px;color:var(--warning)"><i class="fas fa-trophy"></i> Ganadores</div><div class="winners-list">${winners.map((w,i)=>`<div class="winner-card"><div class="winner-medal">${getMedal(i)}</div><div><div class="winner-number">#${padNum(w.number,raffle?.digits||3)}</div><div class="winner-name">${w.clientName||'N/A'}</div><div class="winner-sub">${w.clientPhone||''}</div><div class="winner-prize">${getPrizeLbl(i+1)}</div></div></div>`).join('')}</div>`;
   }
 
   $('drawContent').innerHTML = html;
 }
 
-function buildOrbitingBalls(raffle){
-  const container = $('orbitingBalls');
-  if(!container||!raffle) return;
-  const tickets = allTickets.filter(t=>t.raffleId===raffle.id);
-  const sample = tickets.slice(0,8);
-  container.innerHTML = sample.map((t,i)=>
-    `<div class="orbit-ball" style="animation-delay:${i*(3/Math.max(sample.length,1))}s;animation-duration:${2.5+i*.3}s">${padNum(t.number,raffle.digits||3).slice(-2)}</div>`
-  ).join('');
-}
-
-// ─── DIGITAL DRAW ─────────────────────────────────────────────
-window.performDraw = function(){
+window.performDraw = async function(){
   if(!activeLiveSession||!drawState.active) return;
   const raffle = allRaffles.find(r=>r.id===drawState.raffleId);
   if(!raffle) return;
   if(drawState.animInterval) return;
   const prizeIndex = (activeLiveSession.winners||[]).length;
   if(prizeIndex>=drawState.prizeCount){ showToast('¡Todos los premios ya fueron sorteados!','info'); return; }
-
-  const lbl = $('drawPrizeLabel');
-  if(lbl) lbl.textContent=`SORTEANDO ${getPrizeLbl(prizeIndex+1)}`;
-  const subtitle = $('drawSubtitle');
-  if(subtitle) subtitle.textContent='Sorteando...';
+  
+  const lbl = $('drawPrizeLabel'); if(lbl) lbl.textContent=`SORTEANDO ${getPrizeLbl(prizeIndex+1)}`;
+  const subtitle = $('drawSubtitle'); if(subtitle) subtitle.textContent='Sorteando...';
   const btn = $('drawActionBtn'); if(btn) btn.style.display='none';
   const ball = $('mainBall');
-  if(ball){ ball.className='main-ball spinning'; ball.style.background='linear-gradient(135deg,var(--purple-light),var(--success))'; }
+  if(ball){ ball.className='main-ball spinning'; }
 
   drawState.animInterval = setInterval(()=>{
     if(!drawState.remainingTickets.length) return;
@@ -1214,21 +951,19 @@ window.performDraw = function(){
   drawState.timeout = setTimeout(async()=>{
     clearInterval(drawState.animInterval);
     drawState.animInterval=null;
-    if(!drawState.remainingTickets.length){ showToast('No quedan boletos disponibles','warning'); return; }
     const winner = drawState.remainingTickets[Math.floor(Math.random()*drawState.remainingTickets.length)];
     if(!winner){ showToast('Error al seleccionar ganador','error'); return; }
     if(ball){ ball.className=`main-ball winner ${getBallClass(prizeIndex)}`; ball.textContent='#'+padNum(winner.number,raffle.digits||3); }
     if(subtitle) subtitle.textContent=`🏆 ${winner.clientName} — ${getPrizeLbl(prizeIndex+1)}`;
 
     drawState.remainingTickets=drawState.remainingTickets.filter(t=>t.id!==winner.id);
-    const newWinner = { number:winner.number, clientName:winner.clientName, clientPhone:winner.clientPhone||'', clientId:winner.clientId||'' };
+    const newWinner = { number:winner.number, clientName:winner.clientName, clientPhone:winner.clientPhone, clientId:winner.clientId };
     const newWinners = [...(activeLiveSession.winners||[]), newWinner];
 
     try{
       await updateDoc(doc(db,'liveSessions',activeLiveSession.id),{ winners:newWinners, currentPrize:newWinners.length });
-      const raffleWinnerNums = newWinners.map(w=>w.number);
       const isAllDone = newWinners.length>=drawState.prizeCount;
-      await updateDoc(doc(db,'rifas',raffle.id),{ winners:raffleWinnerNums, drawCompleted:isAllDone, status:isAllDone?'closed':'active', drawDate:new Date().toISOString(), drawBy:currentUser.uid });
+      await updateDoc(doc(db,'rifas',raffle.id),{ winners:newWinners.map(w=>w.number), drawCompleted:isAllDone });
     }catch(e){ showToast('Error guardando: '+e.message,'error'); }
 
     showToast(`🏆 ${getPrizeLbl(prizeIndex+1)}: #${padNum(winner.number,raffle.digits||3)} — ${winner.clientName}`,'success');
@@ -1236,7 +971,7 @@ window.performDraw = function(){
 
     const done = newWinners.length>=drawState.prizeCount;
     if(!done){
-      let secs = 30;
+      let secs = 10;
       const cdBar = $('countdownBar');
       if(cdBar){ cdBar.style.display='block'; cdBar.textContent=`Siguiente en ${secs}s`; cdBar.classList.add('active'); }
       drawState.countdownInterval=setInterval(()=>{
@@ -1246,17 +981,16 @@ window.performDraw = function(){
           clearInterval(drawState.countdownInterval);
           if(cdBar){ cdBar.style.display='none'; cdBar.classList.remove('active'); }
           const btn2=$('drawActionBtn'); if(btn2) btn2.style.display='flex';
-          if(ball){ ball.className='main-ball'; ball.textContent='?'; ball.style.background='linear-gradient(135deg,var(--purple-light),var(--success))'; }
+          if(ball){ ball.className='main-ball'; ball.textContent='?'; }
           if(subtitle) subtitle.textContent='Presiona para siguiente premio';
           const lbl2=$('drawPrizeLabel'); if(lbl2) lbl2.textContent=`SORTEANDO ${getPrizeLbl(newWinners.length+1)}`;
         }
       },1000);
     } else {
       if(subtitle) subtitle.textContent='🎉 ¡Sorteo completado!';
-      const lbl2=$('drawPrizeLabel'); if(lbl2) lbl2.textContent='SORTEO COMPLETADO';
-      try{ await updateDoc(doc(db,'liveSessions',activeLiveSession.id),{status:'ended',endedAt:new Date().toISOString()}); }catch(e){}
-      showToast('🎊 ¡Sorteo completado! Todos los premios entregados','success');
-      launchConfetti();
+      if(lbl) lbl.textContent='SORTEO COMPLETADO';
+      try{ await updateDoc(doc(db,'liveSessions',activeLiveSession.id),{status:'ended'}); }catch(e){}
+      showToast('🎊 ¡Sorteo completado!','success');
       setTimeout(()=>renderDraw(),2000);
     }
   }, 3000);
@@ -1272,57 +1006,74 @@ window.registerManualDrawWinner = async function(){
   if(!ticket){ showToast(`El boleto #${padNum(num,raffle.digits||3)} no fue vendido`,'error'); return; }
   const prizeIndex = (activeLiveSession.winners||[]).length;
   if(prizeIndex>=drawState.prizeCount){ showToast('Ya se asignaron todos los premios','warning'); return; }
-  const newWinner = { number:num, clientName:ticket.clientName, clientPhone:ticket.clientPhone||'', clientId:ticket.clientId||'' };
+  const newWinner = { number:num, clientName:ticket.clientName, clientPhone:ticket.clientPhone, clientId:ticket.clientId };
   const newWinners = [...(activeLiveSession.winners||[]), newWinner];
   showLoader('Registrando...');
   try{
     await updateDoc(doc(db,'liveSessions',activeLiveSession.id),{ winners:newWinners, currentPrize:newWinners.length });
-    const raffleWinnerNums = newWinners.map(w=>w.number);
     const isAllDone = newWinners.length>=drawState.prizeCount;
-    await updateDoc(doc(db,'rifas',raffle.id),{ winners:raffleWinnerNums, drawCompleted:isAllDone, status:isAllDone?'closed':'active', drawDate:new Date().toISOString(), drawBy:currentUser.uid });
+    await updateDoc(doc(db,'rifas',raffle.id),{ winners:newWinners.map(w=>w.number), drawCompleted:isAllDone });
     hideLoader();
     showToast(`🏆 Ganador registrado: #${padNum(num,raffle.digits||3)} — ${ticket.clientName}`,'success');
     launchConfetti();
-    if(isAllDone){ try{ await updateDoc(doc(db,'liveSessions',activeLiveSession.id),{status:'ended',endedAt:new Date().toISOString()}); }catch(e){} }
     renderDraw();
   }catch(e){ hideLoader(); showToast('Error: '+e.message,'error'); }
 };
 
-// ─── HISTORY ──────────────────────────────────────────────────
+function renderHome(){
+  const active = allRaffles.filter(r=>r.status==='active');
+  const totalSold = allTickets.length;
+  const totalRevenue = allTickets.reduce((s,t)=>{ const r=allRaffles.find(ra=>ra.id===t.raffleId); return s+(r?parseFloat(r.ticketPrice||0):0); },0);
+  const totalPaid = allPayments.reduce((s,p)=>s+(p.paid||0),0);
+
+  let html = `<div class="card"><div class="card-title"><i class="fas fa-chart-line"></i> Dashboard</div><div class="stats-grid"><div class="stat-box"><div class="stat-label">Rifas</div><div class="stat-value">${allRaffles.length}</div></div><div class="stat-box"><div class="stat-label">Boletos</div><div class="stat-value">${totalSold}</div></div><div class="stat-box"><div class="stat-label">Cobrado</div><div class="stat-value" style="font-size:14px">${money(totalPaid)}</div></div></div><div style="display:flex;gap:8px;margin-top:14px"><button class="btn-primary live-btn" style="flex:2" onclick="openSelectRaffle()"><i class="fas fa-play-circle"></i> Iniciar Tómbola</button><button class="btn-secondary" style="flex:1" onclick="openSharePanel()"><i class="fas fa-share-alt"></i> Compartir</button></div></div>`;
+  html += `<div style="font-weight:700;font-size:13px;margin-bottom:10px;color:var(--success)"><i class="fas fa-list"></i> Mis Rifas (${allRaffles.length})</div>`;
+  if(allRaffles.length===0){
+    html += `<div class="card" style="text-align:center;padding:40px 20px"><div style="font-size:40px;margin-bottom:10px">🎰</div><p style="color:rgba(255,255,255,.4);font-size:12px">Sin rifas creadas.</p></div>`;
+  } else {
+    html += allRaffles.map(r=>{
+      const sold=r.soldTickets||0, total=r.totalTickets||0;
+      const pct=total>0?Math.round(sold/total*100):0;
+      const isActive=r.status==='active';
+      return `<div class="card"><div class="card-header"><div><div class="card-title"><i class="fas fa-dice"></i> ${r.name}</div><div style="font-size:9px;color:rgba(255,255,255,.4)">${fmtDate(r.endDate)}</div></div><span class="badge" style="${isActive?'background:rgba(64,145,108,.15);color:var(--success)':'background:rgba(231,111,81,.15);color:var(--danger)'}">${isActive?'ACTIVA':'CERRADA'}</span></div><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div><div class="stats-grid"><div class="stat-box"><div class="stat-label">Vendidos</div><div class="stat-value" style="font-size:16px">${sold}</div></div><div class="stat-box"><div class="stat-label">Total</div><div class="stat-value" style="font-size:16px">${total}</div></div><div class="stat-box"><div class="stat-label">%</div><div class="stat-value" style="font-size:16px">${pct}%</div></div></div>${isActive?`<button class="btn-primary live-btn" onclick="openSelectRaffleFor('${r.id}')"><i class="fas fa-play-circle"></i> Sortear Esta Rifa</button>`:`<div style="text-align:center;font-size:11px;color:rgba(255,255,255,.3);padding:4px">${r.drawCompleted?'✅ Sorteo Completado':'Rifa Cerrada'}</div>`}</div>`;
+    }).join('');
+  }
+  $('homeContent').innerHTML = html;
+}
+
 function renderHistory(){
   const winners=[];
   for(const r of allRaffles){
     if(!r.winners?.length) continue;
     for(let i=0;i<r.winners.length;i++){
-      const wNum = typeof r.winners[i]==='object'?r.winners[i].number:r.winners[i];
+      const wNum = r.winners[i];
       const t = allTickets.find(tk=>tk.raffleId===r.id&&tk.number===wNum);
-      winners.push({ raffleName:r.name, number:wNum, position:i+1, clientName:t?t.clientName:'N/A', clientPhone:t?t.clientPhone:'', date:r.drawDate||r.endDate, prizeName:r.prizes?.[i]?.name||'Premio', digits:r.digits||3 });
+      winners.push({ raffleName:r.name, number:wNum, position:i+1, clientName:t?t.clientName:'N/A', date:r.drawDate||r.endDate, digits:r.digits||3 });
     }
   }
   winners.sort((a,b)=>new Date(b.date)-new Date(a.date));
-  $('historyContent').innerHTML = `
-  <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:800;color:var(--success);margin-bottom:14px"><i class="fas fa-trophy"></i> Historial de Ganadores</div>
-  ${winners.length===0?`<div class="card" style="text-align:center;padding:40px"><div style="font-size:40px;margin-bottom:12px">🏆</div><p style="color:rgba(255,255,255,.4);font-size:12px">Sin sorteos realizados</p></div>`
-  :winners.map(w=>`
-  <div class="winner-card" style="opacity:1;animation:none">
-    <div class="winner-medal">${getMedal(w.position-1)}</div>
-    <div>
-      <div class="winner-number">#${padNum(w.number,w.digits)}</div>
-      <div class="winner-name">${w.clientName}</div>
-      <div class="winner-sub">${w.clientPhone}</div>
-      <div class="winner-prize">${getPrizeLbl(w.position)} · ${w.prizeName} · ${w.raffleName}</div>
-      <div style="font-size:9px;color:rgba(255,255,255,.3);margin-top:2px">${fmtDate(w.date)}</div>
-    </div>
-  </div>`).join('')}`;
+  $('historyContent').innerHTML = `<div class="card-title"><i class="fas fa-trophy"></i> Historial de Ganadores</div>${winners.length===0?`<div class="card" style="text-align:center;padding:40px"><div style="font-size:40px">🏆</div><p>Sin sorteos realizados</p></div>`:winners.map(w=>`<div class="winner-card"><div class="winner-medal">${getMedal(w.position-1)}</div><div><div class="winner-number">#${padNum(w.number,w.digits)}</div><div class="winner-name">${w.clientName}</div><div class="winner-sub">${w.raffleName}</div><div style="font-size:9px;color:rgba(255,255,255,.3)">${fmtDate(w.date)}</div></div></div>`).join('')}`;
 }
 
-// ─── SHARE ────────────────────────────────────────────────────
 function getViewerUrl(){
   const base = location.href.split('?')[0].split('#')[0];
   const sessionId = activeLiveSession?.id||'';
   const adminId = currentUser?.uid||'';
   return `${base}?view=${adminId}&session=${sessionId}`;
 }
+
+window.openSelectRaffle = function(){ 
+  const sel = $('selectRaffleForDraw');
+  const opts = allRaffles.filter(r=>r.status==='active').map(r=>`<option value="${r.id}">${r.name} (${r.soldTickets||0} boletos)</option>`).join('');
+  if(sel) sel.innerHTML = opts||'<option value="">Sin rifas activas</option>';
+  $('modalSelectRaffle').classList.add('active');
+};
+window.openSelectRaffleFor = function(raffleId){
+  const sel = $('selectRaffleForDraw');
+  const opts = allRaffles.filter(r=>r.status==='active').map(r=>`<option value="${r.id}" ${r.id===raffleId?'selected':''}>${r.name} (${r.soldTickets||0} boletos)</option>`).join('');
+  if(sel) sel.innerHTML = opts;
+  $('modalSelectRaffle').classList.add('active');
+};
 
 window.openSharePanel = function(){
   if(!activeLiveSession){ showToast('Primero inicia una tómbola','warning'); return; }
@@ -1333,268 +1084,36 @@ window.openSharePanel = function(){
 
 window.copyShareLink = function(){
   const inp = $('shareLinkInput'); if(!inp) return;
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(inp.value).then(()=>showToast('✅ Link copiado','success')).catch(()=>{ inp.select(); document.execCommand('copy'); showToast('Link copiado','success'); });
-  } else {
-    inp.select(); document.execCommand('copy'); showToast('Link copiado','success');
-  }
+  navigator.clipboard.writeText(inp.value).then(()=>showToast('✅ Link copiado','success')).catch(()=>{ inp.select(); document.execCommand('copy'); showToast('Link copiado','success'); });
 };
 
 window.copyStreamLink = function(){
   const inp = $('streamLinkInput'); if(!inp) return;
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(inp.value).then(()=>showToast('✅ Link copiado','success')).catch(()=>{ inp.select(); document.execCommand('copy'); showToast('Link copiado','success'); });
-  } else {
-    inp.select(); document.execCommand('copy'); showToast('Link copiado','success');
-  }
+  navigator.clipboard.writeText(inp.value).then(()=>showToast('✅ Link copiado','success')).catch(()=>{ inp.select(); document.execCommand('copy'); showToast('Link copiado','success'); });
 };
 
 window.shareStreamWhatsApp = function(){
   const url = getViewerUrl();
-  const msg = `🎰 ¡Tómbola EN VIVO de ${adminBizInfo.businessName}!\n\nVe el sorteo en tiempo real aquí:\n${url}\n\n¡No te pierdas los ganadores!`;
+  const msg = `🎰 ¡Tómbola EN VIVO!\n\nVe el sorteo aquí:\n${url}`;
   window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
 };
 
-window.shareViaWhatsApp = function(){
-  shareStreamWhatsApp();
-  closeModal('modalShareLink');
-};
+window.shareViaWhatsApp = function(){ shareStreamWhatsApp(); closeModal('modalShareLink'); };
 
-// ─── CONFETTI ─────────────────────────────────────────────────
 function launchConfetti(){
   const container = $('confettiContainer');
   if(!container) return;
-  const colors=['#e9c46a','#40916c','#e76f51','#3498db','#9b59b6','#2ecc71','#f39c12'];
-  for(let i=0;i<60;i++){
+  const colors=['#e9c46a','#40916c','#e76f51','#3498db','#9b59b6'];
+  for(let i=0;i<50;i++){
     const piece = document.createElement('div');
     piece.className='confetti-piece';
     piece.style.cssText=`left:${Math.random()*100}%;top:0;background:${colors[Math.floor(Math.random()*colors.length)]};border-radius:${Math.random()>.5?'50%':'2px'};width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;animation-duration:${2+Math.random()*2}s;animation-delay:${Math.random()*.8}s`;
     container.appendChild(piece);
-    setTimeout(()=>piece.remove(),(4+Math.random()*2)*1000);
+    setTimeout(()=>piece.remove(),4000);
   }
 }
 
-// ─── VIEWER MODE ─────────────────────────────────────────────
-async function initViewerMode(){
-  const params = new URLSearchParams(location.search);
-  const adminId = params.get('view');
-  const sessionId = params.get('session');
-  if(!adminId){ showToast('URL inválida','error'); return; }
-
-  showViewer();
-
-  try{
-    const snap = await getDoc(doc(db,'adminConfig',adminId));
-    if(snap.exists()){
-      const d=snap.data();
-      adminBizInfo={businessName:d.businessName||'RIFA POOL',contactPhone:d.contactPhone||'',address:d.address||'',email:d.email||''};
-      if(d.logoUrl){ appLogo=d.logoUrl; appLogoDataURI=d.logoUrl.startsWith('data:')?d.logoUrl:await urlToDataURI(d.logoUrl); updateLogoEverywhere(); }
-    }
-  }catch(e){ console.warn(e); }
-
-  document.title=`${adminBizInfo.businessName} · Tómbola En Vivo`;
-
-  if(sessionId){
-    onSnapshot(doc(db,'liveSessions',sessionId), snap=>{
-      if(!snap.exists()){ renderViewerWaiting('No se encontró la sesión'); return; }
-      activeLiveSession = { id:snap.id, ...snap.data() };
-      renderViewerContent();
-      updateDoc(doc(db,'liveSessions',sessionId),{ viewerCount:(activeLiveSession.viewerCount||0)+1 }).catch(()=>{});
-    });
-    onSnapshot(collection(db,'rifas'), snap=>{
-      allRaffles=[];
-      snap.forEach(d=>{ const r={id:d.id,...d.data()}; if(r.createdBy===adminId) allRaffles.push(r); });
-      if(activeLiveSession) renderViewerContent();
-    });
-    onSnapshot(collection(db,'tickets'), snap=>{
-      allTickets=[];
-      snap.forEach(d=>{ const t={id:d.id,...d.data()}; if(t.adminId===adminId) allTickets.push(t); });
-      if(activeLiveSession) renderViewerContent();
-    });
-  } else {
-    onSnapshot(query(collection(db,'liveSessions'),where('adminId','==',adminId),where('status','==','live')), snap=>{
-      if(snap.empty){ renderViewerWaiting(`${adminBizInfo.businessName} no tiene una transmisión activa ahora mismo`); return; }
-      const latest = snap.docs[snap.docs.length-1];
-      activeLiveSession = { id:latest.id, ...latest.data() };
-      renderViewerContent();
-    });
-  }
-}
-
-function renderViewerWaiting(msg){
-  const lvBadge=$('viewerLiveBadge'); if(lvBadge) lvBadge.style.display='none';
-  $('viewerContent').innerHTML=`
-  <div class="viewer-header">
-    <div class="viewer-title">${adminBizInfo.businessName}</div>
-    <div class="viewer-sub">TÓMBOLA EN VIVO</div>
-  </div>
-  <div class="viewer-event-card">
-    <div style="font-size:50px;margin-bottom:14px">🎰</div>
-    <div class="viewer-raffle-name">${msg||'Esperando sorteo...'}</div>
-    <span class="viewer-status waiting"><i class="fas fa-clock"></i> ESPERANDO</span>
-    <p style="font-size:11px;color:rgba(255,255,255,.4);margin-top:14px">Esta página se actualiza automáticamente cuando inicie el sorteo</p>
-    <div style="margin-top:16px;padding:10px;background:rgba(233,196,106,.08);border-radius:10px;font-size:11px;color:rgba(255,255,255,.5)"><i class="fas fa-sync-alt" style="color:var(--warning)"></i> Actualizando en tiempo real...</div>
-  </div>`;
-}
-
-let viewerBallInterval=null;
-
-function renderViewerContent(){
-  if(!activeLiveSession) return;
-  const isLive = activeLiveSession.status==='live';
-  const isEnded = activeLiveSession.status==='ended';
-  const raffle = allRaffles.find(r=>r.id===activeLiveSession.raffleId);
-  const winners = activeLiveSession.winners||[];
-  const prizeCount = activeLiveSession.prizeCount||1;
-  const mode = activeLiveSession.mode;
-  const lvBadge=$('viewerLiveBadge');
-  if(lvBadge) lvBadge.style.display = isLive?'inline-flex':'none';
-
-  // Stop previous viewer ball animation
-  if(viewerBallInterval){ clearInterval(viewerBallInterval); viewerBallInterval=null; }
-
-  let html=`
-  <div class="viewer-header">
-    <div class="viewer-title">${activeLiveSession.businessName||adminBizInfo.businessName}</div>
-    <div class="viewer-sub">TÓMBOLA EN VIVO</div>
-  </div>
-  <div class="viewer-event-card">
-    <div class="viewer-raffle-name">${activeLiveSession.raffleName||raffle?.name||''}</div>
-    <span class="viewer-status ${isLive?'live':isEnded?'ended':'waiting'}">
-      ${isLive?'<i class="fas fa-circle"></i> EN VIVO':isEnded?'<i class="fas fa-check"></i> FINALIZADO':'<i class="fas fa-clock"></i> PREPARANDO'}
-    </span>
-    <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-top:12px">
-      <div class="stat-box"><div class="stat-label">Premios</div><div class="stat-value" style="font-size:16px">${prizeCount}</div></div>
-      <div class="stat-box"><div class="stat-label">Entregados</div><div class="stat-value" style="font-size:16px;color:var(--success)">${winners.length}</div></div>
-      <div class="stat-box"><div class="stat-label">Boletos</div><div class="stat-value" style="font-size:16px">${raffle?.soldTickets||allTickets.filter(t=>t.raffleId===activeLiveSession.raffleId).length}</div></div>
-    </div>
-  </div>`;
-
-  if(mode==='online'){
-    const done = winners.length>=prizeCount||isEnded;
-    const lastWinner = winners[winners.length-1];
-    html+=`
-    <div class="online-draw-display">
-      <div class="draw-screen">
-        <div class="draw-screen-inner">
-          ${isLive?'<div class="online-live-badge"><div class="live-dot"></div>EN VIVO</div>':''}
-          <div class="draw-arena" style="background:transparent;border:none;padding:10px;width:100%">
-            <div class="draw-prize-label">${done?'SORTEO COMPLETADO':isLive?`PRÓXIMO: ${getPrizeLbl(winners.length+1)}`:'ESPERANDO...'}</div>
-            <div class="ball-container" style="height:120px">
-              <div class="main-ball ${lastWinner&&done?getBallClass(winners.length-1):''}" id="viewerMainBall">${lastWinner?'#'+padNum(lastWinner.number,raffle?.digits||3):'?'}</div>
-            </div>
-            <div class="draw-subtitle">${done?`🎉 ¡${winners.length} ganador${winners.length!==1?'es':''} definido${winners.length!==1?'s':''}!`:isLive?'Sorteo en progreso...':'Esperando al admin...'}</div>
-          </div>
-        </div>
-      </div>
-      <div class="live-ticker">
-        <span class="ticker-label">LIVE</span>
-        <div class="ticker-text">${adminBizInfo.businessName} · ${activeLiveSession.raffleName||''} · ${winners.length} premio${winners.length!==1?'s':''} entregado${winners.length!==1?'s':''} ${winners.map((w,i)=>`· ${getMedal(i)} #${padNum(w.number,raffle?.digits||3)} ${w.clientName}`).join(' ')}</div>
-      </div>
-    </div>`;
-    // Start viewer ball animation after render
-    if(isLive && !done){
-      setTimeout(()=>animateViewerBall(raffle), 300);
-    }
-  }
-
-  // Mode: manual → show Jitsi link for viewer (no iframe due to restrictions)
-  if(mode==='manual'&&activeLiveSession.roomName){
-    html+=`
-    <div class="card" style="text-align:center">
-      <div class="card-title" style="justify-content:center"><i class="fas fa-broadcast-tower"></i> Transmisión en Vivo</div>
-      ${isLive?`
-      <div style="padding:20px">
-        <div style="font-size:40px;margin-bottom:12px">📺</div>
-        <p style="font-size:13px;color:rgba(255,255,255,.7);margin-bottom:14px">El administrador está transmitiendo en vivo. Únete para ver:</p>
-        <a href="https://meet.jit.si/${activeLiveSession.roomName}" target="_blank" rel="noopener"
-           style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--danger),#c0392b);padding:12px 24px;border-radius:var(--radius-sm);color:#fff;font-weight:700;font-size:13px;text-decoration:none;margin-bottom:10px">
-          <i class="fas fa-play-circle"></i> Ver Transmisión en Vivo
-        </a>
-        <p style="font-size:10px;color:rgba(255,255,255,.35);margin-top:8px">Se abrirá en una nueva ventana</p>
-      </div>`:`
-      <div style="padding:20px">
-        <div style="font-size:40px;margin-bottom:10px">📡</div>
-        <p style="font-size:12px;color:rgba(255,255,255,.4)">La transmisión ha finalizado</p>
-      </div>`}
-    </div>`;
-  }
-
-  if(winners.length>0){
-    html+=`
-    <div style="font-weight:700;font-size:14px;margin:16px 0 10px;color:var(--warning)"><i class="fas fa-trophy"></i> 🏆 Ganadores</div>
-    <div class="winners-list">
-      ${winners.map((w,i)=>`
-      <div class="winner-card">
-        <div class="winner-medal">${getMedal(i)}</div>
-        <div>
-          <div class="winner-number">#${padNum(w.number,raffle?.digits||3)}</div>
-          <div class="winner-name">${w.clientName||'N/A'}</div>
-          <div class="winner-sub">${w.clientPhone||''}</div>
-          <div class="winner-prize">${getPrizeLbl(i+1)} · ${raffle?.prizes?.[i]?.name||'Premio'}</div>
-        </div>
-      </div>`).join('')}
-    </div>`;
-  } else if(isLive){
-    html+=`
-    <div class="card" style="text-align:center;padding:20px">
-      <div style="font-size:30px;margin-bottom:8px;animation:floatBall 2s ease-in-out infinite">🎰</div>
-      <p style="color:rgba(255,255,255,.5);font-size:12px">Los ganadores aparecerán aquí en tiempo real</p>
-    </div>`;
-  }
-
-  if(raffle?.prizes?.length){
-    html+=`
-    <div style="font-weight:700;font-size:13px;margin:14px 0 10px"><i class="fas fa-gift" style="color:var(--success)"></i> Premios en Juego</div>
-    ${raffle.prizes.map((p,i)=>`
-    <div class="card" style="display:flex;align-items:center;gap:12px;padding:12px">
-      <div style="font-size:28px">${getMedal(i)}</div>
-      <div>
-        <div style="font-weight:700;font-size:13px">${getPrizeLbl(i+1)}</div>
-        <div style="font-size:12px;color:var(--success);font-weight:600">${p.name}</div>
-        ${p.description?`<div style="font-size:10px;color:rgba(255,255,255,.4)">${p.description}</div>`:''}
-      </div>
-      ${winners[i]?`<div style="margin-left:auto;text-align:right"><div style="font-size:10px;color:var(--warning);font-weight:700">GANADO</div><div style="font-family:'Orbitron',monospace;font-size:14px;color:var(--warning)">#${padNum(winners[i].number,raffle.digits||3)}</div></div>`:''}
-    </div>`).join('')}`;
-  }
-
-  html+=`
-  <div style="text-align:center;padding:20px 10px;border-top:1px solid rgba(255,255,255,.06);margin-top:20px">
-    <div style="font-size:10px;color:rgba(255,255,255,.35)">Powered by</div>
-    <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:800;color:rgba(64,145,108,.6)">RIFA POOL</div>
-    <div style="font-size:10px;color:rgba(255,255,255,.25)">Sistema de Rifas Digitales</div>
-  </div>`;
-
-  $('viewerContent').innerHTML=html;
-  if(isLive&&winners.length>0) setTimeout(()=>launchConfetti(),300);
-}
-
-function animateViewerBall(raffle){
-  if(viewerBallInterval){ clearInterval(viewerBallInterval); viewerBallInterval=null; }
-  const ball=$('viewerMainBall');
-  if(!ball||!raffle) return;
-  const tickets=allTickets.filter(t=>t.raffleId===raffle.id);
-  if(!tickets.length) return;
-  ball.className='main-ball spinning';
-  ball.style.background='linear-gradient(135deg,var(--purple-light),var(--success))';
-  viewerBallInterval=setInterval(()=>{
-    if(!$('viewerMainBall')){ clearInterval(viewerBallInterval); viewerBallInterval=null; return; }
-    const t=tickets[Math.floor(Math.random()*tickets.length)];
-    ball.textContent='#'+padNum(t.number,raffle.digits||3);
-  },200);
-}
-
-// ─── INIT ─────────────────────────────────────────────────────
 (async function init(){
-  if(IS_VIEWER_MODE){
-    $('loadingScreen').style.display='flex';
-    setTimeout(async()=>{
-      $('loadingScreen').style.display='none';
-      await initViewerMode();
-    },1200);
-    return;
-  }
-
   let saved=null;
   try{ saved=JSON.parse(localStorage.getItem('rifapool_live_admin')||'null'); }catch(e){}
   if(saved?.uid){
@@ -1606,12 +1125,8 @@ function animateViewerBall(raffle){
         return;
       }
     }catch(e){ console.warn(e); }
-    try{ localStorage.removeItem('rifapool_live_admin'); }catch(e){}
   }
-  setTimeout(()=>{
-    $('loadingScreen').style.display='none';
-    $('loginScreen').style.display='flex';
-  },1200);
+  setTimeout(()=>{ $('loadingScreen').style.display='none'; $('loginScreen').style.display='flex'; },1200);
 })();
 </script>
 </body>
