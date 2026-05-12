@@ -80,6 +80,10 @@
       from { opacity: 0; transform: translateX(100px); }
       to { opacity: 1; transform: translateX(0); }
     }
+    @keyframes modalBounce {
+      0% { opacity: 0; transform: scale(0.9) translateY(-15px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
 
     /* Componentes más pequeños para móvil */
     .loading-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(5,7,8,0.95); backdrop-filter:blur(10px); z-index:3000; display:none; justify-content:center; align-items:center; flex-direction:column; gap:15px; }
@@ -93,6 +97,20 @@
     .success-content i { font-size:45px; color:var(--primary); margin-bottom:12px; }
     .success-content h3 { color:var(--primary); margin-bottom:8px; font-size:18px; }
     .success-content p { color:var(--text-secondary); margin-bottom:15px; font-size:12px; }
+
+    /* Confirmación elegante - Tamaño proporcionado */
+    .confirm-modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); backdrop-filter:blur(12px); display:none; justify-content:center; align-items:center; z-index:3500; }
+    .confirm-modal.active { display:flex; }
+    .confirm-content { background:linear-gradient(145deg, var(--bg-light), var(--darker)); border-radius:18px; padding:16px 20px; max-width:260px; width:90%; border:1px solid var(--primary); box-shadow:0 10px 25px rgba(0,0,0,0.3); animation:modalBounce 0.25s ease; text-align:center; }
+    .confirm-content i { font-size:32px; margin-bottom:8px; }
+    .confirm-content h3 { font-size:15px; margin-bottom:5px; color:white; font-weight:600; }
+    .confirm-content p { font-size:11px; color:var(--text-secondary); margin-bottom:14px; line-height:1.4; }
+    .confirm-buttons { display:flex; gap:10px; justify-content:center; }
+    .confirm-buttons button { padding:6px 14px; border:none; border-radius:30px; font-weight:500; cursor:pointer; transition:all 0.25s; display:inline-flex; align-items:center; gap:5px; font-size:11px; }
+    .confirm-buttons .btn-confirm-yes { background:linear-gradient(135deg, var(--danger), #ff6b7c); color:white; }
+    .confirm-buttons .btn-confirm-no { background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.2); }
+    .confirm-buttons .btn-confirm-yes:hover { transform:scale(1.02); box-shadow:0 2px 8px rgba(255,71,87,0.3); }
+    .confirm-buttons .btn-confirm-no:hover { background:rgba(255,255,255,0.2); transform:scale(1.02); }
 
     .photo-preview-modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); backdrop-filter:blur(15px); display:none; justify-content:center; align-items:center; z-index:5000; cursor:pointer; }
     .photo-preview-modal.active { display:flex; }
@@ -127,6 +145,21 @@
     .message-preview-item .preview-title { font-weight:bold; color:var(--primary); font-size:12px; margin-bottom:4px; }
     .message-preview-item .preview-text { font-size:11px; color:var(--text-secondary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .message-preview-item .preview-date { font-size:9px; color:rgba(255,255,255,0.4); margin-top:4px; }
+
+    /* Login con icono de información */
+    .login-header { display:flex; justify-content:flex-end; padding:10px 15px; position:absolute; top:0; right:0; left:0; z-index:10; }
+    .login-info-btn { background:rgba(0,255,157,0.15); border:1px solid rgba(0,255,157,0.3); width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.3s; color:var(--primary); font-size:18px; }
+    .login-info-btn:hover { background:var(--primary); color:#000; transform:scale(1.05); }
+    .login-info-modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); backdrop-filter:blur(20px); display:none; justify-content:center; align-items:center; z-index:7000; }
+    .login-info-modal.active { display:flex; }
+    .login-info-content { background:linear-gradient(145deg, var(--bg-light), var(--darker)); border-radius:25px; width:85%; max-width:320px; padding:22px; border:2px solid var(--primary); text-align:center; animation:modalBounce 0.3s ease; }
+    .login-info-content i { font-size:42px; color:var(--primary); margin-bottom:12px; }
+    .login-info-content h3 { color:var(--primary); margin-bottom:12px; font-size:17px; }
+    .login-info-content p { font-size:12px; color:var(--text-secondary); margin-bottom:8px; display:flex; align-items:center; justify-content:center; gap:8px; }
+    .login-info-content .contact-number { font-size:15px; font-weight:bold; color:var(--primary); }
+    .login-info-content .contact-email { color:var(--info); font-size:13px; }
+    .login-info-content .close-info-btn { background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:#000; border:none; padding:8px 20px; border-radius:40px; margin-top:15px; cursor:pointer; font-weight:bold; transition:all 0.3s; display:inline-flex; align-items:center; gap:6px; font-size:12px; }
+    .login-info-content .close-info-btn:hover { transform:scale(1.02); }
 
     .login-container { position:fixed; top:0; left:0; width:100%; height:100%; background:radial-gradient(circle at 30% 20%,#0a0f12,#050708); display:flex; justify-content:center; align-items:center; z-index:1000; }
     .login-box { width:85%; max-width:300px; display:flex; flex-direction:column; align-items:center; }
@@ -325,7 +358,7 @@
       border-color: var(--primary);
       background: rgba(0,255,157,0.05);
     }
-    .employee-card img {
+    .employee-card .employee-photo {
       width: 55px;
       height: 55px;
       object-fit: cover;
@@ -333,6 +366,24 @@
       margin-bottom: 8px;
       border-radius: 50%;
       cursor: pointer;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .employee-card .no-photo-icon {
+      width: 55px;
+      height: 55px;
+      background: rgba(0,255,157,0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 8px;
+      border: 2px solid var(--primary);
+    }
+    .employee-card .no-photo-icon i {
+      font-size: 28px;
+      color: var(--primary);
     }
     .employee-name {
       font-size: 11px;
@@ -381,7 +432,7 @@
     /* Modal de políticas */
     .policy-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(15px); display: none; justify-content: center; align-items: center; z-index: 5000; }
     .policy-modal.active { display: flex; }
-    .policy-modal-content { background: linear-gradient(135deg, var(--bg-light), var(--darker)); border-radius: 25px; width: 90%; max-width: 400px; max-height: 80vh; overflow-y: auto; padding: 20px; border: 2px solid var(--primary); animation: fadeIn 0.3s ease; }
+    .policy-modal-content { background: linear-gradient(135deg, var(--bg-light), var(--darker)); border-radius: 25px; width: 90%; max-width: 400px; max-height: 80vh; overflow-y: auto; padding: 20px; border: 2px solid var(--primary); animation: modalBounce 0.3s ease; }
     .policy-modal-content h3 { color: var(--primary); margin-bottom: 15px; text-align: center; }
     .policy-modal-content p { font-size: 11px; line-height: 1.5; margin-bottom: 12px; color: var(--text-secondary); }
     .policy-modal-content .policy-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
@@ -390,7 +441,7 @@
     /* Modal de ayuda */
     .help-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(15px); display: none; justify-content: center; align-items: center; z-index: 5000; }
     .help-modal.active { display: flex; }
-    .help-modal-content { background: linear-gradient(135deg, var(--bg-light), var(--darker)); border-radius: 25px; width: 90%; max-width: 400px; max-height: 80vh; overflow-y: auto; padding: 20px; border: 2px solid var(--info); animation: fadeIn 0.3s ease; }
+    .help-modal-content { background: linear-gradient(135deg, var(--bg-light), var(--darker)); border-radius: 25px; width: 90%; max-width: 400px; max-height: 80vh; overflow-y: auto; padding: 20px; border: 2px solid var(--info); animation: modalBounce 0.3s ease; }
     .help-modal-content h3 { color: var(--info); margin-bottom: 15px; text-align: center; }
     .help-section { margin-bottom: 20px; }
     .help-section h4 { color: var(--primary); font-size: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
@@ -401,7 +452,7 @@
     /* Modal aceptación políticas primer inicio */
     .accept-policy-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); backdrop-filter: blur(20px); display: none; justify-content: center; align-items: center; z-index: 6000; }
     .accept-policy-modal.active { display: flex; }
-    .accept-policy-content { background: linear-gradient(135deg, var(--bg-light), var(--darker)); border-radius: 25px; width: 90%; max-width: 380px; max-height: 85vh; overflow-y: auto; padding: 25px; border: 2px solid var(--primary); animation: fadeIn 0.3s ease; text-align: center; }
+    .accept-policy-content { background: linear-gradient(135deg, var(--bg-light), var(--darker)); border-radius: 25px; width: 90%; max-width: 380px; max-height: 85vh; overflow-y: auto; padding: 25px; border: 2px solid var(--primary); animation: modalBounce 0.3s ease; text-align: center; }
     .accept-policy-content h3 { color: var(--primary); margin-bottom: 10px; }
     .accept-policy-content .policy-text { text-align: left; background: rgba(0,0,0,0.3); border-radius: 15px; padding: 15px; margin: 15px 0; max-height: 300px; overflow-y: auto; }
     .accept-policy-content .policy-text p { font-size: 11px; margin-bottom: 8px; color: var(--text-secondary); }
@@ -495,12 +546,6 @@
     .nav-item.nav-normal i { font-size: 18px; }
     .nav-item.nav-normal span { font-size: 9px; }
 
-    .modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); backdrop-filter:blur(5px); display:none; justify-content:center; align-items:center; z-index:2000; }
-    .modal.active { display:flex; }
-    .modal-content { background:var(--bg-light); border-radius:25px; padding:20px; max-width:250px; width:90%; border:1px solid var(--primary); text-align:center; }
-    .modal-content h3 { font-size:16px; margin-bottom:10px; }
-    .modal-content p { font-size:12px; }
-
     .welcome-section { background:linear-gradient(135deg,rgba(0,255,157,0.1),rgba(0,0,0,0.3)); border-radius:18px; padding:12px; margin-bottom:15px; }
     .welcome-section div { font-size:13px; }
 
@@ -509,8 +554,10 @@
     .detail-header button { width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,0.1); border:none; color:white; cursor:pointer; font-size:14px; transition: all 0.3s; }
     .detail-header button:hover { background: var(--primary); color: #000; transform: scale(1.05); }
     .detail-avatar { text-align:center; margin-bottom:20px; }
-    .detail-avatar img { width:90px; height:90px; object-fit:cover; border:3px solid var(--primary); border-radius:50%; margin-bottom:8px; cursor:pointer; transition: transform 0.3s; }
-    .detail-avatar img:hover { transform: scale(1.05); }
+    .detail-avatar .detail-photo { width:100px; height:100px; object-fit:cover; border:3px solid var(--primary); border-radius:50%; margin-bottom:8px; cursor:pointer; transition: transform 0.3s; }
+    .detail-avatar .detail-no-photo { width:100px; height:100px; background:rgba(0,255,157,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 8px; border:3px solid var(--primary); }
+    .detail-avatar .detail-no-photo i { font-size: 48px; color: var(--primary); }
+    .detail-avatar .detail-photo:hover { transform: scale(1.05); }
     .detail-name { font-size:18px; font-weight:700; color:var(--primary); }
     .detail-info-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
     .detail-info-item { background:rgba(255,255,255,0.08); padding:10px; border-radius:12px; border-left:2px solid var(--primary); transition: all 0.3s; }
@@ -577,6 +624,19 @@
 
 <div id="loadingOverlay" class="loading-overlay"><div class="loading-spinner"></div><div class="loading-text">PROCESANDO...</div></div>
 <div id="successModal" class="success-modal"><div class="success-content"><i class="fas fa-check-circle"></i><h3>¡Éxito!</h3><p id="successMessage">Operación completada</p><button class="btn btn-primary" onclick="document.getElementById('successModal').classList.remove('active')">Aceptar</button></div></div>
+
+<!-- Modal confirmación elegante -->
+<div id="confirmModal" class="confirm-modal">
+  <div class="confirm-content">
+    <i id="confirmIcon" class="fas fa-question-circle" style="color: var(--warning);"></i>
+    <h3 id="confirmTitle">Confirmar</h3>
+    <p id="confirmMessage">¿Estás seguro?</p>
+    <div class="confirm-buttons">
+      <button id="confirmYesBtn" class="btn-confirm-yes"><i class="fas fa-check"></i> Aceptar</button>
+      <button id="confirmNoBtn" class="btn-confirm-no"><i class="fas fa-times"></i> Cancelar</button>
+    </div>
+  </div>
+</div>
 
 <div id="photoPreviewModal" class="photo-preview-modal">
   <div class="photo-preview-close" onclick="closePhotoPreview()"><i class="fas fa-times"></i></div>
@@ -688,7 +748,25 @@
   </div>
 </div>
 
+<!-- Modal información login -->
+<div id="loginInfoModal" class="login-info-modal">
+  <div class="login-info-content">
+    <i class="fas fa-info-circle"></i>
+    <h3>¿Olvidaste tu contraseña?</h3>
+    <p><i class="fas fa-phone-alt"></i> Comunícate con:</p>
+    <p class="contact-number"><i class="fab fa-whatsapp"></i> (849) 515-8440</p>
+    <p><i class="fas fa-envelope"></i> Correo:</p>
+    <p class="contact-email">infor@retomrt.com</p>
+    <p style="margin-top:15px;"><i class="fas fa-user-plus"></i> ¿Nuevo usuario?</p>
+    <p>Para registrarse, contacte al departamento de RRHH o solicite su credencial al mismo número.</p>
+    <button class="close-info-btn" onclick="closeLoginInfoModal()"><i class="fas fa-check-circle"></i> Entendido</button>
+  </div>
+</div>
+
 <div id="loginScreen" class="login-container">
+  <div class="login-header">
+    <button class="login-info-btn" id="loginInfoBtn"><i class="fas fa-info-circle"></i></button>
+  </div>
   <div class="login-box">
     <div class="login-logo"><img src="https://firebasestorage.googleapis.com/v0/b/formulario-2-8929a.appspot.com/o/Vizo%20Access.png?alt=media&token=2e31c49c-ca38-4b5e-b35e-43dee12c16da"></div>
     <div class="login-title">VIZO ACCESS</div>
@@ -836,7 +914,20 @@
         <div class="config-group"><label>Posición nombre</label><select id="configNamePosition" class="config-select"><option value="bottom">Debajo</option><option value="top">Encima</option></select></div>
         <div class="config-group"><label>Navegación</label><select id="configNavMode" class="config-select"><option value="auto">Automático</option><option value="manual">Manual</option><option value="both">Ambos</option></select></div>
         <div class="config-group"><label>Comportamiento final</label><select id="configLoopMode" class="config-select"><option value="loop">Loop</option><option value="stop">Detener</option><option value="back">Regresar</option></select></div>
-        <div class="config-group"><label>Velocidad (ms)</label><input type="number" id="configAutoSpeed" class="config-input" value="3000" step="500"></div>
+        <div class="config-group"><label>Velocidad del carrusel</label>
+          <select id="configAutoSpeed" class="config-select">
+            <option value="2000">2 segundos</option>
+            <option value="3000" selected>3 segundos</option>
+            <option value="5000">5 segundos</option>
+            <option value="8000">8 segundos</option>
+            <option value="10000">10 segundos</option>
+            <option value="15000">15 segundos</option>
+            <option value="30000">30 segundos</option>
+            <option value="60000">1 minuto</option>
+            <option value="120000">2 minutos</option>
+            <option value="300000">5 minutos</option>
+          </select>
+        </div>
         <button id="saveConfigBtn" class="btn btn-primary"><i class="fas fa-save"></i> Guardar</button>
         
         <!-- Políticas y ayuda -->
@@ -875,7 +966,10 @@
 
 <div id="detailPage" class="detail-page">
   <div class="detail-header"><button id="backFromDetail"><i class="fas fa-arrow-left"></i></button><h3 style="font-size:16px;">Detalle</h3></div>
-  <div class="detail-avatar"><img id="detailImg"><div class="detail-name" id="detailName"></div></div>
+  <div class="detail-avatar">
+    <div id="detailPhotoContainer"></div>
+    <div class="detail-name" id="detailName"></div>
+  </div>
   <div class="detail-info-grid" id="detailInfoGrid"></div>
   <div class="detail-actions" style="display:flex;gap:8px;">
     <button id="sendToWhatsAppBtn" class="btn-whatsapp" style="flex:1;"><i class="fab fa-whatsapp"></i> WhatsApp</button>
@@ -883,9 +977,8 @@
   </div>
 </div>
 
-<div id="deleteModal" class="modal"><div class="modal-content"><h3>Confirmar</h3><p>¿Eliminar este colaborador?</p><div style="display:flex;gap:8px;"><button id="confirmDeleteBtn" class="btn btn-danger">Eliminar</button><button id="cancelDeleteBtn" class="btn btn-secondary">Cancelar</button></div></div></div>
-
-<div id="clearHistoryModal" class="modal"><div class="modal-content"><h3><i class="fas fa-trash-alt"></i> Vaciar Historial</h3><p>¿Estás seguro de que deseas eliminar todo el historial de modificaciones?</p><div style="display:flex;gap:8px;margin-top:15px;"><button id="confirmClearHistoryBtn" class="btn btn-danger"><i class="fas fa-trash"></i> Vaciar</button><button id="cancelClearHistoryBtn" class="btn btn-secondary">Cancelar</button></div></div></div>
+<div id="deleteModalAntiguo" style="display:none;"></div>
+<div id="clearHistoryModalAntiguo" style="display:none;"></div>
 
 <div id="cameraFullscreen" class="camera-fullscreen">
   <div class="camera-header">
@@ -929,7 +1022,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-  import { getFirestore, collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, doc, Timestamp, onSnapshot, setDoc, getDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+  import { getFirestore, collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, doc, Timestamp, onSnapshot, setDoc, getDoc, orderBy, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAMTWJr3mISmNiP-e_KjCO9BdBPi7Uuug4",
@@ -947,7 +1040,6 @@
   let pendingMessages = [], viewedMessages = new Set(), mensajesUnsubscribe = null, isMessageWindowOpen = false;
   let currentView = 'grid', faceDetectionInterval = null, faceApiReady = false;
   let currentMessageData = null;
-  let ultimoRegistroEditado = null;
   let flashMode = 'off';
   let torchTrack = null, torchSupported = false;
   const GOOD_NEEDED = 5, BAD_NEEDED = 8;
@@ -956,8 +1048,46 @@
   const configDefaults = { imgShape:"circle", rows:"3", namePosition:"bottom", navMode:"both", loopMode:"loop", autoSpeed:3000, faceDetectionEnabled:true };
   let userConfig = { ...configDefaults };
   let politicasAceptadas = false;
-  // Historial de últimos 3
+  // Historial de últimos 3 (se guarda en Firebase)
   let historialRegistros = [];
+
+  // Variables para confirmación elegante
+  let confirmCallback = null;
+
+  function showConfirmModal(title, message, iconType, onConfirm) {
+    const modal = document.getElementById('confirmModal');
+    const icon = document.getElementById('confirmIcon');
+    const titleEl = document.getElementById('confirmTitle');
+    const msgEl = document.getElementById('confirmMessage');
+    
+    if (iconType === 'danger') {
+      icon.style.color = 'var(--danger)';
+      icon.className = 'fas fa-exclamation-triangle';
+    } else if (iconType === 'warning') {
+      icon.style.color = 'var(--warning)';
+      icon.className = 'fas fa-question-circle';
+    } else {
+      icon.style.color = 'var(--primary)';
+      icon.className = 'fas fa-info-circle';
+    }
+    
+    titleEl.innerText = title;
+    msgEl.innerText = message;
+    confirmCallback = onConfirm;
+    modal.classList.add('active');
+  }
+  
+  document.getElementById('confirmYesBtn')?.addEventListener('click', () => {
+    document.getElementById('confirmModal').classList.remove('active');
+    if (confirmCallback) confirmCallback(true);
+    confirmCallback = null;
+  });
+  
+  document.getElementById('confirmNoBtn')?.addEventListener('click', () => {
+    document.getElementById('confirmModal').classList.remove('active');
+    if (confirmCallback) confirmCallback(false);
+    confirmCallback = null;
+  });
 
   async function loadFaceApi() {
     try {
@@ -986,8 +1116,10 @@
     return 'fas fa-building';
   }
 
-  // Guardar en historial SOLO últimos 3
-  function guardarEnHistorial(empleado, tipo) {
+  // Guardar en historial en Firebase y localmente
+  async function guardarEnHistorial(empleado, tipo) {
+    if (!currentUser) return;
+    
     const nuevoRegistro = {
       id: empleado.id,
       username: empleado.username,
@@ -996,7 +1128,7 @@
       lastName: empleado.lastName,
       areaTrabajo: empleado.areaTrabajo,
       posicionLaboral: empleado.posicionLaboral,
-      fotoBase64: empleado.fotoBase64,
+      fotoBase64: empleado.fotoBase64 || '',
       turnoHoras: empleado.turnoHoras,
       departamento: empleado.departamento,
       jefeCargo: empleado.jefeCargo,
@@ -1005,33 +1137,63 @@
       fecha: new Date().toISOString(),
       timestamp: Date.now()
     };
+    
+    // Guardar en Firestore
+    const historyRef = collection(db, 'Historial', currentUser.uid, 'registros');
+    await addDoc(historyRef, nuevoRegistro);
+    
+    // También mantener en memoria y localStorage para rápido acceso
     historialRegistros.unshift(nuevoRegistro);
     if (historialRegistros.length > 3) {
       historialRegistros = historialRegistros.slice(0, 3);
     }
-    localStorage.setItem(`historial_${currentUser?.uid}`, JSON.stringify(historialRegistros));
+    localStorage.setItem(`historial_${currentUser.uid}`, JSON.stringify(historialRegistros));
     actualizarVistaHistorial();
   }
 
-  function vaciarHistorial() {
-    historialRegistros = [];
-    localStorage.removeItem(`historial_${currentUser?.uid}`);
-    actualizarVistaHistorial();
-    showSuccess('Historial vaciado correctamente');
+  // Cargar historial desde Firebase
+  async function cargarHistorialDesdeFirebase() {
+    if (!currentUser) return;
+    try {
+      const historyRef = collection(db, 'Historial', currentUser.uid, 'registros');
+      const q = query(historyRef, orderBy('timestamp', 'desc'));
+      const snapshot = await getDocs(q);
+      const registros = [];
+      snapshot.forEach(doc => {
+        registros.push(doc.data());
+      });
+      // Tomar solo los últimos 3
+      historialRegistros = registros.slice(0, 3);
+      localStorage.setItem(`historial_${currentUser.uid}`, JSON.stringify(historialRegistros));
+      actualizarVistaHistorial();
+    } catch (error) {
+      console.log('Error cargando historial:', error);
+    }
+  }
+
+  async function vaciarHistorialFirebase() {
+    if (!currentUser) return;
+    try {
+      const historyRef = collection(db, 'Historial', currentUser.uid, 'registros');
+      const snapshot = await getDocs(historyRef);
+      const batch = writeBatch(db);
+      snapshot.forEach(doc => {
+        batch.delete(doc.ref);
+      });
+      await batch.commit();
+      historialRegistros = [];
+      localStorage.removeItem(`historial_${currentUser.uid}`);
+      actualizarVistaHistorial();
+      showSuccess('Historial vaciado correctamente');
+    } catch (error) {
+      console.log('Error vaciando historial:', error);
+      showAlert('Error al vaciar historial', 'error');
+    }
   }
 
   function actualizarVistaHistorial() {
     const container = document.getElementById('historyContent');
     if (!container) return;
-    
-    if (historialRegistros.length === 0 && currentUser) {
-      const saved = localStorage.getItem(`historial_${currentUser.uid}`);
-      if (saved) {
-        try {
-          historialRegistros = JSON.parse(saved);
-        } catch(e) {}
-      }
-    }
     
     if (!historialRegistros.length) {
       container.innerHTML = `<div class="history-empty"><i class="fas fa-history"></i><p>No hay registros en el historial</p><p style="font-size:10px;">Solo se guardan los últimos 3 colaboradores editados/creados</p></div>`;
@@ -1064,6 +1226,15 @@
     }
   }
   window.verDetalleDesdeHistorial = verDetalleDesdeHistorial;
+
+  // Función para renderizar foto con ícono facial cuando no hay foto
+  function renderizarFoto(fotoBase64, size = '55px', className = '') {
+    if (fotoBase64 && fotoBase64.startsWith('data:image')) {
+      return `<img src="${fotoBase64}" class="${className}" style="width:${size};height:${size};object-fit:cover;border-radius:50%;border:2px solid var(--primary);cursor:pointer;" onclick="event.stopPropagation();openPhotoPreview('${fotoBase64}')">`;
+    } else {
+      return `<div class="no-photo-icon" style="width:${size};height:${size};"><i class="fas fa-user-circle" style="font-size:calc(${size} - 15px);color:var(--primary);"></i></div>`;
+    }
+  }
 
   const showLoading = (s) => document.getElementById('loadingOverlay').classList.toggle('active', s);
   const showSuccess = (msg) => { document.getElementById('successMessage').innerText = msg; document.getElementById('successModal').classList.add('active'); };
@@ -1224,6 +1395,15 @@
   window.closeHelpModal = () => {
     document.getElementById('helpModal').classList.remove('active');
   };
+  
+  // Información login
+  document.getElementById('loginInfoBtn')?.addEventListener('click', () => {
+    document.getElementById('loginInfoModal').classList.add('active');
+  });
+  
+  window.closeLoginInfoModal = () => {
+    document.getElementById('loginInfoModal').classList.remove('active');
+  };
 
   // FLASH
   function actualizarUIFlash() {
@@ -1260,7 +1440,7 @@
       const det=await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions({inputSize:320,scoreThreshold:0.2})).withFaceLandmarks();
       ctx.clearRect(0,0,canvas.width,canvas.height);
       if(!det){goodFrames=0;badFrames=faceOkLocked?badFrames+1:BAD_NEEDED;if(badFrames>=BAD_NEEDED){faceOkLocked=false;capBtn.disabled=true;capBtn.classList.remove('counting');guide.classList.remove('aligned');barWrap.classList.remove('visible');bar.style.width='0%';}setMsg('<i class="fas fa-user-slash"></i><span>⚠️ No se detecta rostro</span>','error');return;}
-      const raw=det.detection.box;let accesorio='',noFrontal='';
+      const raw=det.detection.box;let accesorio='';
       if(det.landmarks){accesorio=detectarAccesorios(det.landmarks,raw);}
       const box=isFront?{x:video.videoWidth-raw.x-raw.width,y:raw.y,width:raw.width,height:raw.height}:raw;
       const vW=video.videoWidth,vH=video.videoHeight,cx=box.x+box.width/2,cy=box.y+box.height/2,dx=cx-vW/2,dy=cy-vH/2,tolX=vW*0.28,tolY=vH*0.30,minSz=vW*0.12,maxSz=vW*0.70,sz=raw.width;
@@ -1278,16 +1458,16 @@
   async function iniciarCamara(){detenerCamara();detenerDeteccionFacial();document.getElementById('btnCapturarFoto').disabled=true;document.getElementById('btnCapturarFoto').classList.remove('counting');setMsg('<i class="fas fa-circle-notch fa-spin"></i><span>Iniciando cámara...</span>','');torchTrack=null;torchSupported=false;try{const constraints={video:{facingMode:currentFacingMode,width:{ideal:640},height:{ideal:480}}};stream=await navigator.mediaDevices.getUserMedia(constraints);const video=document.getElementById('cameraVideo');video.srcObject=stream;video.style.transform=currentFacingMode==='user'?'scaleX(-1)':'none';await new Promise(r=>{video.onloadedmetadata=r;});const tracks=stream.getVideoTracks();if(tracks.length>0){try{const caps=tracks[0].getCapabilities?tracks[0].getCapabilities():{};if(caps.torch===true){torchTrack=tracks[0];torchSupported=true;}}catch(e){torchSupported=false;}}if(flashMode==='on')await aplicarTorch(true);iniciarDeteccionFacial();}catch(err){showAlert('Error al abrir cámara','error');}}
   function detenerCamara(){detenerDeteccionFacial();if(torchTrack&&torchSupported){try{torchTrack.applyConstraints({advanced:[{torch:false}]});}catch(e){}}torchTrack=null;torchSupported=false;if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}const v=document.getElementById('cameraVideo');if(v)v.srcObject=null;}
   async function capturarFoto(){const video=document.getElementById('cameraVideo'),canvas=document.createElement('canvas');canvas.width=video.videoWidth;canvas.height=video.videoHeight;if(flashMode==='capture'||flashMode==='on'){if(torchSupported&&torchTrack){if(flashMode==='capture'){await aplicarTorch(true);await new Promise(r=>setTimeout(r,150));}canvas.getContext('2d').drawImage(video,0,0,canvas.width,canvas.height);if(flashMode==='capture')await aplicarTorch(false);}else{if(flashMode==='capture')await flashDePantalla();canvas.getContext('2d').drawImage(video,0,0,canvas.width,canvas.height);}}else{canvas.getContext('2d').drawImage(video,0,0,canvas.width,canvas.height);}const base64=canvas.toDataURL('image/jpeg',0.9);document.getElementById('previewImage').src=base64;document.getElementById('cameraFullscreen').classList.remove('active');document.getElementById('previewScreen').classList.add('active');detenerCamara();}
-  function guardarFoto(){const src=document.getElementById('previewImage').src;document.getElementById('fotoBase64').value=src;document.getElementById('fotoPreview').innerHTML=`<img src="${src}" style="width:55px;height:55px;object-fit:cover;border-radius:50%;border:2px solid var(--primary);cursor:pointer;" onclick="openPhotoPreview('${src}')">`;document.getElementById('previewScreen').classList.remove('active');showAlert('Foto guardada','success');}
+  function guardarFoto(){const src=document.getElementById('previewImage').src;document.getElementById('fotoBase64').value=src;document.getElementById('fotoPreview').innerHTML=renderizarFoto(src, '55px', '');document.getElementById('previewScreen').classList.remove('active');showAlert('Foto guardada','success');}
 
   // CONFIGURACIÓN
   async function cargarConfiguracion(){if(!currentUser)return;const ds=await getDoc(doc(db,'UserConfig',currentUser.uid));if(ds.exists())userConfig={...configDefaults,...ds.data()};else await setDoc(doc(db,'UserConfig',currentUser.uid),configDefaults);faceDetectionEnabled=userConfig.faceDetectionEnabled!==undefined?userConfig.faceDetectionEnabled:true;cargarValoresConfigUI();aplicarConfigCarruselCompleto();}
-  function cargarValoresConfigUI(){document.getElementById('configImgShape').value=userConfig.imgShape;document.getElementById('configRows').value=userConfig.rows;document.getElementById('configNamePosition').value=userConfig.namePosition;document.getElementById('configNavMode').value=userConfig.navMode;document.getElementById('configLoopMode').value=userConfig.loopMode;document.getElementById('configAutoSpeed').value=userConfig.autoSpeed;const toggle=document.getElementById('faceDetectionToggle');if(toggle){toggle.checked=faceDetectionEnabled;document.getElementById('faceDetectionStatus').innerText=faceDetectionEnabled?'Activada':'Desactivada';}}
+  function cargarValoresConfigUI(){document.getElementById('configImgShape').value=userConfig.imgShape;document.getElementById('configRows').value=userConfig.rows;document.getElementById('configNamePosition').value=userConfig.namePosition;document.getElementById('configNavMode').value=userConfig.navMode;document.getElementById('configLoopMode').value=userConfig.loopMode;const speedSelect = document.getElementById('configAutoSpeed');if(speedSelect) speedSelect.value = userConfig.autoSpeed;const toggle=document.getElementById('faceDetectionToggle');if(toggle){toggle.checked=faceDetectionEnabled;document.getElementById('faceDetectionStatus').innerText=faceDetectionEnabled?'Activada':'Desactivada';}}
   async function guardarConfiguracion(){if(!currentUser)return;const nc={imgShape:document.getElementById('configImgShape').value,rows:document.getElementById('configRows').value,namePosition:document.getElementById('configNamePosition').value,navMode:document.getElementById('configNavMode').value,loopMode:document.getElementById('configLoopMode').value,autoSpeed:parseInt(document.getElementById('configAutoSpeed').value),faceDetectionEnabled:document.getElementById('faceDetectionToggle').checked};await setDoc(doc(db,'UserConfig',currentUser.uid),nc);userConfig=nc;faceDetectionEnabled=nc.faceDetectionEnabled;aplicarConfigCarruselCompleto();showSuccess('Configuración guardada');}
   function aplicarConfigCarruselCompleto(){const items=document.querySelectorAll('#carouselTrack .carousel-item');const rv=parseInt(userConfig.rows);let iw=rv===1?180:rv===2?120:rv===3?90:rv===4?75:65;const track=document.querySelector('#carouselTrack');if(rv===1){track.style.justifyContent='center';track.style.gap='0px';}else{track.style.justifyContent='flex-start';track.style.gap='12px';}items.forEach(item=>{item.style.flex=`0 0 ${iw}px`;const img=item.querySelector('img');if(img){if(userConfig.imgShape==='circle')img.style.borderRadius='50%';else if(userConfig.imgShape==='square')img.style.borderRadius='0%';else img.style.borderRadius='15px';img.style.width=`${iw}px`;img.style.height=`${iw}px`;}const sp=item.querySelector('span');if(sp)sp.style.order=userConfig.namePosition==='top'?'-1':'0';});if(carruselInterval){clearInterval(carruselInterval);carruselInterval=null;}if(userConfig.navMode==='auto'||userConfig.navMode==='both')carruselInterval=setInterval(()=>moverCarrusel(1),userConfig.autoSpeed);crearBotonesCarrusel();}
   function crearBotonesCarrusel(){const cd=document.getElementById('carouselControls');cd.innerHTML='<button class="carousel-control-btn" id="carouselPrev"><i class="fas fa-chevron-left"></i></button><button class="carousel-control-btn" id="carouselNext"><i class="fas fa-chevron-right"></i></button>';document.getElementById('carouselPrev')?.addEventListener('click',()=>moverCarrusel(-1));document.getElementById('carouselNext')?.addEventListener('click',()=>moverCarrusel(1));}
   function moverCarrusel(d){const t=document.getElementById('carouselTrack');if(!t||!t.children.length)return;const iw=t.children[0].offsetWidth+(parseInt(getComputedStyle(t).gap)||12);let ns=t.scrollLeft+(d*iw);if(userConfig.loopMode==='loop'){if(ns<0)ns=t.scrollWidth-t.clientWidth;else if(ns>t.scrollWidth-t.clientWidth)ns=0;}else{ns=Math.max(0,Math.min(ns,t.scrollWidth-t.clientWidth));}t.scrollTo({left:ns,behavior:'smooth'});}
-  function actualizarCarrusel(){if(!empleados.length){document.getElementById('carouselTrack').innerHTML='<div style="text-align:center;padding:15px;">No hay colaboradores</div>';return;}const sh=[...empleados].sort(()=>0.5-Math.random()).slice(0,20);document.getElementById('carouselTrack').innerHTML=sh.map(e=>`<div class="carousel-item" onclick="verDetalle('${e.id}')"><img src="${e.fotoBase64||'https://via.placeholder.com/70'}" onerror="this.src='https://via.placeholder.com/70'"><span>${e.firstName||''} ${e.lastName||''}</span></div>`).join('');aplicarConfigCarruselCompleto();}
+  function actualizarCarrusel(){if(!empleados.length){document.getElementById('carouselTrack').innerHTML='<div style="text-align:center;padding:15px;">No hay colaboradores</div>';return;}const sh=[...empleados].sort(()=>0.5-Math.random()).slice(0,20);document.getElementById('carouselTrack').innerHTML=sh.map(e=>`<div class="carousel-item" onclick="verDetalle('${e.id}')">${renderizarFoto(e.fotoBase64, '65px', '')}<span>${e.firstName||''} ${e.lastName||''}</span></div>`).join('');aplicarConfigCarruselCompleto();}
   
   // Unificar áreas con mismo nombre
   function obtenerAreasUnicas() {
@@ -1318,7 +1498,7 @@
     const laf=document.getElementById('listaAreaFilter');
     if(laf) laf.innerHTML='<option value="">Todas las áreas</option>'+areasUnicas.map(a=>`<option value="${a.nombre}">${a.nombre}</option>`).join('');
     const so=[...empleados].sort((a,b)=>(b.createdAt?.toDate?.()??0)-(a.createdAt?.toDate?.()??0)).slice(0,5);
-    document.getElementById('recentEmployees').innerHTML=so.map(e=>`<div class="recent-item" onclick="verDetalle('${e.id}')"><img src="${e.fotoBase64||'https://via.placeholder.com/30'}" onerror="this.src='https://via.placeholder.com/30'"><span>${e.firstName} ${e.lastName}</span><span style="margin-left:auto;font-size:9px;color:var(--primary);">${e.rtmId||''}</span><span style="margin-left:5px;font-size:8px;color:var(--text-secondary);">Cód: ${e.username||''}</span></div>`).join('');
+    document.getElementById('recentEmployees').innerHTML=so.map(e=>`<div class="recent-item" onclick="verDetalle('${e.id}')">${renderizarFoto(e.fotoBase64, '30px', '')}<span>${e.firstName} ${e.lastName}</span><span style="margin-left:auto;font-size:9px;color:var(--primary);">${e.rtmId||''}</span><span style="margin-left:5px;font-size:8px;color:var(--text-secondary);">Cód: ${e.username||''}</span></div>`).join('');
     document.querySelectorAll('#recentEmployees img').forEach(img=>{img.style.cursor='pointer';img.addEventListener('click',(e)=>{e.stopPropagation();openPhotoPreview(img.src);});});
     window._areasData = areasUnicas;
   }
@@ -1349,8 +1529,8 @@
     const ar=document.getElementById('listaAreaFilter')?.value||'',po=document.getElementById('listaPositionFilter')?.value||'',so=document.getElementById('listaSortOrder')?.value||'recent',se=document.getElementById('listaSearchInput')?.value||'';
     let f=filtrarEmpleados(ar,po,se);f=ordenarEmpleados(f,so);
     const ec=document.getElementById('employeesContainer');
-    if(currentView==='grid'){ec.className='employees-grid';ec.innerHTML=f.map(emp=>`<div class="employee-card" onclick="verDetalle('${emp.id}')"><img src="${emp.fotoBase64||'https://via.placeholder.com/55'}" onerror="this.src='https://via.placeholder.com/55'"><div class="employee-name">${emp.firstName||''} ${emp.lastName||''}</div><div class="employee-code"><i class="fas fa-id-card"></i> Cód: ${emp.username||''}</div><div class="employee-actions" style="margin-top:6px;"><button class="btn btn-primary btn-sm" onclick="event.stopPropagation();editarEmpleado('${emp.id}')"><i class="fas fa-edit"></i></button><button class="btn btn-danger btn-sm" onclick="event.stopPropagation();confirmarEliminar('${emp.id}')"><i class="fas fa-trash"></i></button></div></div>`).join('');}
-    else{ec.className='employees-list';ec.innerHTML=f.map(emp=>`<div class="employee-list-item" onclick="verDetalle('${emp.id}')"><img src="${emp.fotoBase64||'https://via.placeholder.com/40'}" onerror="this.src='https://via.placeholder.com/40'"><div class="employee-list-info"><div class="employee-list-name">${emp.firstName||''} ${emp.lastName||''}</div><div class="employee-list-code"><i class="fas fa-id-card"></i> Cód: ${emp.username||''} | ${emp.rtmId||''} | ${emp.areaTrabajo||''}</div></div><div class="employee-list-actions"><button class="btn btn-primary btn-sm" onclick="event.stopPropagation();editarEmpleado('${emp.id}')"><i class="fas fa-edit"></i></button><button class="btn btn-danger btn-sm" onclick="event.stopPropagation();confirmarEliminar('${emp.id}')"><i class="fas fa-trash"></i></button></div></div>`).join('');}
+    if(currentView==='grid'){ec.className='employees-grid';ec.innerHTML=f.map(emp=>`<div class="employee-card" onclick="verDetalle('${emp.id}')">${renderizarFoto(emp.fotoBase64, '55px', 'employee-photo')}<div class="employee-name">${emp.firstName||''} ${emp.lastName||''}</div><div class="employee-code"><i class="fas fa-id-card"></i> Cód: ${emp.username||''}</div><div class="employee-actions" style="margin-top:6px;"><button class="btn btn-primary btn-sm" onclick="event.stopPropagation();editarEmpleado('${emp.id}')"><i class="fas fa-edit"></i></button><button class="btn btn-danger btn-sm" onclick="event.stopPropagation();confirmarEliminar('${emp.id}')"><i class="fas fa-trash"></i></button></div></div>`).join('');}
+    else{ec.className='employees-list';ec.innerHTML=f.map(emp=>`<div class="employee-list-item" onclick="verDetalle('${emp.id}')"><div style="width:40px;height:40px;">${renderizarFoto(emp.fotoBase64, '40px', '')}</div><div class="employee-list-info"><div class="employee-list-name">${emp.firstName||''} ${emp.lastName||''}</div><div class="employee-list-code"><i class="fas fa-id-card"></i> Cód: ${emp.username||''} | ${emp.rtmId||''} | ${emp.areaTrabajo||''}</div></div><div class="employee-list-actions"><button class="btn btn-primary btn-sm" onclick="event.stopPropagation();editarEmpleado('${emp.id}')"><i class="fas fa-edit"></i></button><button class="btn btn-danger btn-sm" onclick="event.stopPropagation();confirmarEliminar('${emp.id}')"><i class="fas fa-trash"></i></button></div></div>`).join('');}
     document.querySelectorAll('#employeesContainer img').forEach(img=>{img.style.cursor='pointer';img.addEventListener('click',(e)=>{e.stopPropagation();openPhotoPreview(img.src);});});
   }
 
@@ -1362,7 +1542,12 @@
       empleado = empleadoOrId;
     }
     if(!empleado) return;
-    document.getElementById('detailImg').src=empleado.fotoBase64||'https://via.placeholder.com/90';
+    const photoContainer = document.getElementById('detailPhotoContainer');
+    if (empleado.fotoBase64 && empleado.fotoBase64.startsWith('data:image')) {
+      photoContainer.innerHTML = `<img src="${empleado.fotoBase64}" class="detail-photo" onclick="openPhotoPreview('${empleado.fotoBase64}')">`;
+    } else {
+      photoContainer.innerHTML = `<div class="detail-no-photo"><i class="fas fa-user-circle"></i></div>`;
+    }
     document.getElementById('detailName').innerText=`${empleado.firstName||''} ${empleado.lastName||''}`;
     document.getElementById('detailInfoGrid').innerHTML=`
       <div class="detail-info-item"><div>RTM ID</div><div><strong>${empleado.rtmId||'N/A'}</strong></div></div>
@@ -1373,16 +1558,24 @@
       <div class="detail-info-item"><div>Depto</div><div>${empleado.departamento||'N/A'}</div></div>`;
     document.getElementById('detailPage').style.display='block';
     empleadoAEliminar=empleado.id;
-    const di=document.getElementById('detailImg');
-    di.style.cursor='pointer';
-    di.onclick=()=>openPhotoPreview(di.src);
   }
   window.verDetalle = verDetalle;
   
-  function editarEmpleado(id){const e=empleados.find(x=>x.id===id);if(!e)return;cambiarSession('pageRegistro');document.getElementById('editId').value=e.id;document.getElementById('username').value=e.username||'';document.getElementById('rtmId').value=e.rtmId||'';document.getElementById('rtmId').disabled=true;document.getElementById('firstName').value=e.firstName||'';document.getElementById('lastName').value=e.lastName||'';document.getElementById('posicionLaboral').value=e.posicionLaboral||'';document.getElementById('turnoHoras').value=e.turnoHoras||'8';document.getElementById('fechaIngreso').value=e.fechaIngreso||'';document.getElementById('departamento').value=e.departamento||'';document.getElementById('areaTrabajo').value=e.areaTrabajo||'';document.getElementById('jefeCargo').value=e.jefeCargo||'';document.getElementById('fotoBase64').value=e.fotoBase64||'';document.getElementById('fotoPreview').innerHTML=e.fotoBase64?`<img src="${e.fotoBase64}" style="width:55px;height:55px;object-fit:cover;border-radius:50%;border:2px solid var(--primary);cursor:pointer;" onclick="openPhotoPreview('${e.fotoBase64}')">` :'';document.getElementById('btnSubmitText').innerText='ACTUALIZAR';document.getElementById('btnCancelarEdit').style.display='block';}
+  function editarEmpleado(id){const e=empleados.find(x=>x.id===id);if(!e)return;cambiarSession('pageRegistro');document.getElementById('editId').value=e.id;document.getElementById('username').value=e.username||'';document.getElementById('rtmId').value=e.rtmId||'';document.getElementById('rtmId').disabled=true;document.getElementById('firstName').value=e.firstName||'';document.getElementById('lastName').value=e.lastName||'';document.getElementById('posicionLaboral').value=e.posicionLaboral||'';document.getElementById('turnoHoras').value=e.turnoHoras||'8';document.getElementById('fechaIngreso').value=e.fechaIngreso||'';document.getElementById('departamento').value=e.departamento||'';document.getElementById('areaTrabajo').value=e.areaTrabajo||'';document.getElementById('jefeCargo').value=e.jefeCargo||'';document.getElementById('fotoBase64').value=e.fotoBase64||'';document.getElementById('fotoPreview').innerHTML=e.fotoBase64?renderizarFoto(e.fotoBase64, '55px', ''):'';document.getElementById('btnSubmitText').innerText='ACTUALIZAR';document.getElementById('btnCancelarEdit').style.display='block';}
   window.editarEmpleado = editarEmpleado;
   
-  function confirmarEliminar(id){empleadoAEliminar=id;document.getElementById('deleteModal').classList.add('active');}
+  function confirmarEliminar(id){
+    showConfirmModal('Eliminar Colaborador', '¿Estás seguro de que deseas eliminar este colaborador? Esta acción no se puede deshacer.', 'danger', async (confirmed) => {
+      if (confirmed) {
+        empleadoAEliminar = id;
+        showLoading(true);
+        await deleteDoc(doc(db,'Ponche',empleadoAEliminar));
+        showSuccess('Eliminado correctamente');
+        empleadoAEliminar = null;
+        showLoading(false);
+      }
+    });
+  }
   window.confirmarEliminar = confirmarEliminar;
   
   // Enviar WhatsApp con todos los datos del colaborador
@@ -1455,13 +1648,31 @@
   document.getElementById('backFromDetail')?.addEventListener('click',()=>document.getElementById('detailPage').style.display='none');
   document.getElementById('sendToWhatsAppBtn')?.addEventListener('click',()=>{const e=empleados.find(x=>x.id===empleadoAEliminar);if(e)window.enviarWhatsApp(e);});
   document.getElementById('editFromDetailBtn')?.addEventListener('click',()=>{const e=empleados.find(x=>x.id===empleadoAEliminar);if(e){document.getElementById('detailPage').style.display='none';editarEmpleado(e.id);}});
-  document.getElementById('confirmDeleteBtn')?.addEventListener('click',async()=>{if(empleadoAEliminar){showLoading(true);await deleteDoc(doc(db,'Ponche',empleadoAEliminar));showSuccess('Eliminado');empleadoAEliminar=null;document.getElementById('deleteModal').classList.remove('active');showLoading(false);}});
-  document.getElementById('cancelDeleteBtn')?.addEventListener('click',()=>document.getElementById('deleteModal').classList.remove('active'));
   
-  // Vaciar historial
-  document.getElementById('confirmClearHistoryBtn')?.addEventListener('click',()=>{vaciarHistorial();document.getElementById('clearHistoryModal').classList.remove('active');});
-  document.getElementById('cancelClearHistoryBtn')?.addEventListener('click',()=>document.getElementById('clearHistoryModal').classList.remove('active'));
-  document.getElementById('clearHistoryIconBtn')?.addEventListener('click',()=>document.getElementById('clearHistoryModal').classList.add('active'));
+  // Vaciar historial con confirmación elegante (sin modal antiguo)
+  document.getElementById('clearHistoryIconBtn')?.addEventListener('click',()=>{
+    showConfirmModal('Vaciar Historial', '¿Estás seguro de que deseas eliminar todo el historial de modificaciones? Esta acción no se puede deshacer.', 'danger', async (confirmed) => {
+      if (confirmed) {
+        await vaciarHistorialFirebase();
+      }
+    });
+  });
+  
+  // Cerrar sesión con confirmación elegante
+  document.getElementById('logoutBtn')?.addEventListener('click',()=>{
+    showConfirmModal('Cerrar Sesión', '¿Estás seguro de que deseas cerrar sesión?', 'warning', (confirmed) => {
+      if (confirmed) {
+        localStorage.removeItem('currentUserRegistro');
+        currentUser = null;
+        if(carruselInterval) clearInterval(carruselInterval);
+        if(mensajesUnsubscribe) mensajesUnsubscribe();
+        document.getElementById('appScreen').style.display = 'none';
+        document.getElementById('loginScreen').style.display = 'flex';
+        document.getElementById('bottomNav').classList.remove('visible');
+        showAlert('Sesión cerrada correctamente', 'success');
+      }
+    });
+  });
 
   document.getElementById('registroForm')?.addEventListener('submit',async(e)=>{
     e.preventDefault();if(!currentUser)return;
@@ -1475,8 +1686,8 @@
     showLoading(true);
     try{
       let empleadoGuardado=null;
-      if(id){await updateDoc(doc(db,'Ponche',id),data);empleadoGuardado={...data,id:id};guardarEnHistorial(empleadoGuardado,'edited');showSuccess('Actualizado');}
-      else{data.createdAt=Timestamp.now();const docRef=await addDoc(collection(db,'Ponche'),data);empleadoGuardado={...data,id:docRef.id};guardarEnHistorial(empleadoGuardado,'created');showSuccess('Registrado');}
+      if(id){await updateDoc(doc(db,'Ponche',id),data);empleadoGuardado={...data,id:id};await guardarEnHistorial(empleadoGuardado,'edited');showSuccess('Actualizado');}
+      else{data.createdAt=Timestamp.now();const docRef=await addDoc(collection(db,'Ponche'),data);empleadoGuardado={...data,id:docRef.id};await guardarEnHistorial(empleadoGuardado,'created');showSuccess('Registrado');}
       document.getElementById('btnCancelarEdit').click();
     }catch(err){showAlert('Error al guardar','error');}
     finally{showLoading(false);}
@@ -1505,18 +1716,15 @@
       document.getElementById('appScreen').style.display='block';
       document.getElementById('bottomNav').classList.add('visible');
       iniciarEscuchaEmpleados();cambiarSession('homeSection');cargarConfiguracion();iniciarEscuchaMensajesTiempoReal();cargarMensajesPendientes();
-      const savedHistory = localStorage.getItem(`historial_${currentUser.uid}`);
-      if(savedHistory){try{historialRegistros=JSON.parse(savedHistory);actualizarVistaHistorial();}catch(e){}}
+      await cargarHistorialDesdeFirebase();
     }catch(e){document.getElementById('loginAlert').innerText='Credenciales incorrectas';document.getElementById('loginAlert').style.display='block';setTimeout(()=>document.getElementById('loginAlert').style.display='none',3000);}
     finally{showLoading(false);}
   });
 
   document.getElementById('acceptPolicyBtn')?.addEventListener('click', async () => { await aceptarPoliticas(); });
-  document.getElementById('declinePolicyBtn')?.addEventListener('click', () => { document.getElementById('acceptPolicyModal').classList.remove('active'); showAlert('Debe aceptar las políticas para usar el sistema', 'error'); document.getElementById('logoutBtn').click(); });
+  document.getElementById('declinePolicyBtn')?.addEventListener('click', () => { document.getElementById('acceptPolicyModal').classList.remove('active'); showAlert('Debe aceptar las políticas para usar el sistema', 'error'); });
 
-  document.getElementById('logoutBtn')?.addEventListener('click',()=>{localStorage.removeItem('currentUserRegistro');currentUser=null;if(carruselInterval)clearInterval(carruselInterval);if(mensajesUnsubscribe)mensajesUnsubscribe();document.getElementById('appScreen').style.display='none';document.getElementById('loginScreen').style.display='flex';document.getElementById('bottomNav').classList.remove('visible');});
-
-  document.getElementById('globalSearchInput')?.addEventListener('input',(e)=>{const t=e.target.value.toLowerCase();if(!t){document.getElementById('globalSearchResults').innerHTML='';return;}const r=empleados.filter(x=>`${x.firstName||''} ${x.lastName||''}`.toLowerCase().includes(t)||(x.username||'').includes(t)||(x.rtmId||'').toLowerCase().includes(t)||(x.areaTrabajo||'').toLowerCase().includes(t));document.getElementById('globalSearchResults').innerHTML=r.slice(0,12).map(emp=>`<div onclick="verDetalle('${emp.id}')" style="background:rgba(255,255,255,0.05);border-radius:12px;padding:8px;text-align:center;cursor:pointer;"><img src="${emp.fotoBase64||'https://via.placeholder.com/50'}" style="width:50px;height:50px;border-radius:50%;object-fit:contain;"><div style="font-size:11px;"><strong>${emp.firstName||''} ${emp.lastName||''}</strong></div><div style="font-size:9px;color:var(--primary);">Cód: ${emp.username||''}</div><div style="font-size:9px;color:var(--text-secondary);">${emp.rtmId||''}</div></div>`).join('');document.querySelectorAll('#globalSearchResults img').forEach(img=>img.addEventListener('click',(e)=>{e.stopPropagation();openPhotoPreview(img.src);}));});
+  document.getElementById('globalSearchInput')?.addEventListener('input',(e)=>{const t=e.target.value.toLowerCase();if(!t){document.getElementById('globalSearchResults').innerHTML='';return;}const r=empleados.filter(x=>`${x.firstName||''} ${x.lastName||''}`.toLowerCase().includes(t)||(x.username||'').includes(t)||(x.rtmId||'').toLowerCase().includes(t)||(x.areaTrabajo||'').toLowerCase().includes(t));document.getElementById('globalSearchResults').innerHTML=r.slice(0,12).map(emp=>`<div onclick="verDetalle('${emp.id}')" style="background:rgba(255,255,255,0.05);border-radius:12px;padding:8px;text-align:center;cursor:pointer;"><div style="width:50px;height:50px;margin:0 auto;">${renderizarFoto(emp.fotoBase64, '50px', '')}</div><div style="font-size:11px;"><strong>${emp.firstName||''} ${emp.lastName||''}</strong></div><div style="font-size:9px;color:var(--primary);">Cód: ${emp.username||''}</div><div style="font-size:9px;color:var(--text-secondary);">${emp.rtmId||''}</div></div>`).join('');document.querySelectorAll('#globalSearchResults img').forEach(img=>img.addEventListener('click',(e)=>{e.stopPropagation();openPhotoPreview(img.src);}));});
 
   document.getElementById('listaSearchInput')?.addEventListener('input',()=>actualizarFiltrosYLista());
   document.getElementById('listaAreaFilter')?.addEventListener('change',()=>actualizarFiltrosYLista());
@@ -1526,7 +1734,7 @@
   window.filtrarPor=(t)=>{cambiarSession('pageLista');if(t==='recent'){document.getElementById('listaSortOrder').value='recent';actualizarFiltrosYLista();}};
 
   const saved=localStorage.getItem('currentUserRegistro');
-  if(saved){try{currentUser=JSON.parse(saved);if(currentUser?.uid){document.getElementById('loginScreen').style.display='none';document.getElementById('appScreen').style.display='block';document.getElementById('bottomNav').classList.add('visible');document.getElementById('companyDisplay').innerText=currentUser.name;document.getElementById('welcomeUserName').innerText=currentUser.name;iniciarEscuchaEmpleados();cambiarSession('homeSection');cargarConfiguracion();iniciarEscuchaMensajesTiempoReal();cargarMensajesPendientes();verificarPoliticasAceptadas();const savedHistory=localStorage.getItem(`historial_${currentUser.uid}`);if(savedHistory){try{historialRegistros=JSON.parse(savedHistory);actualizarVistaHistorial();}catch(e){}}}}catch(e){}}
+  if(saved){try{currentUser=JSON.parse(saved);if(currentUser?.uid){document.getElementById('loginScreen').style.display='none';document.getElementById('appScreen').style.display='block';document.getElementById('bottomNav').classList.add('visible');document.getElementById('companyDisplay').innerText=currentUser.name;document.getElementById('welcomeUserName').innerText=currentUser.name;iniciarEscuchaEmpleados();cambiarSession('homeSection');cargarConfiguracion();iniciarEscuchaMensajesTiempoReal();cargarMensajesPendientes();verificarPoliticasAceptadas();cargarHistorialDesdeFirebase();}}catch(e){}}
 </script>
 </body>
 </html>
