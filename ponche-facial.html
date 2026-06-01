@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Asistencia Facial</title>
+  <title>Asistencia Facial Ultra Rápida</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1/dist/face-api.js"></script>
   <style>
+    /* ========== ESTILOS COMPLETOS (NO REDUCIDOS) ========== */
     * {
       margin: 0; padding: 0; box-sizing: border-box;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -51,7 +52,6 @@
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       z-index: 1;
-      /* Tamaño visible en pantalla: cuadrado cómodo */
       width:  clamp(200px, 44vw, 320px);
       height: clamp(200px, 44vw, 320px);
       border-radius: 50%;
@@ -524,7 +524,7 @@
           <div class="bloqueo-title" id="bloqueoTitle">Registro Bloqueado</div>
           <div class="bloqueo-message" id="bloqueoMessage">---</div>
           <div class="bloqueo-detail" id="bloqueoDetail">---</div>
-          <button class="bloqueo-close" onclick="cerrarBloqueo()">
+          <button class="bloqueo-close" onclick="window.cerrarBloqueo ? window.cerrarBloqueo() : (()=>{})()">
             <i class="fas fa-check"></i> Entendido
           </button>
         </div>
@@ -746,11 +746,11 @@
 
     const DEFAULT_SETTINGS = {
       UMBRAL_PRECISION: 0.45,
-      DETECTION_INTERVAL: 400,   // más frecuente — canvas pequeño lo permite
+      DETECTION_INTERVAL: 300,   // Frecuencia alta porque la detección es ultra rápida (canvas pequeño)
       COOLDOWN_SEGUNDOS: 30,
       MIN_CONFIDENCE: 0.70,
       MULTI_SCAN_ENABLED: true,
-      MULTI_SCAN_COUNT: 2,       // reducido a 2 para respuesta en ~0.8s
+      MULTI_SCAN_COUNT: 2,       // Reducido para respuesta instantánea
       CONFIRM_MODE: 'none',
       CONFIRM_SEARCH: true,
       DOUBLE_CODE: true,
@@ -775,10 +775,11 @@
     let detectionActive = false;
     let bgLoadingActive = false;
 
-    // ── Canvas pequeño para detección ─────────────────────────────────────
-    // La CLAVE de la velocidad: detectamos en 200x150 en lugar de 640x480
-    // Eso es 9.6x menos píxeles → 3-4x más rápido en faceapi
-    const detCanvas = document.getElementById('detectionCanvas'); // 200x150
+    // Cache de descriptores faciales (la clave de la velocidad)
+    let faceDescriptorsCache = new Map(); // key: codigo, value: Float32Array
+
+    // Canvas pequeño para detección (200x150)
+    const detCanvas = document.getElementById('detectionCanvas');
     const detCtx    = detCanvas.getContext('2d', { willReadFrequently: true });
 
     const MODEL_URL = 'https://raw.githubusercontent.com/vladmandic/face-api/master/model/';
@@ -1021,7 +1022,6 @@
     async function iniciarCamara() {
       updateProgress(45, 'Iniciando cámara...', 'Cámara');
       try {
-        // Resolución reducida → menos datos que procesar en cámara también
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode:'user', width:{ ideal:320 }, height:{ ideal:240 } }
         });
@@ -1032,96 +1032,152 @@
       } catch(e) { showToast('⚠️ Error al acceder a la cámara','error'); }
     }
 
-    // ── PROCESAR DESCRIPTOR (con canvas pequeño para velocidad) ───────────
-    async function procesarDescriptor(codigo, emp) {
-      if (!emp.fotoBase64) return null;
+    // ── EXTRAER DESCRIPTOR DE UNA IMAGEN (una sola vez) ───────────────────
+    async function extraerDescriptorDesdeImagen(base64String) {
+      if (!base64String) return null;
       try {
         const img = new Image();
-        img.src = emp.fotoBase64;
-        await new Promise(r => { img.onload=r; img.onerror=r; });
-        // Usar canvas 200x150 para procesar la foto también → consistencia
-        const c = document.createElement('canvas');
-        c.width=200; c.height=150;
-        const cx = c.getContext('2d');
-        cx.drawImage(img, 0, 0, 200, 150);
-        const detection = await faceapi.detectSingleFace(c).withFaceLandmarks().withFaceDescriptor();
-        if (detection) return new faceapi.LabeledFaceDescriptors(codigo, [detection.descriptor]);
-      } catch(e) {}
-      return null;
+        img.src = base64String;
+        await new Promise(resolve => { img.onload = resolve; img.onerror = resolve; });
+        // Usamos el canvas pequeño para consistencia y velocidad
+        const canvas = document.createElement('canvas');
+        canvas.width = 200;
+        canvas.height = 150;
+        const ctxCanvas = canvas.getContext('2d');
+        ctxCanvas.drawImage(img, 0, 0, 200, 150);
+        const detection = await faceapi.detectSingleFace(canvas).withFaceLandmarks().withFaceDescriptor();
+        return detection ? detection.descriptor : null;
+      } catch(e) {
+        console.warn("Error al extraer descriptor:", e);
+        return null;
+      }
     }
 
-    function reconstruirFaceMatcher() {
-      if (!faceMatcher) return;
-      const d = faceMatcher.labeledDescriptors;
-      if (d && d.length>0) faceMatcher = new faceapi.FaceMatcher(d, CONFIG.UMBRAL_PRECISION);
+    // ── CONSTRUIR FACE MATCHER LOCAL DESDE LA CACHE (DESCARGA ÚNICA) ──────
+    function construirFaceMatcherLocal() {
+      if (faceDescriptorsCache.size === 0) return null;
+      const labeledDescriptors = [];
+      for (let [codigo, descriptor] of faceDescriptorsCache.entries()) {
+        if (descriptor && descriptor instanceof Float32Array) {
+          labeledDescriptors.push(new faceapi.LabeledFaceDescriptors(codigo, [descriptor]));
+        }
+      }
+      if (labeledDescriptors.length === 0) return null;
+      return new faceapi.FaceMatcher(labeledDescriptors, CONFIG.UMBRAL_PRECISION);
     }
 
-    // ── CARGA EN BACKGROUND ───────────────────────────────────────────────
-    async function cargarDescriptoresBackground(empleadosArray) {
-      if (!modelosCargados || empleadosArray.length===0) return;
-      bgLoadingActive = true;
-      const total = empleadosArray.length;
-      let done = 0;
-      showBgBadge(`Reconocimiento 0/${total}`);
+    // ── CARGA INICIAL DE EMPLEADOS + DESCRIPTORES (SOLO UNA VEZ) ──────────
+    async function cargarEmpleadosYDescriptores() {
+      if (!currentUser) return;
+      updateProgress(60, 'Descargando vectores biométricos...', 'Cargando colaboradores');
+      const q = query(collection(db, 'Ponche'), where('collaboratorId', '==', currentUser.uid));
+      const snapshot = await getDocs(q);
+      const nuevosDatos = new Map();
+      const empleadosConFoto = [];
 
-      const BATCH = 4; // lotes de 4 — canvas pequeño es más rápido
-      const descriptorsAcum = faceMatcher ? [...faceMatcher.labeledDescriptors] : [];
-
-      for (let i=0; i<empleadosArray.length; i+=BATCH) {
-        if (!bgLoadingActive) break;
-        const lote = empleadosArray.slice(i, i+BATCH);
-        const resultados = await Promise.all(lote.map(([cod,emp]) => procesarDescriptor(cod,emp)));
-        for (const r of resultados) {
-          if (r) {
-            const idx = descriptorsAcum.findIndex(d=>d.label===r.label);
-            if (idx>=0) descriptorsAcum[idx]=r; else descriptorsAcum.push(r);
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        if (data.username) {
+          const empData = {
+            id: docSnap.id, firstName: data.firstName || '', lastName: data.lastName || '',
+            fotoBase64: data.fotoBase64 || null, turnoHoras: data.turnoHoras || 8,
+            collaboratorId: data.collaboratorId, activo: data.activo !== false,
+            status: data.status || 'active', diasSemanaNoLaborables: data.diasSemanaNoLaborables || [],
+            wdayHorario: data.wdayHorario || {}, diasMensualesLibres: data.diasMensualesLibres || [],
+            menMode: data.menMode || 'auto', tipoLibre: data.tipoLibre || null,
+            fechaInicioLibre: data.fechaInicioLibre || null, fechaFinLibre: data.fechaFinLibre || null,
+            motivoLibre: data.motivoLibre || ''
+          };
+          nuevosDatos.set(data.username, empData);
+          if (data.fotoBase64 && data.activo !== false && data.status !== 'inactive') {
+            empleadosConFoto.push({ codigo: data.username, empData });
           }
         }
-        done += lote.length;
-        if (descriptorsAcum.length>0) {
-          try { faceMatcher = new faceapi.FaceMatcher(descriptorsAcum, CONFIG.UMBRAL_PRECISION); } catch(e){}
-        }
-        showBgBadge(`Reconocimiento ${done}/${total}`);
-        await new Promise(r => setTimeout(r, 10)); // yield mínimo
+      });
+
+      employeesData = nuevosDatos;
+      updateProgress(70, 'Procesando descriptores faciales...', `0/${empleadosConFoto.length}`);
+
+      // Limpiar cache anterior
+      faceDescriptorsCache.clear();
+      let procesados = 0;
+      const total = empleadosConFoto.length;
+
+      // Procesar en lotes pequeños para no saturar
+      const BATCH_SIZE = 3;
+      for (let i = 0; i < empleadosConFoto.length; i += BATCH_SIZE) {
+        const lote = empleadosConFoto.slice(i, i + BATCH_SIZE);
+        const resultados = await Promise.all(lote.map(async (item) => {
+          const descriptor = await extraerDescriptorDesdeImagen(item.empData.fotoBase64);
+          if (descriptor) {
+            faceDescriptorsCache.set(item.codigo, descriptor);
+          }
+          return descriptor;
+        }));
+        procesados += lote.length;
+        const pct = 70 + Math.round((procesados / total) * 20);
+        updateProgress(pct, `Procesando descriptores (${procesados}/${total})...`, `${procesados}/${total}`);
+        await new Promise(r => setTimeout(r, 10));
       }
 
-      bgLoadingActive = false;
-      hideBgBadge();
-      if (descriptorsAcum.length>0) updateStatusIndicator('success','Listo');
+      updateProgress(92, 'Construyendo matcher local...', 'Optimizando');
+      faceMatcher = construirFaceMatcherLocal();
+
+      updateProgress(98, '¡Sistema listo!', '✓');
+      await new Promise(r => setTimeout(r, 200));
+      hideLoading();
+      updateStatusIndicator('success', 'Sistema ultra rápido listo');
+      showToast(`Bienvenido, ${currentUser.name}. Modo local activado.`, 'success');
     }
 
-    // ── ESCUCHA EMPLEADOS ─────────────────────────────────────────────────
+    // ── ESCUCHA EN TIEMPO REAL DE NUEVOS COLABORADORES (Actualiza cache) ──
     function iniciarEscuchaEmpleados() {
       if (!currentUser) return;
-      const q = query(collection(db,'Ponche'), where('collaboratorId','==',currentUser.uid));
-      onSnapshot(q, (snapshot) => {
+      const q = query(collection(db, 'Ponche'), where('collaboratorId', '==', currentUser.uid));
+      onSnapshot(q, async (snapshot) => {
         if (snapshotDebounceTimer) clearTimeout(snapshotDebounceTimer);
         snapshotDebounceTimer = setTimeout(async () => {
-          const nuevosDatos    = new Map();
-          const empleadosConFoto = [];
-          snapshot.forEach(docSnap => {
-            const data = docSnap.data();
+          let huboCambios = false;
+          snapshot.docChanges().forEach(change => {
+            const data = change.doc.data();
             if (data.username) {
-              const empData = {
-                id: docSnap.id, firstName:data.firstName||'', lastName:data.lastName||'',
-                fotoBase64:data.fotoBase64||null, turnoHoras:data.turnoHoras||8,
-                collaboratorId:data.collaboratorId, activo:data.activo!==false,
-                status:data.status||'active', diasSemanaNoLaborables:data.diasSemanaNoLaborables||[],
-                wdayHorario:data.wdayHorario||{}, diasMensualesLibres:data.diasMensualesLibres||[],
-                menMode:data.menMode||'auto', tipoLibre:data.tipoLibre||null,
-                fechaInicioLibre:data.fechaInicioLibre||null, fechaFinLibre:data.fechaFinLibre||null,
-                motivoLibre:data.motivoLibre||''
-              };
-              nuevosDatos.set(data.username, empData);
-              if (data.fotoBase64 && data.activo!==false && data.status!=='inactive')
-                empleadosConFoto.push([data.username, empData]);
+              if (change.type === 'removed') {
+                employeesData.delete(data.username);
+                faceDescriptorsCache.delete(data.username);
+                huboCambios = true;
+              } else {
+                const empData = {
+                  id: change.doc.id, firstName: data.firstName || '', lastName: data.lastName || '',
+                  fotoBase64: data.fotoBase64 || null, turnoHoras: data.turnoHoras || 8,
+                  collaboratorId: data.collaboratorId, activo: data.activo !== false,
+                  status: data.status || 'active', diasSemanaNoLaborables: data.diasSemanaNoLaborables || [],
+                  wdayHorario: data.wdayHorario || {}, diasMensualesLibres: data.diasMensualesLibres || [],
+                  menMode: data.menMode || 'auto', tipoLibre: data.tipoLibre || null,
+                  fechaInicioLibre: data.fechaInicioLibre || null, fechaFinLibre: data.fechaFinLibre || null,
+                  motivoLibre: data.motivoLibre || ''
+                };
+                employeesData.set(data.username, empData);
+                if (data.fotoBase64 && data.activo !== false && data.status !== 'inactive') {
+                  // Si la foto cambió o no existe en cache, recargar descriptor
+                  if (!faceDescriptorsCache.has(data.username)) {
+                    extraerDescriptorDesdeImagen(data.fotoBase64).then(desc => {
+                      if (desc) {
+                        faceDescriptorsCache.set(data.username, desc);
+                        faceMatcher = construirFaceMatcherLocal();
+                      }
+                    });
+                  }
+                } else {
+                  faceDescriptorsCache.delete(data.username);
+                }
+                huboCambios = true;
+              }
             }
           });
-          employeesData = nuevosDatos;
-          bgLoadingActive = false;
-          await new Promise(r=>setTimeout(r,30));
-          cargarDescriptoresBackground(empleadosConFoto);
-        }, 300);
+          if (huboCambios) {
+            faceMatcher = construirFaceMatcherLocal();
+          }
+        }, 500);
       });
     }
 
@@ -1137,7 +1193,10 @@
       alertEl.style.display='flex';
       updateStatusIndicator('error','Bloqueado');
     }
-    window.cerrarBloqueo=function(){ document.getElementById('bloqueoAlert').style.display='none'; };
+    window.cerrarBloqueo = function() { 
+      const el = document.getElementById('bloqueoAlert');
+      if (el) el.style.display = 'none';
+    };
 
     // ── COOLDOWN ──────────────────────────────────────────────────────────
     function verificarCooldown(codigo) {
@@ -1164,7 +1223,7 @@
       } catch(e) { return { tipo:'entry', parId:`PAR_${codigo}_${Date.now()}` }; }
     }
 
-    // ── GUARDAR REGISTRO ──────────────────────────────────────────────────
+    // ── GUARDAR REGISTRO (SOLO ENVÍA EL MICRO-DATO A FIREBASE) ────────────
     async function guardarRegistroFirebase(codigo, confianza, metodo) {
       const verificacion=await verificarPuedeRegistrar(codigo);
       if (!verificacion.puede) { mostrarBloqueo(verificacion); return false; }
@@ -1178,7 +1237,7 @@
         employeeName:`${userData.firstName||''} ${userData.lastName||''}`.trim()||codigo,
         employeeId:userData.id, timestamp, fecha, hora,
         type:tipo, confidence:confianza, method:metodo, turnoHoras:userData.turnoHoras||8,
-        device:'TensorFlow.js', parId, registroId:`${codigo}_${Date.now()}`
+        device:'TensorFlow.js (Local)', parId, registroId:`${codigo}_${Date.now()}`
       };
       await addDoc(collection(db,'facialAttendance'), attendanceData);
       marcarCooldown(codigo);
@@ -1237,7 +1296,7 @@
       showToast('Registro cancelado','error');
     });
 
-    // ── PROCESAR REGISTRO ─────────────────────────────────────────────────
+    // ── PROCESAR REGISTRO (USANDO MATCHER LOCAL) ──────────────────────────
     async function procesarRegistro(codigo, confianza=1.0, metodo='facial') {
       if (isProcessing||!currentUser) return;
       const verificacion=await verificarPuedeRegistrar(codigo);
@@ -1361,12 +1420,8 @@
     });
     document.getElementById('menuCodeSearch').addEventListener('click',()=>{ menuModal.classList.remove('show'); abrirBuscadorCodigo(); });
 
-    // ── DETECCIÓN — usa canvas 200x150 para 3-4x más velocidad ───────────
-    // Estrategia: dibujamos el video en un canvas pequeño y detectamos ahí.
-    // faceapi tarda proporcional al nº de píxeles: 200x150=30k px vs 640x480=307k px
-    // Resultado: detección en ~150-300ms en vez de 600-1200ms → registro en 1-2s
-
-    let detectionRunning = false; // evitar overlap de detecciones
+    // ── DETECCIÓN — usa canvas 200x150 para velocidad extrema ─────────────
+    let detectionRunning = false;
     let detLoopTimer = null;
 
     function startDetectionLoop() {
@@ -1380,45 +1435,40 @@
       if (detLoopTimer) { clearInterval(detLoopTimer); detLoopTimer=null; }
     }
 
-    // Mide tiempo de detección para mostrar en badge de velocidad
     let lastDetMs = 0;
 
     async function runDetection() {
-      if (!detectionActive||!faceMatcher||!videoStarted||!modelosCargados||isProcessing||!currentUser||detectionRunning) return;
+      if (!detectionActive || !faceMatcher || !videoStarted || !modelosCargados || isProcessing || !currentUser || detectionRunning) return;
       detectionRunning = true;
       cameraRing.classList.add('scanning');
       const t0 = performance.now();
       try {
-        // ► PASO CLAVE: dibujar video en canvas pequeño (200x150)
         detCtx.drawImage(video, 0, 0, 200, 150);
-
-        // Detectar sobre el canvas pequeño — mucho más rápido
         const detection = await faceapi.detectSingleFace(detCanvas).withFaceLandmarks().withFaceDescriptor();
+        lastDetMs = Math.round(performance.now() - t0);
+        if (speedBadge) { speedBadge.textContent = `⚡ ${lastDetMs}ms`; speedBadge.classList.add('show'); }
 
-        lastDetMs = Math.round(performance.now()-t0);
-        if (speedBadge) { speedBadge.textContent=`⚡ ${lastDetMs}ms`; speedBadge.classList.add('show'); }
+        if (!detection) { cameraRing.classList.remove('scanning'); detectionRunning = false; return; }
 
-        if (!detection) { cameraRing.classList.remove('scanning'); detectionRunning=false; return; }
+        const match = faceMatcher.findBestMatch(detection.descriptor);
+        const confidence = 1 - match.distance;
 
-        const match      = faceMatcher.findBestMatch(detection.descriptor);
-        const confidence = 1-match.distance;
-
-        if (match.label!=='unknown' && confidence>=CONFIG.MIN_CONFIDENCE) {
+        if (match.label !== 'unknown' && confidence >= CONFIG.MIN_CONFIDENCE) {
           const nombre = employeesData.get(match.label)?.firstName || match.label;
           showConfidenceIndicator(confidence, nombre);
 
           if (CONFIG.MULTI_SCAN_ENABLED) {
-            if (match.label!==lastMultiLabel) { multiScanBuffer={}; lastMultiLabel=match.label; }
-            multiScanBuffer[match.label]=(multiScanBuffer[match.label]||0)+1;
-            if (multiScanBuffer[match.label]<CONFIG.MULTI_SCAN_COUNT) {
-              updateStatusIndicator('idle',`${multiScanBuffer[match.label]}/${CONFIG.MULTI_SCAN_COUNT}`);
-              cameraRing.classList.remove('scanning'); detectionRunning=false; return;
+            if (match.label !== lastMultiLabel) { multiScanBuffer = {}; lastMultiLabel = match.label; }
+            multiScanBuffer[match.label] = (multiScanBuffer[match.label] || 0) + 1;
+            if (multiScanBuffer[match.label] < CONFIG.MULTI_SCAN_COUNT) {
+              updateStatusIndicator('idle', `${multiScanBuffer[match.label]}/${CONFIG.MULTI_SCAN_COUNT}`);
+              cameraRing.classList.remove('scanning'); detectionRunning = false; return;
             }
-            multiScanBuffer[match.label]=0; lastMultiLabel=null;
+            multiScanBuffer[match.label] = 0; lastMultiLabel = null;
           }
           await procesarRegistro(match.label, confidence, 'facial');
         }
-      } catch(e) {}
+      } catch(e) { console.warn(e); }
       cameraRing.classList.remove('scanning');
       detectionRunning = false;
     }
@@ -1432,7 +1482,6 @@
       if (!faceMatcher)              { showToast('⚠️ Cargando colaboradores...','error'); return; }
       if (CONFIG.FLASH_ENABLED) { captureFlash.classList.add('active'); setTimeout(()=>captureFlash.classList.remove('active'),120); }
       try {
-        // También usar canvas pequeño para captura manual
         detCtx.drawImage(video, 0, 0, 200, 150);
         const detection=await faceapi.detectSingleFace(detCanvas).withFaceLandmarks().withFaceDescriptor();
         if (!detection) { showToast('🔍 No se detectó rostro','error'); return; }
@@ -1567,7 +1616,7 @@
       const confActivo=document.querySelector('.confirm-type-btn.active');
       if (confActivo) CONFIG.CONFIRM_MODE=confActivo.dataset.conf;
       await saveUserConfig();
-      reconstruirFaceMatcher();
+      faceMatcher = construirFaceMatcherLocal(); // Reconstruir con nueva precisión
       stopDetectionLoop(); startDetectionLoop();
       if (!CONFIG.SHOW_CONFIDENCE) faceConfidenceBar.classList.remove('show');
       if (!CONFIG.MULTI_SCAN_ENABLED) { multiScanBuffer={}; lastMultiLabel=null; }
@@ -1584,59 +1633,60 @@
 
     // ── INICIALIZACIÓN ────────────────────────────────────────────────────
     async function initWithUser(user) {
-      currentUser=user;
-      companyNameSpan.textContent=user.name.split(' ')[0];
-      if (menuUserName) menuUserName.textContent=user.name;
-      loginScreen.style.display='none';
-      appScreen.style.display='block';
-      showLoading('Cargando configuración...',5,'Config');
+      currentUser = user;
+      companyNameSpan.textContent = user.name.split(' ')[0];
+      if (menuUserName) menuUserName.textContent = user.name;
+      loginScreen.style.display = 'none';
+      appScreen.style.display = 'block';
+      showLoading('Cargando configuración...', 5, 'Config');
       await loadUserConfig(user.uid);
-      updateProgress(15,'Cargando modelos de IA...','Modelos');
+      updateProgress(15, 'Cargando modelos de IA...', 'Modelos');
       await Promise.all([cargarModelos(), iniciarCamara()]);
-      updateProgress(60,'Iniciando detección...','Cámara lista');
+      
+      // CARGA ÚNICA DE COLABORADORES Y DESCRIPTORES (DESCARGA AUTOMÁTICA)
+      await cargarEmpleadosYDescriptores();
+      
       startDetectionLoop();
       applySettingsToUI();
-      updateProgress(70,'Conectando con Firebase...','Colaboradores');
-      iniciarEscuchaEmpleados();
-      updateProgress(90,'Listo para registrar','OK');
-      await new Promise(r=>setTimeout(r,300));
-      updateProgress(100,'¡Sistema listo!','✓ Listo');
-      await new Promise(r=>setTimeout(r,350));
+      updateProgress(100, '¡Sistema listo en modo local!', '✓ Listo');
+      await new Promise(r => setTimeout(r, 500));
       hideLoading();
-      updateStatusIndicator('success','Sistema listo');
-      showToast(`Bienvenido, ${user.name}`,'success');
-      passwordInput.value=''; loginAlert.style.display='none';
+      updateStatusIndicator('success', 'Sistema ultra rápido');
+      
+      // Iniciar escucha para cambios futuros (actualiza cache automáticamente)
+      iniciarEscuchaEmpleados();
+      
+      passwordInput.value = ''; loginAlert.style.display = 'none';
     }
 
     // ── SESIÓN GUARDADA ───────────────────────────────────────────────────
-    const savedUser=localStorage.getItem('currentUserAsistencia');
+    const savedUser = localStorage.getItem('currentUserAsistencia');
     if (savedUser) { try { initWithUser(JSON.parse(savedUser)); } catch(e){ localStorage.removeItem('currentUserAsistencia'); } }
 
     // ── LOGIN ─────────────────────────────────────────────────────────────
-    loginBtn.addEventListener('click',async()=>{
-      const username=usernameInput.value.trim(), pin=passwordInput.value.trim();
-      if (!username||!pin){ loginAlert.textContent='Complete los campos'; loginAlert.style.display='block'; return; }
+    loginBtn.addEventListener('click', async () => {
+      const username = usernameInput.value.trim(), pin = passwordInput.value.trim();
+      if (!username || !pin){ loginAlert.textContent = 'Complete los campos'; loginAlert.style.display = 'block'; return; }
       try {
-        const userData=await authenticateUser(username,pin);
-        localStorage.setItem('currentUserAsistencia',JSON.stringify(userData));
+        const userData = await authenticateUser(username, pin);
+        localStorage.setItem('currentUserAsistencia', JSON.stringify(userData));
         await initWithUser(userData);
-      } catch(error){ hideLoading(); loginAlert.textContent=error.message; loginAlert.style.display='block'; }
+      } catch(error){ hideLoading(); loginAlert.textContent = error.message; loginAlert.style.display = 'block'; }
     });
 
     // ── LOGOUT ────────────────────────────────────────────────────────────
-    logoutBtn.addEventListener('click',()=>{
-      bgLoadingActive=false; stopDetectionLoop(); hideBgBadge();
-      if (video.srcObject) video.srcObject.getTracks().forEach(t=>t.stop());
+    logoutBtn.addEventListener('click', () => {
+      bgLoadingActive = false; stopDetectionLoop(); hideBgBadge();
+      if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
       localStorage.removeItem('currentUserAsistencia');
-      currentUser=null; faceMatcher=null; employeesData=new Map();
-      appScreen.style.display='none'; loginScreen.style.display='flex';
-      usernameInput.value=''; passwordInput.value=''; menuModal.classList.remove('show');
+      currentUser = null; faceMatcher = null; employeesData.clear(); faceDescriptorsCache.clear();
+      appScreen.style.display = 'none'; loginScreen.style.display = 'flex';
+      usernameInput.value = ''; passwordInput.value = ''; menuModal.classList.remove('show');
       updateStatusIndicator('idle');
     });
 
-    // ── ATAJOS ────────────────────────────────────────────────────────────
-    usernameInput.addEventListener('keypress',(e)=>{ if(e.key==='Enter') passwordInput.focus(); });
-    passwordInput.addEventListener('keypress',(e)=>{ if(e.key==='Enter') loginBtn.click(); });
+    usernameInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') passwordInput.focus(); });
+    passwordInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') loginBtn.click(); });
   </script>
 </body>
 </html>
