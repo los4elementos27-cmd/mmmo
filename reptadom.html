@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>RepTaDom - Tu Plataforma de Servicios</title>
-  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/1077/1077114.png" type="image/png">
+  <link rel="icon" href="logo.png" type="image/png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -742,12 +742,13 @@
     .profile-info-item i { width: 28px; color: var(--primary); }
     .contact-wa-btn { background: #25D366; color: white; border: none; padding: 10px 20px; border-radius: 30px; cursor: pointer; font-weight: 600; margin-top: 10px; width: 100%; }
 
-    /* Chat screen - con input fijo */
+    /* Chat screen - con input fijo en la parte inferior */
     .chat-full-container {
       display: flex;
       flex-direction: column;
       height: calc(100vh - 80px);
       max-height: calc(100vh - 80px);
+      position: relative;
     }
     .chat-messages-full {
       flex: 1;
@@ -758,7 +759,7 @@
       padding: 10px;
       background: var(--bg);
       border-radius: var(--radius);
-      margin-bottom: 16px;
+      margin-bottom: 0;
       min-height: 0;
     }
     .message {
@@ -788,11 +789,13 @@
       display: flex;
       gap: 12px;
       align-items: center;
-      padding: 8px 0;
+      padding: 12px 8px;
       background: white;
       border-top: 1px solid var(--border);
       position: sticky;
       bottom: 0;
+      width: 100%;
+      z-index: 15;
     }
     .chat-input-area input {
       flex: 1;
@@ -1163,23 +1166,29 @@ let portfolioFiles = [];
 let notificationListener = null;
 let userRatings = new Set();
 
-// Logo personalizado
-let customLogo = null;
-async function loadCustomLogo() {
-  try {
-    const logoDoc = await getDoc(doc(db, 'appConfig', 'logo'));
-    if (logoDoc.exists()) {
-      customLogo = logoDoc.data().url;
-      const logoElement = document.getElementById('logoPlaceholderNew');
-      if (logoElement) {
-        if (customLogo) {
-          logoElement.innerHTML = `<img src="${customLogo}" alt="Logo">`;
-        } else {
-          logoElement.innerHTML = '<i class="fas fa-store"></i>';
-        }
-      }
+// Logo personalizado desde archivo local logo.png
+function loadCustomLogo() {
+  const logoElement = document.getElementById('logoPlaceholderNew');
+  const faviconElement = document.querySelector('link[rel="icon"]');
+  
+  // Intentar cargar logo.png desde el directorio raíz
+  const logoPath = 'logo.png';
+  const img = new Image();
+  img.onload = function() {
+    if (logoElement) {
+      logoElement.innerHTML = `<img src="${logoPath}" alt="Logo">`;
     }
-  } catch(e) { console.warn('Error loading logo:', e); }
+    if (faviconElement) {
+      faviconElement.href = logoPath;
+    }
+  };
+  img.onerror = function() {
+    if (logoElement) {
+      logoElement.innerHTML = '<i class="fas fa-store"></i>';
+    }
+    // Mantener favicon por defecto
+  };
+  img.src = logoPath;
 }
 
 // ─── FUNCIONES DE CONEXIÓN ONLINE/OFFLINE ─────────────────
@@ -2100,7 +2109,7 @@ document.getElementById('chatUsersHomeBtn')?.addEventListener('click', goToHomeF
 
 async function init() {
   await loadAppConfig();
-  await loadCustomLogo();
+  loadCustomLogo();
   await new Promise(r => setTimeout(r, 900));
   const saved = localStorage.getItem('marketUser');
   if (saved) {
